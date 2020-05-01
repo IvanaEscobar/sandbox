@@ -1,5 +1,7 @@
 # Ivana's forced ignores
 weighted*.ipynb
+*.nc
+*.data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
