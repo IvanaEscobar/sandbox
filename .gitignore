@@ -2,6 +2,7 @@
 weighted*.ipynb
 *.nc
 *.data
+dask-worker-space/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
