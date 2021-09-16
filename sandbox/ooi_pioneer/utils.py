@@ -18,7 +18,7 @@ def readOOI (fname):
                         'sea_water_temperature_profiler_depth_enabled': 'prof_T',
                         'sea_water_temperature_profiler_depth_enabled_qc_agg':'prof_Tflag',
                         'sea_water_practical_salinity_profiler_depth_enabled': 'prof_S',
-                        'sea_water_practical_salinity_profiler_depth_enabled_qc_agg':'prof_Sflag',})\\
+                        'sea_water_practical_salinity_profiler_depth_enabled_qc_agg':'prof_Sflag',}) \
             .drop({     'sea_water_density_profiler_depth_enabled',
                         'sea_water_density_profiler_depth_enabled_qc_agg',
                         'sea_water_pressure_profiler_depth_enabled',
