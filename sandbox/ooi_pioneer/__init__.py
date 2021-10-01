@@ -1,5 +1,9 @@
 from .utils import (
         readOOI
         )
+from .mitprof import (
+        MITprof_read
+        )
 
-__all__ = ['utils']
+__all__ = [ 'mitprof',
+            'utils']

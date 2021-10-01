@@ -3,7 +3,7 @@
  setup(
    name='sandbox',
    version='0.0',
-   packages=['sandbox', 'sandbox.test'],
+   packages=['sandbox', 'sandbox.test', 'sandbox/ooi_pioneer'],
    url='https://github.com/IvanaEscobar/sandbox',
    keywords=['ocean','computation'],
    license='LICENSE.txt',
