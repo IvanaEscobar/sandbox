@@ -3,11 +3,11 @@ from os.path import exists
 
 def MITprof_read ( fname ):
     """ 
-    read netcdf iPROF data file into python
+    Read NetCDF iPROF full data into xarray DataSet
     Parameters
     ----------
     fname : str
-        file data name
+        data file name
     Returns
     -------
     ds : xarray DataSet
