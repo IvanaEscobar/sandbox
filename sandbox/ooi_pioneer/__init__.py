@@ -4,9 +4,6 @@ from .utils import (
 from .download_OOIdata import (
         load_data
         )
-from .mitprof import (
-        MITprof_read
-        )
 
-__all__ = [ 'mitprof',
+__all__ = [ 'download_OOIdata',
             'utils']
