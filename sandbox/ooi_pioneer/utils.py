@@ -1,8 +1,9 @@
 import xarray as xr
+from os.path import exists
 
 def readOOI (fname):
-    """ Update parameter names from OOI to iPROF
-
+    """ 
+    Update parameter names from OOI to iPROF
     Parameters
     ----------
     fname : str
@@ -13,7 +14,11 @@ def readOOI (fname):
         dataset with iPROF variable names 
     """
     
-    ds = xr.open_dataset(fname)
+    if ( exists(fname) ):
+        ds = xr.open_dataset( fname )
+    else:
+        raise TypeError(f'Domain {fname} not recognized')
+
     ds = ds.rename({    'row':'iPROF', 
                         'sea_water_temperature_profiler_depth_enabled': 'prof_T',
                         'sea_water_temperature_profiler_depth_enabled_qc_agg':'prof_Tflag',
@@ -26,4 +31,35 @@ def readOOI (fname):
     ds['prof_depth'] = xr.DataArray(-1 * ds.z, dims=ds.z.dims, attrs=ds.z.attrs)
     ds=ds.drop('z')
 
-    return
+    writeTimeVariables (ds)
+
+    return ds
+
+def writeTimeVariables (ds):
+    """ 
+    Update from datetime64 times to default iPROF time
+    Parameters
+    ----------
+    ds : xarray DataSet
+        OOI Profiler mooring data for one profiler
+    Returns
+    -------
+    ds : xarray DataSet
+        dataset with iPROF time dataArrays 
+    """
+    times = ds.time.values.astype('datetime64[s]')
+    yyyymmdd = []; hhmmss = []
+    for time in times:
+        tmp = str(time).partition('T')
+        yyyymmdd.append( float(''.join( tmp[0].split("-", maxsplit=2) )) )
+        hhmmss.append( float(''.join( tmp[-1].split(":", maxsplit=2) )) )
+        
+    ds['prof_YYYYMMDD'] = xr.DataArray(
+                            yyyymmdd, dims=["iPROF"],
+                            attrs={'long_name' : 'year (4 digits), month (2 digits), day (2 digits)'}
+                        )
+    ds['prof_HHMMSS'] = xr.DataArray(
+                            hhmmss, dims=["iPROF"],
+                            attrs={'long_name' : 'hour (2 digits), minute (2 digits), second (2 digits)'}
+                        )
+    return None
