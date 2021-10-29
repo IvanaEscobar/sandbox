@@ -5,6 +5,7 @@ weighted*.ipynb
 *.jpg
 *.png
 dask-worker-space/
+*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
