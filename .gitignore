@@ -6,6 +6,9 @@ weighted*.ipynb
 *.png
 dask-worker-space/
 *.swp
+a.out
+*.json
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
