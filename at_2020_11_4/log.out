@@ -1,0 +1,78 @@
+(cd misc;	make -k all)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/misc'
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib MathConstants.f90 
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib AttenMod.f90
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib sspMod.f90 
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib ReadEnvironmentMod.f90 
+ar r libmisc.a FatalError.o beampattern.o MathConstants.o RefCoef.o SourceReceiverPositions.o  pchipMod.o AttenMod.o sspMod.o RWSHDFile.o interpolation.o MergeVectorsMod.o munk.o ReadEnvironmentMod.o SortMod.o splinec.o subtabulate.o calculateweights.o norms.o cross_products.o monotonicMod.o PolyMod.o PekRoot.o RootFinderSecantMod.o
+ranlib libmisc.a
+Routines needed by SCOOTER\SPARC\BELLHOP\BOUNCE built
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/misc'
+(cd tslib;	make -k all)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/tslib'
+make[1]: Nothing to be done for `all'.
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/tslib'
+(cd Bellhop;	make -k install)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/Bellhop'
+ifort -o bellhop.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib angleMod.o ArrMod.o bdryMod.o   bellhopMod.o sspMod.o ReflectMod.o                       WriteRay.o              influence.o               Step.o   ReadEnvironmentBell.o bellhop.o ../misc/libmisc.a -L../misc -lmisc
+ifort -o bellhop3d.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib angleMod.o ArrMod.o bdry3DMod.o bellhopMod.o sspMod.o ReflectMod.o Reflect3DMod.o Cone.o WriteRay.o RayNormals.o influence.o influence3D.o Step3DMod.o ReadEnvironmentBell.o bellhop3D.o ../misc/libmisc.a -L../misc -lmisc
+Bellhop built
+*************
+ 
+for f in bellhop.exe bellhop3d.exe ; do \
+	echo "----- Installing $f"; cp -p $f ../bin; \
+done
+----- Installing bellhop.exe
+----- Installing bellhop3d.exe
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/Bellhop'
+(cd Kraken;	make -k install)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/Kraken'
+ifort -o bounce.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib KrakencMod.o  BCImpedancecMod.o                                 Scattering.o bounce.o ../misc/libmisc.a -L../misc -lmisc
+ifort -o kraken.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib KrakenMod.o   BCImpedanceMod.o  InverseIterationMod.o RootFinderBrent.o Scattering.o kraken.o ../misc/libmisc.a -L../misc -lmisc
+ifort -o krakenc.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib KrakencMod.o BCImpedancecMod.o InverseIterationMod.o           Scattering.o krakenc.o ../misc/libmisc.a -L../misc -lmisc
+KRAKEN built
+************
+ 
+for f in bounce.exe kraken.exe krakenc.exe ; do \
+	echo "----- Installing $f"; cp -p $f ../bin; \
+done
+----- Installing bounce.exe
+----- Installing kraken.exe
+----- Installing krakenc.exe
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/Kraken'
+(cd KrakenField;        make -k install)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/KrakenField'
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib EvaluateADMod.f90 
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib EvaluateCMMod.f90 
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib ReadModes.f90 
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib field.f90 
+ifort -o field.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib ReadModes.o EvaluateMod.o EvaluateADMod.o EvaluateCMMod.o ../misc/libmisc.a field.o -L../misc -lmisc
+ifort -c -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib field3d.f90 
+ifort -o field3d.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib ReadModes.o ElementMod.o Evaluate3DMod.o EvaluateGBMod.o EvaluatepdqMod.o ../misc/libmisc.a field3d.o  -L../misc -lmisc
+KRAKEN field routines built
+************
+ 
+for f in field.exe field3d.exe ; do \
+	echo "----- Installing $f"; cp -p $f ../bin; \
+done
+----- Installing field.exe
+----- Installing field3d.exe
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/KrakenField'
+# (cd Krakel;	make -k install)
+(cd Scooter;	make -k install)
+make[1]: Entering directory `/home/ivana/at_2020_11_4/Scooter'
+ifort -o scooter.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib factor_Mod.o backsub_Mod.o scooter.o ../misc/libmisc.a -L../tslib -lts -L../misc -lmisc
+ifort -o sparc.exe -W0 -WB -convert big_endian -assume byterecl -fPIC -mcmodel=large -shared-intel -132 -O3 -I../misc -I../tslib factor_Mod.o backsub_Mod.o sparc.o ../tslib/sourceMod.o ../misc/libmisc.a ../tslib/libts.a -L../tslib -lts -L../misc -lmisc
+Scooter and Sparc built
+***********************
+ 
+for f in scooter.exe sparc.exe ; do \
+	echo "----- Installing $f"; cp -p $f ../bin; \
+done
+----- Installing scooter.exe
+----- Installing sparc.exe
+make[1]: Leaving directory `/home/ivana/at_2020_11_4/Scooter'
+ 
+***************************************
+***** Acoustics Toolbox installed *****
+***************************************
