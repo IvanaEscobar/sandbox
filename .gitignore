@@ -1,4 +1,9 @@
 # Ivana's forced ignores
+*.o
+*.mod
+lib*.a
+*.exe
+bin
 weighted*.ipynb
 *.nc
 *.data
