@@ -3,12 +3,18 @@
 ! ------------------------------------------------------
 
       PROGRAM  HeronFormula
-         IMPLICIT  NONE
+         USE, INTRINSIC :: iso_fortran_env, ONLY: dp=>real64
+         IMPLICIT NONE
       
-         REAL     :: a, b, c             ! three sides
-         REAL     :: s                   ! half of perimeter
-         REAL     :: Area                ! triangle area
-         LOGICAL  :: Cond_1, Cond_2      ! two logical conditions
+         
+         REAL(dp)     b, c            ! three sides
+         INTEGER  a
+         REAL     s                   ! half of perimeter
+         REAL     Area                ! triangle area
+         LOGICAL  Cond_1, Cond_2      ! two logical conditions
+
+         ! Arrays
+         REAL(dp) arr(10)
       
          READ(*,*)  a, b, c
       
@@ -17,8 +23,10 @@
          WRITE(*,*)  "c = ", c
          WRITE(*,*)
       
-         Cond_1 = (a > 0.) .AND. (b > 0.) .AND. (c > 0.)
-         Cond_2 = (a + b > c) .AND. (a + c > b) .AND. (b + c > a)
+         Cond_1 =   (a > 0.) .AND. (b > 0.)
+     &              .AND. (c > 0.)
+         Cond_2 =   (a + b > c) .AND. (a + c > b) 
+     &              .AND. (b + c > a)
       
          IF (Cond_1 .AND. Cond_2) THEN
             s    = (a + b + c) / 2.0
