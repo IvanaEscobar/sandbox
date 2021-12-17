@@ -1,0 +1,173 @@
+ BELLHOP/BELLHOP3D
+ 
+ BELLHOP- Munk profile/Flat waveguide                                           
+  
+ frequency =   50.00     Hz
+
+ Dummy parameter NMedia =            1
+ 
+     Spline approximation to SSP
+     Attenuation units: dB/wavelength
+     VACUUM
+ 
+ Depth =    5000.00 m
+ 
+ Sound speed profile:
+   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI
+
+      0.00      1548.52      0.00     1.00       0.0000    0.0000
+    200.00      1530.29      0.00     1.00       0.0000    0.0000
+    250.00      1526.69      0.00     1.00       0.0000    0.0000
+    400.00      1517.78      0.00     1.00       0.0000    0.0000
+    600.00      1509.49      0.00     1.00       0.0000    0.0000
+    800.00      1504.30      0.00     1.00       0.0000    0.0000
+   1000.00      1501.38      0.00     1.00       0.0000    0.0000
+   1200.00      1500.14      0.00     1.00       0.0000    0.0000
+   1400.00      1500.12      0.00     1.00       0.0000    0.0000
+   1600.00      1501.02      0.00     1.00       0.0000    0.0000
+   1800.00      1502.57      0.00     1.00       0.0000    0.0000
+   2000.00      1504.62      0.00     1.00       0.0000    0.0000
+   2200.00      1507.02      0.00     1.00       0.0000    0.0000
+   2400.00      1509.69      0.00     1.00       0.0000    0.0000
+   2600.00      1512.55      0.00     1.00       0.0000    0.0000
+   2800.00      1515.56      0.00     1.00       0.0000    0.0000
+   3000.00      1518.67      0.00     1.00       0.0000    0.0000
+   3200.00      1521.85      0.00     1.00       0.0000    0.0000
+   3400.00      1525.10      0.00     1.00       0.0000    0.0000
+   3600.00      1528.38      0.00     1.00       0.0000    0.0000
+   3800.00      1531.70      0.00     1.00       0.0000    0.0000
+   4000.00      1535.04      0.00     1.00       0.0000    0.0000
+   4200.00      1538.39      0.00     1.00       0.0000    0.0000
+   4400.00      1541.76      0.00     1.00       0.0000    0.0000
+   4600.00      1545.14      0.00     1.00       0.0000    0.0000
+   4800.00      1548.52      0.00     1.00       0.0000    0.0000
+   5000.00      1551.91      0.00     1.00       0.0000    0.0000
+ 
+                                 ( RMS roughness =   0.00     )
+     ACOUSTO-ELASTIC half-space
+   5000.00      1600.00      0.00     1.80       0.8000    0.0000
+ 
+ __________________________________________________________________________
+ 
+ Number of Source   depths, Sz =            1
+ Source   depths, Sz (m)
+   1000.00    
+ 
+ 
+ __________________________________________________________________________
+ 
+ Number of Receiver depths, Rz =            1
+ Receiver depths, Rz (m)
+   1000.00    
+ 
+ 
+ __________________________________________________________________________
+ 
+ Number of Receiver ranges, Rr =            1
+ Receiver ranges, Rr (km)
+   101.000    
+ 
+ 
+ Arrivals calculation, ASCII  file output
+ Geometric hat beams in Cartesian coordinates
+ Point source (cylindrical coordinates)
+ Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )
+ __________________________________________________________________________
+ 
+ Number of beams in elevation   =           70
+ Beam take-off angles (degrees)
+  -13.0000      -12.6232      -12.2464      -11.8696      -11.4928    
+  -11.1159      -10.7391      -10.3623      -9.98551      -9.60870    
+          ... 
+   13.0000    
+ 
+ __________________________________________________________________________
+ 
+ 
+ Step length,       deltas =   100.0     m
+ 
+ Maximum ray depth, Box%z  =   5500.     m
+ Maximum ray range, Box%r  =   102.0    km
+ No beam shift in effect
+ 
+ 
+ ( Maximum # of arrivals =     20000000 )
+ 
+Tracing beam       1    -13.00
+ 
+ Geometric hat beams                     
+ halfwidth  =    1453.34635062762     
+ epsilonOpt =  (0.000000000000000E+000,331786052.925643)
+ EpsMult    =    1.00000000000000     
+ 
+Tracing beam       2    -12.62
+Tracing beam       3    -12.25
+Tracing beam       4    -11.87
+Tracing beam       5    -11.49
+Tracing beam       6    -11.12
+Tracing beam       7    -10.74
+Tracing beam       8    -10.36
+Tracing beam       9     -9.99
+Tracing beam      10     -9.61
+Tracing beam      11     -9.23
+Tracing beam      12     -8.86
+Tracing beam      13     -8.48
+Tracing beam      14     -8.10
+Tracing beam      15     -7.72
+Tracing beam      16     -7.35
+Tracing beam      17     -6.97
+Tracing beam      18     -6.59
+Tracing beam      19     -6.22
+Tracing beam      20     -5.84
+Tracing beam      21     -5.46
+Tracing beam      22     -5.09
+Tracing beam      23     -4.71
+Tracing beam      24     -4.33
+Tracing beam      25     -3.96
+Tracing beam      26     -3.58
+Tracing beam      27     -3.20
+Tracing beam      28     -2.83
+Tracing beam      29     -2.45
+Tracing beam      30     -2.07
+Tracing beam      31     -1.70
+Tracing beam      32     -1.32
+Tracing beam      33     -0.94
+Tracing beam      34     -0.57
+Tracing beam      35     -0.19
+Tracing beam      36      0.19
+Tracing beam      37      0.57
+Tracing beam      38      0.94
+Tracing beam      39      1.32
+Tracing beam      40      1.70
+Tracing beam      41      2.07
+Tracing beam      42      2.45
+Tracing beam      43      2.83
+Tracing beam      44      3.20
+Tracing beam      45      3.58
+Tracing beam      46      3.96
+Tracing beam      47      4.33
+Tracing beam      48      4.71
+Tracing beam      49      5.09
+Tracing beam      50      5.46
+Tracing beam      51      5.84
+Tracing beam      52      6.22
+Tracing beam      53      6.59
+Tracing beam      54      6.97
+Tracing beam      55      7.35
+Tracing beam      56      7.72
+Tracing beam      57      8.10
+Tracing beam      58      8.48
+Tracing beam      59      8.86
+Tracing beam      60      9.23
+Tracing beam      61      9.61
+Tracing beam      62      9.99
+Tracing beam      63     10.36
+Tracing beam      64     10.74
+Tracing beam      65     11.12
+Tracing beam      66     11.49
+Tracing beam      67     11.87
+Tracing beam      68     12.25
+Tracing beam      69     12.62
+Tracing beam      70     13.00
+
+ CPU Time =       0.362E-01s
