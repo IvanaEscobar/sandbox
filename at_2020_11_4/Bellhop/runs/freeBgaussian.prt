@@ -1,0 +1,141 @@
+ BELLHOP/BELLHOP3D
+
+ BELLHOP3D- free space 3D, Gaussian Cart. Coord                                  
+ frequency =   5.000     Hz
+
+ Dummy parameter NMedia =            1
+
+     C-linear approximation to SSP
+     Attenuation units: dB/mkHz
+
+
+   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI
+
+     ACOUSTO-ELASTIC half-space
+      0.00      1500.00      0.00     1.00       0.0000    0.0000
+
+ Depth =    5000.00 m
+
+ Sound speed profile:
+   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI
+
+      0.00      1500.00      0.00     1.00       0.0000    0.0000
+   5000.00      1500.00      0.00     1.00       0.0000    0.0000
+
+                                 ( RMS roughness =   0.00     )
+     ACOUSTO-ELASTIC half-space
+   5000.00      1500.00      0.00     1.00       0.0000    0.0000
+
+ __________________________________________________________________________
+
+ Number of source   x-coordinates, Sx =            1
+ source   x-coordinates, Sx (km)
+   0.00000    
+
+
+ __________________________________________________________________________
+
+ Number of source   y-coordinates, Sy =            1
+ source   y-coordinates, Sy (km)
+   0.00000    
+
+
+ __________________________________________________________________________
+
+ Number of Source   depths, Sz =            1
+ Source   depths, Sz (m)
+   3000.00    
+
+
+ __________________________________________________________________________
+
+ Number of Receiver depths, Rz =          501
+ Receiver depths, Rz (m)
+   0.00000       10.0000       20.0000       30.0000       40.0000    
+   50.0000       60.0000       70.0000       80.0000       90.0000    
+          ... 
+   5000.00    
+
+
+ __________________________________________________________________________
+
+ Number of Receiver ranges, Rr =         1000
+ Receiver ranges, Rr (km)
+  0.100000E-01  0.200000E-01  0.300000E-01  0.400000E-01  0.500000E-01
+  0.600000E-01  0.700000E-01  0.800000E-01  0.900000E-01  0.100000    
+          ... 
+   10.0000    
+
+
+ __________________________________________________________________________
+
+ Number of receiver bearings, theta =            2
+ receiver bearings, theta (degrees)
+   0.00000       20.0000    
+
+
+ Coherent TL calculation
+ Geometric gaussian beams in Cartesian coordinates
+ Point source (cylindrical coordinates)
+ Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )
+ 3D calculation
+ __________________________________________________________________________
+
+ Number of beams in elevation   =          189
+ Beam take-off angles (degrees)
+  -89.0000      -88.0532      -87.1064      -86.1596      -85.2128    
+  -84.2660      -83.3191      -82.3723      -81.4255      -80.4787    
+          ... 
+   89.0000    
+
+ Number of beams in bearing   =           21
+ Beam take-off angles (degrees)
+  -10.0000      -9.00000      -8.00000      -7.00000      -6.00000    
+  -5.00000      -4.00000      -3.00000      -2.00000      -1.00000    
+          ... 
+   10.0000    
+
+ __________________________________________________________________________
+
+
+ Step length,       deltas =   100.0     m
+
+ Maximum ray x-range, Box%x =  0.1005E+05 m
+ Maximum ray y-range, Box%y =  0.1005E+05 m
+ Maximum ray z-range, Box%z =   5000.     m
+ No beam shift in effect
+
+
+
+xs =    0.00         0.00        0.300E+04
+
+ Geometric beam, Gaussian-shaped, Cart. coord.                                   
+ HalfWidth1  =    0.0000000000000000     
+ HalfWidth2  =    0.0000000000000000     
+ epsilonOPT1 =                (0.0000000000000000,0.0000000000000000)
+ epsilonOPT2 =                (0.0000000000000000,0.0000000000000000)
+ EpsMult     =    1.0000000000000000     
+
+Tracing azimuthal beam    1    -10.00
+Tracing azimuthal beam    2     -9.00
+Tracing azimuthal beam    3     -8.00
+Tracing azimuthal beam    4     -7.00
+Tracing azimuthal beam    5     -6.00
+Tracing azimuthal beam    6     -5.00
+Tracing azimuthal beam    7     -4.00
+Tracing azimuthal beam    8     -3.00
+Tracing azimuthal beam    9     -2.00
+Tracing azimuthal beam   10     -1.00
+Tracing azimuthal beam   11      0.00
+Tracing azimuthal beam   12      1.00
+Tracing azimuthal beam   13      2.00
+Tracing azimuthal beam   14      3.00
+Tracing azimuthal beam   15      4.00
+Tracing azimuthal beam   16      5.00
+Tracing azimuthal beam   17      6.00
+Tracing azimuthal beam   18      7.00
+Tracing azimuthal beam   19      8.00
+Tracing azimuthal beam   20      9.00
+Tracing azimuthal beam   21     10.00
+
+ CPU Time =        4.43    s
