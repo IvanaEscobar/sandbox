@@ -141,7 +141,8 @@ export RM=rm
 export CC=gcc
 export CFLAGS=-g
 #export FFLAGS+= -I../misc -I../tslib -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-export FFLAGS+= -I../misc -I../tslib
+export absolutePATH=${PWD}
+export FFLAGS+= -I${absolutePATH}/misc -I${absolutePATH}/tslib
 
 # KRAKEL is commented out below because it requires the LAPACK library.
 # If you have the LAPACK library installed on your system, first edit the
@@ -187,9 +188,6 @@ clean:
 	find . -name '*.shd'  -exec rm -r {} +
 	find . -name '*.shd.mat'  -exec rm -r {} +
 	find . -name '*.prt'  -exec rm -r {} +
-	find . -name '*.gcov'  -exec rm -r {} +
-	find . -name '*.gcda'  -exec rm -r {} +
-	find . -name '*.gcno'  -exec rm -r {} +
 	(cd misc;	make -k -i clean)
 	(cd tslib;	make -k -i clean)
 	(cd Bellhop;	make -k -i clean)
@@ -199,3 +197,9 @@ clean:
 #	(cd Scooter;	make -k -i clean)
 	(cd tests;	make -k -i clean)
 
+cleancov: 
+	find . -name '*.gcda'  -exec rm -r {} +
+	find . -name '*.gcno'  -exec rm -r {} +
+	rm -rf html/ coverage.info
+
+cleanall: clean cleancov

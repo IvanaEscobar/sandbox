@@ -93,3 +93,20 @@ bellhop.o:   arrmod.mod anglemod.mod bdrymod.mod   readenvironmentbell.mod bellh
 
 bellhop3D.o: arrmod.mod anglemod.mod bdry3dmod.mod readenvironmentbell.mod bellhopmod.mod sspmod.mod reflectmod.mod reflect3dmod.mod writeray.mod raynormals.mod influence3d.mod step3dmod.mod bellhop3D.f90
 
+
+## COVERAGE TARGETS (on Mac)
+LCOV=/usr/local/bin/lcov
+LCOV_DIR=${PWD}/coverage
+GCOV=/usr/local/bin/gcov-11
+
+cov:
+	$(GCOV) *.f90
+
+lcov-report:
+	mkdir -p $(LCOV_DIR)
+	$(LCOV) --compat-libtool --capture --directory . --output-file $(LCOV_DIR)/coverage.info --gcov-tool $(GCOV)
+	genhtml -t "flatwave" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
+	open $(LCOV_DIR)/html/index.html
+
+lcov-reset:
+	rm -rf *.gcda *.gcov
