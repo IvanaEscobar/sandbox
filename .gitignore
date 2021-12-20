@@ -19,8 +19,8 @@ a.out
 # Code Coverage
 *.gcno
 *.gcda
-*.gcov
-
+coverage.info
+html/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
