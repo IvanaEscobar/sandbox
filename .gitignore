@@ -15,12 +15,17 @@ dask-worker-space/
 a.out
 *.json
 .DS_Store
+.Krakel
+.Kraken
+.KrakenField
+.Scooter
 
 # Code Coverage
 *.gcno
 *.gcda
+*.gcov
 coverage.info
-html/
+coverage/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -19,8 +19,8 @@ cov: $(SOURCE)
 	$(GCOV) *.f90
 
 html: $(SOURCE)
-	lcov --gcov-tool $(GCOV) --capture --directory . --output-file coverage.info
-	genhtml --output-directory html coverage.info
+	cov --gcov-tool $(GCOV) --capture --directory . --output-file coverage.info
+	genhtml -o html coverage.info
 	open html/index.html
 
 clean:
