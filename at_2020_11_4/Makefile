@@ -129,9 +129,12 @@ FFLAGS+= -frecursive
 # export FFLAGS= -p -g -march=native -Bstatic -Wa,-q -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -std=gnu -O3 -ffast-math -funroll-all-loops -fcheck=all
 
 # MITgcm:
-#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
+FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
 F90FLAGS=${FFLAGS}
 
+# Code Coverage with gcov and lcov
+FFLAGS+= --coverage
+F90FLAGS+= --coverage
 # ______________________________________________________________________________
 
 export RM=rm
@@ -184,6 +187,9 @@ clean:
 	find . -name '*.shd'  -exec rm -r {} +
 	find . -name '*.shd.mat'  -exec rm -r {} +
 	find . -name '*.prt'  -exec rm -r {} +
+	find . -name '*.gcov'  -exec rm -r {} +
+	find . -name '*.gcda'  -exec rm -r {} +
+	find . -name '*.gcno'  -exec rm -r {} +
 	(cd misc;	make -k -i clean)
 	(cd tslib;	make -k -i clean)
 	(cd Bellhop;	make -k -i clean)

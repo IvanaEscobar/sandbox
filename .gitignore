@@ -16,6 +16,12 @@ a.out
 *.json
 .DS_Store
 
+# Code Coverage
+*.gcno
+*.gcda
+*.gcov
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
