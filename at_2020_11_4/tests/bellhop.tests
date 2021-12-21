@@ -1,0 +1,156 @@
+BeamPattern/runtests.m:bellhop( 'omni' )
+BeamPattern/runtests.m:bellhop( 'shaded' )
+Bellhop3DTests/DoubleSeamount/runtests.m:bellhop3d DoubleSeamount3D_ray
+Bellhop3DTests/DoubleSeamount/runtests.m:bellhop3d DoubleSeamount3D
+Bellhop3DTests/DoubleSeamount/runtests.m:bellhop3d DoubleSeamount3DHat
+Bellhop3DTests/KoreanSeas/runtests.m:bellhop3d( fileroot )     % run BELLHOP3D on the munk3d test case
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge2d
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3dHatRayCen
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3dCart
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3dGaussian
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3dGaussian_side
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3dHat_side
+Bellhop3DTests/TruncatedWedge/runtests.m:bellhop3d wedge3d_ray     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/KermitRoosevelt/runtests.m:% bellhop3d KR2d
+Bellhop3DTests/KermitRoosevelt/runtests.m:bellhop3d KR3dCart
+Bellhop3DTests/KermitRoosevelt/runtests.m:bellhop3d KR3dGaussian
+Bellhop3DTests/KermitRoosevelt/runtests.m:bellhop3d KR3d_ray     % run BELLHOP3D on the KR3d test case
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBhat' )
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBhat_raycen' )
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBgaussian' )
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBgaussian_raycen' )
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBhatpolar' )
+Bellhop3DTests/free/runtests.m:bellhop3d( 'freeBgaussianpolar' )
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount_ray
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount2D
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount3DHatcart
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount3DHatRaycen
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount3DGaussian
+Bellhop3DTests/Seamount/runtests.m:bellhop3d Seamount2D_side
+Bellhop3DTests/Seamount/runtests.m:bellhop Seamount_slice
+Bellhop3DTests/halfspace/runtests.m:bellhop3d( 'lower_halfB' )
+Bellhop3DTests/halfspace/runtests.m:bellhop3d( 'upper_halfB' )
+Bellhop3DTests/Taiwan/runtests.m:bellhop3d( fileroot )
+Bellhop3DTests/PenetrableWedge/run_wedge.m:bellhop3d Wedge3d     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PenetrableWedge/run_wedge.m:    bellhop3d Wedge3d_ray     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d pwedge3dRayCen
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d pwedge3dCart
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d pwedge2d
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d pwedge2d_rot
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d pwedge3d_rot
+Bellhop3DTests/PenetrableWedge/runtests.m:bellhop3d slice2d
+Bellhop3DTests/MunkRot/runtests.m:bellhop3d Munk3D
+Bellhop3DTests/MunkRot/runtests.m:bellhop3d Munk3Dz
+Bellhop3DTests/MunkRot/runtests.m:bellhop3d foo
+Bellhop3DTests/MunkRot/runtests.m:bellhop3d fooz
+Bellhop3DTests/MunkRot/runtests.m:bellhop3d foozz
+Bellhop3DTests/Munk/runtests.m:bellhop3d munk3d     % run BELLHOP3D on the munk3d test case
+Bellhop3DTests/Munk/runtests.m:bellhop3d munk3d_ray     % run BELLHOP3D on the munk3d test case
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice2dHatCart
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatCart
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice2dGaussian
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dGaussian
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatRaycen
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatRaycenSemi
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatRaycenInc
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatCart   % this is redundant if you ran the whole script
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatCartSemi
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dHatCartInc
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dGaussian   % this is redundant if you ran the whole script
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dGaussianSemi
+Bellhop3DTests/Munk/runtests.m:bellhop3d slice3dGaussianInc
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot_ray
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot2D
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot3DHatCartPolar
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot3DHatCart
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot3DHatCart_theta90
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot3DHatRaycen
+Bellhop3DTests/Parabot/runtests.m:bellhop3d ParaBot3DGaussian
+Bellhop3DTests/Weymouth/runtests.m:bellhop3d( fileroot )
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge2dray
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge2d     % run BELLHOP3D on the wedge2d test case
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge3dHat     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge3dHatRayCen     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge3dGaussian     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge3dGaussianRayCen     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/PerfectWedge/runtests.m:bellhop3d wedge3d_ray     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/Hyperbot/runtests.m:bellhop3d HyperBot_ray     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/Hyperbot/runtests.m:bellhop3d HyperBot2D     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/Hyperbot/runtests.m:bellhop3d HyperBot3DHatCart     % run BELLHOP3D on the wedge3d test case
+Bellhop3DTests/Hyperbot/runtests.m:bellhop3d HyperBot3DPolar     % run BELLHOP3D on the wedge3d test case
+Dickins/runtests.m:bellhop( 'DickinsBray' )
+Dickins/runtests.m:bellhop( 'DickinsB_oneBeam' )
+Dickins/runtests.m:bellhop( 'DickinsB' )
+Dickins/runtests.m:bellhop( 'DickinsFlatB' )
+Ellipse/runtests.m:bellhop Ellipse
+Ellipse/runtests.m:bellhop EllipseTLGeom
+Ellipse/runtests.m:bellhop EllipseTLGB
+Ellipse/runtests.m:bellhop Ellipse
+Ellipse/runtests.m:bellhop EllipseTLGeom
+Ellipse/runtests.m:bellhop EllipseTLGB
+Gulf/runtests.m:bellhop 'Gulf_ray_ri'
+Gulf/runtests.m:bellhop 'Gulf_ray_rd'
+Gulf/runtests.m:bellhop 'GulfB_ri_geo'
+Gulf/runtests.m:bellhop 'GulfB_ri_gb'
+Gulf/runtests.m:bellhop 'GulfB_rd_geo'
+Gulf/runtests.m:bellhop 'GulfB_rd_gb'
+Munk/runtests.m:bellhop( 'MunkB_ray' )
+Munk/runtests.m:bellhop( 'MunkB_eigenray' )
+Munk/runtests.m:bellhop( 'MunkB_Coh' )
+Munk/runtests.m:bellhop( 'MunkB_gb' )
+Munk/runtests.m:bellhop( 'MunkB_Coh_gb' )
+Munk/runtests.m:bellhop( 'MunkB_Coh_CervenyR' )
+Munk/runtests.m:bellhop( 'MunkB_Coh_CervenyC' )
+Munk/runtests.m:bellhop( 'MunkB_Coh' )
+Munk/runtests.m:bellhop( 'MunkB_Coh_gb' )
+Munk/runtests.m:bellhop( 'MunkB_Semi' )
+Munk/runtests.m:bellhop( 'MunkB_Semi_gb' )
+Munk/runtests.m:bellhop( 'MunkB_Inc' )
+Munk/runtests.m:bellhop( 'MunkB_Inc_gb' )
+Munk/runtests.m:bellhop( 'Munk_shearB' )
+MunkRot/runtests.m:bellhop Munk
+MunkRot/runtests.m:bellhop MunkRot
+Noise/ATOC/runtests.m:bellhop aetB_TL
+Noise/ATOC/runtests.m:bellhop aetB
+Noise/ATOC/runtests.m:bellhop aet_VLA_B
+ParaBot/runtests.m:bellhop ParaBot
+ParaBot/runtests.m:bellhop ParaBotTLGeom
+ParaBot/runtests.m:bellhop ParaBotTLGB
+ParaBot/runtests.m:bellhop ParaBot
+ParaBot/runtests.m:bellhop ParaBotTLGeom
+ParaBot/runtests.m:bellhop ParaBotTLGB
+PekerisRD/runtests.m:bellhop( 'PekerisRDB' )
+PointLine/runtests.m:bellhop 'LloydPointB'
+PointLine/runtests.m:bellhop 'LloydLineB'
+PointLine/runtests.m:bellhop 'LloydPoint_gbtB'
+PointLine/runtests.m:bellhop 'LloydLine_gbtB'
+SBCX/runtests.m:bellhop( 'sbcx' )
+SBCX/runtests.m:bellhop( 'sbcx_Arr_asc' )
+SBCX/runtests.m:bellhop( 'sbcx_Arr_bin' )
+VolAtt/runtests.m:bellhop 'freeB'
+VolAtt/runtests.m:bellhop 'free_gbtB'
+VolAtt/runtests.m:bellhop 'freeB_Inc'
+VolAtt/runtests.m:bellhop 'free_gbtB_Inc'
+VolAtt/runtests.m:bellhop 'free_ThorpB'
+VolAtt/runtests.m:bellhop 'free_FGB'
+arctic/runtests.m:bellhop( 'arcticB' )
+arctic/runtests.m:bellhop( 'arcticB_gb' )
+block/runtests.m:bellhop blockB_ray
+block/runtests.m:bellhop blockB_geo
+block/runtests.m:bellhop blockB_gb
+calib/runtests.m:bellhop( 'calibB' )
+calib/runtests.m:bellhop( 'calibB_gb' )
+calib/runtests.m:bellhop( 'calibBgrad' )
+calib/runtests.m:bellhop( 'calibBgrad_gb' )
+free/runtests.m:bellhop 'freePointB'
+free/runtests.m:bellhop 'freePoint_gbtB'
+free/runtests.m:bellhop 'freePoint_ParaxialB'
+free/runtests.m:bellhop 'freeLineB'
+free/runtests.m:bellhop 'freeLine_gbtB'
+free/runtests.m:bellhop 'freeLine_ParaxialB'
+halfspace/runtests.m:bellhop( 'lower_halfB' )
+halfspace/runtests.m:bellhop( 'upper_halfB' )
+sduct/runtests.m:bellhop( 'sductB' )
+sduct/runtests.m:bellhop( 'sductB_gb' )
+terrain/runtests.m:bellhop( 'lower_half' )
+terrain/runtests.m:bellhop( 'lower_half_gbt' )
