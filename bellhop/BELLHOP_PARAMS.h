@@ -1,4 +1,4 @@
-#ifdef ALLOW_MYPACKAGE
+#ifdef ALLOW_BELLHOP
 
 C     Package flag
       LOGICAL myPa_MNC
@@ -44,7 +44,7 @@ C-    file names for initial conditions:
      &       myPa_VelUFile,  myPa_VelVFile,
      &       myPa_Surf1File, myPa_Surf2File
 
-#ifdef MYPACKAGE_3D_STATE
+#ifdef BELLHOP_3D_STATE
 C     MYPA 3-dim. fields
       _RL myPa_StatScal1(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
       _RL myPa_StatScal2(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
@@ -53,16 +53,16 @@ C     MYPA 3-dim. fields
       COMMON /MYPA_STATE_3D/
      &    myPa_StatScal1, myPa_StatScal2,
      &    myPa_StatVelU,  myPa_StatVelV
-#endif /* MYPACKAGE_3D_STATE */
-#ifdef MYPACKAGE_2D_STATE
+#endif /* BELLHOP_3D_STATE */
+#ifdef BELLHOP_2D_STATE
 C     MYPA 2-dim. fields
       _RL myPa_Surf1(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RL myPa_Surf2(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       COMMON /MYPA_STATE_2D/
      &    myPa_Surf1, myPa_Surf2
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
-#ifdef MYPACKAGE_TENDENCY
+#ifdef BELLHOP_TENDENCY
       _RL myPa_TendScal1(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
       _RL myPa_TendScal2(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
       _RL myPa_TendVelU(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
@@ -70,9 +70,9 @@ C     MYPA 2-dim. fields
       COMMON /MYPA_TENDENCY/
      &    myPa_TendScal1, mypa_TendScal2,
      &    myPa_TendVelU,  mypa_TendVelV
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
 
-#endif /* ALLOW_MYPACKAGE */
+#endif /* ALLOW_BELLHOP */
 
 CEH3 ;;; Local Variables: ***
 CEH3 ;;; mode:fortran ***
