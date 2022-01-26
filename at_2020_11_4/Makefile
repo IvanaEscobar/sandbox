@@ -129,16 +129,20 @@ FFLAGS+= -frecursive
 # export FFLAGS= -p -g -march=native -Bstatic -Wa,-q -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -std=gnu -O3 -ffast-math -funroll-all-loops -fcheck=all
 
 # MITgcm:
-#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
+FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
 F90FLAGS=${FFLAGS}
 
+# Code Coverage with gcov and lcov
+FFLAGS+= --coverage
+F90FLAGS+= --coverage
 # ______________________________________________________________________________
 
 export RM=rm
 export CC=gcc
 export CFLAGS=-g
 #export FFLAGS+= -I../misc -I../tslib -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-export FFLAGS+= -I../misc -I../tslib
+export absolutePATH=${PWD}
+export FFLAGS+= -I${absolutePATH}/misc -I${absolutePATH}/tslib
 
 # KRAKEL is commented out below because it requires the LAPACK library.
 # If you have the LAPACK library installed on your system, first edit the
@@ -193,3 +197,9 @@ clean:
 #	(cd Scooter;	make -k -i clean)
 	(cd tests;	make -k -i clean)
 
+cleancov: 
+	find . -name '*.gcda'  -exec rm -r {} +
+	find . -name '*.gcno'  -exec rm -r {} +
+	rm -rf html/ coverage.info
+
+cleanall: clean cleancov
