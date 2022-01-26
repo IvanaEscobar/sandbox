@@ -15,6 +15,9 @@ dask-worker-space/
 a.out
 *.json
 .DS_Store
+build*/
+input/
+results/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
