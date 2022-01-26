@@ -1,5 +1,5 @@
 
-ENVFIL = pekeris twersky  double scholte flused elsed atten norm -fal ice kupert kuperb kuperm -f
+ENVFIL = pekeris twersky double scholte flused elsed atten norm -fal ice kupert kuperb kuperm -f
 
 install: clean $(ENVFIL)
 
