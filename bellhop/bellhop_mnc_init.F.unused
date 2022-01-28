@@ -1,11 +1,11 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C     !ROUTINE: MYPACKAGE_MNC_INIT
+C     !ROUTINE: BELLHOP_MNC_INIT
 
 C     !INTERFACE:
-      SUBROUTINE MYPACKAGE_MNC_INIT( myThid )
+      SUBROUTINE BELLHOP_MNC_INIT( myThid )
 
 C     !DESCRIPTION:
 C     Initialize MNC lookup tables for Mypackage.
@@ -15,13 +15,14 @@ C     !USES:
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT PARAMETERS:
       INTEGER myThid
 CEOP
 
-#ifdef ALLOW_MYPACKAGE
+#ifdef ALLOW_BELLHOP
 #ifdef ALLOW_MNC
 
       IF (useMNC) THEN
@@ -71,7 +72,7 @@ CEOP
       ENDIF
 
 #endif /* ALLOW_MNC */
-#endif /* ALLOW_MYPACKAGE */
+#endif /* ALLOW_BELLHOP */
 
       RETURN
       END
