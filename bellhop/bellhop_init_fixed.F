@@ -64,6 +64,8 @@ C     Close the open data file
       CLOSE(iUnit,STATUS='DELETE')
 #endif /* SINGLE_DISK_IO */
 
+      _END_MASTER(myThid)
+
 #ifdef ALLOW_MNC
       IF (useMNC) THEN
         CALL BELLHOP_MNC_INIT( myThid )
