@@ -1,10 +1,10 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 CBOP
-C !ROUTINE: MYPACKAGE_WRITE_PICKUP
+C !ROUTINE: BELLHOP_WRITE_PICKUP
 
 C !INTERFACE: ==========================================================
-      SUBROUTINE MYPACKAGE_WRITE_PICKUP( permPickup,
+      SUBROUTINE BELLHOP_WRITE_PICKUP( permPickup,
      &                    suff, myTime, myIter, myThid )
 
 C !DESCRIPTION:
@@ -15,7 +15,8 @@ C !USES: ===============================================================
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C !INPUT PARAMETERS: ===================================================
 C     permPickup      :: write a permanent pickup
@@ -32,8 +33,8 @@ C     myThid          :: thread number
 C !OUTPUT PARAMETERS: ==================================================
 C  none
 
-#ifdef ALLOW_MYPACKAGE
-#if (defined MYPACKAGE_3D_STATE) || (defined MYPACKAGE_2D_STATE)
+#ifdef ALLOW_BELLHOP
+#if (defined BELLHOP_3D_STATE) || (defined BELLHOP_2D_STATE)
 
 C     === Functions ====
       INTEGER  ILNBLNK
@@ -61,16 +62,16 @@ CEOP
 
         lChar = ILNBLNK(suff)
         IF ( lChar.EQ.0 ) THEN
-          WRITE(fn,'(2A)') 'pickup_mypackage'
+          WRITE(fn,'(2A)') 'pickup_bellhop'
         ELSE
-          WRITE(fn,'(2A)') 'pickup_mypackage.',suff(1:lChar)
+          WRITE(fn,'(2A)') 'pickup_bellhop.',suff(1:lChar)
         ENDIF
         fp = precFloat64
         j  = 0
 
 C       Firstly, write 3-D fields as consecutive records,
 
-#ifdef MYPACKAGE_3D_STATE
+#ifdef BELLHOP_3D_STATE
 C     record number < 0 : a hack not to write meta files now:
         j = j + 1
         CALL WRITE_REC_3D_RL( fn, fp, Nr,
@@ -90,12 +91,12 @@ C     record number < 0 : a hack not to write meta files now:
         CALL WRITE_REC_3D_RL( fn, fp, Nr,
      &                        myPa_StatVelV, -j, myIter, myThid )
         IF (j.LE.listDim) wrFldList(j) = 'myPaStaV'
-#endif /* MYPACKAGE_3D_STATE */
+#endif /* BELLHOP_3D_STATE */
 
 C-    switch to 2-D fields:
         nj = -j*Nr
 
-#ifdef MYPACKAGE_2D_STATE
+#ifdef BELLHOP_2D_STATE
         j = j + 1
         nj = nj-1
         CALL WRITE_REC_3D_RL( fn, fp, 1,
@@ -107,19 +108,19 @@ C-    switch to 2-D fields:
         CALL WRITE_REC_3D_RL( fn, fp, 1,
      &                        myPa_Surf2, nj, myIter, myThid )
         IF (j.LE.listDim) wrFldList(j) = 'myPaSur2'
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
 C--------------------------
         nWrFlds = j
         IF ( nWrFlds.GT.listDim ) THEN
-          WRITE(msgBuf,'(2A,I5,A)') 'MYPACKAGE_WRITE_PICKUP: ',
+          WRITE(msgBuf,'(2A,I5,A)') 'BELLHOP_WRITE_PICKUP: ',
      &     'trying to write ',nWrFlds,' fields'
           CALL PRINT_ERROR( msgBuf, myThid )
-          WRITE(msgBuf,'(2A,I5,A)') 'MYPACKAGE_WRITE_PICKUP: ',
+          WRITE(msgBuf,'(2A,I5,A)') 'BELLHOP_WRITE_PICKUP: ',
      &     'field-list dimension (listDim=',listDim,') too small'
           CALL PRINT_ERROR( msgBuf, myThid )
           CALL ALL_PROC_DIE( myThid )
-          STOP 'ABNORMAL END: S/R MYPACKAGE_WRITE_PICKUP (list-size Pb)'
+          STOP 'ABNORMAL END: S/R BELLHOP_WRITE_PICKUP (list-size Pb)'
         ENDIF
 #ifdef ALLOW_MDSIO
 C     uses this specific S/R to write (with more informations) only meta files
@@ -139,8 +140,8 @@ C     uses this specific S/R to write (with more informations) only meta files
 #endif /* ALLOW_MDSIO */
 C--------------------------
 
-#endif /* MYPACKAGE_3D_STATE or MYPACKAGE_2D_STATE */
-#endif /* ALLOW_MYPACKAGE */
+#endif /* BELLHOP_3D_STATE or BELLHOP_2D_STATE */
+#endif /* ALLOW_BELLHOP */
 
       RETURN
       END

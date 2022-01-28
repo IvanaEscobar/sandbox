@@ -1,11 +1,11 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_CHECK
+C !ROUTINE: BELLHOP_CHECK
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_CHECK( myThid )
+      SUBROUTINE BELLHOP_CHECK( myThid )
 
 C     !DESCRIPTION:
 C     Check dependances with other packages
@@ -15,21 +15,22 @@ C     !USES:
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT PARAMETERS:
 C     myThid   :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef ALLOW_MYPACKAGE
+#ifdef ALLOW_BELLHOP
 C     !LOCAL VARIABLES:
 C     msgBuf   :: Informational/error message buffer
       CHARACTER*(MAX_LEN_MBUF) msgBuf
 
       _BEGIN_MASTER(myThid)
 
-       WRITE(msgBuf,'(A)') 'MYPACKAGE_CHECK: #define MYPACKAGE'
+       WRITE(msgBuf,'(A)') 'BELLHOP_CHECK: #define BELLHOP'
        CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                     SQUEEZE_RIGHT , 1)
 
@@ -68,12 +69,15 @@ C-     For example, require this package to use tempStepping
         WRITE(msgBuf,'(A)') 'myPa_applyTendT needs tempStepping=.true.'
         CALL PRINT_ERROR( msgBuf , 1)
         CALL ALL_PROC_DIE( 0 )
-        STOP 'ABNORMAL END: S/R MYPACKAGE_CHECK'
+        STOP 'ABNORMAL END: S/R BELLHOP_CHECK'
        ENDIF
 
+       WRITE(msgBuf,'(A)') ' '
+       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
+     &                     SQUEEZE_RIGHT , 1)
       _END_MASTER(myThid)
 
-#endif /* ALLOW_MYPACKAGE */
+#endif /* ALLOW_BELLHOP */
 
       RETURN
       END

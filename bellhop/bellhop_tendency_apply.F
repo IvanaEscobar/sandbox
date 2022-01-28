@@ -1,23 +1,23 @@
-#include "MYPACKAGE_OPTIONS.h"
-C--  File mypackage_tendency_apply.F: Routines to apply MYPACKAGE tendencies
+#include "BELLHOP_OPTIONS.h"
+C--  File bellhop_tendency_apply.F: Routines to apply BELLHOP tendencies
 C--   Contents
-C--   o MYPACKAGE_TENDENCY_APPLY_U
-C--   o MYPACKAGE_TENDENCY_APPLY_V
-C--   o MYPACKAGE_TENDENCY_APPLY_T
-C--   o MYPACKAGE_TENDENCY_APPLY_S
+C--   o BELLHOP_TENDENCY_APPLY_U
+C--   o BELLHOP_TENDENCY_APPLY_V
+C--   o BELLHOP_TENDENCY_APPLY_T
+C--   o BELLHOP_TENDENCY_APPLY_S
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_TENDENCY_APPLY_U
+C !ROUTINE: BELLHOP_TENDENCY_APPLY_U
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_TENDENCY_APPLY_U(
-     U                     gU_arr,
-     I                     iMin,iMax,jMin,jMax, k, bi, bj,
-     I                     myTime, myIter, myThid )
+      SUBROUTINE BELLHOP_TENDENCY_APPLY_U(
+     U                    gU_arr,
+     I                    iMin,iMax,jMin,jMax, k, bi, bj,
+     I                    myTime, myIter, myThid )
 
 C     !DESCRIPTION:
-C     Add mypackage tendency terms to U tendency.  Routine works for one
+C     Add bellhop tendency terms to U tendency.  Routine works for one
 C     level at a time. Assumes that U and V tendencies are on C-Grid or
 C     on A-grid.
 
@@ -27,7 +27,9 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "GRID.h"
 c#include "DYNVARS.h"
-#include "MYPACKAGE.h"
+c#include "FFIELDS.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gU_arr    :: the tendency array
@@ -46,7 +48,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef MYPACKAGE_TENDENCY
+#ifdef BELLHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -69,23 +71,23 @@ C--   Assume Agrid position:
         ENDDO
       ENDIF
 
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_TENDENCY_APPLY_V
+C !ROUTINE: BELLHOP_TENDENCY_APPLY_V
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_TENDENCY_APPLY_V(
-     U                     gV_arr,
-     I                     iMin,iMax,jMin,jMax, k, bi, bj,
-     I                     myTime, myIter, myThid )
+      SUBROUTINE BELLHOP_TENDENCY_APPLY_V(
+     U                    gV_arr,
+     I                    iMin,iMax,jMin,jMax, k, bi, bj,
+     I                    myTime, myIter, myThid )
 
 C     !DESCRIPTION:
-C     Add mypackage tendency terms to V tendency.  Routine works for one
+C     Add bellhop tendency terms to V tendency.  Routine works for one
 C     level at a time. Assumes that U and V tendencies are on C-Grid or
 C     on A-grid.
 
@@ -95,7 +97,9 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "GRID.h"
 c#include "DYNVARS.h"
-#include "MYPACKAGE.h"
+c#include "FFIELDS.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gV_arr    :: the tendency array
@@ -114,7 +118,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef MYPACKAGE_TENDENCY
+#ifdef BELLHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -137,23 +141,23 @@ C--   Assume Agrid position:
         ENDDO
       ENDIF
 
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_TENDENCY_APPLY_T
+C !ROUTINE: BELLHOP_TENDENCY_APPLY_T
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_TENDENCY_APPLY_T(
-     U                     gT_arr,
-     I                     iMin,iMax,jMin,jMax, k, bi, bj,
-     I                     myTime, myIter, myThid )
+      SUBROUTINE BELLHOP_TENDENCY_APPLY_T(
+     U                    gT_arr,
+     I                    iMin,iMax,jMin,jMax, k, bi, bj,
+     I                    myTime, myIter, myThid )
 
 C     !DESCRIPTION:
-C     Add mypackage tendency terms to T (theta) tendency.  Routine works
+C     Add bellhop tendency terms to T (theta) tendency.  Routine works
 C     for one level at a time
 
 C     !USES:
@@ -162,7 +166,9 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "GRID.h"
 c#include "DYNVARS.h"
-#include "MYPACKAGE.h"
+c#include "FFIELDS.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gT_arr    :: the tendency array
@@ -181,7 +187,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef MYPACKAGE_TENDENCY
+#ifdef BELLHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -194,23 +200,23 @@ C     !LOCAL VARIABLES:
         ENDDO
       ENDIF
 
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_TENDENCY_APPLY_S
+C !ROUTINE: BELLHOP_TENDENCY_APPLY_S
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_TENDENCY_APPLY_S(
+      SUBROUTINE BELLHOP_TENDENCY_APPLY_S(
      U                     gS_arr,
      I                     iMin,iMax,jMin,jMax, k, bi, bj,
      I                     myTime, myIter, myThid )
 
 C     !DESCRIPTION:
-C     Add mypackage tendency terms to S tendency.  Routine works for one
+C     Add bellhop tendency terms to S tendency.  Routine works for one
 C     level at a time
 
 C     !USES:
@@ -219,7 +225,9 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "GRID.h"
 c#include "DYNVARS.h"
-#include "MYPACKAGE.h"
+c#include "FFIELDS.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gS_arr    :: the tendency array
@@ -238,7 +246,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef MYPACKAGE_TENDENCY
+#ifdef BELLHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -251,7 +259,7 @@ C     !LOCAL VARIABLES:
         ENDDO
       ENDIF
 
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
 
       RETURN
       END
