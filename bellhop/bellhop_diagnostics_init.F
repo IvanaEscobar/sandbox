@@ -1,11 +1,11 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_DIAGNOSTICS_INIT
+C !ROUTINE: BELLHOP_DIAGNOSTICS_INIT
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_DIAGNOSTICS_INIT( myThid )
+      SUBROUTINE BELLHOP_DIAGNOSTICS_INIT( myThid )
 
 C     !DESCRIPTION:
 C     Initialize list of all available diagnostics
@@ -14,7 +14,8 @@ C     !USES:
       IMPLICIT NONE
 #include "EEPARAMS.h"
 #include "SIZE.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     myThid ::  my Thread Id number
@@ -43,21 +44,21 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 c     IF ( useDiagnotics ) THEN
 
         diagName  = 'MYPaSta1'
-        diagTitle = 'Scalar state variable 1 for package MYPACKAGE'
+        diagTitle = 'Scalar state variable 1 for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'SM      MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPaSta2'
-        diagTitle = 'Scalar state variable 2 for package MYPACKAGE'
+        diagTitle = 'Scalar state variable 2 for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'SM      MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPaStaU'
-        diagTitle = 'uVel-type state variable for package MYPACKAGE'
+        diagTitle = 'uVel-type state variable for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'UM      MR      '
         diagMate  = diagNum + 2
@@ -66,7 +67,7 @@ c     IF ( useDiagnotics ) THEN
      I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
 
         diagName  = 'MYPaStaV'
-        diagTitle = 'vVel-type state variable for package MYPACKAGE'
+        diagTitle = 'vVel-type state variable for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'VM      MR      '
         diagMate  = diagNum
@@ -75,35 +76,35 @@ c     IF ( useDiagnotics ) THEN
      I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
 
         diagName  = 'MYPaSur1'
-        diagTitle = 'Surface field 1 for package MYPACKAGE'
+        diagTitle = 'Surface field 1 for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'SM      L1      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPaSur2'
-        diagTitle = 'Surface field 2 for package MYPACKAGE'
+        diagTitle = 'Surface field 2 for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'SM      L1      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPadTdt'
-        diagTitle = ' Pot.Temp. tendency from package MYPACKAGE'
+        diagTitle = ' Pot.Temp. tendency from package BELLHOP'
         diagUnits = 'K/s             '
         diagCode  = 'SMR     MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPadSdt'
-        diagTitle = ' Salinity  tendency from package MYPACKAGE'
+        diagTitle = ' Salinity  tendency from package BELLHOP'
         diagUnits = 'g/kg/s          '
         diagCode  = 'SMR     MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
         diagName  = 'MYPadUdt'
-        diagTitle = 'u-Velocity tendency from package MYPACKAGE'
+        diagTitle = 'u-Velocity tendency from package BELLHOP'
         diagUnits = 'm/s^2           '
         diagCode  = 'UMR     MR      '
         diagMate  = diagNum + 2
@@ -112,7 +113,7 @@ c     IF ( useDiagnotics ) THEN
      I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
 
         diagName  = 'MYPadVdt'
-        diagTitle = 'v-Velocity tendency from package MYPACKAGE'
+        diagTitle = 'v-Velocity tendency from package BELLHOP'
         diagUnits = 'm/s^2           '
         diagCode  = 'VMR     MR      '
         diagMate  = diagNum
@@ -122,7 +123,7 @@ c     IF ( useDiagnotics ) THEN
 
 C--     an example of how to set "free levels option" diagnostics
         diagName  = 'MYPaLev3'
-        diagTitle = '3-levels field for package MYPACKAGE'
+        diagTitle = '3-levels field for package BELLHOP'
         diagUnits = 'unit            '
         diagCode  = 'SM      MX      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,

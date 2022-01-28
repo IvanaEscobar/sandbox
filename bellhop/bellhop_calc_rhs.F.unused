@@ -1,10 +1,10 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 CBOP
-C !ROUTINE: MYPACKAGE_CALC_RHS
+C !ROUTINE: BELLHOP_CALC_RHS
 
 C !INTERFACE: ==========================================================
-      SUBROUTINE MYPACKAGE_CALC_RHS(
+      SUBROUTINE BELLHOP_CALC_RHS(
      I                     myTime, myIter, myThid )
 
 C !DESCRIPTION:
@@ -15,7 +15,8 @@ C !USES: ===============================================================
 #include "SIZE.h"
 #include "EEPARAMS.h"
 c#include "PARAMS.h"
-c#include "MYPACKAGE.h"
+c#include "BELLHOP_PARAMS.h"
+c#include "BELLHOP_VARS.h"
 
 C !INPUT PARAMETERS: ===================================================
 C myTime    :: Current time in simulation

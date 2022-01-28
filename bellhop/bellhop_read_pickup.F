@@ -1,21 +1,22 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP
-C     !ROUTINE: MYPACKAGE_READ_PICKUP
+C     !ROUTINE: BELLHOP_READ_PICKUP
 
 C     !INTERFACE:
-      SUBROUTINE MYPACKAGE_READ_PICKUP( myIter, myThid )
+      SUBROUTINE BELLHOP_READ_PICKUP( myIter, myThid )
 
 C     !DESCRIPTION:
-C     Reads current state of MYPACKAGE from a pickup file
+C     Reads current state of BELLHOP from a pickup file
 
 C     !USES:
       IMPLICIT NONE
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT PARAMETERS:
 C     myIter            :: time-step number
@@ -23,8 +24,8 @@ C     myThid            :: thread number
       INTEGER myIter
       INTEGER myThid
 
-#ifdef ALLOW_MYPACKAGE
-#if (defined MYPACKAGE_3D_STATE) || (defined MYPACKAGE_2D_STATE)
+#ifdef ALLOW_BELLHOP
+#if (defined BELLHOP_3D_STATE) || (defined BELLHOP_2D_STATE)
 
 C     !LOCAL VARIABLES:
 C     fn          :: character buffer for creating filename
@@ -53,13 +54,13 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
        IF ( pickupSuff.EQ.' ' ) THEN
         IF ( rwSuffixType.EQ.0 ) THEN
-          WRITE(fn,'(A,I10.10)') 'pickup_mypackage.', myIter
+          WRITE(fn,'(A,I10.10)') 'pickup_bellhop.', myIter
         ELSE
           CALL RW_GET_SUFFIX( suff, startTime, myIter, myThid )
-          WRITE(fn,'(A,A)') 'pickup_mypackage.', suff
+          WRITE(fn,'(A,A)') 'pickup_bellhop.', suff
         ENDIF
        ELSE
-        WRITE(fn,'(A,A10)') 'pickup_mypackage.', pickupSuff
+        WRITE(fn,'(A,A10)') 'pickup_bellhop.', pickupSuff
        ENDIF
        fp = precFloat64
 
@@ -70,14 +71,14 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        _BEGIN_MASTER( myThid )
 c      IF ( filePrec.NE.0 .AND. filePrec.NE.fp ) THEN
        IF ( nbFields.GE.0 .AND. filePrec.NE.fp ) THEN
-         WRITE(msgBuf,'(2A,I4)') 'MYPACKAGE_READ_PICKUP: ',
+         WRITE(msgBuf,'(2A,I4)') 'BELLHOP_READ_PICKUP: ',
      &    'pickup-file binary precision do not match !'
          CALL PRINT_ERROR( msgBuf, myThid )
-         WRITE(msgBuf,'(A,2(A,I4))') 'MYPACKAGE_READ_PICKUP: ',
+         WRITE(msgBuf,'(A,2(A,I4))') 'BELLHOP_READ_PICKUP: ',
      &    'file prec.=', filePrec, ' but expecting prec.=', fp
          CALL PRINT_ERROR( msgBuf, myThid )
          CALL ALL_PROC_DIE( 0 )
-         STOP 'ABNORMAL END: S/R MYPACKAGE_READ_PICKUP (data-prec Pb)'
+         STOP 'ABNORMAL END: S/R BELLHOP_READ_PICKUP (data-prec Pb)'
        ENDIF
        _END_MASTER( myThid )
 
@@ -85,18 +86,18 @@ c      IF ( filePrec.NE.0 .AND. filePrec.NE.fp ) THEN
 C-      No meta-file or old meta-file without List of Fields
         ioUnit = errorMessageUnit
         IF ( pickupStrictlyMatch ) THEN
-          WRITE(msgBuf,'(4A)') 'MYPACKAGE_READ_PICKUP: ',
+          WRITE(msgBuf,'(4A)') 'BELLHOP_READ_PICKUP: ',
      &      'no field-list found in meta-file',
      &      ' => cannot check for strick-matching'
           CALL PRINT_ERROR( msgBuf, myThid )
-          WRITE(msgBuf,'(4A)') 'MYPACKAGE_READ_PICKUP: ',
+          WRITE(msgBuf,'(4A)') 'BELLHOP_READ_PICKUP: ',
      &      'try with " pickupStrictlyMatch=.FALSE.,"',
      &      ' in file: "data", NameList: "PARM03"'
           CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
           CALL ALL_PROC_DIE( myThid )
-          STOP 'ABNORMAL END: S/R MYPACKAGE_READ_PICKUP'
+          STOP 'ABNORMAL END: S/R BELLHOP_READ_PICKUP'
         ELSE
-          WRITE(msgBuf,'(4A)') 'WARNING >> MYPACKAGE_READ_PICKUP: ',
+          WRITE(msgBuf,'(4A)') 'WARNING >> BELLHOP_READ_PICKUP: ',
      &      ' no field-list found'
           CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
          IF ( nbFields.EQ.-1 ) THEN
@@ -112,11 +113,11 @@ c         CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
 c         WRITE(msgBuf,'(4A)') 'WARNING >> ',
 c    &      ' until checkpoint59l (2007 Dec 17)'
 c         CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(4A)') 'MYPACKAGE_READ_PICKUP: ',
+          WRITE(msgBuf,'(4A)') 'BELLHOP_READ_PICKUP: ',
      &      'no field-list found in meta-file'
           CALL PRINT_ERROR( msgBuf, myThid )
           CALL ALL_PROC_DIE( myThid )
-          STOP 'ABNORMAL END: S/R MYPACKAGE_READ_PICKUP'
+          STOP 'ABNORMAL END: S/R BELLHOP_READ_PICKUP'
          ENDIF
         ENDIF
        ENDIF
@@ -127,10 +128,10 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C---   Old way to read pickup:
 
        ELSE
-C---   New way to read MYPACKAGE pickup:
+C---   New way to read BELLHOP pickup:
         nj = 0
-C---    read MYPACKAGE 3-D fields for restart
-#ifdef MYPACKAGE_3D_STATE
+C---    read BELLHOP 3-D fields for restart
+#ifdef BELLHOP_3D_STATE
         CALL READ_MFLDS_3D_RL( 'myPaSta1', myPa_StatScal1,
      &                                 nj, fp, Nr, myIter, myThid )
         CALL READ_MFLDS_3D_RL( 'myPaSta2', myPa_StatScal2,
@@ -139,15 +140,15 @@ C---    read MYPACKAGE 3-D fields for restart
      &                                 nj, fp, Nr, myIter, myThid )
         CALL READ_MFLDS_3D_RL( 'myPaStaV', myPa_StatVelV,
      &                                 nj, fp, Nr, myIter, myThid )
-#endif /* MYPACKAGE_3D_STATE */
+#endif /* BELLHOP_3D_STATE */
         nj = nj*Nr
-C---    read MYPACKAGE 2-D fields for restart
-#ifdef MYPACKAGE_2D_STATE
+C---    read BELLHOP 2-D fields for restart
+#ifdef BELLHOP_2D_STATE
         CALL READ_MFLDS_3D_RL( 'myPaSur1', myPa_Surf1,
      &                                 nj, fp, 1 , myIter, myThid )
         CALL READ_MFLDS_3D_RL( 'myPaSur2', myPa_Surf2,
      &                                 nj, fp, 1 , myIter, myThid )
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
 C--    end: new way to read pickup file
        ENDIF
@@ -159,25 +160,25 @@ C--    Check for missing fields:
      U                     nMissing,
      I                     myIter, myThid )
        IF ( nMissing.GT.missFldDim ) THEN
-         WRITE(msgBuf,'(2A,I4)') 'MYPACKAGE_READ_PICKUP: ',
+         WRITE(msgBuf,'(2A,I4)') 'BELLHOP_READ_PICKUP: ',
      &     'missing fields list has been truncated to', missFldDim
          CALL PRINT_ERROR( msgBuf, myThid )
          CALL ALL_PROC_DIE( myThid )
-         STOP 'ABNORMAL END: S/R MYPACKAGE_READ_PICKUP (list-size Pb)'
+         STOP 'ABNORMAL END: S/R BELLHOP_READ_PICKUP (list-size Pb)'
        ENDIF
        IF ( nMissing.GE.1 ) THEN
         ioUnit = errorMessageUnit
         DO j=1,nMissing
-         WRITE(msgBuf,'(4A)') 'MYPACKAGE_READ_PICKUP: ',
+         WRITE(msgBuf,'(4A)') 'BELLHOP_READ_PICKUP: ',
      &       'cannot restart without field "',missFldList(nj),'"'
          CALL PRINT_ERROR( msgBuf, myThid )
         ENDDO
         CALL ALL_PROC_DIE( myThid )
-        STOP 'ABNORMAL END: S/R MYPACKAGE_READ_PICKUP'
+        STOP 'ABNORMAL END: S/R BELLHOP_READ_PICKUP'
        ENDIF
 
 C--    Update overlap regions:
-#ifdef MYPACKAGE_3D_STATE
+#ifdef BELLHOP_3D_STATE
         CALL EXCH_3D_RL( myPa_StatScal1, Nr, myThid )
         CALL EXCH_3D_RL( myPa_StatScal2, Nr, myThid )
         IF ( myPa_StaV_Cgrid ) THEN
@@ -188,14 +189,14 @@ C-      Assume Agrid position:
          CALL EXCH_UV_AGRID_3D_RL( myPa_StatVelU, myPa_StatVelV,
      &                       .TRUE., Nr, myThid )
         ENDIF
-#endif /* MYPACKAGE_3D_STATE */
-#ifdef MYPACKAGE_2D_STATE
+#endif /* BELLHOP_3D_STATE */
+#ifdef BELLHOP_2D_STATE
         CALL EXCH_XY_RL( myPa_Surf1, myThid )
         CALL EXCH_XY_RL( myPa_Surf2, myThid )
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
-#endif /* MYPACKAGE_3D_STATE or MYPACKAGE_2D_STATE */
-#endif /* ALLOW_MYPACKAGE */
+#endif /* BELLHOP_3D_STATE or BELLHOP_2D_STATE */
+#endif /* ALLOW_BELLHOP */
 
       RETURN
       END

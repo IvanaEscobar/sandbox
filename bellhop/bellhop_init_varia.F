@@ -1,14 +1,14 @@
-#include "MYPACKAGE_OPTIONS.h"
+#include "BELLHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: MYPACKAGE_INIT_VARIA
+C !ROUTINE: BELLHOP_INIT_VARIA
 
 C !INTERFACE:
-      SUBROUTINE MYPACKAGE_INIT_VARIA( myThid )
+      SUBROUTINE BELLHOP_INIT_VARIA( myThid )
 
 C     !DESCRIPTION:
-C     Initialize MYPACKAGE variables
+C     Initialize BELLHOP variables
 
 C     !USES:
       IMPLICIT NONE
@@ -16,14 +16,15 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "PARAMS.h"
 #include "GRID.h"
-#include "MYPACKAGE.h"
+#include "BELLHOP_PARAMS.h"
+#include "BELLHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     myThid ::  my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef ALLOW_MYPACKAGE
+#ifdef ALLOW_BELLHOP
 
 C     !LOCAL VARIABLES:
 C     === Local variables ===
@@ -32,36 +33,36 @@ C     === Local variables ===
       DO bj = myByLo(myThid), myByHi(myThid)
        DO bi = myBxLo(myThid), myBxHi(myThid)
 
-C     Initialize arrays in common blocks :
+C--   Initialize arrays in common blocks :
 C     3-dim.
         DO k=1,Nr
          DO j=1-Oly,sNy+OLy
           DO i=1-Olx,sNx+Olx
-#ifdef MYPACKAGE_3D_STATE
+#ifdef BELLHOP_3D_STATE
            myPa_StatScal1(i,j,k,bi,bj) = 0. _d 0
            myPa_StatScal2(i,j,k,bi,bj) = 0. _d 0
            myPa_StatVelU (i,j,k,bi,bj) = 0. _d 0
            myPa_StatVelV (i,j,k,bi,bj) = 0. _d 0
-#endif /* MYPACKAGE_3D_STATE */
-#ifdef MYPACKAGE_TENDENCY
+#endif /* BELLHOP_3D_STATE */
+#ifdef BELLHOP_TENDENCY
            myPa_TendScal1(i,j,k,bi,bj) = 0. _d 0
            myPa_TendScal2(i,j,k,bi,bj) = 0. _d 0
            myPa_TendVelU (i,j,k,bi,bj) = 0. _d 0
            myPa_TendVelV (i,j,k,bi,bj) = 0. _d 0
-#endif /* MYPACKAGE_TENDENCY */
+#endif /* BELLHOP_TENDENCY */
           ENDDO
          ENDDO
         ENDDO
 
 C     2-dim.
-#ifdef MYPACKAGE_2D_STATE
+#ifdef BELLHOP_2D_STATE
         DO j=1-Oly,sNy+OLy
          DO i=1-Olx,sNx+Olx
-          myPa_Surf1(i,j,bi,bj) = 0. _d 0
+          bellhop_SST(i,j,bi,bj) = 0. _d 0
           myPa_Surf2(i,j,bi,bj) = 0. _d 0
          ENDDO
         ENDDO
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
 C- end bi,bj loops
        ENDDO
@@ -74,7 +75,7 @@ C     Prevent loading of new data before everyone has finished initialisation
 C     this is done within IO routines => no longer needed
 c      _BARRIER
 
-#ifdef MYPACKAGE_3D_STATE
+#ifdef BELLHOP_3D_STATE
        IF ( myPa_Scal1File .NE. ' ' ) THEN
          CALL READ_FLD_XYZ_RL( myPa_Scal1File, ' ',
      &                         myPa_StatScal1, 0, myThid )
@@ -105,9 +106,9 @@ C-      Assume Agrid position:
      &                       .TRUE., Nr, myThid )
         ENDIF
        ENDIF
-#endif /* MYPACKAGE_3D_STATE */
+#endif /* BELLHOP_3D_STATE */
 
-#ifdef MYPACKAGE_2D_STATE
+#ifdef BELLHOP_2D_STATE
        IF ( myPa_Surf1File .NE. ' ' ) THEN
          CALL READ_FLD_XY_RL( myPa_Surf1File,' ',
      &                        myPa_Surf1, 0, myThid )
@@ -118,16 +119,16 @@ C-      Assume Agrid position:
      &                        myPa_Surf2, 0, myThid )
          CALL EXCH_XY_RL( myPa_Surf2, myThid )
        ENDIF
-#endif /* MYPACKAGE_2D_STATE */
+#endif /* BELLHOP_2D_STATE */
 
       ELSE
-C--   restart from a pickup:
-         CALL MYPACKAGE_READ_PICKUP( nIter0, myThid )
+C-    restart from a pickup:
+         CALL BELLHOP_READ_PICKUP( nIter0, myThid )
 
-C--   end start-from-iter-zero if/else block
+C-    end start-from-iter-zero if/else block
       ENDIF
 
-#endif /* ALLOW_MYPACKAGE */
+#endif /* ALLOW_BELLHOP */
 
       RETURN
       END
