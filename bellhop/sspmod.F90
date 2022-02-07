@@ -1,36 +1,55 @@
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
 MODULE sspmod
+! <CONTACT EMAIL="ivana@utexas.edu">
+!   Ivana Escobar
+! </CONTACT>
 
   ! Holds SSP input by user and associated variables
 
-  ! This module is very similar to the one used by the other programs in the Acoustics Toolbox
-  ! However, it returns the SSP *and* its derivatives
+  ! This module is very similar to the one used by the other programs in the 
+  ! Acoustics Toolbox. However, it returns the SSP *and* its derivatives
 
-  ! Also, a greater premium has been placed on returning this info quickly, since BELLHOP calls it at every step
-  ! Therefore more information is pre-computed
+  ! Also, a greater premium has been placed on returning this info quickly, 
+  ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE FatalError
+  USE fatalerror
   IMPLICIT NONE
+  PRIVATE
+  #include "EEPARAMS_90.h"
 
-  SAVE
+! public interfaces
+!=======================================================================
+
+    public EvaluateSSP, EvaluateSSP2D, EvaluateSSP3D, n2Linear, cLinear, &
+           cPCHIP, cCubic, Quad, Hexahedral, Analytic, AnalyticCosh, &
+           Analytic3D, ReadSSP
+
+!=======================================================================
+
+  !SAVE
   INTEGER, PARAMETER, PRIVATE :: ENVFile = 5, PRTFile = 6
   INTEGER, PARAMETER     :: MaxSSP = 100001
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
   INTEGER,       PRIVATE :: iz
-  REAL (KIND=8), PRIVATE :: Depth, W
-  REAL (KIND=8)          :: zTemp, betaPowerLaw = 1, fT = 1D20
-  REAL (KIND=8)          :: alphaR = 1500, betaR = 0, alphaI = 0, betaI = 0, rhoR = 1
+  _RL, PRIVATE :: Depth, W
+  _RL          :: zTemp, betaPowerLaw = 1, fT = 1D20
+  _RL          :: alphaR = 1500, betaR = 0, alphaI = 0, betaI = 0, rhoR = 1
 
   TYPE rxyz_vector
-    REAL(KIND=8), ALLOCATABLE :: r(:), x(:), y(:), z(:)
+    _RL, ALLOCATABLE :: r(:), x(:), y(:), z(:)
   END TYPE rxyz_vector
 
   ! SSP
   TYPE SSPStructure
     INTEGER              :: NPts, Nr, Nx, Ny, Nz
-    REAL    (KIND=8)     :: z( MaxSSP ), rho( MaxSSP )
-    COMPLEX (KIND=8)     :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), n2z( MaxSSP ), cSpline( 4, MaxSSP )
+    _RL                  :: z( MaxSSP ), rho( MaxSSP )
+    COMPLEX (KIND=8)     :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), &
+                            n2z( MaxSSP ), cSpline( 4, MaxSSP )
     COMPLEX (KIND=8)     :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
-    REAL (KIND=8), ALLOCATABLE :: cMat( :, : ), czMat( :, : ), cMat3( :, :, : ), czMat3( :, :, : )
+    _RL, ALLOCATABLE     :: cMat( :, : ), czMat( :, : ), cMat3( :, :, : ), & 
+                            czMat3( :, :, : )
     TYPE ( rxyz_vector ) :: Seg
     CHARACTER (LEN=1)    :: Type
     CHARACTER (LEN=2)    :: AttenUnit
@@ -41,10 +60,10 @@ MODULE sspmod
   ! *** Halfspace properties structure ***
 
   TYPE HSInfo
-     REAL     (KIND=8) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
-     COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
-     REAL     (KIND=8) :: rho, Depth             ! density, depth
-     CHARACTER (LEN=1) :: BC                     ! Boundary condition type
+     _RL :: alphaR, alphaI, betaR, betaI    ! compressional and shear wave speeds/attenuations in user units
+     COMPLEX  (KIND=8) :: cP, cS            ! P-wave, S-wave speeds
+     _RL               :: rho, Depth        ! density, depth
+     CHARACTER (LEN=1) :: BC                ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE HSInfo
 
@@ -59,19 +78,18 @@ MODULE sspmod
   TYPE(BdryType) :: Bdry
 
 CONTAINS
-
   SUBROUTINE EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
     ! Call the particular profil routine indicated by the SSP%Type and perform Task
     !   Task = 'TAB'  then tabulate cp, cs, rhoT 
     !   Task = 'INI' then initialize
 
-    REAL      (KIND=8), INTENT( IN  ) :: freq
-    REAL      (KIND=8), INTENT( IN  ) :: x( 2 )      ! r-z coordinate where SSP is to be evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 2 )      ! r-z coordinate where SSP is to be evaluated
     CHARACTER ( LEN=3), INTENT( IN  ) :: Task
-    REAL      (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-    REAL      (KIND=8)                :: gradc_3d( 3 ), cxx, cyy, cxy, cxz, cyz
-    REAL      (KIND=8)                :: x3( 3 )
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+    _RL                :: gradc_3d( 3 ), cxx, cyy, cxy, cxz, cyz
+    _RL                :: x3( 3 )
 
     SELECT CASE ( SSP%Type )
     CASE ( 'N' )  !  N2-linear profile option
@@ -105,9 +123,9 @@ SUBROUTINE EvaluateSSP2D( x2D, c, cimag, gradc, crr, crz, czz, rho, xs, tradial,
   ! Converts cartesian gradients to polar
   ! Called from BELLHOP3D to get a 2D slice out of the 3D SSP
 
-  REAL (KIND=8), INTENT( IN  ) :: x2D( 2 ), xs( 3 ), tradial( 2 ), freq
-  REAL (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), czz, crz, crr, rho
-  REAL (KIND=8)                :: x( 3 ), gradc3D(3 ), cxx, cyy, cxy, cxz, cyz
+  _RL, INTENT( IN  ) :: x2D( 2 ), xs( 3 ), tradial( 2 ), freq
+  _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), czz, crz, crr, rho
+  _RL                :: x( 3 ), gradc3D(3 ), cxx, cyy, cxy, cxz, cyz
 
   ! convert polar coordinate to cartesian
   x = [ xs( 1 ) + x2D( 1 ) * tradial( 1 ), xs( 2 ) + x2D( 1 ) * tradial( 2 ), x2D( 2 ) ]
@@ -131,11 +149,11 @@ END SUBROUTINE EvaluateSSP2D
     !   Task = 'TAB'  then tabulate cp, cs, rhoT 
     !   Task = 'INI' then initialize
 
-    REAL      (KIND=8), INTENT( IN  ) :: freq
-    REAL      (KIND=8), INTENT( IN  ) :: x( 3 )      ! x-y-z coordinate where SSP is to be evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 3 )      ! x-y-z coordinate where SSP is to be evaluated
     CHARACTER ( LEN=3), INTENT( IN  ) :: Task
-    REAL      (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho
-    REAL      (KIND=8)                :: x_rz( 2 ), gradc_rz( 2 ), crr, crz
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho
+    _RL                :: x_rz( 2 ), gradc_rz( 2 ), crr, crz
 
     x_rz = [ 0.0D0, x( 3 ) ]   ! convert x-y-z coordinate to cylindrical coordinate
 
@@ -174,10 +192,10 @@ END SUBROUTINE EvaluateSSP2D
 
     ! N2-linear interpolation of SSP data
 
-    REAL     (KIND=8), INTENT( IN  ) :: freq
-    REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL     (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
        Depth     = x( 2 )
@@ -222,10 +240,10 @@ END SUBROUTINE EvaluateSSP2D
 
     ! c-linear interpolation of SSP data
 
-    REAL     (KIND=8), INTENT( IN  ) :: freq
-    REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL     (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
        Depth     = x( 2 )
@@ -262,11 +280,11 @@ END SUBROUTINE EvaluateSSP2D
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
 
     USE pchipMod
-    REAL     (KIND=8), INTENT( IN  ) :: freq
-    REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL     (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
-    REAL     (KIND=8) :: xt
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    _RL :: xt
     COMPLEX  (KIND=8) :: c_cmplx
 
     IF ( Task == 'INI' ) THEN   ! read in SSP data
@@ -321,12 +339,12 @@ END SUBROUTINE EvaluateSSP2D
 
     ! Cubic spline interpolation
 
-    REAL     (KIND=8), INTENT( IN )  :: freq
-    REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    _RL, INTENT( IN )  :: freq
+    _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL     (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     INTEGER                          :: iBCBeg, iBCEnd
-    REAL     (KIND=8)                :: hSpline
+    _RL                :: hSpline
     COMPLEX  (KIND=8)                :: c_cmplx, cz_cmplx, czz_cmplx
     
     IF ( Task == 'INI' ) THEN
@@ -385,12 +403,12 @@ END SUBROUTINE EvaluateSSP2D
     ! Bilinear quadrilatteral interpolation of SSP data in 2D
 
     INTEGER,           PARAMETER      :: SSPFile = 40
-    REAL      (KIND=8), INTENT( IN  ) :: freq
-    REAL      (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3),  INTENT( IN  ) :: Task
-    REAL      (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     INTEGER                           :: AllocateStatus, iSegT, iz2
-    REAL      (KIND=8)                :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
+    _RL                :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
     
     IF ( Task == 'INI' ) THEN
 
@@ -542,14 +560,14 @@ END SUBROUTINE EvaluateSSP2D
     ! Trilinear hexahedral interpolation of SSP data in 3D
     ! assumes a rectilinear case (not the most general hexahedral)
 
-    INTEGER,            PARAMETER     :: SSPFile = 40
-    REAL      (KIND=8), INTENT( IN  ) :: freq
-    REAL      (KIND=8), INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
+    INTEGER, PARAMETER :: SSPFile = 40
+    _RL, INTENT( IN  ) :: freq
+    _RL, INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
     CHARACTER (LEN =3), INTENT( IN  ) :: Task
-    REAL      (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho ! sound speed and its derivatives
-    INTEGER                           :: AllocateStatus, iSegxt, iSegyt, iy2, iz2, iSegxTT( 1 ), iSegyTT( 1 ), iSegzTT( 1 )
-    REAL      (KIND=8)                :: c1, c2, c11, c12, c21, c22, cz11, cz12, cz21, cz22, cz1, cz2, &
-                                         cx, cy, cz, s1, s2, s3
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho ! sound speed and its derivatives
+    INTEGER            :: AllocateStatus, iSegxt, iSegyt, iy2, iz2, iSegxTT( 1 ), iSegyTT( 1 ), iSegzTT( 1 )
+    _RL                :: c1, c2, c11, c12, c21, c22, cz11, cz12, cz21, &
+                          cz22, cz1, cz2, cx, cy, cz, s1, s2, s3
 
     IF ( Task == 'INI' ) THEN
 
@@ -777,9 +795,9 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
 
-    REAL (KIND=8), INTENT( IN  ) :: x( 2 )
-    REAL (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-    REAL (KIND=8)                :: c0, cr, cz, DxtDz, xt
+    _RL, INTENT( IN  ) :: x( 2 )
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+    _RL                :: c0, cr, cz, DxtDz, xt
 
     iSegz = 1
     c0    = 1500.0
@@ -814,9 +832,9 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE AnalyticCosh( x, c, cimag, gradc, crr, crz, czz, rho )
 
-    REAL (KIND=8), INTENT( IN  ) :: x( 2 )
-    REAL (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-    REAL (KIND=8)                :: cr, cz, A, B, D, z
+    _RL, INTENT( IN  ) :: x( 2 )
+    _RL, INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+    _RL                :: cr, cz, A, B, D, z
 
     iSegz = 1
     rho   = 1.0
@@ -846,8 +864,8 @@ END SUBROUTINE EvaluateSSP2D
 
 SUBROUTINE Analytic3D( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho )
 
-  REAL (KIND=8) :: x( 3 ), c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, c0, W, Wz, epsilon, epsilon_y
-  REAL (KIND=8) :: rho
+  _RL :: x( 3 ), c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, c0, W, Wz, epsilon, epsilon_y
+  _RL :: rho
   
   iSegz = 1
   c0    = 1500.0
@@ -892,7 +910,7 @@ END SUBROUTINE Analytic3D
 
     USE AttenMod
 
-    REAL     (KIND=8), INTENT(IN) :: freq, Depth
+    _RL, INTENT(IN) :: freq, Depth
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
@@ -941,4 +959,3 @@ END SUBROUTINE Analytic3D
   END SUBROUTINE ReadSSP
 
 END MODULE sspmod
- 

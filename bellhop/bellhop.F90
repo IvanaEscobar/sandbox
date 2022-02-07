@@ -1,3 +1,6 @@
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
 PROGRAM BELLHOP
 
   ! BELLHOP Beam tracing for ocean acoustics
@@ -19,8 +22,9 @@ PROGRAM BELLHOP
 
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean Systems Center
   
-  USE MathConstants
-  USE ReadEnvironmentBell
+  USE constants_mod,            only: pi, i, DegRad, RadDeg
+  USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
+                                      TopBot, OpenOutputFiles
   USE BeamPattern
   USE bdryMod
   USE RefCoef
@@ -31,6 +35,7 @@ PROGRAM BELLHOP
   USE FatalError
 
   IMPLICIT NONE
+  #include "EEPARAMS_90.h"
   
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: jj
@@ -154,7 +159,7 @@ SUBROUTINE BellhopCore
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
   REAL                 :: Tstart, Tstop
-  REAL        (KIND=8) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
+  _RL                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX     (KIND=8) :: epsilon
@@ -348,13 +353,13 @@ COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha
 
   ! Picks the optimum value for epsilon
 
-  REAL      (KIND=8), INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
-  REAL      (KIND=8), INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
-  REAL      (KIND=8), INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
+  _RL, INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
+  _RL, INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
+  _RL, INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
   CHARACTER (LEN= 2), INTENT( IN  ) :: BeamType
   LOGICAL, SAVE      :: INIFlag = .TRUE.
-  REAL      (KIND=8) :: HalfWidth
-  REAL      (KIND=8) :: cz
+  _RL                :: HalfWidth
+  _RL                :: cz
   COMPLEX   (KIND=8) :: epsilonOpt
   CHARACTER (LEN=40) :: TAG
 
@@ -424,13 +429,13 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   USE Step
   USE WriteRay
 
-  REAL     (KIND=8), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
-  REAL     (KIND=8), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
+  _RL, INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
+  _RL, INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
   INTEGER           :: is, is1                    ! index for a step along the ray
-  REAL     (KIND=8) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-  REAL     (KIND=8) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
-  REAL     (KIND=8) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
-  REAL     (KIND=8) :: sss
+  _RL :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+  _RL :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
+  _RL :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
+  _RL :: sss
 
   ! Initial conditions
 
@@ -580,11 +585,11 @@ SUBROUTINE Distances2D( rayx, Topx, Botx, dTop, dBot, Topn, Botn, DistTop, DistB
   ! Calculates the distances to the boundaries
   ! Formula differs from JKPS because code uses outward pointing normals
 
-  REAL (KIND=8), INTENT( IN  ) :: rayx( 2 )              ! ray coordinate
-  REAL (KIND=8), INTENT( IN  ) :: Topx( 2 ), Botx( 2 )   ! top, bottom coordinate
-  REAL (KIND=8), INTENT( IN  ) :: Topn( 2 ), Botn( 2 )   ! top, bottom normal vector (outward)
-  REAL (KIND=8), INTENT( OUT ) :: dTop( 2 ), dBot( 2 )   ! vector pointing from top, bottom bdry to ray
-  REAL (KIND=8), INTENT( OUT ) :: DistTop, DistBot       ! distance (normal to bdry) from the ray to top, bottom boundary
+  _RL, INTENT( IN  ) :: rayx( 2 )              ! ray coordinate
+  _RL, INTENT( IN  ) :: Topx( 2 ), Botx( 2 )   ! top, bottom coordinate
+  _RL, INTENT( IN  ) :: Topn( 2 ), Botn( 2 )   ! top, bottom normal vector (outward)
+  _RL, INTENT( OUT ) :: dTop( 2 ), dBot( 2 )   ! vector pointing from top, bottom bdry to ray
+  _RL, INTENT( OUT ) :: DistTop, DistBot       ! distance (normal to bdry) from the ray to top, bottom boundary
 
   dTop    = rayx - Topx  ! vector pointing from top    to ray
   dBot    = rayx - Botx  ! vector pointing from bottom to ray
@@ -598,16 +603,16 @@ END SUBROUTINE Distances2D
 SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
   INTEGER,              INTENT( IN ) :: Npts
-  REAL     (KIND=8),    INTENT( IN ) :: tBdry( 2 ), nBdry( 2 )  ! Tangent and normal to the boundary
-  REAL     (KIND=8),    INTENT( IN ) :: kappa                   ! Boundary curvature
+  _RL,    INTENT( IN ) :: tBdry( 2 ), nBdry( 2 )  ! Tangent and normal to the boundary
+  _RL,    INTENT( IN ) :: kappa                   ! Boundary curvature
   CHARACTER (LEN=3),    INTENT( IN ) :: BotTop                  ! Flag indicating bottom or top reflection
   TYPE( HSInfo ),       INTENT( IN ) :: HS                      ! half-space properties
   TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts )            ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
   INTEGER           :: is1
-  REAL     (KIND=8) :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
-  REAL     (KIND=8) :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
-  REAL     (KIND=8) :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
+  _RL :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
+  _RL :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
+  _RL :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
   COMPLEX  (KIND=8) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, Refl   ! for tabulated reflection coef.
   COMPLEX  (KIND=8) :: ch, a, b, d, sb, delta, ddelta                 ! for beam shift
   TYPE(ReflectionCoef) :: RInt

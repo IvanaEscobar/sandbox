@@ -1,14 +1,28 @@
-MODULE ReadEnvironmentBell
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE read_environment_mod
+! <CONTACT EMAIL="ivana@utexas.edu">
+!   Ivana Escobar
+! </CONTACT>
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE BellhopMod
-  USE MathConstants
+  USE constants_mod,    only: pi, i, DegRad, RadDeg
+  USE bellhop_mod
   USE sspmod
   USE AttenMod
   USE FatalError
-
   IMPLICIT NONE
+  PRIVATE
+  #include "EEPARAMS_90.h"
+
+! public interfaces
+!=======================================================================
+
+  public ReadEnvironment, ReadTopOpt, ReadRunType, TopBot, OpenOutputFiles
+  
+!=======================================================================
 
 CONTAINS
   SUBROUTINE ReadEnvironment( FileRoot, ThreeD )
@@ -19,12 +33,12 @@ CONTAINS
     USE anglemod
     USE SourceReceiverPositions
 
-    REAL      (KIND=8), PARAMETER   :: c0 = 1500.0
+    _RL, PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat
     REAL               :: ZMin, ZMax
-    REAL      (KIND=8) :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
+    _RL :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
@@ -432,10 +446,10 @@ CONTAINS
 
     ! Handles top and bottom boundary conditions
 
-    REAL     (KIND=8), INTENT( IN    ) :: freq               ! frequency
+    _RL, INTENT( IN    ) :: freq               ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
     TYPE( HSInfo ),    INTENT( INOUT ) :: HS
-    REAL     (KIND=8) :: Mz, vr, alpha2_f          ! values related to grain size
+    _RL :: Mz, vr, alpha2_f          ! values related to grain size
 
     ! Echo to PRTFile user's choice of boundary condition
 
@@ -639,4 +653,4 @@ CONTAINS
 
   END SUBROUTINE OpenOutputFiles
 
-END MODULE ReadEnvironmentBell
+END MODULE read_environment_mod
