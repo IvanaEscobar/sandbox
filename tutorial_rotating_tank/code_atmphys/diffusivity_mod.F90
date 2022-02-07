@@ -277,8 +277,7 @@ end subroutine diffusivity_init
 subroutine diffusivity(t, q, u, v, p_full, p_half, z_full, z_half,  &
                        u_star, b_star, h, k_m, k_t, myThid, kbot)
 
-_RL,    intent(in),           dimension(:,:,:) :: t
-_RL,    intent(in),           dimension(:,:,:) :: q, u, v
+_RL,    intent(in),           dimension(:,:,:) :: t, q, u, v
 _RL,    intent(in),           dimension(:,:,:) :: p_full, p_half
 _RL,    intent(in),           dimension(:,:,:) :: z_full, z_half
 _RL,    intent(in),           dimension(:,:)   :: u_star, b_star
