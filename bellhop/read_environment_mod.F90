@@ -34,7 +34,7 @@ CONTAINS
                                       ReadRayBearingAngles
     USE sourcereceiverpositions, only: Pos
 
-    _RL, PARAMETER   :: c0 = 1500.0
+    REAL(KIND=_RL90), PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat
