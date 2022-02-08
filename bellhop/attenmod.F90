@@ -18,7 +18,7 @@ MODULE attenmod
 ! public interfaces
 !=======================================================================
 
-    public CRCI
+    public CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
 !=======================================================================
 

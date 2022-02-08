@@ -10,9 +10,11 @@ MODULE read_environment_mod
 
   USE constants_mod,    only: pi
   USE bellhop_mod
-  USE sspmod,           only: EvaluateSSP, HSInfo, Bdry, SSP
+  USE sspmod,           only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, &
+                              betaR, alphaI, betaI, rhoR, betaPowerLaw, fT
   USE fatal_error,      only: ERROUT
-  USE attenmod,         only: CRCI
+  USE attenmod,         only: CRCI, T, Salinity, pH, z_bar, iBio, &
+                              NBioLayers, bio
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -34,12 +36,12 @@ CONTAINS
                                       ReadRayBearingAngles
     USE sourcereceiverpositions, only: Pos
 
-    REAL(KIND=_RL90), PARAMETER   :: c0 = 1500.0
+    REAL (KIND=_RL90), PARAMETER    :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat
     REAL               :: ZMin, ZMax
-    _RL :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
+    REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
