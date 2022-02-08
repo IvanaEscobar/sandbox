@@ -25,14 +25,14 @@ PROGRAM BELLHOP
   USE constants_mod,            only: pi, i, DegRad, RadDeg
   USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
+  USE anglemod,                 only: Angles
+  USE fatal_error,              only: ERROUT
+  USE sourcereceiverpositions,  only: Pos
+  USE bdry_mod
   USE BeamPattern
-  USE bdryMod
   USE RefCoef
-  USE SourceReceiverPositions
-  USE angleMod
   USE sspMod
   USE influence
-  USE FatalError
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
@@ -154,7 +154,7 @@ PROGRAM BELLHOP
 SUBROUTINE BellhopCore
 
   USE ArrMod
-  USE AttenMod
+  USE attenmod, only: CRCI
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg

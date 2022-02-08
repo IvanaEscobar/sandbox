@@ -1,23 +1,37 @@
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
 MODULE anglemod
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
-  USE MathConstants
-  USE SubTabulate
-  USE SourceReceiverPositions
-  USE SortMod
-  USE FatalError
+  USE constants_mod,    only: pi, DegRad
+  USE fatal_error,      only: ERROUT
+  USE subtabulate,      only: SubTab
+  USE sourcereceiverpositions, only: Pos, Number_to_Echo
+  USE sort_mod,         only: Sort
 
   IMPLICIT NONE
-  SAVE
+  PRIVATE
+  #include "EEPARAMS_90.h"
+
+! public interfaces
+!=======================================================================
+
+  public ReadRayElevationAngles, ReadRayBearingAngles, Angles
+
+!=======================================================================
 
   INTEGER          :: ialpha, ibeta
   INTEGER, PRIVATE :: AllocateStatus
   INTEGER,       PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6
-  REAL (KIND=8), PRIVATE, PARAMETER :: c0 = 1500.0
+  _RL, PRIVATE, PARAMETER :: c0 = 1500.0
 
   TYPE AnglesStructure
      INTEGER       :: Nalpha = 0, Nbeta = 1, iSingle_alpha = 0, iSingle_beta = 0
-     REAL (KIND=8) :: Dalpha, Dbeta
-     REAL (KIND=8), ALLOCATABLE:: alpha( : ), beta( : )
+     _RL :: Dalpha, Dbeta
+     _RL, ALLOCATABLE:: alpha( : ), beta( : )
   END TYPE AnglesStructure
 
   Type( AnglesStructure ) :: Angles
@@ -25,9 +39,9 @@ MODULE anglemod
 CONTAINS
   SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType )
 
-    REAL      (KIND=8), INTENT( IN  ) :: freq, Depth
+    _RL, INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
-    REAL      (KIND=8)                :: d_theta_recommended
+    _RL                :: d_theta_recommended
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
        READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha ! option to trace a single beam
@@ -87,7 +101,7 @@ CONTAINS
 
   SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType )
 
-    REAL      (KIND=8), INTENT( IN ) :: freq
+    _RL, INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN

@@ -8,11 +8,11 @@ MODULE read_environment_mod
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE constants_mod,    only: pi, i, DegRad, RadDeg
+  USE constants_mod,    only: pi
   USE bellhop_mod
-  USE sspmod
-  USE AttenMod
-  USE FatalError
+  USE sspmod,           only: EvaluateSSP, HSInfo, Bdry, SSP
+  USE fatal_error,      only: ERROUT
+  USE attenmod,         only: CRCI
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -30,8 +30,9 @@ CONTAINS
     ! Routine to read in and echo all the input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
-    USE anglemod
-    USE SourceReceiverPositions
+    USE anglemod,               only: ReadRayElevationAngles, &
+                                      ReadRayBearingAngles
+    USE sourcereceiverpositions, only: Pos
 
     _RL, PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
@@ -360,7 +361,7 @@ CONTAINS
 
     ! Read the RunType variable and echo with explanatory information to the print file
 
-    USE SourceReceiverPositions
+    USE sourcereceiverpositions, only: Pos
 
     CHARACTER (LEN= 7), INTENT( OUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
@@ -551,10 +552,10 @@ CONTAINS
   SUBROUTINE OpenOutputFiles( FileRoot, ThreeD )
     ! Write appropriate header information
 
-    USE SourceReceiverPositions
-    USE angleMod
-    USE bdryMod
-    USE RWSHDFile
+    USE anglemod, only: Angles
+    USE sourcereceiverpositions,    only: Pos
+    USE bdry_mod
+    USE rwshd_file,                 only: WriteHeader
 
     LOGICAL,            INTENT( IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot

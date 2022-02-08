@@ -14,7 +14,7 @@ MODULE sspmod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE fatalerror
+  USE fatal_error,              only: ERROUT
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -22,7 +22,8 @@ MODULE sspmod
 ! public interfaces
 !=======================================================================
 
-    public EvaluateSSP, EvaluateSSP2D, EvaluateSSP3D, n2Linear, cLinear, &
+    public EvaluateSSP, HSInfo, Bdry, SSP, &
+           EvaluateSSP2D, EvaluateSSP3D, n2Linear, cLinear, &
            cPCHIP, cCubic, Quad, Hexahedral, Analytic, AnalyticCosh, &
            Analytic3D, ReadSSP
 
@@ -279,7 +280,7 @@ END SUBROUTINE EvaluateSSP2D
     ! This implements the new monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
 
-    USE pchipMod
+    USE pchipmod,  only: PCHIP
     _RL, INTENT( IN  ) :: freq
     _RL, INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
@@ -908,7 +909,7 @@ END SUBROUTINE Analytic3D
 
     ! reads the SSP data from the environmental file and convert to Nepers/m
 
-    USE AttenMod
+    USE attenmod, only: CRCI
 
     _RL, INTENT(IN) :: freq, Depth
 

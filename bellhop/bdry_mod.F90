@@ -1,35 +1,49 @@
-MODULE bdrymod
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE bdry_mod
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
 
-  !USE norms
-  USE monotonicMod
-  USE FatalError
+  USE monotonic_mod,    only: monotonic
+  USE fatal_error,      only: ERROUT
 
   IMPLICIT NONE
-  SAVE
+  PRIVATE
+  #include "EEPARAMS_90.h"
+
+! public interfaces
+!=======================================================================
+
+
+
+!=======================================================================
+
   INTEGER, PARAMETER :: ATIFile = 40, BTYFile = 41, Number_to_Echo = 21
   INTEGER            :: IsegTop, IsegBot            ! indices that point to the current active segment
   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
 
-  REAL (KIND=8)      :: rTopseg( 2 ), rBotseg( 2 )  ! range intervals defining the current active segment
+  _RL      :: rTopseg( 2 ), rBotseg( 2 )  ! range intervals defining the current active segment
   CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
 
   ! Halfspace properties
   TYPE HSInfo2
-     REAL     (KIND=8) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
+     _RL :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
      COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
-     REAL     (KIND=8) :: rho, Depth             ! density, depth
+     _RL :: rho, Depth             ! density, depth
      CHARACTER (LEN=1) :: BC                     ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE
 
   TYPE BdryPt
-     REAL    (KIND=8) :: x( 2 ), t( 2 ), n( 2 )        ! coordinate, tangent, and outward normal for a segment
-     REAL    (KIND=8) :: Nodet( 2 ), Noden( 2 )        ! tangent and normal at the node, if the curvilinear option is used
-     REAL    (KIND=8) :: Len, Kappa                    ! length and curvature of a segement
-     REAL    (KIND=8) :: Dx, Dxx, Dss                  ! first, second derivatives wrt depth; s is along tangent
+     _RL :: x( 2 ), t( 2 ), n( 2 )        ! coordinate, tangent, and outward normal for a segment
+     _RL :: Nodet( 2 ), Noden( 2 )        ! tangent and normal at the node, if the curvilinear option is used
+     _RL :: Len, Kappa                    ! length and curvature of a segement
+     _RL :: Dx, Dxx, Dss                  ! first, second derivatives wrt depth; s is along tangent
      TYPE( HSInfo2 )   :: HS
   END TYPE
 
@@ -43,8 +57,8 @@ CONTAINS
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: TopATI
-    REAL      (KIND=8), INTENT( IN ) :: DepthT
-    REAL      (KIND=8), ALLOCATABLE  :: phi( : )
+    _RL, INTENT( IN ) :: DepthT
+    _RL, ALLOCATABLE  :: phi( : )
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( TopATI )
@@ -131,7 +145,7 @@ CONTAINS
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
-    REAL      (KIND=8), INTENT( IN ) :: DepthB
+    _RL, INTENT( IN ) :: DepthB
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( BotBTY )
@@ -237,8 +251,8 @@ CONTAINS
     ! exits the domain defined by the user
 
     INTEGER                          :: NPts = 0
-    REAL      (KIND=8), ALLOCATABLE  :: phi( : )
-    REAL      (KIND=8)               :: sss
+    _RL, ALLOCATABLE  :: phi( : )
+    _RL               :: sss
     TYPE(BdryPt)                     :: Bdry( : )
     CHARACTER (LEN=3),  INTENT( IN ) :: BotTop           ! Flag indicating bottom or top reflection
     CHARACTER (LEN=2)                :: CurvilinearFlag = '-'
@@ -335,7 +349,7 @@ CONTAINS
 
     INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegTopT( 1 )
-    REAL (KIND=8), INTENT( IN ) :: r
+    _RL, INTENT( IN ) :: r
 
     IsegTopT = MAXLOC( Top( : )%x( 1 ), Top( : )%x( 1 ) < r )
 
@@ -359,7 +373,7 @@ CONTAINS
 
     INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegBotT( 1 )
-    REAL (KIND=8), INTENT( IN ) :: r
+    _RL, INTENT( IN ) :: r
 
     IsegBotT = MAXLOC( Bot( : )%x( 1 ), Bot( : )%x( 1 ) < r )
 
@@ -375,6 +389,4 @@ CONTAINS
 
   END SUBROUTINE GetBotSeg
 
-END MODULE bdrymod
-
-
+END MODULE bdry_mod
