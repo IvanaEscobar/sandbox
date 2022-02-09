@@ -22,17 +22,23 @@ PROGRAM BELLHOP
 
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean Systems Center
   
-  USE constants_mod,            only: pi, i, DegRad, RadDeg
+  USE constants_mod,            only: pi, DegRad, RadDeg
   USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
   USE anglemod,                 only: Angles
   USE fatal_error,              only: ERROUT
   USE sourcereceiverpositions,  only: Pos
+  USE sspmod
   USE bdry_mod
+  USE ref_coef,                 only: ReadReflectionCoefficient,&
+                                      InterpolateRelfectionCoefficient,&
+                                      ReflectionCoef
+  USE influence,                only: InfluenceCervenyRayCen,&
+                                      InfluenceCervenyCart,&
+                                      InfluenceGeoHatRayCen, InfluenceSGB,&
+                                      InfluenceGeoGauzzianCart,&
+                                      InfleunceGeoHatCart, ScalePressure
   USE BeamPattern
-  USE RefCoef
-  USE sspMod
-  USE influence
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
@@ -426,8 +432,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Traces the beam corresponding to a particular take-off angle
 
-  USE Step
-  USE WriteRay
+  USE step,      only: Step2D
+  USE write_ray, only: WriteRay2D
 
   _RL, INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   _RL, INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude

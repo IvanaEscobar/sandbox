@@ -1,10 +1,26 @@
-MODULE Step
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE step
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
-  USE bellhopMod
-  USE sspMod
+  USE bellhop_mod
+  USE sspmod,       only: EvaluateSSP, SSP
+
   IMPLICIT NONE
-CONTAINS
+  PRIVATE
+  #include "EEPARAMS_90.h"
 
+! public interfaces
+!=======================================================================
+
+    public Step2D
+
+!=======================================================================
+
+CONTAINS
   SUBROUTINE Step2D( ray0, ray2, Topx, Topn, Botx, Botn )
 
     ! Does a single step along the ray
@@ -174,5 +190,4 @@ CONTAINS
     END IF
 
   END SUBROUTINE ReduceStep2D
-
-END MODULE Step
+END MODULE step

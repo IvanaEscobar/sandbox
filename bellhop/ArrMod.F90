@@ -1,9 +1,25 @@
-MODULE ArrMod
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE arrmod
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
-  USE MathConstants
+  USE constants_mod,    only: pi
 
   ! Variables for arrival information
   IMPLICIT NONE
+  PRIVATE
+  #include "EEPARAMS_90.h"
+
+! public interfaces
+!=======================================================================
+
+    public WriteArrivalsASCII, WriteArrivalsBinary
+
+!=======================================================================
+
   INTEGER, PARAMETER, PRIVATE :: ARRFile = 36
   INTEGER                     :: MaxNArr
   INTEGER, ALLOCATABLE        :: NArr( :, : ), NArr3D( :, :, : )
@@ -17,7 +33,6 @@ MODULE ArrMod
   TYPE(Arrival), ALLOCATABLE :: Arr( :, :, : ), Arr3D( :, :, :, : )
 
 CONTAINS
-
   SUBROUTINE AddArr( omega, id, ir, Amp, Phase, delay, SrcDeclAngle, RcvrDeclAngle, NumTopBnc, NumBotBnc )
 
     ! ADDs the amplitude and delay for an ARRival into a matrix of same.
@@ -25,8 +40,8 @@ CONTAINS
 
     REAL,      PARAMETER :: PhaseTol = 0.05  ! arrivals with essentially the same phase are grouped into one
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, id, ir
-    REAL    ( KIND = 8 ), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, RcvrDeclAngle
-    COMPLEX ( KIND = 8 ), INTENT( IN ) :: delay
+    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, RcvrDeclAngle
+    COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL              :: NewRay
     INTEGER              :: iArr( 1 ), Nt
     REAL                 :: AmpTot, w1, w2
@@ -94,7 +109,7 @@ CONTAINS
     REAL,              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
-    REAL     (KIND=8) :: factor
+    REAL     (KIND=_RL90) :: factor
 
     WRITE( ARRFile, * ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
@@ -141,7 +156,7 @@ CONTAINS
     REAL,              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
-    REAL     (KIND=8) :: factor
+    REAL     (KIND=_RL90) :: factor
 
     WRITE( ARRFile ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
@@ -188,9 +203,9 @@ CONTAINS
     REAL,                 PARAMETER    :: PhaseTol = 0.5  ! arrivals with essentially the same phase are grouped into one
     INTEGER,              INTENT( IN ) :: itheta, id, ir
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc
-    REAL    ( KIND = 8 ), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, SrcAzimAngle, RcvrDeclAngle, RcvrAzimAngle
+    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, SrcAzimAngle, RcvrDeclAngle, RcvrAzimAngle
 
-    COMPLEX ( KIND = 8 ), INTENT( IN ) :: delay
+    COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL                            :: NewRay
     INTEGER                            :: iArr( 1 ), Nt
     REAL                               :: AmpTot, w1, w2
@@ -330,4 +345,4 @@ CONTAINS
     RETURN
   END SUBROUTINE WriteArrivalsBinary3D
 
-END MODULE ArrMod
+END MODULE arrmod
