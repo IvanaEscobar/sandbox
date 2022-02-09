@@ -11,9 +11,10 @@ MODULE influence
 
   USE bellhop_mod
   USE sourcereceiverpositions,  only: Pos
-  USE sspmod,                   only: EvaluateSSP, Bdry ! used to construct image beams in the Cerveny style beam routines
-  USE ArrMod
-  USE WriteRay
+! used to construct image beams in the Cerveny style beam routines
+  USE sspmod,                   only: EvaluateSSP, Bdry 
+  USE writeray,                 only: WriteRay2D
+  USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary
 
   IMPLICIT NONE
   PRIVATE

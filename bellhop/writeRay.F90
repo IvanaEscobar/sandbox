@@ -1,7 +1,7 @@
 #include "BELLHOP_OPTIONS_90.h"
 !BOP
 ! !INTERFACE:
-MODULE write_ray
+MODULE writeray
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -22,7 +22,7 @@ MODULE write_ray
 ! public interfaces
 !=======================================================================
 
-    public ...
+    public WriteRay2D
 
 !=======================================================================
 
@@ -108,4 +108,4 @@ CONTAINS
 
   END SUBROUTINE WriteRay3D
 
-END MODULE write_ray
+END MODULE writeray

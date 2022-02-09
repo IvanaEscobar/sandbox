@@ -556,7 +556,7 @@ CONTAINS
 
     USE anglemod, only: Angles
     USE sourcereceiverpositions,    only: Pos
-    USE bdry_mod
+    !USE bdrymod
     USE rwshd_file,                 only: WriteHeader
 
     LOGICAL,            INTENT( IN ) :: ThreeD

@@ -1,7 +1,7 @@
 #include "BELLHOP_OPTIONS_90.h"
 !BOP
 ! !INTERFACE:
-MODULE bdry_mod
+MODULE bdrymod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -18,7 +18,8 @@ MODULE bdry_mod
 ! public interfaces
 !=======================================================================
 
-
+    public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, rTopSeg, rBotSeg,&
+           iSmallStepCtr
 
 !=======================================================================
 
@@ -27,7 +28,7 @@ MODULE bdry_mod
   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
 
-  _RL      :: rTopseg( 2 ), rBotseg( 2 )  ! range intervals defining the current active segment
+  REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  ! range intervals defining the current active segment
   CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
 
   ! Halfspace properties
@@ -389,4 +390,4 @@ CONTAINS
 
   END SUBROUTINE GetBotSeg
 
-END MODULE bdry_mod
+END MODULE bdrymod

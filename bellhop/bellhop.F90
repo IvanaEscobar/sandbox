@@ -29,8 +29,9 @@ PROGRAM BELLHOP
   USE fatal_error,              only: ERROUT
   USE sourcereceiverpositions,  only: Pos
   USE sspmod
-  USE bdry_mod
-  USE ref_coef,                 only: ReadReflectionCoefficient,&
+  USE bdrymod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
+                                      Bot, Top
+  USE refcoef,                  only: ReadReflectionCoefficient,&
                                       InterpolateRelfectionCoefficient,&
                                       ReflectionCoef
   USE influence,                only: InfluenceCervenyRayCen,&
@@ -159,7 +160,7 @@ PROGRAM BELLHOP
 
 SUBROUTINE BellhopCore
 
-  USE ArrMod
+  USE arrmod,   only: WriteArrivalASCII, WriteArrivalsBinary
   USE attenmod, only: CRCI
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
@@ -432,8 +433,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Traces the beam corresponding to a particular take-off angle
 
-  USE step,      only: Step2D
-  USE write_ray, only: WriteRay2D
+  USE step,     only: Step2D
+  USE writeray, only: WriteRay2D
 
   _RL, INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   _RL, INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude

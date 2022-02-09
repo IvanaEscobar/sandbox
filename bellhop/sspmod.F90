@@ -23,7 +23,7 @@ MODULE sspmod
 !=======================================================================
 
     public EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR, alphaI, &
-           betaI, rhoR, betaPowerLaw, fT
+           betaI, rhoR, betaPowerLaw, fT, iSegz, iSegr
 
 !=======================================================================
 

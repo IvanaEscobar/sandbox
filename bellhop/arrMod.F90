@@ -6,7 +6,7 @@ MODULE arrmod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE constants_mod,    only: pi
+  USE constants_mod,    only: pi, RadDeg
 
   ! Variables for arrival information
   IMPLICIT NONE

@@ -1,7 +1,7 @@
 #include "BELLHOP_OPTIONS_90.h"
 !BOP
 ! !INTERFACE:
-MODULE ref_coef
+MODULE refcoef
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -37,7 +37,7 @@ CONTAINS
 
     ! Optionally read in reflection coefficient for Top or Bottom boundary
 
-    USE constants_mod,    only: pi
+    USE constants_mod,    only: pi, DegRad
 
     INTEGER,            INTENT( IN ) :: PRTFile         ! unit number for print file
     CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC    ! flag set to 'F' if refl. coef. is to be read from a File
@@ -187,7 +187,7 @@ CONTAINS
     ! Returns f, g, iPower for given x using tabulated values.
     ! Uses polynomial interpolation to approximate the function between the tabulated values
 
-    USE PolyMod
+    USE polymod, only: Poly
 
     INTEGER, PARAMETER :: N = 3                    ! order of the polynomial for interpolation
     INTEGER,            INTENT( IN  ) :: NkTab, iTab( NkTab )
@@ -249,4 +249,4 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE InterpolateIRC
-END MODULE ref_coef
+END MODULE refcoef
