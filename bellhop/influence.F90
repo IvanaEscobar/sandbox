@@ -13,7 +13,7 @@ MODULE influence
   USE sourcereceiverpositions,  only: Pos
 ! used to construct image beams in the Cerveny style beam routines
   USE sspmod,                   only: EvaluateSSP, Bdry 
-  USE writeray,                 only: WriteRay2D
+ ! USE writeray,                 only: WriteRay2D
   USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary
 
   IMPLICIT NONE
@@ -29,7 +29,7 @@ MODULE influence
 
 !=======================================================================
 
-  INTEGER,          PRIVATE :: iz, ir, iS
+  INTEGER,              PRIVATE :: iz, ir, iS
   REAL    (KIND=_RL90), PRIVATE :: Ratio1 = 1.0D0   ! scale factor for a line source
   REAL    (KIND=_RL90), PRIVATE :: W, s, n, Amp, phase, const, phaseInt, q0, q, qold, RcvrDeclAngle, rA, rB
   COMPLEX (KIND=_RL90), PRIVATE :: delay

@@ -49,7 +49,8 @@ CONTAINS
     IF ( FileName( 1 : 1 ) == ' ' ) FileName = 'SHDFIL'
 
     ! INQUIRE( FILE = FileName, RECL = IRECL )
-    OPEN( UNIT = SHDFile,   FILE = FileName, STATUS = 'OLD', ACCESS = 'DIRECT', FORM = 'UNFORMATTED', RECL = 4, &
+    OPEN( UNIT = SHDFile,   FILE = FileName, STATUS = 'OLD', & 
+          ACCESS = 'DIRECT', FORM = 'UNFORMATTED', RECL = 4, &
          IOSTAT = IOStaT, ACTION = 'READ' )
     IF ( IOStat /= 0 ) CALL ERROUT( 'ReadHeader', 'Unable to open shade file' )
 
