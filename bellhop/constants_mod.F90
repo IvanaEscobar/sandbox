@@ -47,8 +47,12 @@ MODULE constants_mod
    private
    #include "EEPARAMS_90.h"
 
-   _RL, PUBLIC, PARAMETER   :: pi = 3.1415926535898D0, RadDeg = 180.0D0 / pi, &
-                               DegRad = pi / 180.0D0 
-   COMPLEX (KIND=8), PUBLIC, PARAMETER :: i = ( 0.0D0, 1.0D0 )
+   REAL (KIND=_RL90), PUBLIC, PARAMETER :: pi = 3.1415926535898D0, &
+                                           RadDeg = 180.0D0 / pi, &
+                                           DegRad = pi / 180.0D0 
+   COMPLEX (KIND=_RL90), PUBLIC, PARAMETER :: i = ( 0.0D0, 1.0D0 )
 
+   INTEGER, PUBLIC, PARAMETER :: ENVFile = 5, PRTFile = 6, RAYFile = 21, &
+                                 SHDFile = 25, ARRFile = 36, SSPFile = 40, &
+                                 MaxN = 10000
 END MODULE constants_mod

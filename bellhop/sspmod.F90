@@ -22,10 +22,8 @@ MODULE sspmod
 ! public interfaces
 !=======================================================================
 
-    public EvaluateSSP, HSInfo, Bdry, SSP, &
-           EvaluateSSP2D, EvaluateSSP3D, n2Linear, cLinear, &
-           cPCHIP, cCubic, Quad, Hexahedral, Analytic, AnalyticCosh, &
-           Analytic3D, ReadSSP
+    public EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR, alphaI, &
+           betaI, rhoR, betaPowerLaw, fT, iSegz, iSegr
 
 !=======================================================================
 

@@ -1,10 +1,26 @@
-MODULE Step
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE step
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
-  USE bellhopMod
-  USE sspMod
+  USE bellhop_mod
+  USE sspmod,       only: EvaluateSSP, SSP, iSegz, iSegr
+
   IMPLICIT NONE
-CONTAINS
+  PRIVATE
+  #include "EEPARAMS_90.h"
 
+! public interfaces
+!=======================================================================
+
+    public Step2D
+
+!=======================================================================
+
+CONTAINS
   SUBROUTINE Step2D( ray0, ray2, Topx, Topn, Botx, Botn )
 
     ! Does a single step along the ray
@@ -13,9 +29,9 @@ CONTAINS
     ! c * t would be the unit tangent
 
     TYPE( ray2DPt )    :: ray0, ray1, ray2
-    REAL (KIND=8 ), INTENT( IN ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 )
+    REAL (KIND=_RL90 ), INTENT( IN ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 )
     INTEGER            :: iSegz0, iSegr0
-    REAL     (KIND=8 ) :: gradc0( 2 ), gradc1( 2 ), gradc2( 2 ), &
+    REAL     (KIND=_RL90 ) :: gradc0( 2 ), gradc1( 2 ), gradc2( 2 ), &
          c0, cimag0, crr0, crz0, czz0, csq0, cnn0_csq0, &
          c1, cimag1, crr1, crz1, czz1, csq1, cnn1_csq1, &
          c2, cimag2, crr2, crz2, czz2, urayt0( 2 ), urayt1( 2 ), &
@@ -70,7 +86,7 @@ CONTAINS
     ray2%t   = ray0%t   - hw0 * gradc0 / csq0       - hw1 * gradc1 / csq1
     ray2%p   = ray0%p   - hw0 * cnn0_csq0 * ray0%q  - hw1 * cnn1_csq1 * ray1%q
     ray2%q   = ray0%q   + hw0 * c0        * ray0%p  + hw1 * c1        * ray1%p
-    ray2%tau = ray0%tau + hw0 / CMPLX( c0, cimag0, KIND=8 ) + hw1 / CMPLX( c1, cimag1, KIND=8 )
+    ray2%tau = ray0%tau + hw0 / CMPLX( c0, cimag0, KIND=_RL90 ) + hw1 / CMPLX( c1, cimag1, KIND=_RL90 )
 
     ray2%Amp       = ray0%Amp
     ray2%Phase     = ray0%Phase
@@ -108,12 +124,13 @@ CONTAINS
 
     ! calculate a reduced step size, h, that lands on any points where the environment changes
 
-    USE BdryMod
+    USE bdrymod, only: rTopSeg, rBotSeg, iSmallStepCtr
+
     INTEGER,       INTENT( IN    ) :: iSegz0, iSegr0                             ! SSP layer the ray is in
-    REAL (KIND=8), INTENT( IN    ) :: x0( 2 ), urayt( 2 )                        ! ray coordinate and tangent
-    REAL (KIND=8), INTENT( IN    ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 ) ! Top, bottom coordinate and normal
-    REAL (KIND=8), INTENT( INOUT ) :: h                                          ! reduced step size 
-    REAL (KIND=8)                  :: x( 2 ), d( 2 ), d0( 2 ), h1, h2, h3, h4, rSeg( 2 )
+    REAL (KIND=_RL90), INTENT( IN    ) :: x0( 2 ), urayt( 2 )                        ! ray coordinate and tangent
+    REAL (KIND=_RL90), INTENT( IN    ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 ) ! Top, bottom coordinate and normal
+    REAL (KIND=_RL90), INTENT( INOUT ) :: h                                          ! reduced step size 
+    REAL (KIND=_RL90)                  :: x( 2 ), d( 2 ), d0( 2 ), h1, h2, h3, h4, rSeg( 2 )
 
     ! Detect interface or boundary crossing and reduce step, if necessary, to land on that crossing.
     ! Keep in mind possibility that user put source right on an interface
@@ -174,5 +191,4 @@ CONTAINS
     END IF
 
   END SUBROUTINE ReduceStep2D
-
-END MODULE Step
+END MODULE step

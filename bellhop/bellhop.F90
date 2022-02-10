@@ -22,23 +22,31 @@ PROGRAM BELLHOP
 
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean Systems Center
   
-  USE constants_mod,            only: pi, i, DegRad, RadDeg
+  USE constants_mod,            only: pi, DegRad, RadDeg, PRTFile
   USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
   USE anglemod,                 only: Angles
   USE fatal_error,              only: ERROUT
   USE sourcereceiverpositions,  only: Pos
-  USE bdry_mod
+  USE sspmod                   
+  USE bdrymod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
+                                      Bot, Top
+  USE refcoef,                  only: ReadReflectionCoefficient,&
+                                      InterpolateReflectionCoefficient,&
+                                      ReflectionCoef
+  USE influence,                only: InfluenceCervenyRayCen,&
+                                      InfluenceCervenyCart,&
+                                      InfluenceGeoHatRayCen, InfluenceSGB,&
+                                      InfluenceGeoGaussianCart,&
+                                      InfluenceGeoHatCart, ScalePressure
+  USE attenmod,                 only: CRCI
   USE BeamPattern
-  USE RefCoef
-  USE sspMod
-  USE influence
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
   
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
-  INTEGER              :: jj
+  INTEGER              :: jj, iostat  ! iostat added locally... IE2022
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
 
@@ -47,7 +55,8 @@ PROGRAM BELLHOP
 
   CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
   ! Open the print file
-  OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', STATUS = 'UNKNOWN', IOSTAT = iostat )
+  OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
+        STATUS = 'UNKNOWN', IOSTAT = iostat )
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
 
@@ -153,8 +162,7 @@ PROGRAM BELLHOP
 
 SUBROUTINE BellhopCore
 
-  USE ArrMod
-  USE attenmod, only: CRCI
+  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
@@ -426,8 +434,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Traces the beam corresponding to a particular take-off angle
 
-  USE Step
-  USE WriteRay
+  USE step,     only: Step2D
+  USE writeray, only: WriteRay2D
 
   _RL, INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   _RL, INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude

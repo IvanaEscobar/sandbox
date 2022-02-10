@@ -1,4 +1,10 @@
-MODULE WriteRay
+#include "BELLHOP_OPTIONS_90.h"
+!BOP
+! !INTERFACE:
+MODULE writeray
+    ! <CONTACT EMAIL="ivana@utexas.edu">
+    !   Ivana Escobar
+    ! </CONTACT>
 
   ! Compress the ray data keeping every iSkip point, points near surface or bottom, and last point.
   ! Write to RAYFile.
@@ -6,20 +12,30 @@ MODULE WriteRay
   ! During an eigenray calculation, subsets of the full ray may be passed
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
-  USE BellhopMod
-  USE sspMod
+  USE bellhop_mod
+  USE sspmod,       only: Bdry
+
   IMPLICIT NONE
+  PRIVATE
+  #include "EEPARAMS_90.h"
+
+! public interfaces
+!=======================================================================
+
+    public WriteRay2D
+
+!=======================================================================
+
   INTEGER, PRIVATE :: MaxNRayPoints = 500000   ! this is the maximum length of the ray vector that is written out
   INTEGER, PRIVATE :: is, N2, iSkip
 
 CONTAINS
-
   SUBROUTINE WriteRay2D( alpha0, Nsteps1 )
 
     ! The 2D version is for ray traces in (r,z) coordinates
 
     INTEGER,       INTENT( IN ) :: Nsteps1
-    REAL (KIND=8), INTENT( IN ) :: alpha0   ! take-off angle of this ray
+    REAL (KIND=_RL90), INTENT( IN ) :: alpha0   ! take-off angle of this ray
 
     ! compression
 
@@ -53,8 +69,8 @@ CONTAINS
     ! The 3D version is for ray traces in (x,y,z) coordinates
 
     INTEGER,       INTENT( IN ) :: Nsteps1
-    REAL (KIND=8), INTENT( IN ) :: alpha0, beta0   ! take-off angle of this ray
-    REAL (KIND=8), INTENT( IN ) :: xs( 3 )         ! source location
+    REAL (KIND=_RL90), INTENT( IN ) :: alpha0, beta0   ! take-off angle of this ray
+    REAL (KIND=_RL90), INTENT( IN ) :: xs( 3 )         ! source location
 
     ! if Nx2D run, copy r-z rays to x-y-z rays
 
@@ -92,5 +108,4 @@ CONTAINS
 
   END SUBROUTINE WriteRay3D
 
-END MODULE WriteRay
-
+END MODULE writeray
