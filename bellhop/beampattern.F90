@@ -15,6 +15,7 @@ MODULE beampattern
 
 ! public interfaces
 !=======================================================================
+    public NSBPPts, SrcBmPat, SBPFlag
 !=======================================================================
 
   INTEGER, PARAMETER         :: SBPFile = 50

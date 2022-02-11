@@ -8,7 +8,8 @@ MODULE read_environment_mod
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE constants_mod,    only: pi
+  USE constants_mod,    only: pi, PRTFile, ENVFile, SSPFile, RAYFile, ARRFile
+                              
   USE bellhop_mod
   USE sspmod,           only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, &
                               betaR, alphaI, betaI, rhoR, betaPowerLaw, fT

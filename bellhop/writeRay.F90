@@ -13,6 +13,7 @@ MODULE writeray
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
   USE bellhop_mod
+  USE constants_mod,only: RAYFile
   USE sspmod,       only: Bdry
 
   IMPLICIT NONE

@@ -13,7 +13,7 @@ MODULE bellhop_mod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  !USE constants_mod,            only: pi, i, DegRad, RadDeg
+  USE constants_mod,            only: MaxN
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -24,7 +24,8 @@ MODULE bellhop_mod
 ! public interfaces
 !=======================================================================
 
-    public freq, Title, Beam
+    public Nrz_per_range, freq, omega, SrcDeclAngle, Title, Beam, ray2D, ray3D,&
+           ray2DPt, ray3DPt
 
 !=======================================================================
 
@@ -60,11 +61,11 @@ MODULE bellhop_mod
 
   ! uncomment COMPLEX below if using paraxial beams !!!
   TYPE ray3DPt
+     ! COMPLEX (KIND=_RL90) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), f, g, h, DetP, DetQ
      REAL (KIND=_RL90)     :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), DetQ
      REAL (KIND=_RL90)     :: x( 3 ), t( 3 ), phi, c, Amp, Phase
      INTEGER               :: NumTopBnc, NumBotBnc
      COMPLEX (KIND=_RL90)  :: tau
-     ! COMPLEX (KIND=_RL90) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), f, g, h, DetP, DetQ
   END TYPE ray3DPt
   TYPE( ray3DPt )          :: ray3D( MaxN )
 

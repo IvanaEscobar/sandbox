@@ -19,7 +19,7 @@ MODULE bdrymod
 !=======================================================================
 
     public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, rTopSeg, rBotSeg,&
-           iSmallStepCtr
+           iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts
 
 !=======================================================================
 
@@ -33,18 +33,18 @@ MODULE bdrymod
 
   ! Halfspace properties
   TYPE HSInfo2
-     _RL :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
-     COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
-     _RL :: rho, Depth             ! density, depth
+     REAL (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
+     COMPLEX  (KIND=_RL90) :: cP, cS                 ! P-wave, S-wave speeds
+     REAL (KIND=_RL90) :: rho, Depth             ! density, depth
      CHARACTER (LEN=1) :: BC                     ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE
 
   TYPE BdryPt
-     _RL :: x( 2 ), t( 2 ), n( 2 )        ! coordinate, tangent, and outward normal for a segment
-     _RL :: Nodet( 2 ), Noden( 2 )        ! tangent and normal at the node, if the curvilinear option is used
-     _RL :: Len, Kappa                    ! length and curvature of a segement
-     _RL :: Dx, Dxx, Dss                  ! first, second derivatives wrt depth; s is along tangent
+     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), n( 2 )        ! coordinate, tangent, and outward normal for a segment
+     REAL (KIND=_RL90) :: Nodet( 2 ), Noden( 2 )        ! tangent and normal at the node, if the curvilinear option is used
+     REAL (KIND=_RL90) :: Len, Kappa                    ! length and curvature of a segement
+     REAL (KIND=_RL90) :: Dx, Dxx, Dss                  ! first, second derivatives wrt depth; s is along tangent
      TYPE( HSInfo2 )   :: HS
   END TYPE
 
@@ -58,8 +58,8 @@ CONTAINS
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: TopATI
-    _RL, INTENT( IN ) :: DepthT
-    _RL, ALLOCATABLE  :: phi( : )
+    REAL (KIND=_RL90), INTENT( IN ) :: DepthT
+    REAL (KIND=_RL90), ALLOCATABLE  :: phi( : )
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( TopATI )
@@ -146,7 +146,7 @@ CONTAINS
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
-    _RL, INTENT( IN ) :: DepthB
+    REAL (KIND=_RL90), INTENT( IN ) :: DepthB
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( BotBTY )
@@ -252,8 +252,8 @@ CONTAINS
     ! exits the domain defined by the user
 
     INTEGER                          :: NPts = 0
-    _RL, ALLOCATABLE  :: phi( : )
-    _RL               :: sss
+    REAL (KIND=_RL90), ALLOCATABLE  :: phi( : )
+    REAL (KIND=_RL90)               :: sss
     TYPE(BdryPt)                     :: Bdry( : )
     CHARACTER (LEN=3),  INTENT( IN ) :: BotTop           ! Flag indicating bottom or top reflection
     CHARACTER (LEN=2)                :: CurvilinearFlag = '-'
@@ -350,7 +350,7 @@ CONTAINS
 
     INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegTopT( 1 )
-    _RL, INTENT( IN ) :: r
+    REAL (KIND=_RL90), INTENT( IN ) :: r
 
     IsegTopT = MAXLOC( Top( : )%x( 1 ), Top( : )%x( 1 ) < r )
 
@@ -374,7 +374,7 @@ CONTAINS
 
     INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegBotT( 1 )
-    _RL, INTENT( IN ) :: r
+    REAL (KIND=_RL90), INTENT( IN ) :: r
 
     IsegBotT = MAXLOC( Bot( : )%x( 1 ), Bot( : )%x( 1 ) < r )
 
