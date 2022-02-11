@@ -6,7 +6,7 @@ MODULE anglemod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE constants_mod,    only: pi, DegRad
+  USE constants_mod,    only: pi, DegRad, ENVFile, PRTFile
   USE fatal_error,      only: ERROUT
   USE subtabulate,      only: SubTab
   USE sourcereceiverpositions, only: Pos, Number_to_Echo
@@ -19,19 +19,18 @@ MODULE anglemod
 ! public interfaces
 !=======================================================================
 
-  public ReadRayElevationAngles, ReadRayBearingAngles, Angles
+  public ReadRayElevationAngles, ReadRayBearingAngles, Angles, ialpha
 
 !=======================================================================
 
   INTEGER          :: ialpha, ibeta
-  INTEGER, PRIVATE :: AllocateStatus
-  INTEGER,       PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6
-  _RL, PRIVATE, PARAMETER :: c0 = 1500.0
+  INTEGER, PRIVATE :: iAllocStat
+  REAL (KIND=_RL90), PRIVATE, PARAMETER :: c0 = 1500.0
 
   TYPE AnglesStructure
      INTEGER       :: Nalpha = 0, Nbeta = 1, iSingle_alpha = 0, iSingle_beta = 0
-     _RL :: Dalpha, Dbeta
-     _RL, ALLOCATABLE:: alpha( : ), beta( : )
+     REAL (KIND=_RL90) :: Dalpha, Dbeta
+     REAL (KIND=_RL90), ALLOCATABLE:: alpha( : ), beta( : )
   END TYPE AnglesStructure
 
   Type( AnglesStructure ) :: Angles
@@ -39,9 +38,9 @@ MODULE anglemod
 CONTAINS
   SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType )
 
-    _RL, INTENT( IN  ) :: freq, Depth
+    REAL (KIND=_RL90), INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
-    _RL                :: d_theta_recommended
+    REAL (KIND=_RL90)                :: d_theta_recommended
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
        READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha ! option to trace a single beam
@@ -65,8 +64,8 @@ CONTAINS
        END IF
     END IF
 
-    ALLOCATE( Angles%alpha( MAX( 3, Angles%Nalpha ) ), STAT = AllocateStatus )
-    IF ( AllocateStatus /= 0 ) CALL ERROUT( 'ReadRayElevationAngles', 'Insufficient memory to store beam angles'  )
+    ALLOCATE( Angles%alpha( MAX( 3, Angles%Nalpha ) ), STAT = iAllocStat )
+    IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayElevationAngles', 'Insufficient memory to store beam angles'  )
 
     IF ( Angles%Nalpha > 2 ) Angles%alpha( 3 ) = -999.9
     READ( ENVFile, * ) Angles%alpha
@@ -101,7 +100,7 @@ CONTAINS
 
   SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType )
 
-    _RL, INTENT( IN ) :: freq
+    REAL (KIND=_RL90), INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
@@ -118,8 +117,8 @@ CONTAINS
        END IF
     END IF
 
-    ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = AllocateStatus )
-    IF ( AllocateStatus /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', 'Insufficient memory to store beam angles'  )
+    ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
+    IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', 'Insufficient memory to store beam angles'  )
 
     IF ( Angles%Nbeta > 2 ) Angles%beta( 3 ) = -999.9
     READ( ENVFile, * ) Angles%beta
@@ -138,8 +137,8 @@ CONTAINS
        DEALLOCATE( Angles%beta )
 
        Angles%Nbeta = Pos%Ntheta
-       ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', 'Insufficient memory to store beam angles'  )
+       ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
+       IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', 'Insufficient memory to store beam angles'  )
        Angles%beta( 1 : Angles%Nbeta ) = Pos%theta( 1 : Pos%Ntheta )   ! Nbeta should = Ntheta
     END IF
 

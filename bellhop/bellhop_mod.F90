@@ -24,7 +24,8 @@ MODULE bellhop_mod
 ! public interfaces
 !=======================================================================
 
-    public Nrz_per_range, freq, omega, SrcDeclAngle, Title, Beam, ray2D, ray3D,&
+    public Nrz_per_range, iStep, freq, omega, SrcDeclAngle, Title, Beam, &
+           ray2D, ray3D,&
            ray2DPt, ray3DPt
 
 !=======================================================================

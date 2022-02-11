@@ -18,13 +18,14 @@ MODULE bdrymod
 ! public interfaces
 !=======================================================================
 
-    public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, rTopSeg, rBotSeg,&
+    public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, &
+           IsegTop, IsegBot, rTopSeg, rBotSeg,&
            iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts
 
 !=======================================================================
 
   INTEGER, PARAMETER :: ATIFile = 40, BTYFile = 41, Number_to_Echo = 21
-  INTEGER            :: IsegTop, IsegBot            ! indices that point to the current active segment
+  INTEGER            :: IsegTop, IsegBot ! indices that point to the current active segment
   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
 

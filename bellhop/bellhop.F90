@@ -24,19 +24,21 @@ PROGRAM BELLHOP
   
   USE bellhop_mod ! Added to get title, freq, Beam
   USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
-                                      ARRFile, RAYFile
+                                      ARRFile, RAYFile, MaxN
   USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
   USE fatal_error,              only: ERROUT
-  USE AngleMod,                 only: Angles
+  USE AngleMod,                 only: Angles, ialpha
   USE SourceReceiverPositions,  only: Pos
-  USE SspMod                   
+  USE SSPMod                   
   USE BdryMod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
                                       Bot, Top, atiType, btyType, NatiPts,&
-                                      NbtyPts
+                                      NbtyPts, iSmallStepCtr, IsegTop, IsegBot,&
+                                      rTopSeg, rBotSeg
   USE RefCoef,                  only: ReadReflectionCoefficient,&
                                       InterpolateReflectionCoefficient,&
-                                      ReflectionCoef, RTop, RBot
+                                      ReflectionCoef, RTop, RBot, NBotPts, & 
+                                      NTopPts
   USE influence,                only: InfluenceCervenyRayCen,&
                                       InfluenceCervenyCart,&
                                       InfluenceGeoHatRayCen, InfluenceSGB,&
