@@ -22,13 +22,9 @@ MODULE pchipmod
 
 !=======================================================================
 
-  REAL (KIND=_RL90), PRIVATE                 :: h
-  REAL (KIND=_RL90), PRIVATE                 :: fprime_r, fprime_i
-
-
+  REAL (KIND=_RL90), PRIVATE    :: h, fprime_r, fprime_i
 
 CONTAINS
-
   SUBROUTINE PCHIP( x, y, N, PolyCoef, csWork )
 
     ! This implements the monotone piecewise cubic Hermite interpolating
@@ -49,7 +45,7 @@ CONTAINS
     ! csWork is a temporary work space for the cubic spline
 
     INTEGER,          INTENT( IN  )   :: N
-    REAL (KIND=_RL90), INTENT( IN  )   :: x( * )
+    REAL (KIND=_RL90), INTENT( IN  )  :: x( * )
     COMPLEX (KIND=8), INTENT( IN  )   :: y( * )
     COMPLEX (KIND=8), INTENT( INOUT ) :: PolyCoef( 4, * ), csWork( 4, * )
 

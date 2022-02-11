@@ -6,7 +6,7 @@ MODULE SPLINEC
     !   Ivana Escobar
     ! </CONTACT>
 
- IMPLICIT NONE
+! IMPLICIT NONE ! wish this wasn't the case
  PRIVATE
  #include "EEPARAMS_90.h"
 
@@ -183,73 +183,73 @@ END SUBROUTINE CSPLINE
 
 
 
-SUBROUTINE VSPLINE (TAU, C, M, MDIM, F, N)
+!SUBROUTINE VSPLINE (TAU, C, M, MDIM, F, N)
+!
+!  !     VSPLINE CALCULATES THE CUBIC SPLINE VALUES FOR A SET OF N POINTS  
+!  !     IN F FROM THE M-POINT CUBI! SPLINE FIT IN ! AND THE NODES IN TAU.
+!  !     THE POINTS ARE RETURNED IN F.  ALL OF THE POINTS IN F MUST LIE 
+!  !     BETWEEN TAU(1) AND TAU(M).
+!
+!  !     * * * * * * * * * * * * *   WARNINGS   * * * * * * * * * * * * *
+!
+!  !     POINTS OUTSIDE OF THE SPLINE FIT REGION ARE EXTRAPOLATED FROM THE END
+!  !     INTERVALS.  THIS CAN RESULT IN WILD VALUES IF EXTRAPOLATED TOO FAR.
+!  !     ALSO THE POINTS MUST BE IN STRICTLY ASCENDING ORDER, IF NOT THE 
+!  !     POINTS WHICH ARE OUT OF ORDER WILL BE EXTRAPOLATED FROM THE CURRENT
+!  !     INTERVAL AGAIN RESULTING IN WILD VALUES.
+!
+!  IMPLICIT REAL (KIND=8) (A-H,O-Z)
+!  REAL    (KIND=8) :: TAU(M)
+!  COMPLEX (KIND=8) :: C(4,MDIM), F(N), SPLINE
+!
+!  J = 1
+!  DO I = 1,N
+!10   J1 = J + 1
+!     IF (TAU(J1) < REAL(F(I)) .AND. J1 < M) THEN ! CHECK TO MAKE SURE
+!        J = J + 1                                ! THIS POINT IS NOT
+!        GO TO 10                                 ! IN THE NEXT INTERVAL.
+!     END IF
+!     H = DBLE (F(I)) - TAU(J)              ! DISTANCE FROM START OF INTERVAL
+!     F(I) = SPLINE (C(1,J), H)
+!  END DO
+!  RETURN
+!END SUBROUTINE VSPLINE
 
-  !     VSPLINE CALCULATES THE CUBIC SPLINE VALUES FOR A SET OF N POINTS  
-  !     IN F FROM THE M-POINT CUBI! SPLINE FIT IN ! AND THE NODES IN TAU.
-  !     THE POINTS ARE RETURNED IN F.  ALL OF THE POINTS IN F MUST LIE 
-  !     BETWEEN TAU(1) AND TAU(M).
 
-  !     * * * * * * * * * * * * *   WARNINGS   * * * * * * * * * * * * *
-
-  !     POINTS OUTSIDE OF THE SPLINE FIT REGION ARE EXTRAPOLATED FROM THE END
-  !     INTERVALS.  THIS CAN RESULT IN WILD VALUES IF EXTRAPOLATED TOO FAR.
-  !     ALSO THE POINTS MUST BE IN STRICTLY ASCENDING ORDER, IF NOT THE 
-  !     POINTS WHICH ARE OUT OF ORDER WILL BE EXTRAPOLATED FROM THE CURRENT
-  !     INTERVAL AGAIN RESULTING IN WILD VALUES.
-
-  IMPLICIT REAL (KIND=8) (A-H,O-Z)
-  REAL    (KIND=8) :: TAU(M)
-  COMPLEX (KIND=8) :: C(4,MDIM), F(N), SPLINE
-
-  J = 1
-  DO I = 1,N
-10   J1 = J + 1
-     IF (TAU(J1) < REAL(F(I)) .AND. J1 < M) THEN ! CHECK TO MAKE SURE
-        J = J + 1                                ! THIS POINT IS NOT
-        GO TO 10                                 ! IN THE NEXT INTERVAL.
-     END IF
-     H = DBLE (F(I)) - TAU(J)              ! DISTANCE FROM START OF INTERVAL
-     F(I) = SPLINE (C(1,J), H)
-  END DO
-  RETURN
-END SUBROUTINE VSPLINE
-
-
-!**********************************************************************C
-      FUNCTION SPLINE ( C, H )
-
-!     THIS FUNCTION EVALUATES THE SPLINE AT THE POINT H
-
-      IMPLICIT REAL (KIND=8) ( A-H, O-Z )
-      COMPLEX (KIND=8) C(4), SPLINE
-
-      SPLINE = C(1) + H * ( C(2) + H * ( C(3) / 2.0 + H * C(4) / 6.0 ) )
-      RETURN
-      END FUNCTION SPLINE
-
-      FUNCTION SPLINEX ( C, H )
-
-!     THIS FUNCTION EVALUATES THE SPLINE DERIVATIVE AT THE POINT H
-
-      IMPLICIT REAL (KIND=8) ( A-H, O-Z )
-      COMPLEX (KIND=8) :: C(4), SPLINEX
-
-      SPLINEX = C(2) + H * ( C(3) + H * C(4) / 2.0 )
-      RETURN
-      END FUNCTION SPLINEX
-
-      FUNCTION SPLINEXX ( C, H )
-
-!     THIS FUNCTION EVALUATES THE SPLINE 2ND DERIVATIVE AT THE POINT H
-
-      IMPLICIT REAL (KIND=8) ( A-H, O-Z )
-      COMPLEX (KIND=8) :: C(4), SPLINEXX
-
-      SPLINEXX = C(3) + H * C(4)
-      RETURN
-      END FUNCTION SPLINEXX
-!**********************************************************************C
+!!**********************************************************************C
+!      FUNCTION SPLINE ( C, H )
+!
+!!     THIS FUNCTION EVALUATES THE SPLINE AT THE POINT H
+!
+!      IMPLICIT REAL (KIND=_RL90) ( A-H, O-Z )
+!      COMPLEX (KIND=_RL90) C(4), SPLINE
+!
+!      SPLINE = C(1) + H * ( C(2) + H * ( C(3) / 2.0 + H * C(4) / 6.0 ) )
+!      RETURN
+!      END FUNCTION SPLINE
+!
+!      FUNCTION SPLINEX ( C, H )
+!
+!!     THIS FUNCTION EVALUATES THE SPLINE DERIVATIVE AT THE POINT H
+!
+!      IMPLICIT REAL (KIND=8) ( A-H, O-Z )
+!      COMPLEX (KIND=8) :: C(4), SPLINEX
+!
+!      SPLINEX = C(2) + H * ( C(3) + H * C(4) / 2.0 )
+!      RETURN
+!      END FUNCTION SPLINEX
+!
+!      FUNCTION SPLINEXX ( C, H )
+!
+!!     THIS FUNCTION EVALUATES THE SPLINE 2ND DERIVATIVE AT THE POINT H
+!
+!      IMPLICIT REAL (KIND=8) ( A-H, O-Z )
+!      COMPLEX (KIND=8) :: C(4), SPLINEXX
+!
+!      SPLINEXX = C(3) + H * C(4)
+!      RETURN
+!      END FUNCTION SPLINEXX
+!!**********************************************************************C
       SUBROUTINE SPLINEALL ( C, H, F, FX, FXX )
 
 !     THIS ROUTINE EVALUATES THE
