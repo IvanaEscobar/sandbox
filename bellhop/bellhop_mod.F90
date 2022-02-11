@@ -13,29 +13,34 @@ MODULE bellhop_mod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE constants_mod,            only: pi, i, DegRad, RadDeg
+  !USE constants_mod,            only: pi, i, DegRad, RadDeg
   IMPLICIT NONE
+  PRIVATE
   #include "EEPARAMS_90.h"
-
-  INTEGER, PARAMETER :: ENVFile = 5, PRTFile = 6, RAYFile = 21, &
-                        SHDFile = 25, ARRFile = 36, SSPFile = 40, MaxN = 100000
 
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 
+! public interfaces
+!=======================================================================
+
+    public freq, Title, Beam
+
+!=======================================================================
+
   INTEGER            :: Nrz_per_range, iStep
-  _RL                :: freq, omega, SrcDeclAngle, SrcAzimAngle
+  REAL (KIND=_RL90)  :: freq, omega, SrcDeclAngle, SrcAzimAngle
   CHARACTER (LEN=80) :: Title
 
   ! *** Beam structure ***
 
   TYPE rxyz
-     _RL :: r, x, y, z
+     REAL (KIND=_RL90) :: r, x, y, z
   END TYPE rxyz
 
   TYPE BeamStructure
      INTEGER           :: NBeams, Nimage, Nsteps, iBeamWindow
-     _RL               :: deltas, epsMultiplier = 1, rLoop
+     REAL (KIND=_RL90) :: deltas, epsMultiplier = 1, rLoop
      CHARACTER (LEN=1) :: Component              ! Pressure or displacement
      CHARACTER (LEN=4) :: Type = 'G S '
      CHARACTER (LEN=7) :: RunType
@@ -47,21 +52,20 @@ MODULE bellhop_mod
   ! *** ray structure ***
 
   TYPE ray2DPt
-     INTEGER          :: NumTopBnc, NumBotBnc
-     _RL              :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
-     COMPLEX (KIND=8) :: tau
+     INTEGER           :: NumTopBnc, NumBotBnc
+     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
+     COMPLEX (KIND=8)  :: tau
   END TYPE ray2DPt
-  TYPE( ray2DPt )     :: ray2D( MaxN )
+  TYPE( ray2DPt )      :: ray2D( MaxN )
 
   ! uncomment COMPLEX below if using paraxial beams !!!
   TYPE ray3DPt
-     _RL     :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), DetQ
-     _RL     :: x( 3 ), t( 3 ), phi, c, Amp, Phase
-     INTEGER :: NumTopBnc, NumBotBnc
-     ! COMPLEX (KIND=8) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), f, g, h, DetP, DetQ
-     COMPLEX (KIND=8) :: tau
-
+     REAL (KIND=_RL90)     :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), DetQ
+     REAL (KIND=_RL90)     :: x( 3 ), t( 3 ), phi, c, Amp, Phase
+     INTEGER               :: NumTopBnc, NumBotBnc
+     COMPLEX (KIND=_RL90)  :: tau
+     ! COMPLEX (KIND=_RL90) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), f, g, h, DetP, DetQ
   END TYPE ray3DPt
-  TYPE( ray3DPt )     :: ray3D( MaxN )
+  TYPE( ray3DPt )          :: ray3D( MaxN )
 
 END MODULE bellhop_mod
