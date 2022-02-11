@@ -16,6 +16,7 @@ MODULE read_environment_mod
   USE fatal_error,      only: ERROUT
   USE attenmod,         only: CRCI, T, Salinity, pH, z_bar, iBio, &
                               NBioLayers, bio
+
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -35,9 +36,10 @@ CONTAINS
 
     USE anglemod,               only: ReadRayElevationAngles, &
                                       ReadRayBearingAngles
-    USE sourcereceiverpositions, only: Pos
+    USE sourcereceiverpositions, only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,&
+                                       ReadRcvrBearings, ReadFreqVec
 
-    REAL (KIND=_RL90), PARAMETER    :: c0 = 1500.0
+    REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat

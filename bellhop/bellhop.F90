@@ -46,6 +46,7 @@ PROGRAM BELLHOP
                                       InfluenceGeoHatCart, ScalePressure
   USE AttenMod,                 only: CRCI
   USE BeamPattern
+  USE writeray,                 only: WriteRay2D
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
@@ -443,7 +444,6 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ! Traces the beam corresponding to a particular take-off angle
 
   USE step,     only: Step2D
-  USE writeray, only: WriteRay2D
 
   REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude

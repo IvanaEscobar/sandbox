@@ -14,7 +14,9 @@ MODULE sspmod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE fatal_error,              only: ERROUT
+  USE fatal_error,  only: ERROUT
+  USE splinec,      only: cspline, splineall
+
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"

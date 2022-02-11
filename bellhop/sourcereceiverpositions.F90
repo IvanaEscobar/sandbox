@@ -20,7 +20,8 @@ MODULE sourcereceiverpositions
 ! public interfaces
 !=======================================================================
 
-    public Pos, Number_to_Echo, Nfreq, freqVec
+    public Pos, Number_to_Echo, Nfreq, freqVec, ReadSxSy, ReadSzRz,&
+           ReadRcvrRanges, ReadRcvrBearings, ReadFreqVec
 
 !=======================================================================
 

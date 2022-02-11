@@ -17,7 +17,7 @@ MODULE arrmod
 !=======================================================================
 
     public WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, NArr, NArr3D, &
-           Arr, Arr3D
+           Arr, Arr3D, AddArr
 
 !=======================================================================
 

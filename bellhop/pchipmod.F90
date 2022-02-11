@@ -9,6 +9,8 @@ MODULE pchipmod
   ! subroutines and functions related to the calculation of the
   ! Piecewise Cubic Hermite Interpolating Polynomial (PCHIP)
 
+  USE splinec, only: cspline
+
   IMPLICIT NONE
   PRIVATE
   #include "EEPARAMS_90.h"
@@ -20,8 +22,8 @@ MODULE pchipmod
 
 !=======================================================================
 
-  _RL, PRIVATE                 :: h
-  _RL, PRIVATE                 :: fprime_r, fprime_i
+  REAL (KIND=_RL90), PRIVATE                 :: h
+  REAL (KIND=_RL90), PRIVATE                 :: fprime_r, fprime_i
 
 
 
@@ -47,12 +49,12 @@ CONTAINS
     ! csWork is a temporary work space for the cubic spline
 
     INTEGER,          INTENT( IN  )   :: N
-    _RL, INTENT( IN  )   :: x( * )
+    REAL (KIND=_RL90), INTENT( IN  )   :: x( * )
     COMPLEX (KIND=8), INTENT( IN  )   :: y( * )
     COMPLEX (KIND=8), INTENT( INOUT ) :: PolyCoef( 4, * ), csWork( 4, * )
 
     INTEGER           :: ix, iBCBeg, iBCEnd
-    _RL :: h1, h2
+    REAL (KIND=_RL90) :: h1, h2
     COMPLEX  (KIND=8) :: del1, del2, f1, f2, f1prime, f2prime, fprimeT
 
     !  Precompute estimates of the derivatives at the nodes
@@ -130,9 +132,9 @@ CONTAINS
   SUBROUTINE h_del( x, y, ix, h1, h2, del1, del2 )
 
     INTEGER,          INTENT( IN  ) :: ix   ! index of the center point
-    _RL, INTENT( IN  ) :: x( * )
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( * )
     COMPLEX (KIND=8), INTENT( IN  ) :: y( * )
-    _RL, INTENT( OUT ) :: h1, h2
+    REAL (KIND=_RL90), INTENT( OUT ) :: h1, h2
     COMPLEX (KIND=8), INTENT( OUT ) :: del1, del2
 
     h1   =   x( ix     ) - x( ix - 1 )
@@ -190,8 +192,8 @@ CONTAINS
 
   FUNCTION fprime_interior( del1, del2, fprime )
 
-    _RL, INTENT( IN ) :: del1, del2, fprime
-    _RL               :: fprime_interior
+    REAL (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    REAL (KIND=_RL90)               :: fprime_interior
 
     ! check if derivative is within the trust region, project into it if not
 
@@ -213,8 +215,8 @@ CONTAINS
 
   FUNCTION fprime_left_end( del1, del2, fprime )
 
-    _RL, INTENT( IN ) :: del1, del2, fprime
-    _RL               :: fprime_left_end
+    REAL (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    REAL (KIND=_RL90)               :: fprime_left_end
 
     fprime_left_end = fprime
 
@@ -235,8 +237,8 @@ CONTAINS
     ! This is essentially the same as fprime_left_end( del2, del1, fprime )
     ! Written separately for clarity
 
-    _RL, INTENT( IN ) :: del1, del2, fprime
-    _RL               :: fprime_right_end
+    REAL (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    REAL (KIND=_RL90)               :: fprime_right_end
 
     fprime_right_end = fprime
 
