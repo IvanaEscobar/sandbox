@@ -22,31 +22,39 @@ PROGRAM BELLHOP
 
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean Systems Center
   
-  USE constants_mod,            only: pi, DegRad, RadDeg, PRTFile
+  USE bellhop_mod ! Added to get title, freq, Beam
+  USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
+                                      ARRFile, RAYFile, MaxN
   USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
-  USE anglemod,                 only: Angles
   USE fatal_error,              only: ERROUT
-  USE sourcereceiverpositions,  only: Pos
-  USE sspmod                   
-  USE bdrymod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
-                                      Bot, Top
-  USE refcoef,                  only: ReadReflectionCoefficient,&
+  USE AngleMod,                 only: Angles, ialpha
+  USE SourceReceiverPositions,  only: Pos
+  USE SSPMod                   
+  USE BdryMod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
+                                      Bot, Top, atiType, btyType, NatiPts,&
+                                      NbtyPts, iSmallStepCtr, IsegTop, IsegBot,&
+                                      rTopSeg, rBotSeg
+  USE RefCoef,                  only: ReadReflectionCoefficient,&
                                       InterpolateReflectionCoefficient,&
-                                      ReflectionCoef
+                                      ReflectionCoef, RTop, RBot, NBotPts, & 
+                                      NTopPts
   USE influence,                only: InfluenceCervenyRayCen,&
                                       InfluenceCervenyCart,&
                                       InfluenceGeoHatRayCen, InfluenceSGB,&
                                       InfluenceGeoGaussianCart,&
                                       InfluenceGeoHatCart, ScalePressure
-  USE attenmod,                 only: CRCI
+  USE AttenMod,                 only: CRCI
   USE BeamPattern
+  USE writeray,                 only: WriteRay2D
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
   
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
-  INTEGER              :: jj, iostat  ! iostat added locally... IE2022
+  INTEGER              :: jj 
+! added locally previously read in from unknown mod ... IE2022
+  INTEGER              :: iostat, iAllocStat  
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
 
@@ -114,8 +122,8 @@ PROGRAM BELLHOP
 
      ! *** altimetry ***
 
-     ALLOCATE( Top( 2 ), Stat = IAllocStat )
-     IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for altimetry data'  )
+     ALLOCATE( Top( 2 ), Stat = iAllocStat )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for altimetry data'  )
      Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
      Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
 
@@ -123,20 +131,20 @@ PROGRAM BELLHOP
 
      ! *** bathymetry ***
 
-     ALLOCATE( Bot( 2 ), Stat = IAllocStat )
-     IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for bathymetry data'  )
+     ALLOCATE( Bot( 2 ), Stat = iAllocStat )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for bathymetry data'  )
      Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
      Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
 
      CALL ComputeBdryTangentNormal( Bot, 'Bot' )
 
-     ALLOCATE( RBot( 1 ), Stat = IAllocStat )   ! bottom reflection coefficient
+     ALLOCATE( RBot( 1 ), Stat = iAllocStat )   ! bottom reflection coefficient
      ALLOCATE( RTop( 1 ), Stat = iAllocStat )   ! top    reflection coefficient
 
      ! *** Source Beam Pattern ***
      NSBPPts = 2
-     ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
-     IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', 'Insufficient memory'  )
+     ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', 'Insufficient memory'  )
      SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
      SrcBmPat( 2, : ) = [  180.0, 0.0 ]
      SrcBmPat( :, 2 ) = 10 ** ( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale !!!
@@ -149,7 +157,7 @@ PROGRAM BELLHOP
      CALL ReadPat( FileRoot, PRTFile )   ! Source Beam Pattern
      ! dummy bearing angles
      Pos%Ntheta = 1
-     ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
+     ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
      Pos%theta( 1 ) = 0.
   END IF
 
@@ -162,12 +170,13 @@ PROGRAM BELLHOP
 
 SUBROUTINE BellhopCore
 
-  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary
+  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr,&
+                      NArr
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
   REAL                 :: Tstart, Tstop
-  _RL                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
+  REAL (KIND=_RL90)                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX     (KIND=8) :: epsilon
@@ -216,11 +225,11 @@ SUBROUTINE BellhopCore
   ! for a TL calculation, allocate space for the pressure matrix
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
   CASE ( 'C', 'S', 'I' )        ! TL calculation
-     ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = IAllocStat )
-     IF ( IAllocStat /= 0 ) &
+     ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+     IF ( iAllocStat /= 0 ) &
           CALL ERROUT( 'BELLHOP', 'Insufficient memory for TL matrix: reduce Nr * NRz'  )
   CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
-     ALLOCATE ( U( 1, 1 ), Stat = IAllocStat )   ! open a dummy variable
+     ALLOCATE ( U( 1, 1 ), Stat = iAllocStat )   ! open a dummy variable
   END SELECT
 
   ! for an arrivals run, allocate space for arrivals matrices
@@ -230,12 +239,12 @@ SUBROUTINE BellhopCore
      WRITE( PRTFile, * )
      WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
 
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), NArr( NRz_per_range, Pos%NRr ), Stat = IAllocStat )
-     IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
           'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage' )
   CASE DEFAULT
      MaxNArr = 1
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), NArr( NRz_per_range, Pos%NRr ), Stat = IAllocStat )
+     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
   END SELECT
 
   NArr( 1 : NRz_per_range, 1 : Pos%NRr ) = 0
@@ -361,13 +370,13 @@ COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha
 
   ! Picks the optimum value for epsilon
 
-  _RL, INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
-  _RL, INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
-  _RL, INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
+  REAL (KIND=_RL90), INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
+  REAL (KIND=_RL90), INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
+  REAL (KIND=_RL90), INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
   CHARACTER (LEN= 2), INTENT( IN  ) :: BeamType
   LOGICAL, SAVE      :: INIFlag = .TRUE.
-  _RL                :: HalfWidth
-  _RL                :: cz
+  REAL (KIND=_RL90)                :: HalfWidth
+  REAL (KIND=_RL90)                :: cz
   COMPLEX   (KIND=8) :: epsilonOpt
   CHARACTER (LEN=40) :: TAG
 
@@ -435,15 +444,14 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ! Traces the beam corresponding to a particular take-off angle
 
   USE step,     only: Step2D
-  USE writeray, only: WriteRay2D
 
-  _RL, INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
-  _RL, INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
+  REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
+  REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
   INTEGER           :: is, is1                    ! index for a step along the ray
-  _RL :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-  _RL :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
-  _RL :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
-  _RL :: sss
+  REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+  REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
+  REAL (KIND=_RL90) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
+  REAL (KIND=_RL90) :: sss
 
   ! Initial conditions
 
@@ -593,11 +601,11 @@ SUBROUTINE Distances2D( rayx, Topx, Botx, dTop, dBot, Topn, Botn, DistTop, DistB
   ! Calculates the distances to the boundaries
   ! Formula differs from JKPS because code uses outward pointing normals
 
-  _RL, INTENT( IN  ) :: rayx( 2 )              ! ray coordinate
-  _RL, INTENT( IN  ) :: Topx( 2 ), Botx( 2 )   ! top, bottom coordinate
-  _RL, INTENT( IN  ) :: Topn( 2 ), Botn( 2 )   ! top, bottom normal vector (outward)
-  _RL, INTENT( OUT ) :: dTop( 2 ), dBot( 2 )   ! vector pointing from top, bottom bdry to ray
-  _RL, INTENT( OUT ) :: DistTop, DistBot       ! distance (normal to bdry) from the ray to top, bottom boundary
+  REAL (KIND=_RL90), INTENT( IN  ) :: rayx( 2 )              ! ray coordinate
+  REAL (KIND=_RL90), INTENT( IN  ) :: Topx( 2 ), Botx( 2 )   ! top, bottom coordinate
+  REAL (KIND=_RL90), INTENT( IN  ) :: Topn( 2 ), Botn( 2 )   ! top, bottom normal vector (outward)
+  REAL (KIND=_RL90), INTENT( OUT ) :: dTop( 2 ), dBot( 2 )   ! vector pointing from top, bottom bdry to ray
+  REAL (KIND=_RL90), INTENT( OUT ) :: DistTop, DistBot       ! distance (normal to bdry) from the ray to top, bottom boundary
 
   dTop    = rayx - Topx  ! vector pointing from top    to ray
   dBot    = rayx - Botx  ! vector pointing from bottom to ray
@@ -611,16 +619,16 @@ END SUBROUTINE Distances2D
 SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
   INTEGER,              INTENT( IN ) :: Npts
-  _RL,    INTENT( IN ) :: tBdry( 2 ), nBdry( 2 )  ! Tangent and normal to the boundary
-  _RL,    INTENT( IN ) :: kappa                   ! Boundary curvature
+  REAL (KIND=_RL90),    INTENT( IN ) :: tBdry( 2 ), nBdry( 2 )  ! Tangent and normal to the boundary
+  REAL (KIND=_RL90),    INTENT( IN ) :: kappa                   ! Boundary curvature
   CHARACTER (LEN=3),    INTENT( IN ) :: BotTop                  ! Flag indicating bottom or top reflection
   TYPE( HSInfo ),       INTENT( IN ) :: HS                      ! half-space properties
   TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts )            ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
   INTEGER           :: is1
-  _RL :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
-  _RL :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
-  _RL :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
+  REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
+  REAL (KIND=_RL90) :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
+  REAL (KIND=_RL90) :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
   COMPLEX  (KIND=8) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, Refl   ! for tabulated reflection coef.
   COMPLEX  (KIND=8) :: ch, a, b, d, sb, delta, ddelta                 ! for beam shift
   TYPE(ReflectionCoef) :: RInt

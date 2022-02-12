@@ -16,7 +16,7 @@ MODULE refcoef
 ! public interfaces
 !=======================================================================
     public ReadReflectionCoefficient, InterpolateReflectionCoefficient, &
-           ReflectionCoef
+           ReflectionCoef, RBot, RTop, NBotPts, NTopPts
 !=======================================================================
 
   INTEGER, PARAMETER            :: BRCFile = 31, TRCFile = 32, IRCFile = 12

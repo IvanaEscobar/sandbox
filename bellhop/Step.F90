@@ -7,6 +7,7 @@ MODULE step
     ! </CONTACT>
 
   USE bellhop_mod
+  USE constants_mod,only: RAYFile
   USE sspmod,       only: EvaluateSSP, SSP, iSegz, iSegr
 
   IMPLICIT NONE
@@ -31,7 +32,7 @@ CONTAINS
     TYPE( ray2DPt )    :: ray0, ray1, ray2
     REAL (KIND=_RL90 ), INTENT( IN ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 )
     INTEGER            :: iSegz0, iSegr0
-    REAL     (KIND=_RL90 ) :: gradc0( 2 ), gradc1( 2 ), gradc2( 2 ), &
+    REAL (KIND=_RL90 ) :: gradc0( 2 ), gradc1( 2 ), gradc2( 2 ), &
          c0, cimag0, crr0, crz0, czz0, csq0, cnn0_csq0, &
          c1, cimag1, crr1, crz1, czz1, csq1, cnn1_csq1, &
          c2, cimag2, crr2, crz2, czz2, urayt0( 2 ), urayt1( 2 ), &

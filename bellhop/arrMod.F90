@@ -16,7 +16,8 @@ MODULE arrmod
 ! public interfaces
 !=======================================================================
 
-    public WriteArrivalsASCII, WriteArrivalsBinary
+    public WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, NArr, NArr3D, &
+           Arr, Arr3D, AddArr
 
 !=======================================================================
 

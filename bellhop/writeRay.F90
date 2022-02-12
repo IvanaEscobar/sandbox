@@ -13,6 +13,7 @@ MODULE writeray
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
   USE bellhop_mod
+  USE constants_mod,only: RAYFile
   USE sspmod,       only: Bdry
 
   IMPLICIT NONE
@@ -34,7 +35,7 @@ CONTAINS
 
     ! The 2D version is for ray traces in (r,z) coordinates
 
-    INTEGER,       INTENT( IN ) :: Nsteps1
+    INTEGER,           INTENT( IN ) :: Nsteps1
     REAL (KIND=_RL90), INTENT( IN ) :: alpha0   ! take-off angle of this ray
 
     ! compression

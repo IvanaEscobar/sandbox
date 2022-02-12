@@ -10,11 +10,13 @@ MODULE influence
   ! mbp 12/2018, based on much older subroutines
 
   USE bellhop_mod
+  USE constants_mod,            only: pi, i, RadDeg, PRTFile, MaxN
   USE sourcereceiverpositions,  only: Pos
 ! used to construct image beams in the Cerveny style beam routines
   USE sspmod,                   only: EvaluateSSP, Bdry 
- ! USE writeray,                 only: WriteRay2D
-  USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary
+  USE writeray,                 only: WriteRay2D
+  USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary,&
+                                      AddArr
 
   IMPLICIT NONE
   PRIVATE
@@ -31,7 +33,8 @@ MODULE influence
 
   INTEGER,              PRIVATE :: iz, ir, iS
   REAL    (KIND=_RL90), PRIVATE :: Ratio1 = 1.0D0   ! scale factor for a line source
-  REAL    (KIND=_RL90), PRIVATE :: W, s, n, Amp, phase, const, phaseInt, q0, q, qold, RcvrDeclAngle, rA, rB
+  REAL    (KIND=_RL90), PRIVATE :: W, s, n, Amp, phase, const, phaseInt, &
+                                   q0, q, qold, RcvrDeclAngle, rA, rB
   COMPLEX (KIND=_RL90), PRIVATE :: delay
 
 CONTAINS
@@ -39,14 +42,15 @@ CONTAINS
 
     ! Paraxial (Cerveny-style) beams in ray-centered coordinates
 
-    INTEGER,          INTENT( IN    ) :: IBeamWindow2
-    REAL    (KIND=_RL90), INTENT( IN    ) :: alpha, RadiusMax                ! take-off angle
-    COMPLEX,          INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
+    INTEGER,              INTENT( IN    ) :: IBeamWindow2
+    REAL (KIND=_RL90),    INTENT( IN    ) :: alpha, RadiusMax ! take-off angle
+    COMPLEX,              INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
     COMPLEX (KIND=_RL90), INTENT( IN    ) :: epsilon
-    INTEGER          :: ir1, ir2, KMAHV( MaxN ), KMAH, image
-    REAL    (KIND=_RL90) :: nA, nB, nSq, c, zr
-    REAL    (KIND=_RL90) :: znV( Beam%Nsteps ), rnV( Beam%Nsteps )   ! ray normal
-    COMPLEX (KIND=_RL90) :: pVB( MaxN ), qVB( MaxN ), q, epsV( MaxN ), contri, gammaV( MaxN ), gamma, P_n, P_s
+    INTEGER              :: ir1, ir2, KMAHV( MaxN ), KMAH, image
+    REAL (KIND=_RL90)    :: nA, nB, nSq, c, zr
+    REAL (KIND=_RL90)    :: znV( Beam%Nsteps ), rnV( Beam%Nsteps )  ! ray normal
+    COMPLEX (KIND=_RL90) :: pVB( MaxN ), qVB( MaxN ), q, epsV( MaxN ), &
+                            contri, gammaV( MaxN ), gamma, P_n, P_s
     COMPLEX (KIND=_RL90) :: tau
 
 !!! need to add logic related to NRz_per_range
@@ -176,14 +180,16 @@ CONTAINS
 
     ! Paraxial (Cerveny-style) beams in Cartesian coordinates
 
-    INTEGER,          INTENT( IN    ) :: IBeamWindow2
-    REAL    (KIND=_RL90), INTENT( IN    ) :: alpha, RadiusMax                ! take-off angle
-    COMPLEX,          INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
+    INTEGER,              INTENT( IN    ) :: IBeamWindow2
+    REAL (KIND=_RL90),    INTENT( IN    ) :: alpha, RadiusMax ! take-off angle
+    COMPLEX,              INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
     COMPLEX (KIND=_RL90), INTENT( IN    ) :: epsilon
-    INTEGER          :: KMAHV( MaxN ), KMAH, irA, irB, Image
-    REAL    (KIND=_RL90) :: x( 2 ), rayt( 2 ), rayn( 2 ), Tr, Tz, zr, Polarity = 1, &
-         c, cimag, cs, cn, csq, gradc( 2 ), crr, crz, czz, rho, deltaz
-    COMPLEX (KIND=_RL90) :: pVB( MaxN ), qVB( MaxN ), q, epsV( MaxN ), contri, gammaV( MaxN ), gamma, const
+    INTEGER              :: KMAHV( MaxN ), KMAH, irA, irB, Image
+    REAL (KIND=_RL90)    :: x( 2 ), rayt( 2 ), rayn( 2 ), Tr, Tz, zr, & 
+                            Polarity = 1, c, cimag, cs, cn, csq, gradc( 2 ), & 
+                            crr, crz, czz, rho, deltaz
+    COMPLEX (KIND=_RL90) :: pVB( MaxN ), qVB( MaxN ), q, epsV( MaxN ), contri, &
+                            gammaV( MaxN ), gamma, const
     COMPLEX (KIND=_RL90) :: tau
 
     ! need to add logic related to NRz_per_range
@@ -309,11 +315,12 @@ CONTAINS
 
     ! Geometrically-spreading beams with a hat-shaped beam in ray-centered coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha                 ! take-off angle
-    COMPLEX,       INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
-    INTEGER          :: irA, irB, II
-    REAL    (KIND=_RL90) :: nA, nB, zr, L, dq( Beam%Nsteps - 1 )
-    REAL    (KIND=_RL90) :: znV( Beam%Nsteps ), rnV( Beam%Nsteps ),  RcvrDeclAngleV ( Beam%Nsteps )
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle
+    COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
+    INTEGER              :: irA, irB, II
+    REAL (KIND=_RL90)    :: nA, nB, zr, L, dq( Beam%Nsteps - 1 )
+    REAL (KIND=_RL90)    :: znV( Beam%Nsteps ), rnV( Beam%Nsteps ), &
+                            RcvrDeclAngleV ( Beam%Nsteps )
     COMPLEX (KIND=_RL90) :: dtau( Beam%Nsteps - 1 )
 
     !!! need to add logic related to NRz_per_range
@@ -417,10 +424,12 @@ CONTAINS
 
     ! Geometric, hat-shaped beams in Cartesisan coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha                 ! take-off angle, angular spacing
-    COMPLEX,       INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
-    INTEGER          :: irT( 1 ), irTT
-    REAL    (KIND=_RL90) :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), x_rcvr( 2, NRz_per_range ), rLen, RadiusMax, zMin, zMax, dqds
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle, angular spacing
+    COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr ) ! complex pressure field
+    INTEGER              :: irT( 1 ), irTT
+    REAL (KIND=_RL90)    :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), &
+                            x_rcvr( 2, NRz_per_range ), rLen, RadiusMax, &
+                            zMin, zMax, dqds
     COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
@@ -524,11 +533,12 @@ CONTAINS
 
     ! Geometric, Gaussian beams in Cartesian coordintes
 
-    INTEGER,       PARAMETER       :: BeamWindow = 4               ! beam window: kills beams outside e**(-0.5 * ibwin**2 )
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha                ! take-off angle, angular spacing
-    COMPLEX,       INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
-    INTEGER          :: irT( 1 ), irTT
-    REAL    (KIND=_RL90) :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), x_rcvr( 2 ), rLen, RadiusMax, zMin, zMax, sigma, lambda, A, dqds
+    INTEGER,           PARAMETER       :: BeamWindow = 4 ! beam window: kills beams outside e**(-0.5 * ibwin**2 )
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle, angular spacing
+    COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
+    INTEGER              :: irT( 1 ), irTT
+    REAL (KIND=_RL90)    :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), x_rcvr( 2 ), &
+                            rLen, RadiusMax, zMin, zMax, sigma, lambda, A, dqds
     COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
@@ -668,9 +678,10 @@ CONTAINS
 
     ! Bucker's Simple Gaussian Beams in Cartesian coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha                 ! take-off angle, angular spacing
-    COMPLEX,       INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
-    REAL    (KIND=_RL90)  :: x( 2 ), rayt( 2 ), A, beta, cn, CPA, deltaz, DS, sint, SX1, thet
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle, angular spacing
+    COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr ) ! complex pressure field
+    REAL (KIND=_RL90)     :: x( 2 ), rayt( 2 ), A, beta, cn, CPA, deltaz, DS, & 
+                             sint, SX1, thet
     COMPLEX (KIND=_RL90)  :: contri, tau
 
     Ratio1 = SQRT(  COS( alpha ) )
@@ -741,10 +752,10 @@ CONTAINS
 
     ! Checks for a branch cut crossing and updates KMAH accordingly
 
-    COMPLEX  (KIND=_RL90), INTENT( IN )    :: q1C, q2C
-    CHARACTER (LEN=4), INTENT( IN )    :: BeamType
-    INTEGER,           INTENT( INOUT ) :: KMAH
-    REAL     (KIND=_RL90)                  :: q1, q2
+    COMPLEX (KIND=_RL90), INTENT( IN )    :: q1C, q2C
+    CHARACTER (LEN=4),    INTENT( IN )    :: BeamType
+    INTEGER,              INTENT( INOUT ) :: KMAH
+    REAL (KIND=_RL90)                     :: q1, q2
 
     SELECT CASE ( BeamType( 2 : 2 ) )
     CASE ( 'W' )   ! WKBeams
@@ -769,13 +780,13 @@ CONTAINS
 
     ! Scale the pressure field
 
-    REAL,              PARAMETER       :: pi = 3.14159265
+    !REAL,              PARAMETER       :: pi = 3.14159265
     INTEGER,           INTENT( IN    ) :: NRz, Nr
     REAL,              INTENT( IN    ) :: r( Nr )         ! ranges
-    REAL     (KIND=_RL90), INTENT( IN    ) :: Dalpha, freq, c ! angular spacing between rays, source frequency, nominal sound speed
+    REAL (KIND=_RL90), INTENT( IN    ) :: Dalpha, freq, c ! angular spacing between rays, source frequency, nominal sound speed
     COMPLEX,           INTENT( INOUT ) :: U( NRz, Nr )    ! Pressure field
     CHARACTER (LEN=5), INTENT( IN    ) :: RunType
-    REAL     (KIND=_RL90)                  :: const, factor
+    REAL (KIND=_RL90)                  :: const, factor
 
     ! Compute scale factor for field
     SELECT CASE ( RunType( 2 : 2 ) )
