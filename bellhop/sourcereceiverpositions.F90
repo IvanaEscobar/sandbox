@@ -29,7 +29,7 @@ MODULE sourcereceiverpositions
   INTEGER, PRIVATE            :: IAllocStat     ! used to capture status after allocation
   INTEGER, PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6   ! unit 5 is usually (not always) the ENVFile
   INTEGER                     :: Nfreq          ! number of frequencies
-  _RL, ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
+  REAL (KIND=_RL90), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
 
   TYPE Position
      INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
@@ -46,9 +46,10 @@ CONTAINS
   SUBROUTINE ReadfreqVec( freq0, BroadbandOption )
 
     ! Optionally reads a vector of source frequencies for a broadband run
-    ! If the broadband option is not selected, then the input freq (a scalar) is stored in the frequency vector
+    ! If the broadband option is not selected, then the input freq (a scalar) 
+    ! is stored in the frequency vector
 
-    _RL, INTENT( IN ) :: freq0             ! Nominal or carrier frequency
+    REAL (KIND=_RL90), INTENT( IN ) :: freq0    ! Nominal or carrier frequency
     CHARACTER,     INTENT( IN ) :: BroadbandOption*( 1 )
     INTEGER                     :: ifreq
 
@@ -61,12 +62,14 @@ CONTAINS
        WRITE( PRTFile, * )
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
-       IF ( Nfreq <= 0 ) CALL ERROUT( 'ReadEnvironment', 'Number of frequencies must be positive'  )
+       IF ( Nfreq <= 0 ) CALL ERROUT( 'ReadEnvironment', &
+                                    'Number of frequencies must be positive'  )
     END IF
 
     IF ( ALLOCATED( freqVec ) ) DEALLOCATE( freqVec )
     ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadEnvironment', 'Too many frequencies'  )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadEnvironment', &
+                                        'Too many frequencies'  )
 
     IF ( BroadbandOption == 'B' ) THEN
        WRITE( PRTFile, * ) 'Frequencies (Hz)'
@@ -74,8 +77,10 @@ CONTAINS
        READ(  ENVFile, * ) freqVec( 1 : Nfreq )
        CALL SubTab( freqVec, Nfreq )
 
-       WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, MIN( Nfreq, Number_to_Echo ) )
-       IF ( Nfreq > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', freqVec( Nfreq )
+       WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
+                                      MIN( Nfreq, Number_to_Echo ) )
+       IF ( Nfreq > Number_to_Echo ) &
+           WRITE( PRTFile,  "( G14.6 )" ) ' ... ', freqVec( Nfreq )
     ELSE
        freqVec( 1 ) = freq0
     END IF
@@ -109,7 +114,8 @@ CONTAINS
   SUBROUTINE ReadSzRz( zMin, zMax )
 
     ! Reads source and receiver z-coordinates (depths)
-    ! zMin and zMax are limits for those depths; sources and receivers are shifted to be within those limits
+    ! zMin and zMax are limits for those depths; sources and receivers are 
+    ! shifted to be within those limits
 
     REAL,    INTENT( IN ) :: zMin, zMax
     !LOGICAL               :: monotonic
@@ -129,31 +135,27 @@ CONTAINS
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
-          WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too near the top bdry has been moved down'
+          WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
+                              'near the top bdry has been moved down'
     END IF
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
        WHERE( Pos%Sz > zMax ) Pos%Sz = zMax
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source below or too near the bottom bdry has been moved up'
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source below or too ',&
+                           'near the bottom bdry has been moved up'
     END IF
 
     IF ( ANY( Pos%Rz( 1 : Pos%NRz ) < zMin ) ) THEN
        WHERE( Pos%Rz < zMin ) Pos%Rz = zMin
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver above or too near the top bdry has been moved down'
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver above or too ',&
+           'near the top bdry has been moved down'
     END IF
 
     IF ( ANY( Pos%Rz( 1 : Pos%NRz ) > zMax ) ) THEN
        WHERE( Pos%Rz > zMax ) Pos%Rz = zMax
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too near the bottom bdry has been moved up'
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too ',&
+                           'near the bottom bdry has been moved up'
     END IF
-
-!!$    IF ( .NOT. monotonic( Pos%sz, Pos%NSz ) ) THEN
-!!$       CALL ERROUT( 'SzRzRMod', 'Source depths are not monotonically increasing' )
-!!$    END IF 
-!!$ 
-!!$    IF ( .NOT. monotonic( Pos%rz, Pos%NRz ) ) THEN
-!!$       CALL ERROUT( 'SzRzRMod', 'Receiver depths are not monotonically increasing' )
-!!$    END IF 
 
     RETURN
   END SUBROUTINE ReadSzRz
@@ -169,7 +171,8 @@ CONTAINS
     IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr - 1 )
 
     IF ( .NOT. monotonic( Pos%rr, Pos%NRr ) ) THEN
-       CALL ERROUT( 'ReadRcvrRanges', 'Receiver ranges are not monotonically increasing' )
+       CALL ERROUT( 'ReadRcvrRanges', &
+           'Receiver ranges are not monotonically increasing' )
     END IF 
  
     RETURN
@@ -179,20 +182,24 @@ CONTAINS
 
   SUBROUTINE ReadRcvrBearings
 
-    CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', 'degrees' )
+    CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
+        'degrees' )
 
     ! full 360-degree sweep? remove duplicate angle
     IF ( Pos%Ntheta > 1 ) THEN
-       IF ( ABS( MOD( Pos%theta( Pos%Ntheta ) - Pos%theta( 1 ), 360.0 ) ) < 10.0 * TINY( 1.0D0 ) ) &
+       IF ( ABS( MOD( Pos%theta( Pos%Ntheta ) - Pos%theta( 1 ), 360.0 ) ) &
+           < 10.0 * TINY( 1.0D0 ) ) &
           Pos%Ntheta = Pos%Ntheta - 1
     END IF
 
     ! calculate angular spacing
     Pos%Delta_theta = 0.0
-    IF ( Pos%Ntheta /= 1 ) Pos%Delta_theta = Pos%theta( Pos%Ntheta ) - Pos%theta( Pos%Ntheta - 1 )
+    IF ( Pos%Ntheta /= 1 ) Pos%Delta_theta = Pos%theta( Pos%Ntheta ) &
+                                           - Pos%theta( Pos%Ntheta - 1 )
 
     IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
-       CALL ERROUT( 'ReadRcvrBearings', 'Receiver bearings are not monotonically increasing' )
+       CALL ERROUT( 'ReadRcvrBearings', &
+           'Receiver bearings are not monotonically increasing' )
     END IF 
  
     RETURN
@@ -218,11 +225,13 @@ CONTAINS
     READ(  ENVFile, * ) Nx
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
-    IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // 'must be positive'  )
+    IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
+                                'must be positive'  )
 
     IF ( ALLOCATED( x ) ) DEALLOCATE( x )
     ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // Description )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
+                                        Description )
 
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
     x( 3 ) = -999.9

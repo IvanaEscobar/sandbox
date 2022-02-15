@@ -19,9 +19,9 @@ MODULE beampattern
 !=======================================================================
 
   INTEGER, PARAMETER         :: SBPFile = 50
-  INTEGER                    :: NSBPPts          ! Number of source beam-pattern points
+  INTEGER                    :: NSBPPts ! Number of source beam-pattern points
   REAL (KIND=_RL90), ALLOCATABLE :: SrcBmPat( :, : )
-  CHARACTER (LEN=1)          :: SBPFlag          ! '*' or 'O' to indicate a directional or omni pattern
+  CHARACTER (LEN=1)          :: SBPFlag ! '*' or 'O' to indicate a directional or omni pattern
 
 CONTAINS
   SUBROUTINE ReadPat( FileRoot, PRTFile )
@@ -35,10 +35,12 @@ CONTAINS
        WRITE( PRTFile, * ) '______________________________'
        WRITE( PRTFile, * ) 'Using source beam pattern file'
 
-       OPEN( UNIT = SBPFile,   FILE = TRIM( FileRoot ) // '.sbp', STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( UNIT = SBPFile, FILE = TRIM( FileRoot ) // '.sbp', STATUS = 'OLD',&
+             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOstat /= 0 ) THEN
           WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
-          CALL ERROUT( 'BELLHOP-ReadPat', 'Unable to open source beampattern file' )
+          CALL ERROUT( 'BELLHOP-ReadPat', &
+                                    'Unable to open source beampattern file' )
        END IF
 
        READ(  SBPFile, * ) NSBPPts
@@ -46,7 +48,8 @@ CONTAINS
 
        ALLOCATE( SrcBmPat( NSBPPts, 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP-ReadPat', 'Insufficient memory for source beam pattern data: reduce # SBP points' )
+            CALL ERROUT( 'BELLHOP-ReadPat', &
+            'Insufficient memory for source beam pattern data: reduce # SBP points' )
 
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Angle (degrees)  Power (dB)'
@@ -59,12 +62,13 @@ CONTAINS
     ELSE   ! no pattern given, use omni source pattern
        NSBPPts = 2
        ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', 'Insufficient memory'  )
+       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', &
+                                           'Insufficient memory'  )
        SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
        SrcBmPat( 2, : ) = [  180.0, 0.0 ]
     ENDIF
 
-    SrcBmPat( :, 2 ) = 10 ** ( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
+    SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
 
   END SUBROUTINE ReadPat
 

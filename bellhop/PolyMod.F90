@@ -71,7 +71,7 @@ CONTAINS
              !         ft( J ) = ( h( J+I ) * ft( J ) - h( J ) * ft( J+1 ) ) / &
              !                                   ( h( J+I ) - h( J ) )
              ft( J ) = ft( J ) + h( J ) * ( ft( J )  - ft( J+1 ) ) / &
-                  &                       ( h( J+I ) - h(  J   ) )
+                                          ( h( J+I ) - h(  J   ) )
           END DO
        END DO
     ENDIF
@@ -84,7 +84,7 @@ CONTAINS
 
   FUNCTION PolyZ( x0, x, F, N )
 
-    INTEGER,            INTENT( IN ) :: N  ! order of the polynomial
+    INTEGER,                INTENT( IN ) :: N  ! order of the polynomial
     COMPLEX ( KIND=_RL90 ), INTENT( IN ) :: x0, x( N ), f( N ) ! x, y values of the polynomial
     COMPLEX ( KIND=_RL90 )    :: PolyZ
     COMPLEX ( KIND=_RL90 )    :: fT( N ), h( N )
@@ -97,7 +97,8 @@ CONTAINS
     IF ( N >= 2 ) THEN
        DO i = 1, N - 1
           DO j = 1, N - i
-             fT( j ) = ( h( j + i ) * fT( j ) - h( j ) * fT( j + 1 ) ) / ( h( j + i ) - h( j ) )
+             fT( j ) = ( h( j + i ) * fT( j ) - h( j ) * fT( j + 1 ) ) &
+                     / ( h( j + i ) - h( j ) )
           END DO
        END DO
     ENDIF

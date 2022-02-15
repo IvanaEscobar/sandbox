@@ -27,10 +27,11 @@ MODULE attenmod
   INTEGER, PRIVATE, PARAMETER      :: PRTFile = 6
   INTEGER, PARAMETER               :: MaxBioLayers = 200
   INTEGER                          :: iBio, NBioLayers
-  _RL :: T = 20, Salinity = 35, pH = 8, z_bar = 0, FG   ! Francois-Garrison volume attenuation; temperature, salinity, ...
+  ! Francois-Garrison volume attenuation; temperature, salinity, ...
+  REAL (KIND=_RL90) :: T = 20, Salinity = 35, pH = 8, z_bar = 0, FG   
 
   TYPE bioStructure
-     _RL :: Z1, Z2, f0, Q, a0
+     REAL (KIND=_RL90) :: Z1, Z2, f0, Q, a0
   END TYPE bioStructure
 
   TYPE( bioStructure ) :: bio( MaxBioLayers )
@@ -56,7 +57,8 @@ CONTAINS
     !             B for biological
     !
     ! freq is the current frequency
-    ! freq0 is the reference frequency for which the dB/meter was specified (used only for 'm')
+    ! freq0 is the reference frequency for which the dB/meter was specified 
+    !  (used only for 'm')
 
     ! Returns
     ! c     real      part of sound speed
@@ -64,10 +66,10 @@ CONTAINS
 
     USE constants_mod,    only: pi
 
-    _RL, INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
+    REAL (KIND=_RL90), INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN )  :: AttenUnit
-    _RL                :: f2, omega, alphaT, Thorp, a, FG
-    COMPLEX  (KIND=8)                :: CRCI
+    REAL (KIND=_RL90)                :: f2, omega, alphaT, Thorp, a, FG
+    COMPLEX  (KIND=_RL90)                :: CRCI
 
     omega = 2.0 * pi * freq
 
@@ -91,7 +93,7 @@ CONTAINS
        IF ( c /= 0.0         ) alphaT = alpha * freq / ( 8.6858896D0 * c )
        !        The following lines give f^1.25 frequency dependence
        !        FAC = SQRT( SQRT( freq / 50.0 ) )
-       !        IF ( c /= 0.0 ) alphaT = FAC * alpha * freq / ( 8.6858896D0 * c )
+       !        IF ( c /= 0.0 ) alphaT = FAC * alpha * freq / ( 8.6858896D0*c )
     CASE ( 'Q' )   ! Quality factor
        IF ( c * alpha /= 0.0 ) alphaT = omega / ( 2.0 * c * alpha )
     CASE ( 'L' )   ! loss parameter
@@ -104,24 +106,26 @@ CONTAINS
        f2 = ( freq / 1000.0 ) ** 2
 
        ! Original formula from Thorp 1967
-       ! Thorp = 40.0 * f2 / ( 4100.0 + f2 ) + 0.1 * f2 / ( 1.0 + f2 )   ! dB/kyard
-       ! Thorp = Thorp / 914.4D0                 ! dB / m
-       ! Thorp = Thorp / 8.6858896D0             ! Nepers / m
+       ! Thorp = 40.0 * f2 / ( 4100.0 + f2 ) + 0.1 * f2 / ( 1.0 + f2 )! dB/kyard
+       ! Thorp = Thorp / 914.4D0              ! dB / m
+       ! Thorp = Thorp / 8.6858896D0          ! Nepers / m
 
        ! Updated formula from JKPS Eq. 1.34
-       Thorp = 3.3d-3 + 0.11 * f2 / ( 1.0 + f2 ) + 44.0 * f2 / ( 4100.0 + f2 ) + 3d-4 * f2   ! dB/km
+       Thorp = 3.3d-3 + 0.11 * f2 / ( 1.0 + f2 ) + 44.0 * f2 / ( 4100.0 + f2 ) &
+               + 3d-4 * f2       ! dB/km
        Thorp = Thorp / 8685.8896 ! Nepers / m
 
        alphaT = alphaT + Thorp
     CASE ( 'F' )   ! Francois-Garrison
-       FG     = Franc_Garr( freq / 1000 );   ! dB/km
-       FG     = FG / 8685.8896;                           ! Nepers / m
+       FG     = Franc_Garr( freq / 1000 )   ! dB/km
+       FG     = FG / 8685.8896              ! Nepers / m
        alphaT = alphaT + FG
     CASE ( 'B' )   ! biological attenuation per Orest Diachok
        DO iBio = 1, NBioLayers
           IF ( z >= bio( iBio )%Z1 .AND. z <= bio( iBio )%Z2 ) THEN
-             a = bio( iBio )%a0 / ( ( 1.0 - bio( iBio )%f0 ** 2 / freq ** 2  ) ** 2 + 1.0 / bio( iBio )%Q ** 2 )   ! dB/km
-             a = a / 8685.8896   ! Nepers / m
+             a = bio( iBio )%a0 / ( ( 1.0 - bio( iBio )%f0**2 / freq**2  )**2 &
+                 + 1.0 / bio( iBio )%Q**2 ) ! dB/km
+             a = a / 8685.8896              ! Nepers / m
              alphaT = alphaT + a
           END IF
        END DO
@@ -134,7 +138,8 @@ CONTAINS
     IF ( alphaT > c ) THEN
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI
        WRITE( PRTFile, * ) 'Usually this means you have an attenuation that is way too high'
-       CALL ERROUT( 'AttenMod : CRCI ', 'The complex sound speed has an imaginary part > real part' )
+       CALL ERROUT( 'AttenMod : CRCI ', &
+                'The complex sound speed has an imaginary part > real part' )
     END IF
 
     RETURN
@@ -160,31 +165,32 @@ CONTAINS
     !     Returns
     !        alpha = volume attenuation in dB/km
 
-    _RL :: f, Franc_Garr
-    _RL :: c, A1, A2, A3, P1, P2, P3, f1, f2
+    REAL (KIND=_RL90) :: f, Franc_Garr
+    REAL (KIND=_RL90) :: c, A1, A2, A3, P1, P2, P3, f1, f2
 
     c = 1412 + 3.21 * T + 1.19 * Salinity + 0.0167 * z_bar
 
     ! Boric acid contribution
-    A1 = 8.86 / c * 10 ** ( 0.78 * pH - 5 )
+    A1 = 8.86 / c * 10**( 0.78 * pH - 5 )
     P1 = 1
-    f1 = 2.8 * sqrt( Salinity / 35 ) * 10 ** ( 4 - 1245 / ( T + 273 ) )
+    f1 = 2.8 * sqrt( Salinity / 35 ) * 10**( 4 - 1245 / ( T + 273 ) )
 
     ! Magnesium sulfate contribution
     A2 = 21.44 * Salinity / c * ( 1 + 0.025 * T )
-    P2 = 1 - 1.37D-4 * z_bar + 6.2D-9 * z_bar ** 2
-    f2 = 8.17 * 10 ** ( 8 - 1990 / ( T + 273 ) ) / ( 1 + 0.0018 * ( Salinity - 35 ) )
+    P2 = 1 - 1.37D-4 * z_bar + 6.2D-9 * z_bar**2
+    f2 = 8.17 * 10**( 8 - 1990 / ( T + 273 ) ) / ( 1 + 0.0018*( Salinity - 35 ) )
 
     ! Viscosity
-    P3 = 1 - 3.83D-5 * z_bar + 4.9D-10 * z_bar ** 2
+    P3 = 1 - 3.83D-5 * z_bar + 4.9D-10 * z_bar**2
     if ( T < 20 ) THEN
-       A3 = 4.937D-4 - 2.59D-5 * T + 9.11D-7 * T ** 2 - 1.5D-8  * T ** 3
+       A3 = 4.937D-4 - 2.59D-5 * T + 9.11D-7 * T**2 - 1.5D-8  * T**3
     else
-       A3 = 3.964D-4 -1.146D-5 * T + 1.45D-7 * T ** 2 - 6.5D-10 * T ** 3
+       A3 = 3.964D-4 -1.146D-5 * T + 1.45D-7 * T**2 - 6.5D-10 * T**3
     end if
 
-    Franc_Garr = A1 * P1 * ( f1 * f ** 2 ) / ( f1 ** 2 + f ** 2 ) + A2 * P2 * ( f2 * f ** 2 ) / ( f2 ** 2 + f ** 2 ) + &
-         A3 * P3 * f ** 2
+    Franc_Garr = A1 * P1 * ( f1 * f**2 ) / ( f1**2 + f**2 ) &
+                 + A2 * P2 * ( f2 * f**2 ) / ( f2**2 + f**2 ) &
+                 + A3 * P3 * f**2
 
   END FUNCTION Franc_Garr
 

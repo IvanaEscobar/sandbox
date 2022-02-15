@@ -36,25 +36,31 @@ CONTAINS
          c0, cimag0, crr0, crz0, czz0, csq0, cnn0_csq0, &
          c1, cimag1, crr1, crz1, czz1, csq1, cnn1_csq1, &
          c2, cimag2, crr2, crz2, czz2, urayt0( 2 ), urayt1( 2 ), &
-         h, halfh, hw0, hw1, ray2n( 2 ), RM, RN, gradcjump( 2 ), cnjump, csjump, w0, w1, rho 
+         h, halfh, hw0, hw1, ray2n( 2 ), RM, RN, gradcjump( 2 ), cnjump, &
+         csjump, w0, w1, rho 
 
-    ! The numerical integrator used here is a version of the polygon (a.k.a. midpoint, leapfrog, or Box method), and similar
+    ! The numerical integrator used here is a version of the polygon (a.k.a. 
+    ! midpoint, leapfrog, or Box method), and similar
     ! to the Heun (second order Runge-Kutta method).
-    ! However, it's modified to allow for a dynamic step change, while preserving the second-order accuracy).
+    ! However, it's modified to allow for a dynamic step change, while 
+    !  preserving the second-order accuracy).
 
     ! *** Phase 1 (an Euler step)
 
-    CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, freq, 'TAB' )
+    CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, freq,&
+                      'TAB' )
 
     csq0      = c0 * c0
-    cnn0_csq0 = crr0 * ray0%t( 2 )**2 - 2.0 * crz0 * ray0%t( 1 ) * ray0%t( 2 ) + czz0 * ray0%t( 1 )**2
+    cnn0_csq0 = crr0 * ray0%t( 2 )**2 - 2.0 * crz0 * ray0%t( 1 ) * ray0%t( 2 )& 
+              + czz0 * ray0%t( 1 )**2
     iSegz0    = iSegz     ! make note of current layer
     iSegr0    = iSegr
 
     h = Beam%deltas       ! initially set the step h, to the basic one, deltas
     urayt0 = c0 * ray0%t  ! unit tangent
 
-    CALL ReduceStep2D( ray0%x, urayt0, iSegz0, iSegr0, Topx, Topn, Botx, Botn, h ) ! reduce h to land on boundary
+    CALL ReduceStep2D( ray0%x, urayt0, iSegz0, iSegr0, Topx, Topn, Botx, &
+                       Botn, h ) ! reduce h to land on boundary
     halfh = 0.5 * h   ! first step of the modified polygon method is a half step
 
     ray1%x = ray0%x + halfh * urayt0
@@ -64,18 +70,22 @@ CONTAINS
 
     ! *** Phase 2
 
-    CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, freq, 'TAB' )
+    CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, freq,& 
+                      'TAB' )
     csq1      = c1 * c1
-    cnn1_csq1 = crr1 * ray1%t( 2 )**2 - 2.0 * crz1 * ray1%t( 1 ) * ray1%t( 2 ) + czz1 * ray1%t( 1 )**2
+    cnn1_csq1 = crr1 * ray1%t( 2 )**2 - 2.0 * crz1 * ray1%t( 1 ) * ray1%t( 2 )&
+              + czz1 * ray1%t( 1 )**2
 
     ! The Munk test case with a horizontally launched ray caused problems.
     ! The ray vertexes on an interface and can ping-pong around that interface.
-    ! Have to be careful in that case about big changes to the stepsize (that invalidate the leap-frog scheme) in phase II.
+    ! Have to be careful in that case about big changes to the stepsize (that 
+    ! invalidate the leap-frog scheme) in phase II.
     ! A modified Heun or Box method could also work.
 
     urayt1 = c1 * ray1%t   ! unit tangent
 
-    CALL ReduceStep2D( ray0%x, urayt1, iSegz0, iSegr0, Topx, Topn, Botx, Botn, h ) ! reduce h to land on boundary
+    CALL ReduceStep2D( ray0%x, urayt1, iSegz0, iSegr0, Topx, Topn, Botx, &
+                       Botn, h ) ! reduce h to land on boundary
 
     ! use blend of f' based on proportion of a full step used.
     w1  = h / ( 2.0d0 * halfh )
@@ -87,7 +97,8 @@ CONTAINS
     ray2%t   = ray0%t   - hw0 * gradc0 / csq0       - hw1 * gradc1 / csq1
     ray2%p   = ray0%p   - hw0 * cnn0_csq0 * ray0%q  - hw1 * cnn1_csq1 * ray1%q
     ray2%q   = ray0%q   + hw0 * c0        * ray0%p  + hw1 * c1        * ray1%p
-    ray2%tau = ray0%tau + hw0 / CMPLX( c0, cimag0, KIND=_RL90 ) + hw1 / CMPLX( c1, cimag1, KIND=_RL90 )
+    ray2%tau = ray0%tau + hw0 / CMPLX( c0, cimag0, KIND=_RL90 ) &
+             + hw1 / CMPLX( c1, cimag1, KIND=_RL90 )
 
     ray2%Amp       = ray0%Amp
     ray2%Phase     = ray0%Phase
@@ -96,7 +107,8 @@ CONTAINS
 
     ! If we crossed an interface, apply jump condition
 
-    CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, freq, 'TAB' )
+    CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, freq,&
+                      'TAB' )
     ray2%c = c2
 
     IF ( iSegz /= iSegz0 .OR. iSegr /= iSegr0 ) THEN
@@ -107,9 +119,11 @@ CONTAINS
        csjump    = DOT_PRODUCT( gradcjump, ray2%t )
 
        IF ( iSegz /= iSegz0 ) THEN         ! crossing in depth
-          RM = +ray2%t( 1 ) / ray2%t( 2 )  ! this is tan( alpha ) where alpha is the angle of incidence
+! RM is tan( alpha ) where alpha is the angle of incidence
+          RM = +ray2%t( 1 ) / ray2%t( 2 )  
        ELSE                                ! crossing in range
-          RM = -ray2%t( 2 ) / ray2%t( 1 )  ! this is tan( alpha ) where alpha is the angle of incidence
+! RM is tan( alpha ) where alpha is the angle of incidence
+          RM = -ray2%t( 2 ) / ray2%t( 1 )  
        END IF
 
        RN     = RM * ( 2 * cnjump - RM * csjump ) / c2
@@ -123,19 +137,23 @@ CONTAINS
 
   SUBROUTINE ReduceStep2D( x0, urayt, iSegz0, iSegr0, Topx, Topn, Botx, Botn, h )
 
-    ! calculate a reduced step size, h, that lands on any points where the environment changes
+    ! calculate a reduced step size, h, that lands on any points where the 
+    ! environment changes
 
     USE bdrymod, only: rTopSeg, rBotSeg, iSmallStepCtr
 
-    INTEGER,       INTENT( IN    ) :: iSegz0, iSegr0                             ! SSP layer the ray is in
-    REAL (KIND=_RL90), INTENT( IN    ) :: x0( 2 ), urayt( 2 )                        ! ray coordinate and tangent
+    INTEGER,           INTENT( IN    ) :: iSegz0, iSegr0  ! SSP layer ray is in
+    REAL (KIND=_RL90), INTENT( IN    ) :: x0( 2 ), urayt( 2 )   ! ray coordinate and tangent
     REAL (KIND=_RL90), INTENT( IN    ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 ) ! Top, bottom coordinate and normal
-    REAL (KIND=_RL90), INTENT( INOUT ) :: h                                          ! reduced step size 
-    REAL (KIND=_RL90)                  :: x( 2 ), d( 2 ), d0( 2 ), h1, h2, h3, h4, rSeg( 2 )
+    REAL (KIND=_RL90), INTENT( INOUT ) :: h ! reduced step size 
+    REAL (KIND=_RL90)                  :: x( 2 ), d( 2 ), d0( 2 ), h1, h2, &
+                                          h3, h4, rSeg( 2 )
 
-    ! Detect interface or boundary crossing and reduce step, if necessary, to land on that crossing.
+    ! Detect interface or boundary crossing and reduce step, if necessary, to 
+    ! land on that crossing.
     ! Keep in mind possibility that user put source right on an interface
-    ! and that multiple events can occur (crossing interface, top, and bottom in a single step).
+    ! and that multiple events can occur (crossing interface, top, and bottom 
+    ! in a single step).
 
     x = x0 + h * urayt ! make a trial step
 
@@ -183,10 +201,12 @@ CONTAINS
        END IF
     END IF
 
-    h = MIN( h, h1, h2, h3, h4 )           ! take limit set by shortest distance to a crossing
+    h = MIN( h, h1, h2, h3, h4 )           ! take limit set by shortest 
+    ! distance to a crossing
     IF ( h < 1.0d-4 * Beam%deltas ) THEN   ! is it taking an infinitesimal step?
        h = 1.0d-5 * Beam%deltas            ! make sure we make some motion
-       iSmallStepCtr = iSmallStepCtr + 1   ! keep a count of the number of sequential small steps
+       iSmallStepCtr = iSmallStepCtr + 1   ! keep a count of the number of 
+       ! sequential small steps
     ELSE
        iSmallStepCtr = 0   ! didn't do a small step so reset the counter
     END IF

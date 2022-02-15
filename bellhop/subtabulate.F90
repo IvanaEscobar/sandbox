@@ -49,8 +49,8 @@ CONTAINS
   SUBROUTINE SubTab_dble( x, Nx )
 
     INTEGER,       INTENT( IN )    :: Nx
-    REAL (KIND=8), INTENT( INOUT ) :: x( Nx )
-    REAL (KIND=8)                  :: deltax
+    REAL (KIND=_RL90), INTENT( INOUT ) :: x( Nx )
+    REAL (KIND=_RL90)                  :: deltax
 
     IF ( Nx >= 3 ) THEN
        IF ( x( 3 ) == -999.9 ) THEN   ! testing for equality here is dangerous

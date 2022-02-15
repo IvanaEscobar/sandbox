@@ -39,7 +39,7 @@ CONTAINS
   FUNCTION monotonic_dble( x, N )
     LOGICAL               :: monotonic_dble
     INTEGER, INTENT( IN ) :: N
-    _RL, DIMENSION( N ), INTENT( IN ) :: x
+    REAL (KIND=_RL90), DIMENSION( N ), INTENT( IN ) :: x
 
     monotonic_dble = .TRUE.
     IF ( N == 1 ) RETURN
