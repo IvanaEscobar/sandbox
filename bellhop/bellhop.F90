@@ -1,7 +1,7 @@
 #include "BELLHOP_OPTIONS_90.h"
 !BOP
 ! !INTERFACE:
-PROGRAM BELLHOP
+!SUBROUTINE BELLHOP
 
   ! BELLHOP Beam tracing for ocean acoustics
 
@@ -25,9 +25,9 @@ PROGRAM BELLHOP
   USE bellhop_mod ! Added to get title, freq, Beam
   USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
                                       ARRFile, RAYFile, MaxN
-  USE read_environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
+  USE read_Environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
                                       TopBot, OpenOutputFiles
-  USE fatal_error,              only: ERROUT
+  USE fatal_Error,              only: ERROUT
   USE AngleMod,                 only: Angles, ialpha
   USE SourceReceiverPositions,  only: Pos
   USE SSPMod                   
@@ -39,14 +39,14 @@ PROGRAM BELLHOP
                                       InterpolateReflectionCoefficient,&
                                       ReflectionCoef, RTop, RBot, NBotPts, & 
                                       NTopPts
-  USE influence,                only: InfluenceCervenyRayCen,&
+  USE Influence,                only: InfluenceCervenyRayCen,&
                                       InfluenceCervenyCart,&
                                       InfluenceGeoHatRayCen, InfluenceSGB,&
                                       InfluenceGeoGaussianCart,&
                                       InfluenceGeoHatCart, ScalePressure
   USE AttenMod,                 only: CRCI
   USE BeamPattern
-  USE writeray,                 only: WriteRay2D
+  USE WriteRay,                 only: WriteRay2D
 
   IMPLICIT NONE
   #include "EEPARAMS_90.h"
@@ -162,16 +162,17 @@ PROGRAM BELLHOP
   END IF
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
-  CALL BellhopCore
+  CALL BellhopCore( Beam )
 
-  CONTAINS
+!END SUBROUTINE BELLHOP
 
 ! **********************************************************************!
 
-SUBROUTINE BellhopCore
+SUBROUTINE BellhopCore ( Beam )
 
   USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr,&
                       NArr
+!  USE bellhop_mod, only: BeamStructure
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
@@ -180,6 +181,8 @@ SUBROUTINE BellhopCore
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX     (KIND=8) :: epsilon
+
+!  TYPE ( BeamStructure ), INTENT(INOUT) :: Beam
 
   CALL CPU_TIME( Tstart )
 
@@ -789,7 +792,4 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   END SELECT
 
 END SUBROUTINE Reflect2D
-
-END PROGRAM BELLHOP
-
 

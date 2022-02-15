@@ -6,17 +6,18 @@ MODULE influence
     !   Ivana Escobar
     ! </CONTACT>
 
-  ! Compute the beam influence, i.e. the contribution of a single beam to the complex pressure
+  ! Compute the beam influence, i.e. the contribution of a single beam to the 
+  ! complex pressure
   ! mbp 12/2018, based on much older subroutines
 
-  USE bellhop_mod
+  USE bellhop_mod ! added to get Beam
   USE constants_mod,            only: pi, i, RadDeg, PRTFile, MaxN
   USE sourcereceiverpositions,  only: Pos
 ! used to construct image beams in the Cerveny style beam routines
   USE sspmod,                   only: EvaluateSSP, Bdry 
-  USE writeray,                 only: WriteRay2D
   USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary,&
                                       AddArr
+  USE writeray,                 only: WriteRay2D ! for eigen rays option
 
   IMPLICIT NONE
   PRIVATE
