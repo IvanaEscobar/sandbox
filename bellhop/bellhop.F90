@@ -1,8 +1,8 @@
 #include "BELLHOP_OPTIONS_90.h"
 !BOP
 ! !INTERFACE:
-!SUBROUTINE BELLHOP
-
+MODULE BELLHOP
+  ! Written as a module to be used in bellhop*.F parts of the MITgcm package
   ! BELLHOP Beam tracing for ocean acoustics
 
   ! Copyright (C) 2009 Michael B. Porter
@@ -30,7 +30,8 @@
   USE fatal_Error,              only: ERROUT
   USE AngleMod,                 only: Angles, ialpha
   USE SourceReceiverPositions,  only: Pos
-  USE SSPMod                   
+  USE SSPMod,                   only: EvaluateSSP, HSInfo, Bdry, SSP, &
+                                      betaPowerLaw, fT
   USE BdryMod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
                                       Bot, Top, atiType, btyType, NatiPts,&
                                       NbtyPts, iSmallStepCtr, IsegTop, IsegBot,&
@@ -49,15 +50,18 @@
   USE WriteRay,                 only: WriteRay2D
 
   IMPLICIT NONE
+  ! PRIVATE
   #include "EEPARAMS_90.h"
   
+  INTEGER              :: iostat, iAllocStat  
+
+CONTAINS
+SUBROUTINE BELLHOP_DRIVER
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: jj 
-! added locally previously read in from unknown mod ... IE2022
-  INTEGER              :: iostat, iAllocStat  
+! added locally previously read in from unknown mod ... IEsco2022
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
-
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
@@ -162,17 +166,14 @@
   END IF
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
-  CALL BellhopCore( Beam )
-
-!END SUBROUTINE BELLHOP
+  CALL BellhopCore
+END SUBROUTINE BELLHOP_DRIVER
 
 ! **********************************************************************!
-
-SUBROUTINE BellhopCore ( Beam )
+SUBROUTINE BellhopCore
 
   USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr,&
                       NArr
-!  USE bellhop_mod, only: BeamStructure
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
@@ -182,7 +183,6 @@ SUBROUTINE BellhopCore ( Beam )
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX     (KIND=8) :: epsilon
 
-!  TYPE ( BeamStructure ), INTENT(INOUT) :: Beam
 
   CALL CPU_TIME( Tstart )
 
@@ -793,3 +793,4 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
 END SUBROUTINE Reflect2D
 
+END MODULE BELLHOP

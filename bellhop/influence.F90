@@ -17,7 +17,7 @@ MODULE influence
   USE sspmod,                   only: EvaluateSSP, Bdry 
   USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary,&
                                       AddArr
-  USE writeray,                 only: WriteRay2D ! for eigen rays option
+  USE writeray
 
   IMPLICIT NONE
   PRIVATE
