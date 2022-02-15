@@ -915,23 +915,27 @@ END SUBROUTINE Analytic3D
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
-    WRITE( PRTFile, "( '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+    WRITE( PRTFile, &
+        "( '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
        
     SSP%NPts = 1
 
     DO iz = 1, MaxSSP
 
        READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
-       WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
+       WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
+           SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 
-       SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, SSP%AttenUnit, betaPowerLaw, fT )
+       SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
+                             SSP%AttenUnit, betaPowerLaw, fT )
        SSP%rho( iz ) = rhoR
 
        ! verify that the depths are monotone increasing
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
               WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z( iz )
-              CALL ERROUT( 'ReadSSP', 'The depths in the SSP must be monotone increasing' )
+              CALL ERROUT( 'ReadSSP', &
+                  'The depths in the SSP must be monotone increasing' )
           END IF
        END IF
 

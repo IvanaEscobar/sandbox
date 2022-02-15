@@ -34,14 +34,17 @@ MODULE arrmod
   TYPE(Arrival), ALLOCATABLE :: Arr( :, :, : ), Arr3D( :, :, :, : )
 
 CONTAINS
-  SUBROUTINE AddArr( omega, id, ir, Amp, Phase, delay, SrcDeclAngle, RcvrDeclAngle, NumTopBnc, NumBotBnc )
+  SUBROUTINE AddArr( omega, id, ir, Amp, Phase, delay, SrcDeclAngle, &
+                     RcvrDeclAngle, NumTopBnc, NumBotBnc )
 
     ! ADDs the amplitude and delay for an ARRival into a matrix of same.
     ! Extra logic included to keep only the strongest arrivals.
-
-    REAL,      PARAMETER :: PhaseTol = 0.05  ! arrivals with essentially the same phase are grouped into one
+    
+    ! arrivals with essentially the same phase are grouped into one
+    REAL,      PARAMETER :: PhaseTol = 0.05 
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, id, ir
-    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, RcvrDeclAngle
+    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, &
+                                          RcvrDeclAngle
     COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL              :: NewRay
     INTEGER              :: iArr( 1 ), Nt
@@ -53,47 +56,52 @@ CONTAINS
     ! Is this the second bracketting ray of a pair?
     ! If so, we want to combine the arrivals to conserve space.
     ! (test this by seeing if the arrival time is close to the previous one)
-    ! (also need that the phase is about the same to make sure surface and direct paths are not joined)
+    ! (also need that the phase is about the same to make sure surface and 
+    ! direct paths are not joined)
 
     IF ( Nt >= 1 ) THEN
        IF ( omega * ABS( delay - Arr( id, ir, Nt )%delay ) < PhaseTol .AND. &
-           ABS( Arr( id, ir, Nt )%phase - Phase )       < PhaseTol ) NewRay = .FALSE.
+           ABS( Arr( id, ir, Nt )%phase - Phase ) < PhaseTol ) NewRay = .FALSE.
     END IF
 
     IF ( NewRay ) THEN
        IF ( Nt >= MaxNArr ) THEN       ! space available to add an arrival?
-          iArr = MINLOC( Arr( id, ir, : )%A )                       ! no: replace weakest arrival
+          iArr = MINLOC( Arr( id, ir, : )%A )   ! no: replace weakest arrival
           IF ( Amp > Arr( id, ir, iArr( 1 ) )%A ) THEN
              Arr( id, ir, iArr( 1 ) )%A             = SNGL( Amp )       ! amplitude
              Arr( id, ir, iArr( 1 ) )%Phase         = SNGL( Phase )     ! phase
              Arr( id, ir, iArr( 1 ) )%delay         = CMPLX( delay )    ! delay time
              Arr( id, ir, iArr( 1 ) )%SrcDeclAngle  = SNGL( SrcDeclAngle )  ! angle
              Arr( id, ir, iArr( 1 ) )%RcvrDeclAngle = SNGL( RcvrDeclAngle ) ! angle
-             Arr( id, ir, iArr( 1 ) )%NTopBnc       = NumTopBnc         ! Number of top     bounces
-             Arr( id, ir, iArr( 1 ) )%NBotBnc       = NumBotBnc         !   "       bottom
+             Arr( id, ir, iArr( 1 ) )%NTopBnc       = NumTopBnc         ! # top bounces
+             Arr( id, ir, iArr( 1 ) )%NBotBnc       = NumBotBnc         ! # bottom bounces
           ENDIF
        ELSE
-          NArr( id, ir         )               = Nt + 1              ! # of arrivals
+          NArr( id, ir         )               = Nt + 1              ! # arrivals
           Arr(  id, ir, Nt + 1 )%A             = SNGL( Amp )         ! amplitude
           Arr(  id, ir, Nt + 1 )%Phase         = SNGL( Phase )       ! phase
           Arr(  id, ir, Nt + 1 )%delay         = CMPLX( delay )      ! delay time
           Arr(  id, ir, Nt + 1 )%SrcDeclAngle  = SNGL( SrcDeclAngle )    ! angle
           Arr(  id, ir, Nt + 1 )%RcvrDeclAngle = SNGL( RcvrDeclAngle )   ! angle
-          Arr(  id, ir, Nt + 1 )%NTopBnc       = NumTopBnc           ! Number of top     bounces
-          Arr(  id, ir, Nt + 1 )%NBotBnc       = NumBotBnc           !   "       bottom
+          Arr(  id, ir, Nt + 1 )%NTopBnc       = NumTopBnc           ! # top bounces
+          Arr(  id, ir, Nt + 1 )%NBotBnc       = NumBotBnc           ! # bottom bounces
        ENDIF
     ELSE      ! not a new ray
        !PhaseArr(   id, ir, Nt ) = PhaseArr( id, ir, Nt )
 
-       ! calculate weightings of old ray information vs. new, based on amplitude of the arrival
+       ! calculate weightings of old ray information vs. new, based on 
+       ! amplitude of the arrival
        AmpTot = Arr( id, ir, Nt )%A + SNGL( Amp )
        w1     = Arr( id, ir, Nt )%A / AmpTot
        w2     = REAL( Amp ) / AmpTot
 
-       Arr( id, ir, Nt )%delay         = w1 * Arr( id, ir, Nt )%delay         + w2 * CMPLX( delay ) ! weighted sum
+       Arr( id, ir, Nt )%delay         = w1 * Arr( id, ir, Nt )%delay &        
+                                         + w2 * CMPLX( delay ) ! weighted sum
        Arr( id, ir, Nt )%A             = AmpTot
-       Arr( id, ir, Nt )%SrcDeclAngle  = w1 * Arr( id, ir, Nt )%SrcDeclAngle  + w2 * SNGL( SrcDeclAngle  )
-       Arr( id, ir, Nt )%RcvrDeclAngle = w1 * Arr( id, ir, Nt )%RcvrDeclAngle + w2 * SNGL( RcvrDeclAngle )
+       Arr( id, ir, Nt )%SrcDeclAngle  = w1 * Arr( id, ir, Nt )%SrcDeclAngle & 
+                                         + w2 * SNGL( SrcDeclAngle  )
+       Arr( id, ir, Nt )%RcvrDeclAngle = w1 * Arr( id, ir, Nt )%RcvrDeclAngle & 
+                                         + w2 * SNGL( RcvrDeclAngle )
     ENDIF
 
     RETURN
@@ -128,7 +136,8 @@ CONTAINS
 
           WRITE( ARRFile, * ) NArr( id, ir )
           DO iArr = 1, NArr( id, ir )
-             ! You can compress the output file a lot by putting in an explicit format statement here ...
+             ! You can compress the output file a lot by putting in an explicit 
+             ! format statement here ...
              ! However, you'll need to make sure you keep adequate precision
              WRITE( ARRFile, * ) &
              SNGL( factor ) * Arr( id, ir, iArr )%A,             &
@@ -201,10 +210,13 @@ CONTAINS
     ! ADDs the amplitude and delay for an ARRival into a matrix of same.
     ! Extra logic included to keep only the strongest arrivals.
 
-    REAL,                 PARAMETER    :: PhaseTol = 0.5  ! arrivals with essentially the same phase are grouped into one
+    ! arrivals with essentially the same phase are grouped into one
+    REAL,                 PARAMETER    :: PhaseTol = 0.5 
     INTEGER,              INTENT( IN ) :: itheta, id, ir
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc
-    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, SrcAzimAngle, RcvrDeclAngle, RcvrAzimAngle
+    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle,&
+                                          SrcAzimAngle, RcvrDeclAngle, &
+                                          RcvrAzimAngle
 
     COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL                            :: NewRay
@@ -217,52 +229,60 @@ CONTAINS
     ! Is this the second bracketting ray of a pair?
     ! If so, we want to combine the arrivals to conserve space.
     ! (test this by seeing if the arrival time is close to the previous one)
-    ! (also need that the phase is about the same to make sure surface and direct paths are not joined)
+    ! (also need that the phase is about the same to make sure surface and 
+    ! direct paths are not joined)
 
     IF ( Nt >= 1 ) THEN
-       IF ( omega * ABS( delay - Arr3D( itheta,  id, ir, Nt )%delay ) < PhaseTol .AND. &
-           ABS( Arr3D( itheta,  id, ir, Nt )%phase - Phase )       < PhaseTol ) NewRay = .FALSE.
+       IF ( omega*ABS( delay - Arr3D( itheta, id, ir, Nt )%delay ) < PhaseTol &
+           .AND.  ABS( Arr3D( itheta, id, ir, Nt )%phase - Phase ) < PhaseTol )& 
+       NewRay = .FALSE.
     END IF
 
     IF ( NewRay ) THEN
        IF ( Nt >= MaxNArr ) THEN       ! space available to add an arrival?
-          iArr = MINLOC( Arr3D( itheta,  id, ir, : )%A )                       ! no: replace weakest arrival
+          iArr = MINLOC( Arr3D( itheta,  id, ir, : )%A ) ! no: replace weakest arrival
           IF ( Amp > Arr3D( itheta,  id, ir, iArr( 1 ) )%A ) THEN
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%A             = SNGL( Amp )       ! amplitude
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%Phase         = SNGL( Phase )     ! phase
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%delay         = CMPLX( delay )    ! delay time
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%SrcDeclAngle  = SNGL( SrcDeclAngle  ) ! angle
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%SrcAzimAngle  = SNGL( SrcAzimAngle  ) ! angle
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%RcvrDeclAngle = SNGL( RcvrDeclAngle ) ! angle
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%RcvrAzimAngle = SNGL( RcvrAzimAngle ) ! angle
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%NTopBnc       = NumTopBnc         ! Number of top     bounces
-             Arr3D( itheta,  id, ir, iArr( 1 ) )%NBotBnc       = NumBotBnc         !   "       bottom
+             Arr3D( itheta, id, ir, iArr(1) )%A      = SNGL( Amp )    ! amplitude
+             Arr3D( itheta, id, ir, iArr(1) )%Phase  = SNGL( Phase )  ! phase
+             Arr3D( itheta, id, ir, iArr(1) )%delay  = CMPLX( delay ) ! delay time
+             Arr3D( itheta, id, ir, iArr(1) )%SrcDeclAngle  = SNGL( SrcDeclAngle ) ! angle
+             Arr3D( itheta, id, ir, iArr(1) )%SrcAzimAngle  = SNGL( SrcAzimAngle ) ! angle
+             Arr3D( itheta, id, ir, iArr(1) )%RcvrDeclAngle = SNGL( RcvrDeclAngle ) ! angle
+             Arr3D( itheta, id, ir, iArr(1) )%RcvrAzimAngle = SNGL( RcvrAzimAngle ) ! angle
+             Arr3D( itheta, id, ir, iArr(1) )%NTopBnc       = NumTopBnc ! # top bounces
+             Arr3D( itheta, id, ir, iArr(1) )%NBotBnc       = NumBotBnc ! # bot bounces
           ENDIF
        ELSE
-          NArr3D( itheta,  id, ir         )               = Nt + 1              ! # of arrivals
-          Arr3D( itheta,   id, ir, Nt + 1 )%A             = SNGL( Amp )         ! amplitude
-          Arr3D( itheta,   id, ir, Nt + 1 )%Phase         = SNGL( Phase )       ! phase
-          Arr3D( itheta,   id, ir, Nt + 1 )%delay         = CMPLX( delay )      ! delay time
-          Arr3D( itheta,   id, ir, Nt + 1 )%SrcDeclAngle  = SNGL( SrcDeclAngle  )   ! angle
-          Arr3D( itheta,   id, ir, Nt + 1 )%SrcAzimAngle  = SNGL( SrcAzimAngle  )   ! angle
-          Arr3D( itheta,   id, ir, Nt + 1 )%RcvrDeclAngle = SNGL( RcvrDeclAngle )   ! angle
-          Arr3D( itheta,   id, ir, Nt + 1 )%RcvrAzimAngle = SNGL( RcvrAzimAngle )   ! angle
-          Arr3D( itheta,   id, ir, Nt + 1 )%NTopBnc       = NumTopBnc           ! Number of top     bounces
-          Arr3D( itheta,   id, ir, Nt + 1 )%NBotBnc       = NumBotBnc           !   "       bottom
+          NArr3D( itheta, id, ir        )             = Nt + 1   ! # of arrivals
+          Arr3D( itheta, id, ir, Nt+1 )%A             = SNGL( Amp ) ! amplitude
+          Arr3D( itheta, id, ir, Nt+1 )%Phase         = SNGL( Phase ) ! phase
+          Arr3D( itheta, id, ir, Nt+1 )%delay         = CMPLX( delay ) ! delay time
+          Arr3D( itheta, id, ir, Nt+1 )%SrcDeclAngle  = SNGL( SrcDeclAngle ) ! angle
+          Arr3D( itheta, id, ir, Nt+1 )%SrcAzimAngle  = SNGL( SrcAzimAngle ) ! angle
+          Arr3D( itheta, id, ir, Nt+1 )%RcvrDeclAngle = SNGL( RcvrDeclAngle ) ! angle
+          Arr3D( itheta, id, ir, Nt+1 )%RcvrAzimAngle = SNGL( RcvrAzimAngle ) ! angle
+          Arr3D( itheta, id, ir, Nt+1 )%NTopBnc       = NumTopBnc ! # top bounces
+          Arr3D( itheta, id, ir, Nt+1 )%NBotBnc       = NumBotBnc ! # bot bounces
        ENDIF
-    ELSE      ! not a new ray
+    ELSE ! not a new ray
        !PhaseArr(   id, ir, Nt ) = PhaseArr( id, ir, Nt )
-       ! calculate weightings of old ray information vs. new, based on amplitude of the arrival
+       ! calculate weightings of old ray information vs. new, based on amplitude
+       ! of the arrival
        AmpTot = Arr3D( itheta, id, ir, Nt )%A + SNGL( Amp )
        w1     = Arr3D( itheta, id, ir, Nt )%A / AmpTot
        w2     = REAL( Amp ) / AmpTot
 
-       Arr3D( itheta, id, ir, Nt )%delay     = w1 * Arr3D( itheta, id, ir, Nt )%delay     + w2 * CMPLX( delay ) ! weighted sum
-       Arr3D( itheta, id, ir, Nt )%A         = AmpTot
-       Arr3D( itheta, id, ir, Nt )%SrcDeclAngle  = w1 * Arr3D( itheta, id, ir, Nt )%SrcDeclAngle  + w2 * SNGL( SrcDeclAngle )
-       Arr3D( itheta, id, ir, Nt )%SrcAzimAngle  = w1 * Arr3D( itheta, id, ir, Nt )%SrcAzimAngle  + w2 * SNGL( SrcAzimAngle )
-       Arr3D( itheta, id, ir, Nt )%RcvrDeclAngle = w1 * Arr3D( itheta, id, ir, Nt )%RcvrDeclAngle + w2 * SNGL( RcvrDeclAngle )
-       Arr3D( itheta, id, ir, Nt )%RcvrAzimAngle = w1 * Arr3D( itheta, id, ir, Nt )%RcvrAzimAngle + w2 * SNGL( RcvrAzimAngle )
+       Arr3D( itheta,id,ir,Nt )%delay = w1*Arr3D( itheta, id, ir, Nt )%delay &
+                                        + w2*CMPLX( delay ) ! weighted sum
+       Arr3D( itheta,id,ir,Nt )%A     = AmpTot
+       Arr3D( itheta,id,ir,Nt )%SrcDeclAngle  = w1*Arr3D( itheta, id, ir, Nt )%SrcDeclAngle  &
+                                                + w2*SNGL( SrcDeclAngle )
+       Arr3D( itheta,id,ir,Nt )%SrcAzimAngle  = w1*Arr3D( itheta, id, ir, Nt )%SrcAzimAngle  &
+                                                + w2*SNGL( SrcAzimAngle )
+       Arr3D( itheta,id,ir,Nt )%RcvrDeclAngle = w1*Arr3D( itheta, id, ir, Nt )%RcvrDeclAngle &
+                                                + w2*SNGL( RcvrDeclAngle )
+       Arr3D( itheta,id,ir,Nt )%RcvrAzimAngle = w1*Arr3D( itheta, id, ir, Nt )%RcvrAzimAngle &
+                                                + w2*SNGL( RcvrAzimAngle )
     ENDIF
 
     RETURN
@@ -287,7 +307,8 @@ CONTAINS
              WRITE( ARRFile, * ) NArr3D( itheta,  id, ir )
 
              DO iArr = 1, NArr3D( itheta,  id, ir )
-                ! you can compress the output file a lot by putting in an explicit format statement here ...
+                ! you can compress the output file a lot by putting in an 
+                ! explicit format statement here ...
                 ! However, you'll need to make sure you keep adequate precision
                 WRITE( ARRFile, * ) &
                               Arr3D( itheta, id, ir, iArr )%A,             &

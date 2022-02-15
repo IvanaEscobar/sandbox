@@ -50,19 +50,23 @@ CONTAINS
        WRITE( PRTFile, * ) '__________________________________________________________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated bottom reflection coef.'
-       OPEN( FilE = TRIM( FileRoot ) // '.brc', UNIT = BRCFile, STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( FilE = TRIM( FileRoot ) // '.brc', UNIT = BRCFile, STATUS = 'OLD',&
+             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
-          CALL ERROUT( 'ReadReflectionCoefficient', 'Unable to open Bottom Reflection Coefficient file' )
+          CALL ERROUT( 'ReadReflectionCoefficient', &
+              'Unable to open Bottom Reflection Coefficient file' )
        END IF
 
        READ(  BRCFile, * ) NBotPts
-       WRITE( PRTFile, * ) 'Number of points in bottom reflection coefficient = ', NBotPts
+       WRITE( PRTFile, * ) 'Number of points in bottom reflection ',&
+                           'coefficient = ', NBotPts
 
        IF ( ALLOCATED( RBot ) ) DEALLOCATE( RBot )
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-          CALL ERROUT( 'ReadReflectionCoefficient', 'Insufficient memory for bot. refl. coef.: reduce # points'  )
+          CALL ERROUT( 'ReadReflectionCoefficient', &
+          'Insufficient memory for bot. refl. coef.: reduce # points'  )
 
        READ(  BRCFile, * ) ( RBot( itheta ), itheta = 1, NBotPts )
        CLOSE( BRCFile )
@@ -78,19 +82,23 @@ CONTAINS
        WRITE( PRTFile, * ) '__________________________________________________________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated top    reflection coef.'
-       OPEN( FILE = TRIM( FileRoot ) // '.trc', UNIT = TRCFile, STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( FILE = TRIM( FileRoot ) // '.trc', UNIT = TRCFile, STATUS = 'OLD',&
+             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
-          CALL ERROUT( 'ReadReflectionCoefficient', 'Unable to open Top Reflection Coefficient file' )
+          CALL ERROUT( 'ReadReflectionCoefficient', &
+              'Unable to open Top Reflection Coefficient file' )
        END IF
 
        READ(  TRCFile, * ) NTopPts
-       WRITE( PRTFile, * ) 'Number of points in top reflection coefficient = ', NTopPts
+       WRITE( PRTFile, * ) 'Number of points in top reflection ',& 
+                           'coefficient = ', NTopPts
 
        IF ( ALLOCATED( RTop ) ) DEALLOCATE( RTop )
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
        IF ( iAllocStat /= 0 ) &
-          CALL ERROUT( 'ReadReflectionCoefficient', 'Insufficient memory for top refl. coef.: reduce # points'  )
+          CALL ERROUT( 'ReadReflectionCoefficient', &
+          'Insufficient memory for top refl. coef.: reduce # points'  )
 
        READ(  TRCFile, * ) ( RTop( itheta ), itheta = 1, NTopPts )
        CLOSE( TRCFile )
@@ -103,20 +111,25 @@ CONTAINS
 
     IF ( BotRC == 'P' ) THEN
        WRITE( PRTFile, * ) 'Reading precalculated refl. coeff. table'
-       OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD',&
+             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) CALL ERROUT( 'ReadReflectionCoefficient', &
-                                       'Unable to open Internal Reflection Coefficient file' )
+                        'Unable to open Internal Reflection Coefficient file' )
 
        READ(  IRCFile, * ) Title2, freq
        READ(  IRCFile, * ) NkTab
        WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Number of points in internal reflection coefficient = ', NkTab
+       WRITE( PRTFile, * ) 'Number of points in internal reflection ', &
+                           'coefficient = ', NkTab
 
        IF ( ALLOCATED( xTab ) )  DEALLOCATE( xTab, fTab, gTab, iTab )
-       ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), Stat = iAllocStat )
-       IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadReflectionCoefficient', 'Too many points in reflection coefficient' )
+       ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), &
+                 Stat = iAllocStat )
+       IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadReflectionCoefficient', &
+           'Too many points in reflection coefficient' )
 
-       READ( IRCFile, FMT = "( 5G15.7, I5 )" ) ( xTab( ik ), fTab( ik ), gTab( ik ), iTab( ik ), ik = 1, NkTab )
+       READ( IRCFile, FMT = "( 5G15.7, I5 )" ) ( xTab( ik ), fTab( ik ), &
+             gTab( ik ), iTab( ik ), ik = 1, NkTab )
        CLOSE( IRCFile )
     ENDIF
 
@@ -140,8 +153,8 @@ CONTAINS
 
     iLeft  = 1
     iRight = NPts
-
-    thetaIntr = REAL( RInt%Theta )   ! This should be unnecessary? probably used when I was doing complex angles
+ ! thetaIntr should be unnecessary? probably used when I was doing complex angles
+    thetaIntr = REAL( RInt%Theta )  
 
     ! Three cases: ThetaInt left, in, or right of tabulated interval
 
@@ -149,18 +162,19 @@ CONTAINS
        !iRight = 2
        RInt%R   = 0.0     ! R( iLeft  )%R
        RInt%phi = 0.0     ! R( iLeft  )%phi
-       WRITE( PRTFile, * ) 'Warning in InterpolateReflectionCoefficient : Refl. Coef. being set to 0 outside tabulated domain'
-       WRITE( PRTFile, * ) 'angle = ', thetaintr, 'lower limit = ', R( iLeft)%theta
+       WRITE( PRTFile, * ) 'Warning in InterpolateReflectionCoefficient : ',&
+                           'Refl. Coef. being set to 0 outside tabulated domain'
+       WRITE( PRTFile, * ) 'angle = ', thetaintr, 'lower limit = ', &
+                           R( iLeft)%theta
 
     ELSE IF( thetaIntr > R( iRight )%theta ) THEN
        !iLeft = NPts - 1
        RInt%R   = 0.0     ! R( iRight )%R
        RInt%phi = 0.0     ! R( iRight )%phi
-       ! WRITE( PRTFile, * ) 'Warning in InterpolateReflectionCoefficient : Refl. Coef. being set to 0 outside tabulated domain'
-       ! WRITE( PRTFile, * ) 'angle = ', ThetaIntr, 'upper limit = ', R( iRight )%theta
 
     ELSE
-       ! Search for bracketting abscissas: Log2( NPts ) stabs required for a bracket
+       ! Search for bracketting abscissas: Log2( NPts ) stabs required for a 
+       ! bracket
 
        DO WHILE ( iLeft /= iRight - 1 )
           iMid = ( iLeft + iRight ) / 2
@@ -173,7 +187,8 @@ CONTAINS
 
        ! Linear interpolation for reflection coef
 
-       alpha    = ( RInt%theta - R( iLeft )%theta ) / ( R( iRight )%theta - R( iLeft )%theta )
+       alpha    = ( RInt%theta - R( iLeft )%theta ) &
+                / ( R( iRight )%theta - R( iLeft )%theta )
        RInt%R   = ( 1 - alpha ) * R( iLeft )%R   + alpha * R( iRight )%R
        RInt%phi = ( 1 - alpha ) * R( iLeft )%phi + alpha * R( iRight )%phi
 
@@ -185,17 +200,18 @@ CONTAINS
 
     ! Internal reflection coefficient interpolator.
     ! Returns f, g, iPower for given x using tabulated values.
-    ! Uses polynomial interpolation to approximate the function between the tabulated values
+    ! Uses polynomial interpolation to approximate the function between the 
+    ! tabulated values
 
     USE polymod, only: Poly
 
-    INTEGER, PARAMETER :: N = 3                    ! order of the polynomial for interpolation
-    INTEGER,            INTENT( IN  ) :: NkTab, iTab( NkTab )
+    INTEGER, PARAMETER :: N = 3     ! order of the polynomial for interpolation
+    INTEGER,                INTENT( IN  ) :: NkTab, iTab( NkTab )
     REAL    ( KIND=_RL90 ), INTENT( IN  ) :: xTab( NkTab )
     COMPLEX ( KIND=_RL90 ), INTENT( IN  ) :: fTab( NkTab ), gTab( NkTab ), x
-    INTEGER,            INTENT( OUT ) :: iPower
+    INTEGER,                INTENT( OUT ) :: iPower
     COMPLEX ( KIND=_RL90 ), INTENT( OUT ) :: f, g
-    INTEGER            :: i, j, iDel, iLeft, iMid, iRight, NAct
+    INTEGER                :: i, j, iDel, iLeft, iMid, iRight, NAct
     REAL    ( KIND=_RL90 ) :: xReal
     COMPLEX ( KIND=_RL90 ) :: xT( N ), fT( N ), gT( N )
 

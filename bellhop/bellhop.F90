@@ -20,7 +20,8 @@ MODULE BELLHOP
   ! You should have received a copy of the GNU General Public License
   ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  ! First version (1983) originally developed with Homer Bucker, Naval Ocean Systems Center
+  ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
+  ! Systems Center
   
   USE bellhop_mod ! Added to get title, freq, Beam
   USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
@@ -78,7 +79,8 @@ SUBROUTINE BELLHOP_DRIVER
      freq  = 250
      ! NMedia variable is not used by BELLHOP
 
-     ! *** Boundary information (type of boundary condition and, if a halfspace, then halfspace info)
+     ! *** Boundary information (type of boundary condition and, if a 
+     !     halfspace, then halfspace info)
 
      AttenUnit         = 'W'
      Bdry%Top%HS%BC    = 'V'
@@ -86,9 +88,11 @@ SUBROUTINE BELLHOP_DRIVER
      Bdry%Bot%HS%Depth = 100
      Bdry%Bot%HS%Opt   = 'A_'
      Bdry%Bot%HS%BC    = 'A'
-     Bdry%Bot%HS%cp    = CRCI( 1D20, 1590D0,    0.5D0, freq, freq, AttenUnit, betaPowerLaw, fT )   ! compressional wave speed
-     Bdry%Bot%HS%cs    = CRCI( 1D20,    0D0,      0D0, freq, freq, AttenUnit, betaPowerLaw, fT )   ! shear         wave speed
-     Bdry%Bot%HS%rho   = 1.2                               ! density
+     Bdry%Bot%HS%cp    = CRCI( 1D20, 1590D0,    0.5D0, freq, freq, AttenUnit, &
+                               betaPowerLaw, fT )   ! compressional wave speed
+     Bdry%Bot%HS%cs    = CRCI( 1D20,    0D0,      0D0, freq, freq, AttenUnit, &
+                               betaPowerLaw, fT )   ! shear wave speed
+     Bdry%Bot%HS%rho   = 1.2                        ! density
 
      ! *** sound speed in the water column ***
 
@@ -96,7 +100,7 @@ SUBROUTINE BELLHOP_DRIVER
      SSP%NPts = 2     ! number of SSP points
      SSP%z(  1 : 2 ) = [    0,  100 ]
      SSP%c(  1 : 2 ) = [ 1500, 1500 ]
-     SSP%cz( 1 : 2 ) = [    0,    0 ]   ! user should really not have to supply this ...
+     SSP%cz( 1 : 2 ) = [    0,    0 ]   ! user should not have to supply this ...
 
      ! *** source and receiver positions ***
 
@@ -121,13 +125,16 @@ SUBROUTINE BELLHOP_DRIVER
      Beam%Box%r   = 5100 ! meters
 
      Angles%Nalpha = 1789
-     ! Angles%alpha  = [ -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80 ] ! -89 89
-     Angles%alpha  = ( 180. / Angles%Nalpha ) * [ ( jj, jj = 1, Angles%Nalpha ) ] - 90.
+     ! Angles%alpha  = [ -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, &
+     !                   30, 40, 50, 60, 70, 80 ] ! -89 89
+     Angles%alpha  = ( 180. / Angles%Nalpha ) * &
+                     [ ( jj, jj = 1, Angles%Nalpha ) ] - 90.
 
      ! *** altimetry ***
 
      ALLOCATE( Top( 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for altimetry data'  )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+                                    'Insufficient memory for altimetry data'  )
      Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
      Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
 
@@ -136,7 +143,8 @@ SUBROUTINE BELLHOP_DRIVER
      ! *** bathymetry ***
 
      ALLOCATE( Bot( 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for bathymetry data'  )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+                                    'Insufficient memory for bathymetry data'  )
      Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
      Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
 
@@ -148,16 +156,21 @@ SUBROUTINE BELLHOP_DRIVER
      ! *** Source Beam Pattern ***
      NSBPPts = 2
      ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', 'Insufficient memory'  )
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', &
+                                         'Insufficient memory'  )
      SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
      SrcBmPat( 2, : ) = [  180.0, 0.0 ]
-     SrcBmPat( :, 2 ) = 10 ** ( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale !!!
+     SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE
      CALL ReadEnvironment(  FileRoot, ThreeD )
-     CALL ReadATI( FileRoot, Bdry%Top%HS%Opt( 5 : 5 ), Bdry%Top%HS%Depth, PRTFile )                          ! AlTImetry
-     CALL ReadBTY( FileRoot, Bdry%Bot%HS%Opt( 2 : 2 ), Bdry%Bot%HS%Depth, PRTFile )                          ! BaThYmetry
-     CALL ReadReflectionCoefficient( FileRoot, Bdry%Bot%HS%Opt( 1 : 1 ), Bdry%Top%HS%Opt( 2 : 2 ), PRTFile ) ! (top and bottom)
-     SBPFlag = Beam%RunType( 3 : 3 )
+     ! AlTImetry
+     CALL ReadATI( FileRoot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
+     ! BaThYmetry
+     CALL ReadBTY( FileRoot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, PRTFile )
+     ! (top and bottom)
+     CALL ReadReflectionCoefficient( FileRoot, Bdry%Bot%HS%Opt( 1:1 ), &
+                                     Bdry%Top%HS%Opt( 2:2 ), PRTFile ) 
+     SBPFlag = Beam%RunType( 3:3 )
      CALL ReadPat( FileRoot, PRTFile )   ! Source Beam Pattern
      ! dummy bearing angles
      Pos%Ntheta = 1
@@ -172,16 +185,17 @@ END SUBROUTINE BELLHOP_DRIVER
 ! **********************************************************************!
 SUBROUTINE BellhopCore
 
-  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr,&
+  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
 
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
-  INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
+  INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, &
+                          NalphaOpt, iSeg
   REAL                 :: Tstart, Tstop
   REAL (KIND=_RL90)                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
-  COMPLEX     (KIND=_RL90) :: epsilon
+  COMPLEX (KIND=_RL90) :: epsilon
 
 
   CALL CPU_TIME( Tstart )
@@ -189,7 +203,8 @@ SUBROUTINE BellhopCore
   omega = 2.0 * pi * freq
 
   IF ( Beam%deltas == 0.0 ) THEN
-     Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   ! Automatic step size selection
+     ! Automatic step size selection
+     Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
      WRITE( PRTFile, * )
      WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatically selected)'' )' ) Beam%deltas
   END IF
@@ -197,28 +212,33 @@ SUBROUTINE BellhopCore
   Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
   IF ( Angles%Nalpha /= 1 ) &
-       Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) / ( Angles%Nalpha - 1 )  ! angular spacing between beams
+       Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
+                       / ( Angles%Nalpha - 1 )  ! angular spacing between beams
 
   ! convert range-dependent geoacoustic parameters from user to program units
-  IF ( atiType( 2 : 2 ) == 'L' ) THEN
+  IF ( atiType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NatiPts
-        Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, Top( iSeg )%HS%alphaI, freq, freq, 'W ', &
-             betaPowerLaw, ft )   ! compressional wave speed
-        Top( iSeg )%HS%cs = CRCI( 1D20, Top( iSeg )%HS%betaR,  Top( iSeg )%HS%betaI,  freq, freq, 'W ', &
-             betaPowerLaw, ft )   ! shear         wave speed
+        Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, &
+                                  Top( iSeg )%HS%alphaI, freq, freq, 'W ', &
+                                  betaPowerLaw, ft ) ! compressional wave speed
+        Top( iSeg )%HS%cs = CRCI( 1D20, Top( iSeg )%HS%betaR,  &
+                                  Top( iSeg )%HS%betaI,  freq, freq, 'W ', &
+                                  betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
    
-  IF ( btyType( 2 : 2 ) == 'L' ) THEN
+  IF ( btyType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NbtyPts
-        Bot( iSeg )%HS%cp = CRCI( 1D20, Bot( iSeg )%HS%alphaR, Bot( iSeg )%HS%alphaI, freq, freq, 'W ', &
-             betaPowerLaw, ft )   ! compressional wave speed 
-        Bot( iSeg )%HS%cs = CRCI( 1D20, Bot( iSeg )%HS%betaR,  Bot( iSeg )%HS%betaI,  freq, freq, 'W ', &
-             betaPowerLaw, ft )   ! shear         wave speed
+        Bot( iSeg )%HS%cp = CRCI( 1D20, Bot( iSeg )%HS%alphaR, &
+                                  Bot( iSeg )%HS%alphaI, freq, freq, 'W ', &
+                                  betaPowerLaw, ft ) ! compressional wave speed
+        Bot( iSeg )%HS%cs = CRCI( 1D20, Bot( iSeg )%HS%betaR,  &
+                                  Bot( iSeg )%HS%betaI,  freq, freq, 'W ', &
+                                  betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
 
-  SELECT CASE ( Beam%RunType( 5 : 5 ) )
+  SELECT CASE ( Beam%RunType( 5:5 ) )
   CASE ( 'I' )
      NRz_per_range = 1         ! irregular grid
   CASE DEFAULT
@@ -230,7 +250,8 @@ SUBROUTINE BellhopCore
   CASE ( 'C', 'S', 'I' )        ! TL calculation
      ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) &
-          CALL ERROUT( 'BELLHOP', 'Insufficient memory for TL matrix: reduce Nr * NRz'  )
+          CALL ERROUT( 'BELLHOP', &
+                       'Insufficient memory for TL matrix: reduce Nr * NRz'  )
   CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
      ALLOCATE ( U( 1, 1 ), Stat = iAllocStat )   ! open a dummy variable
   END SELECT
@@ -238,16 +259,19 @@ SUBROUTINE BellhopCore
   ! for an arrivals run, allocate space for arrivals matrices
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
   CASE ( 'A', 'a' )
-     MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )   ! allow space for at least 10 arrivals
+     ! allow space for at least 10 arrivals
+     MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
      WRITE( PRTFile, * )
      WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
 
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
+                NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
           'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage' )
   CASE DEFAULT
      MaxNArr = 1
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), &
+                NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
   END SELECT
 
   NArr( 1 : NRz_per_range, 1 : Pos%NRr ) = 0
@@ -269,7 +293,8 @@ SUBROUTINE BellhopCore
 
      ! Are there enough beams?
      DalphaOpt = SQRT( c / ( 6.0 * freq * Pos%Rr( Pos%NRr ) ) )
-     NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) / DalphaOpt )
+     NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) )& 
+                 / DalphaOpt )
 
      IF ( Beam%RunType( 1 : 1 ) == 'C' .AND. Angles%Nalpha < NalphaOpt ) THEN
         WRITE( PRTFile, * ) 'Warning in BELLHOP : Too few beams'
@@ -279,55 +304,68 @@ SUBROUTINE BellhopCore
      ! Trace successive beams
 
      DeclinationAngle: DO ialpha = 1, Angles%Nalpha
-        SrcDeclAngle = RadDeg * Angles%alpha( ialpha )          ! take-off declination angle in degrees
+        ! take-off declination angle in degrees
+        SrcDeclAngle = RadDeg * Angles%alpha( ialpha ) 
 
-        IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN    ! Single beam run?
+        ! Single beam run?
+        IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN
 
-           IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) < SrcDeclAngle )  ! index of ray angle in beam pattern
+           IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) &
+                    < SrcDeclAngle )  ! index of ray angle in beam pattern
            IBP    = IBPvec( 1 )
-           IBP    = MAX( IBP, 1 )               ! don't go before beginning of table
-           IBP    = MIN( IBP, NSBPPts - 1 )     ! don't go past end of table
+           IBP    = MAX( IBP, 1 )           ! don't go before beginning of table
+           IBP    = MIN( IBP, NSBPPts - 1 ) ! don't go past end of table
 
            ! linear interpolation to get amplitude
-           s    = ( SrcDeclAngle  - SrcBmPat( IBP, 1 ) ) / ( SrcBmPat( IBP + 1, 1 ) - SrcBmPat( IBP, 1 ) )
+           s    = ( SrcDeclAngle  - SrcBmPat( IBP, 1 ) ) &
+                  / ( SrcBmPat( IBP + 1, 1 ) - SrcBmPat( IBP, 1 ) )
            Amp0 = ( 1 - s ) * SrcBmPat( IBP, 2 ) + s * SrcBmPat( IBP + 1, 2 )
 
            ! Lloyd mirror pattern for semi-coherent option
            IF ( Beam%RunType( 1 : 1 ) == 'S' ) &
-              Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( omega / c * xs( 2 ) * SIN( Angles%alpha( ialpha ) ) ) )
+              Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( omega / c * xs( 2 ) &
+                     * SIN( Angles%alpha( ialpha ) ) ) )
 
            ! show progress ...
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
-              WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) ialpha, SrcDeclAngle
+              WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) &
+                     ialpha, SrcDeclAngle
               CALL FLUSH( PRTFile )
            END IF
 
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
 
-           IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   ! Write the ray trajectory to RAYFile
+           ! Write the ray trajectory to RAYFile
+           IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
-           ELSE                                       ! Compute the contribution to the field
-
-              epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, Angles%alpha( ialpha ), &
-                   Angles%Dalpha, Beam%rLoop, Beam%epsMultiplier ) ! 'optimal' beam constant
+           ELSE ! Compute the contribution to the field
+              ! 'optimal' beam constant
+              epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, &
+                                     Angles%alpha( ialpha ), Angles%Dalpha, &
+                                     Beam%rLoop, Beam%epsMultiplier )
 
               SELECT CASE ( Beam%Type( 1 : 1 ) )
               CASE ( 'R' )
-                 iBeamWindow2 = Beam%iBeamWindow **2
+                 iBeamWindow2 = Beam%iBeamWindow**2
                  RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyRayCen(   U, epsilon, Angles%alpha( ialpha ), iBeamWindow2, RadMax )
+                 CALL InfluenceCervenyRayCen( U, epsilon, Angles%alpha(ialpha),& 
+                                              iBeamWindow2, RadMax )
               CASE ( 'C' )
-                 iBeamWindow2 = Beam%iBeamWindow **2
+                 iBeamWindow2 = Beam%iBeamWindow**2
                  RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyCart(     U, epsilon, Angles%alpha( ialpha ), iBeamWindow2, RadMax )
+                 CALL InfluenceCervenyCart( U, epsilon, Angles%alpha( ialpha ),& 
+                                            iBeamWindow2, RadMax )
               CASE ( 'g' )
-                 CALL InfluenceGeoHatRayCen(    U, Angles%alpha( ialpha ), Angles%Dalpha )
+                 CALL InfluenceGeoHatRayCen( U, Angles%alpha( ialpha ), &
+                                             Angles%Dalpha )
               CASE ( 'S' )
-                 CALL InfluenceSGB(             U, Angles%alpha( ialpha ), Angles%Dalpha )
+                 CALL InfluenceSGB( U, Angles%alpha( ialpha ), Angles%Dalpha )
               CASE ( 'B' )
-                 CALL InfluenceGeoGaussianCart( U, Angles%alpha( ialpha ), Angles%Dalpha )
+                 CALL InfluenceGeoGaussianCart( U, Angles%alpha( ialpha ), &
+                                                Angles%Dalpha )
              CASE DEFAULT
-                 CALL InfluenceGeoHatCart(      U, Angles%alpha( ialpha ), Angles%Dalpha )
+                 CALL InfluenceGeoHatCart( U, Angles%alpha( ialpha ), &
+                                           Angles%Dalpha )
               END SELECT
 
            END IF
@@ -338,16 +376,19 @@ SUBROUTINE BellhopCore
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' )   ! TL calculation
-        CALL ScalePressure( Angles%Dalpha, ray2D( 1 )%c, Pos%Rr, U, NRz_per_range, Pos%NRr, Beam%RunType, freq )
+        CALL ScalePressure( Angles%Dalpha, ray2D( 1 )%c, Pos%Rr, U, &
+                            NRz_per_range, Pos%NRr, Beam%RunType, freq )
         IRec = 10 + NRz_per_range * ( is - 1 )
         RcvrDepth: DO Irz1 = 1, NRz_per_range
            IRec = IRec + 1
            WRITE( SHDFile, REC = IRec ) U( Irz1, 1 : Pos%NRr )
         END DO RcvrDepth
      CASE ( 'A' )             ! arrivals calculation, ascii
-        CALL WriteArrivalsASCII(  Pos%Rr, NRz_per_range, Pos%NRr, Beam%RunType( 4 : 4 ) )
+        CALL WriteArrivalsASCII(  Pos%Rr, NRz_per_range, Pos%NRr, &
+                                  Beam%RunType( 4:4 ) )
      CASE ( 'a' )             ! arrivals calculation, binary
-        CALL WriteArrivalsBinary( Pos%Rr, NRz_per_range, Pos%NRr, Beam%RunType( 4 : 4 ) )
+        CALL WriteArrivalsBinary( Pos%Rr, NRz_per_range, Pos%NRr, &
+                                  Beam%RunType( 4:4 ) )
      END SELECT
 
   END DO SourceDepth
@@ -369,24 +410,28 @@ END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
 
-COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, EpsMultiplier )
+COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, &
+                                           Dalpha, rLoop, EpsMultiplier )
 
   ! Picks the optimum value for epsilon
-
-  REAL (KIND=_RL90), INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
-  REAL (KIND=_RL90), INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
-  REAL (KIND=_RL90), INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
+  
+  ! angular frequency, sound speed and gradient
+  REAL (KIND=_RL90), INTENT( IN  )  :: omega, c, gradc( 2 ) 
+  ! angular spacing for ray fan
+  REAL (KIND=_RL90), INTENT( IN  )  :: alpha, Dalpha        
+  ! multiplier, loop range
+  REAL (KIND=_RL90),  INTENT( IN  ) :: epsMultiplier, Rloop 
   CHARACTER (LEN= 2), INTENT( IN  ) :: BeamType
-  LOGICAL, SAVE      :: INIFlag = .TRUE.
-  REAL (KIND=_RL90)                :: HalfWidth
-  REAL (KIND=_RL90)                :: cz
-  COMPLEX   (KIND=_RL90) :: epsilonOpt
-  CHARACTER (LEN=40) :: TAG
+  LOGICAL, SAVE                     :: INIFlag = .TRUE.
+  REAL (KIND=_RL90)                 :: HalfWidth
+  REAL (KIND=_RL90)                 :: cz
+  COMPLEX   (KIND=_RL90)            :: epsilonOpt
+  CHARACTER (LEN=40)                :: TAG
 
-  SELECT CASE ( BeamType( 1 : 1 ) )
+  SELECT CASE ( BeamType( 1:1 ) )
   CASE ( 'C', 'R' )
      TAG    = 'Paraxial beams'
-     SELECT CASE ( BeamType( 2 : 2 ) )
+     SELECT CASE ( BeamType( 2:2 ) )
      CASE ( 'F' )
         TAG       = 'Space filling beams'
         halfwidth = 2.0 / ( ( omega / c ) * Dalpha )
@@ -417,7 +462,8 @@ COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dal
      epsilonOpt = i * 0.5 * omega * halfwidth ** 2
 
   CASE ( 'b' )
-     CALL ERROUT( 'BELLHOP', 'Geo Gaussian beams in ray-cent. coords. not implemented in BELLHOP' )
+     CALL ERROUT( 'BELLHOP', &
+         'Geo Gaussian beams in ray-cent. coords. not implemented in BELLHOP' )
 
   CASE ( 'S' )
      TAG        = 'Simple Gaussian beams'
@@ -448,12 +494,14 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   USE step,     only: Step2D
 
-  REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
-  REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
-  INTEGER           :: is, is1                    ! index for a step along the ray
+  REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! x-y coordinate of the source
+  REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! initial angle, amplitude
+  INTEGER           :: is, is1                   ! indx for a step along the ray
   REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-  REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
-  REAL (KIND=_RL90) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
+  REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), &
+                       ToptInt( 2 ), BottInt( 2 )
+  ! Distances from ray beginning, end to top and bottom
+  REAL (KIND=_RL90) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot 
   REAL (KIND=_RL90) :: sss
 
   ! Initial conditions
@@ -481,7 +529,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ! convert range-dependent geoacoustic parameters from user to program units
   ! compiler is not accepting the copy of the whole structure at once ...
   IF ( atiType( 2 : 2 ) == 'L' ) THEN
-     Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   ! grab the geoacoustic info for the new segment
+     ! grab the geoacoustic info for the new segment
+     Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   
      Bdry%Top%HS%cs  = Top( IsegTop )%HS%cs
      Bdry%Top%HS%rho = Top( IsegTop )%HS%rho
   END IF
@@ -494,12 +543,14 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Trace the beam (note that Reflect alters the step index is)
   is = 0
-  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
-       Top( IsegTop )%n, Bot( IsegBot )%n, DistBegTop, DistBegBot )
+  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop, &
+                    dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, DistBegTop, & 
+                    DistBegBot )
 
   IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
      Beam%Nsteps = 1
-     WRITE( PRTFile, * ) 'Terminating the ray trace because the source is on or outside the boundaries'
+     WRITE( PRTFile, * ) &
+         'Terminating the ray trace because the source is on or outside the boundaries'
      RETURN       ! source must be within the medium
   END IF
 
@@ -516,7 +567,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
           ray2D( is1 )%x( 1 ) > rTopSeg( 2 ) ) THEN
         CALL GetTopSeg( ray2D( is1 )%x( 1 ) )
         IF ( atiType( 2 : 2 ) == 'L' ) THEN
-           Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   ! grab the geoacoustic info for the new segment
+           ! grab the geoacoustic info for the new segment, cp
+           Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   
            Bdry%Top%HS%cs  = Top( IsegTop )%HS%cs
            Bdry%Top%HS%rho = Top( IsegTop )%HS%rho
         END IF
@@ -527,7 +579,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
           ray2D( is1 )%x( 1 ) > rBotSeg( 2 ) ) THEN
         CALL GetBotSeg( ray2D( is1 )%x( 1 ) )
         IF ( btyType( 2 : 2 ) == 'L' ) THEN
-           Bdry%Bot%HS%cp  = Bot( IsegBot )%HS%cp   ! grab the geoacoustic info for the new segment
+           ! grab the geoacoustic info for the new segment, cp
+           Bdry%Bot%HS%cp  = Bot( IsegBot )%HS%cp   
            Bdry%Bot%HS%cs  = Bot( IsegBot )%HS%cs
            Bdry%Bot%HS%rho = Bot( IsegBot )%HS%rho
         END IF
@@ -539,54 +592,70 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      ! DistBeg is the distance at step is,   which is saved
      ! DistEnd is the distance at step is+1, which needs to be calculated
 
-     CALL Distances2D( ray2D( is1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
-          Top( IsegTop )%n, Bot( IsegBot )%n, DistEndTop, DistEndBot )
+     CALL Distances2D( ray2D( is1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
+                       dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, &
+                       DistEndTop, DistEndBot )
 
-     IF      ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN  ! test top reflection
+     IF ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN  ! test top reflection
 
         IF ( atiType == 'C' ) THEN
-           sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) / Top( IsegTop )%Len   ! proportional distance along segment
-           TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden + sss * Top( 1 + IsegTop )%Noden
-           ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet + sss * Top( 1 + IsegTop )%Nodet
+           ! proportional distance along segment
+           sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) &
+                     / Top( IsegTop )%Len   
+           TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &
+                     + sss * Top( 1 + IsegTop )%Noden
+           ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet &
+                     + sss * Top( 1 + IsegTop )%Nodet
         ELSE
            TopnInt = Top( IsegTop )%n   ! normal is constant in a segment
            ToptInt = Top( IsegTop )%t
         END IF
 
-        CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, Top( IsegTop )%kappa, RTop, NTopPTS )
-        ray2D( is + 1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
+        CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, &
+                        Top( IsegTop )%kappa, RTop, NTopPTS )
+        ray2D( is+1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
-        CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
-             Top( IsegTop )%n, Bot( IsegBot )%n, DistEndTop, DistEndBot )
+        CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, & 
+                          dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, &
+                          DistEndTop, DistEndBot )
 
      ELSE IF ( DistBegBot > 0.0d0 .AND. DistEndBot <= 0.0d0 ) THEN  ! test bottom reflection
 
         IF ( btyType == 'C' ) THEN
-           sss     = DOT_PRODUCT( dEndBot, Bot( IsegBot )%t ) / Bot( IsegBot )%Len   ! proportional distance along segment
-           BotnInt = ( 1 - sss ) * Bot( IsegBot )%Noden + sss * Bot( 1 + IsegBot )%Noden
-           BottInt = ( 1 - sss ) * Bot( IsegBot )%Nodet + sss * Bot( 1 + IsegBot )%Nodet
+           sss     = DOT_PRODUCT( dEndBot, Bot( IsegBot )%t ) &
+                     / Bot( IsegBot )%Len ! proportional distance along segment
+           BotnInt = ( 1 - sss ) * Bot( IsegBot )%Noden &
+                     + sss * Bot( 1+IsegBot )%Noden
+           BottInt = ( 1 - sss ) * Bot( IsegBot )%Nodet &
+                     + sss * Bot( 1+IsegBot )%Nodet
         ELSE
            BotnInt = Bot( IsegBot )%n   ! normal is constant in a segment
            BottInt = Bot( IsegBot )%t
         END IF
 
-        CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, Bot( IsegBot )%kappa, RBot, NBotPTS )
-        ray2D( is + 1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
-        CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot, &
-             Top( IsegTop )%n, Bot( IsegBot )%n, DistEndTop, DistEndBot )
+        CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, &
+                        Bot( IsegBot )%kappa, RBot, NBotPTS )
+        ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
+        CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
+                          dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,& 
+                          DistEndTop, DistEndBot )
 
      END IF
 
-     ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
-     IF ( ABS( ray2D( is + 1 )%x( 1 ) ) > Beam%Box%r .OR. &
-          ABS( ray2D( is + 1 )%x( 2 ) ) > Beam%Box%z .OR. ray2D( is + 1 )%Amp < 0.005 .OR. &
+     ! Has the ray left the box, lost its energy, escaped the boundaries, or 
+     ! exceeded storage limit?
+     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r .OR. &
+          ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z .OR. &
+          ray2D( is+1 )%Amp < 0.005 .OR. &
           ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
           ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
-          ! ray2D( is + 1 )%t( 1 ) < 0 ) THEN ! this last test kills off a backward traveling ray
+          ! ray2D( is + 1 )%t( 1 ) < 0 ) THEN ! this last test kills off a 
+          ! backward traveling ray
         Beam%Nsteps = is + 1
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
-        WRITE( PRTFile, * ) 'Warning in TraceRay2D : Insufficient storage for ray trajectory'
+        WRITE( PRTFile, * ) &
+            'Warning in TraceRay2D : Insufficient storage for ray trajectory'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
@@ -599,16 +668,17 @@ END SUBROUTINE TraceRay2D
 
 ! **********************************************************************!
 
-SUBROUTINE Distances2D( rayx, Topx, Botx, dTop, dBot, Topn, Botn, DistTop, DistBot )
+SUBROUTINE Distances2D( rayx, Topx, Botx, dTop, dBot, Topn, Botn, DistTop, &
+                        DistBot )
 
   ! Calculates the distances to the boundaries
   ! Formula differs from JKPS because code uses outward pointing normals
 
-  REAL (KIND=_RL90), INTENT( IN  ) :: rayx( 2 )              ! ray coordinate
-  REAL (KIND=_RL90), INTENT( IN  ) :: Topx( 2 ), Botx( 2 )   ! top, bottom coordinate
-  REAL (KIND=_RL90), INTENT( IN  ) :: Topn( 2 ), Botn( 2 )   ! top, bottom normal vector (outward)
-  REAL (KIND=_RL90), INTENT( OUT ) :: dTop( 2 ), dBot( 2 )   ! vector pointing from top, bottom bdry to ray
-  REAL (KIND=_RL90), INTENT( OUT ) :: DistTop, DistBot       ! distance (normal to bdry) from the ray to top, bottom boundary
+  REAL (KIND=_RL90), INTENT( IN  ) :: rayx(2)          ! ray coordinate
+  REAL (KIND=_RL90), INTENT( IN  ) :: Topx(2), Botx(2) ! top, bottom coordinate
+  REAL (KIND=_RL90), INTENT( IN  ) :: Topn(2), Botn(2) ! top, bottom normal vector (outward)
+  REAL (KIND=_RL90), INTENT( OUT ) :: dTop(2), dBot(2) ! vector pointing from top, bottom bdry to ray
+  REAL (KIND=_RL90), INTENT( OUT ) :: DistTop, DistBot ! distance (normal to bdry) from the ray to top, bottom boundary
 
   dTop    = rayx - Topx  ! vector pointing from top    to ray
   dBot    = rayx - Botx  ! vector pointing from bottom to ray
@@ -621,19 +691,24 @@ END SUBROUTINE Distances2D
 
 SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
-  INTEGER,              INTENT( IN ) :: Npts
-  REAL (KIND=_RL90),    INTENT( IN ) :: tBdry( 2 ), nBdry( 2 )  ! Tangent and normal to the boundary
-  REAL (KIND=_RL90),    INTENT( IN ) :: kappa                   ! Boundary curvature
-  CHARACTER (LEN=3),    INTENT( IN ) :: BotTop                  ! Flag indicating bottom or top reflection
-  TYPE( HSInfo ),       INTENT( IN ) :: HS                      ! half-space properties
-  TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts )            ! reflection coefficient
+  INTEGER,              INTENT( IN    ) :: Npts
+  REAL (KIND=_RL90),    INTENT( IN    ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
+  REAL (KIND=_RL90),    INTENT( IN    ) :: kappa               ! Boundary curvature
+  CHARACTER (LEN=3),    INTENT( IN    ) :: BotTop              ! Flag indicating bottom or top reflection
+  TYPE( HSInfo ),       INTENT( IN    ) :: HS                  ! half-space properties
+  TYPE(ReflectionCoef), INTENT( IN    ) :: RefC( NPts )        ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
-  INTEGER           :: is1
-  REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
-  REAL (KIND=_RL90) :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
-  REAL (KIND=_RL90) :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
-  COMPLEX  (KIND=_RL90) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, Refl   ! for tabulated reflection coef.
-  COMPLEX  (KIND=_RL90) :: ch, a, b, d, sb, delta, ddelta                 ! for beam shift
+  INTEGER              :: is1
+  REAL (KIND=_RL90)    :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                          rho ! derivatives of sound speed
+  REAL (KIND=_RL90)    :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), &
+                          rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, &
+                          csjump  ! for curvature change
+  REAL (KIND=_RL90)    :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, &
+                          theta_bot ! for beam shift
+  COMPLEX (KIND=_RL90) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, &
+                          Refl   ! for tabulated reflection coef.
+  COMPLEX (KIND=_RL90) :: ch, a, b, d, sb, delta, ddelta ! for beam shift
   TYPE(ReflectionCoef) :: RInt
 
   is  = is + 1
@@ -650,24 +725,29 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ! Calculate the change in curvature
   ! Based on formulas given by Muller, Geoph. J. R.A.S., 79 (1984).
 
-  CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )   ! just to get c
+  CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, freq,& 
+                    'TAB' )   ! just to get c
 
   ! incident unit ray tangent and normal
   rayt = c * ray2D( is )%t                              ! unit tangent to ray
   rayn = [ -rayt( 2 ), rayt( 1 ) ]                      ! unit normal  to ray
 
-  ! reflected unit ray tangent and normal (the reflected tangent, normal system has a different orientation)
+  ! reflected unit ray tangent and normal (the reflected tangent, normal system
+  ! has a different orientation)
   rayt_tilde = c * ray2D( is1 )%t                       ! unit tangent to ray
   rayn_tilde = -[ -rayt_tilde( 2 ), rayt_tilde( 1 ) ]   ! unit normal  to ray
 
   RN = 2 * kappa / c ** 2 / Th    ! boundary curvature correction
 
-  ! get the jumps (this could be simplified, e.g. jump in rayt is roughly 2 * Th * nbdry
+  ! get the jumps (this could be simplified, e.g. jump in rayt is 
+  ! roughly 2 * Th * nbdry
   cnjump = -DOT_PRODUCT( gradc, rayn_tilde - rayn  )
   csjump = -DOT_PRODUCT( gradc, rayt_tilde - rayt )
 
   IF ( BotTop == 'TOP' ) THEN
-     cnjump = -cnjump   ! this is because the (t,n) system of the top boundary has a different sense to the bottom boundary
+     ! cnjump changes sign because the (t,n) system of the top boundary has a 
+     ! different sense to the bottom boundary
+     cnjump = -cnjump  
      RN     = -RN
   END IF
 
@@ -701,41 +781,44 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
      CALL InterpolateReflectionCoefficient( RInt, RefC, Npts, PRTFile )
      ray2D( is1 )%Amp   = ray2D( is )%Amp * RInt%R
      ray2D( is1 )%Phase = ray2D( is )%Phase + RInt%phi
-  CASE ( 'A', 'G' )            ! half-space
-     kx = omega * Tg     ! wavenumber in direction parallel      to bathymetry
-     kz = omega * Th     ! wavenumber in direction perpendicular to bathymetry (in ocean)
+  CASE ( 'A', 'G' )     ! half-space
+     kx = omega * Tg    ! wavenumber in direction parallel      to bathymetry
+     kz = omega * Th    ! wavenumber in direction perpendicular to bathymetry (in ocean)
 
      ! notation below is a bit mis-leading
-     ! kzS, kzP is really what I called gamma in other codes, and differs by a factor of +/- i
+     ! kzS, kzP is really what I called gamma in other codes, and differs by a 
+     ! factor of +/- i
      IF ( REAL( HS%cS ) > 0.0 ) THEN
-        kzS2 = kx ** 2 - ( omega / HS%cS ) ** 2
-        kzP2 = kx ** 2 - ( omega / HS%cP ) ** 2
+        kzS2 = kx**2 - ( omega / HS%cS )**2
+        kzP2 = kx**2 - ( omega / HS%cP )**2
         kzS  = SQRT( kzS2 )
         kzP  = SQRT( kzP2 )
-        mu   = HS%rho * HS%cS ** 2
+        mu   = HS%rho * HS%cS**2
 
-        y2 = ( ( kzS2 + kx ** 2 ) ** 2 - 4.0D0 * kzS * kzP * kx ** 2 ) * mu
-        y4 = kzP * ( kx ** 2 - kzS2 )
+        y2 = ( ( kzS2 + kx**2 )**2 - 4.0D0 * kzS * kzP * kx**2 ) * mu
+        y4 = kzP * ( kx**2 - kzS2 )
 
-        f = omega ** 2 * y4
+        f = omega**2 * y4
         g = y2
      ELSE
-        kzP = SQRT( kx ** 2 - ( omega / HS%cP ) ** 2 )
+        kzP = SQRT( kx**2 - ( omega / HS%cP )**2 )
 
-        ! Intel and GFortran compilers return different branches of the SQRT for negative reals
+        ! Intel and GFortran compilers return different branches of the SQRT 
+        ! for negative reals
         IF ( REAL( kzP ) == 0.0D0 .AND. AIMAG( kzP ) < 0.0D0 ) kzP = -kzP
         f   = kzP
         g   = HS%rho
      ENDIF
 
-     Refl =  - ( rho * f - i * kz * g ) / ( rho * f + i * kz * g )   ! complex reflection coef.
+     Refl =  - ( rho*f - i * kz*g ) / ( rho*f + i * kz*g )   ! complex reflection coef.
      
      IF ( ABS( Refl ) < 1.0E-5 ) THEN   ! kill a ray that has lost its energy in reflection
         ray2D( is1 )%Amp   = 0.0
         ray2D( is1 )%Phase = ray2D( is )%Phase
      ELSE
         ray2D( is1 )%Amp   = ABS( Refl ) * ray2D(  is )%Amp
-        ray2D( is1 )%Phase = ray2D( is )%Phase + ATAN2( AIMAG( Refl ), REAL( Refl ) )
+        ray2D( is1 )%Phase = ray2D( is )%Phase + &
+                             ATAN2( AIMAG( Refl ), REAL( Refl ) )
 
         ! compute beam-displacement Tindle, Eq. (14)
         ! needs a correction to beam-width as well ...
@@ -749,7 +832,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         !     RV( is + 1 ) = RV( is + 1 ) + DELTA
         !  END IF
 
-        if ( Beam%Type( 4 : 4 ) == 'S' ) then   ! beam displacement & width change (Seongil's version)
+        if ( Beam%Type( 4:4 ) == 'S' ) then   ! beam displacement & width change (Seongil's version)
            ch = ray2D( is )%c / conjg( HS%cP )
            co = ray2D( is )%t( 1 ) * ray2D( is )%c
            si = ray2D( is )%t( 2 ) * ray2D( is )%c
@@ -769,20 +852,26 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
            END IF
 
            pdelta  = real( delta ) / ( ray2D( is )%c / co)
-           ddelta  = -a / ( ck*sb*d ) - a*cco / ssi / (ck*sb*d) + a*cco / (ck*b*sb*d) &
-                     -a*co / si / (ck*sb*d*d) * (2* HS%rho * HS%rho *si*co-2*co*si)
+           ddelta  = -a / ( ck*sb*d ) - a*cco / ssi / (ck*sb*d) &
+                     + a*cco / (ck*b*sb*d) &
+                     -a*co / si / (ck*sb*d*d) &
+                     * (2* HS%rho * HS%rho *si*co-2*co*si)
            rddelta = -real( ddelta )
            sddelta = rddelta / abs( rddelta )        
 
-           ! next 3 lines have an update by Diana McCammon to allow a sloping bottom
-           ! I think the formulas are good, but this won't be reliable because it doesn't have the logic
-           ! that tracks crossing into new segments after the ray displacement.
+           ! next 3 lines have an update by Diana McCammon to allow a sloping 
+           ! bottom . I think the formulas are good, but this won't be reliable 
+           ! because it doesn't have the logic that tracks crossing into new 
+           ! segments after the ray displacement.
            
            theta_bot = datan( tBdry( 2 ) / tBdry( 1 ))  ! bottom angle
-           ray2D( is1 )%x( 1 ) = ray2D( is1 )%x( 1 ) + real( delta ) * dcos( theta_bot )   ! range displacement
-           ray2D( is1 )%x( 2 ) = ray2D( is1 )%x( 2 ) + real( delta ) * dsin( theta_bot )   ! depth displacement
-           ray2D( is1 )%tau    = ray2D( is1 )%tau + pdelta             ! phase change
-           ray2D( is1 )%q      = ray2D( is1 )%q + sddelta * rddelta * si * c * ray2D( is )%p   ! beam-width change
+           ray2D( is1 )%x( 1 ) = ray2D( is1 )%x( 1 ) + real( delta ) &
+                                 * dcos( theta_bot )   ! range displacement
+           ray2D( is1 )%x( 2 ) = ray2D( is1 )%x( 2 ) + real( delta ) &
+                                 * dsin( theta_bot )   ! depth displacement
+           ray2D( is1 )%tau    = ray2D( is1 )%tau + pdelta  ! phase change
+           ray2D( is1 )%q      = ray2D( is1 )%q + sddelta * rddelta * si * c &
+                                 * ray2D( is )%p   ! beam-width change
         endif
 
      ENDIF

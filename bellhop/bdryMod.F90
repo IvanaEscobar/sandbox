@@ -25,27 +25,29 @@ MODULE bdrymod
 !=======================================================================
 
   INTEGER, PARAMETER :: ATIFile = 40, BTYFile = 41, Number_to_Echo = 21
-  INTEGER            :: IsegTop, IsegBot ! indices that point to the current active segment
+  INTEGER            :: IsegTop, IsegBot ! indices point to current active segment
   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
 
-  REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  ! range intervals defining the current active segment
+  ! range intervals defining the current active segment
+  REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  
   CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
 
   ! Halfspace properties
   TYPE HSInfo2
-     REAL (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
-     COMPLEX  (KIND=_RL90) :: cP, cS                 ! P-wave, S-wave speeds
-     REAL (KIND=_RL90) :: rho, Depth             ! density, depth
-     CHARACTER (LEN=1) :: BC                     ! Boundary condition type
+     ! compressional and shear wave speeds/attenuations in user units
+     REAL (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
+     COMPLEX  (KIND=_RL90) :: cP, cS    ! P-wave, S-wave speeds
+     REAL (KIND=_RL90) :: rho, Depth    ! density, depth
+     CHARACTER (LEN=1) :: BC            ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE
 
   TYPE BdryPt
-     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), n( 2 )        ! coordinate, tangent, and outward normal for a segment
-     REAL (KIND=_RL90) :: Nodet( 2 ), Noden( 2 )        ! tangent and normal at the node, if the curvilinear option is used
-     REAL (KIND=_RL90) :: Len, Kappa                    ! length and curvature of a segement
-     REAL (KIND=_RL90) :: Dx, Dxx, Dss                  ! first, second derivatives wrt depth; s is along tangent
+     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), n( 2 ) ! coordinate, tangent, and outward normal for a segment
+     REAL (KIND=_RL90) :: Nodet( 2 ), Noden( 2 ) ! tangent and normal at the node, if the curvilinear option is used
+     REAL (KIND=_RL90) :: Len, Kappa             ! length and curvature of a segement
+     REAL (KIND=_RL90) :: Dx, Dxx, Dss           ! first, second derivatives wrt depth; s is along tangent
      TYPE( HSInfo2 )   :: HS
   END TYPE
 
@@ -69,7 +71,8 @@ CONTAINS
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using top-altimetry file'
 
-       OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', &
+             STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOsTAT /= 0 ) THEN
           WRITE( PRTFile, * ) 'ATIFile = ', TRIM( FileRoot ) // '.ati'
           CALL ERROUT( 'ReadATI', 'Unable to open altimetry file' )
@@ -82,16 +85,19 @@ CONTAINS
        CASE ( 'L' )
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
        CASE DEFAULT
-          CALL ERROUT( 'ReadATI', 'Unknown option for selecting altimetry interpolation' )
+          CALL ERROUT( 'ReadATI', &
+                       'Unknown option for selecting altimetry interpolation' )
        END SELECT AltiType
 
        READ(  ATIFile, * ) NatiPts
        WRITE( PRTFile, * ) 'Number of altimetry points = ', NatiPts
-       NatiPts = NatiPts + 2   ! we'll be extending the altimetry to infinity to the left and right
+       ! we'll be extending the altimetry to infinity to the left and right
+       NatiPts = NatiPts + 2  
 
        ALLOCATE( Top(  NatiPts ), phi( NatiPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP:ReadATI', 'Insufficient memory for altimetry data: reduce # ati points' )
+            CALL ERROUT( 'BELLHOP:ReadATI', &
+                'Insufficient memory for altimetry data: reduce # ati points' )
 
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
@@ -105,18 +111,22 @@ CONTAINS
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x
              END IF
           CASE ( 'L' )
-             READ(  ATIFile, * )                   Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, Top( ii )%HS%rho, &
-                                                                Top( ii )%HS%alphaI, Top( ii )%HS%betaI
+             READ(  ATIFile, * ) Top( ii )%x, Top( ii )%HS%alphaR, &
+                                 Top( ii )%HS%betaR, Top( ii )%HS%rho, &
+                                 Top( ii )%HS%alphaI, Top( ii )%HS%betaI
              IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   ! echo some values
-                WRITE( PRTFile, FMT = "(7G11.3)" ) Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, Top( ii )%HS%rho, &
-                                                                Top( ii )%HS%alphaI, Top( ii )%HS%betaI
+                WRITE( PRTFile, FMT = "(7G11.3)" ) &
+                    Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, &
+                    Top( ii )%HS%rho, Top( ii )%HS%alphaI, Top( ii )%HS%betaI
              END IF
           CASE DEFAULT
-             CALL ERROUT( 'ReadATI', 'Unknown option for selecting altimetry option' )
+             CALL ERROUT( 'ReadATI', &
+                            'Unknown option for selecting altimetry option' )
           END SELECT
 
           IF ( Top( ii )%x( 2 ) < DepthT ) THEN
-             CALL ERROUT( 'BELLHOP:ReadATI', 'Altimetry rises above highest point in the sound speed profile' )
+             CALL ERROUT( 'BELLHOP:ReadATI', &
+                 'Altimetry rises above highest point in the sound speed profile' )
           END IF
        END DO atiPt
 
@@ -126,7 +136,8 @@ CONTAINS
 
     CASE DEFAULT   ! no altimetry given, use SSP depth for flat top
        ALLOCATE( Top( 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for altimetry data'  )
+       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+                                    'Insufficient memory for altimetry data'  )
        Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
        Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
     END SELECT
@@ -134,7 +145,8 @@ CONTAINS
     CALL ComputeBdryTangentNormal( Top, 'Top' )
 
     IF ( .NOT. monotonic( Top%x( 1 ), NAtiPts ) ) THEN
-       CALL ERROUT( 'BELLHOP:ReadATI', 'Altimetry ranges are not monotonically increasing' )
+       CALL ERROUT( 'BELLHOP:ReadATI', &
+                        'Altimetry ranges are not monotonically increasing' )
     END IF 
  
   END SUBROUTINE ReadATI
@@ -156,7 +168,8 @@ CONTAINS
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
 
-       OPEN( UNIT = BTYFile,   FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
+             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOsTAT /= 0 ) THEN
           WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
           CALL ERROUT( 'ReadBTY', 'Unable to open bathymetry file' )
@@ -170,17 +183,20 @@ CONTAINS
        CASE ( 'L' )
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
        CASE DEFAULT
-          CALL ERROUT( 'ReadBTY', 'Unknown option for selecting bathymetry interpolation' )
+          CALL ERROUT( 'ReadBTY', &
+                    'Unknown option for selecting bathymetry interpolation' )
        END SELECT BathyType
 
 
        READ(  BTYFile, * ) NbtyPts
        WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
-
-       NbtyPts = NbtyPts + 2   ! we'll be extending the bathymetry to infinity on both sides
+       
+       ! we'll be extending the bathymetry to infinity on both sides
+       NbtyPts = NbtyPts + 2  
        ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP:ReadBTY', 'Insufficient memory for bathymetry data: reduce # bty points' )
+            CALL ERROUT( 'BELLHOP:ReadBTY', &
+                'Insufficient memory for bathymetry data: reduce # bty points' )
 
        WRITE( PRTFile, * )
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
@@ -191,7 +207,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'Long format (bathymetry and geoacoustics)'
           WRITE( PRTFile, "( ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI', / )" )
        CASE DEFAULT
-          CALL ERROUT( 'ReadBTY', 'Unknown option for selecting bathymetry interpolation' )
+          CALL ERROUT( 'ReadBTY', &
+                    'Unknown option for selecting bathymetry interpolation' )
        END SELECT BathyTypeB
 
        btyPt: DO ii = 2, NbtyPts - 1
@@ -199,23 +216,26 @@ CONTAINS
           SELECT CASE ( btyType( 2 : 2 ) )
           CASE ( 'S', '' )   ! short format
              READ(  BTYFile, * ) Bot( ii )%x
-             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   ! echo some values
+             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  ! echo some values
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( ii )%x
              END IF
           CASE ( 'L' )       ! long format
-             READ(  BTYFile, * )                   Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
-                                                                Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+             READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, &
+                                 Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
+                                 Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   ! echo some values
                 WRITE( PRTFile, FMT="( F10.2, F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
-                   Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
-                                Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+                   Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
+                   Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
              END IF
           CASE DEFAULT
-             CALL ERROUT( 'ReadBTY', 'Unknown option for selecting bathymetry option' )
+             CALL ERROUT( 'ReadBTY', &
+                            'Unknown option for selecting bathymetry option' )
           END SELECT
 
           IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
-             CALL ERROUT( 'BELLHOP:ReadBTY', 'Bathymetry drops below lowest point in the sound speed profile' )
+             CALL ERROUT( 'BELLHOP:ReadBTY', &
+                 'Bathymetry drops below lowest point in the sound speed profile' )
           END IF
  
        END DO btypt
@@ -226,7 +246,8 @@ CONTAINS
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
        ALLOCATE( Bot( 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for bathymetry data'  )
+       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+                                    'Insufficient memory for bathymetry data'  )
        Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
        Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
     END SELECT
@@ -234,7 +255,8 @@ CONTAINS
     CALL ComputeBdryTangentNormal( Bot, 'Bot' )
 
     IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
-       CALL ERROUT( 'BELLHOP:ReadBTY', 'Bathymetry ranges are not monotonically increasing' )
+       CALL ERROUT( 'BELLHOP:ReadBTY', &
+                        'Bathymetry ranges are not monotonically increasing' )
     END IF 
 
   END SUBROUTINE ReadBTY
@@ -249,14 +271,14 @@ CONTAINS
     ! normals  (%n, %noden), and
     ! curvatures (%kappa)
     !
-    ! The boundary is also extended with a constant depth to infinity to cover cases where the ray
-    ! exits the domain defined by the user
+    ! The boundary is also extended with a constant depth to infinity to cover 
+    ! cases where the ray exits the domain defined by the user
 
     INTEGER                          :: NPts = 0
-    REAL (KIND=_RL90), ALLOCATABLE  :: phi( : )
-    REAL (KIND=_RL90)               :: sss
+    REAL (KIND=_RL90), ALLOCATABLE   :: phi( : )
+    REAL (KIND=_RL90)                :: sss
     TYPE(BdryPt)                     :: Bdry( : )
-    CHARACTER (LEN=3),  INTENT( IN ) :: BotTop           ! Flag indicating bottom or top reflection
+    CHARACTER (LEN=3),  INTENT( IN ) :: BotTop ! Flag indicating bottom or top reflection
     CHARACTER (LEN=2)                :: CurvilinearFlag = '-'
 
     SELECT CASE ( BotTop )
@@ -284,7 +306,7 @@ CONTAINS
 
     BoundaryPt: DO ii = 1, NPts - 1
        Bdry( ii )%t   = Bdry( ii + 1 )%x      - Bdry( ii )%x
-       Bdry( ii )%Dx  = Bdry( ii )%t( 2 ) / Bdry( ii )%t( 1 )   ! first derivative
+       Bdry( ii )%Dx  = Bdry( ii )%t( 2 ) / Bdry( ii )%t( 1 )   ! 1st derivative
        ! write( *, * ) 'Dx, t', Bdry( ii )%Dx, Bdry( ii )%x, 1 / ( Bdry( ii )%x( 2 ) / 500 )
 
        ! normalize the tangent vector
@@ -302,15 +324,18 @@ CONTAINS
 
     END DO BoundaryPt
 
-    IF ( CurvilinearFlag( 1 : 1 ) == 'C' ) THEN ! curvilinear option: compute tangent and normal at node by averaging normals on adjacent segments
-       ! averaging two centered differences is equivalent to forming a single centered difference of two steps ...
+    ! curvilinear option: compute tangent and normal at node by averaging 
+    ! normals on adjacent segments
+    IF ( CurvilinearFlag( 1 : 1 ) == 'C' ) THEN 
+       ! averaging two centered differences is equivalent to forming a single 
+       ! centered difference of two steps ...
        DO ii = 2, NPts - 1
           sss = Bdry( ii - 1 )%Len / ( Bdry( ii - 1 )%Len + Bdry( ii )%Len )
           sss = 0.5
-          Bdry( ii )%Nodet = ( 1.0 - sss ) * Bdry( ii - 1 )%t + sss * Bdry( ii )%t
+          Bdry( ii )%Nodet = ( 1.0 - sss ) * Bdry( ii-1 )%t + sss * Bdry( ii )%t
        END DO
 
-       Bdry( 1    )%Nodet = [ 1.0, 0.0 ]   ! tangent left-end  node
+       Bdry( 1    )%Nodet = [ 1.0, 0.0 ]   ! tangent left-end node
        Bdry( NPts )%Nodet = [ 1.0, 0.0 ]   ! tangent right-end node
 
        SELECT CASE ( BotTop )
@@ -324,16 +349,23 @@ CONTAINS
 
        ! compute curvature in each segment
        ALLOCATE( phi( NPts ), Stat = IAllocStat )
-       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )   ! this is the angle at each node
+       ! phi is the angle at each node
+       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )   
 
        DO ii = 1, NPts - 1
-          Bdry( ii )%kappa = ( phi( ii + 1 ) - phi( ii ) ) / Bdry( ii )%Len ! this is curvature = dphi/ds
-          Bdry( ii )%Dxx   = ( Bdry( ii + 1 )%Dx     - Bdry( ii )%Dx     ) / &   ! second derivative
-                             ( Bdry( ii + 1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
-          Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 ) ** 3   ! derivative in direction of tangent
-          !write( *, * ) 'kappa, Dss, Dxx', Bdry( ii )%kappa, Bdry( ii )%Dss, Bdry( ii )%Dxx, &
-               ! 1 / ( ( 8 / 1000 ** 2 ) * ABS( Bdry( ii )%x( 2 ) ) ** 3 ), Bdry( ii )%x( 2 )
-               !  -1 / ( 4 * ( Bdry( ii )%x( 2 ) ) ** 3 / 1000000 ), Bdry( ii )%x( 2 )
+          ! this is curvature = dphi/ds
+          Bdry( ii )%kappa = ( phi( ii+1 ) - phi( ii ) ) / Bdry( ii )%Len 
+          ! second derivative
+          Bdry( ii )%Dxx   = ( Bdry( ii+1 )%Dx     - Bdry( ii )%Dx     ) / &   
+                             ( Bdry( ii+1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
+          ! derivative in direction of tangent
+          Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 )**3   
+          !write( *, * ) 'kappa, Dss, Dxx', Bdry( ii )%kappa, Bdry( ii )%Dss, &
+               ! Bdry( ii )%Dxx, &
+               ! 1 / ( ( 8 / 1000 ** 2 ) * ABS( Bdry( ii )%x( 2 ) ) ** 3 ), &
+               ! Bdry( ii )%x( 2 ) &
+               !  -1 / ( 4 * ( Bdry( ii )%x( 2 ) ) ** 3 / 1000000 ), &
+               ! Bdry( ii )%x( 2 )
 
           Bdry( ii )%kappa = Bdry( ii )%Dss   !over-ride kappa !!!!!
        END DO
@@ -354,10 +386,12 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN ) :: r
 
     IsegTopT = MAXLOC( Top( : )%x( 1 ), Top( : )%x( 1 ) < r )
-
-    IF ( IsegTopT( 1 ) > 0 .AND. IsegTopT( 1 ) < NatiPts ) THEN  ! IsegTop MUST LIE IN [ 1, NatiPts-1 ]
+    
+    ! IsegTop MUST LIE IN [ 1, NatiPts-1 ]
+    IF ( IsegTopT( 1 ) > 0 .AND. IsegTopT( 1 ) < NatiPts ) THEN  
        IsegTop = IsegTopT( 1 )
-       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop + 1 )%x( 1 ) ]   ! segment limits in range
+       ! segment limits in range
+       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop + 1 )%x( 1 ) ]   
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )
@@ -378,10 +412,11 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN ) :: r
 
     IsegBotT = MAXLOC( Bot( : )%x( 1 ), Bot( : )%x( 1 ) < r )
-
-    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN  ! IsegBot MUST LIE IN [ 1, NbtyPts-1 ]
+    ! IsegBot MUST LIE IN [ 1, NbtyPts-1 ]
+    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN  
        IsegBot = IsegBotT( 1 )   
-       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]   ! segment limits in range
+       ! segment limits in range
+       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]  
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )

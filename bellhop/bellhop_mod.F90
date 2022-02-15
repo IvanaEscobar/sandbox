@@ -63,8 +63,10 @@ MODULE bellhop_mod
 
   ! uncomment COMPLEX below if using paraxial beams !!!
   TYPE ray3DPt
-     ! COMPLEX (KIND=_RL90) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), f, g, h, DetP, DetQ
-     REAL (KIND=_RL90)     :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), q_hat( 2 ), DetQ
+     ! COMPLEX (KIND=_RL90) :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), &
+     ! q_hat( 2 ), f, g, h, DetP, DetQ
+     REAL (KIND=_RL90)     :: p_tilde( 2 ), q_tilde( 2 ), p_hat( 2 ), &
+                              q_hat( 2 ), DetQ
      REAL (KIND=_RL90)     :: x( 3 ), t( 3 ), phi, c, Amp, Phase
      INTEGER               :: NumTopBnc, NumBotBnc
      COMPLEX (KIND=_RL90)  :: tau

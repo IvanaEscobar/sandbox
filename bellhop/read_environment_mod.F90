@@ -44,7 +44,8 @@ CONTAINS
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat
     REAL               :: ZMin, ZMax
-    REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
+    REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, &
+                          sigma, Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
@@ -52,10 +53,12 @@ CONTAINS
     WRITE( PRTFile, * )
 
     ! Open the environmental file
-    OPEN( UNIT = ENVFile, FILE = TRIM( FileRoot ) // '.env', STATUS = 'OLD', IOSTAT = iostat, ACTION = 'READ' )
+    OPEN( UNIT = ENVFile, FILE = TRIM( FileRoot ) // '.env', STATUS = 'OLD', &
+          IOSTAT = iostat, ACTION = 'READ' )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
        WRITE( PRTFile, * ) 'ENVFile = ', TRIM( FileRoot ) // '.env'
-       CALL ERROUT( 'BELLHOP - READIN', 'Unable to open the environmental file' )
+       CALL ERROUT( 'BELLHOP - READIN', &
+                    'Unable to open the environmental file' )
     END IF
 
     ! Prepend model name to title
@@ -81,7 +84,8 @@ CONTAINS
 
     ! *** Top BC ***
 
-    IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+    IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
+        "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
 
     CALL TopBot( freq, AttenUnit, Bdry%Top%HS )
 
@@ -102,7 +106,8 @@ CONTAINS
        CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, 'INI' )
     ENDIF
 
-    Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from first SSP point
+    Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from 
+    !first SSP point
     ! bottom depth should perhaps be set the same way?
 
     ! *** Bottom BC ***
@@ -128,7 +133,6 @@ CONTAINS
 
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
-    ! CALL ReadSzRz( ZMin + 100 * SPACING( ZMin ), ZMax - 100 * SPACING( ZMax ) )   ! not sure why I had this
     CALL ReadSzRz( ZMin, ZMax )
     CALL ReadRcvrRanges
     IF ( ThreeD ) CALL ReadRcvrBearings
@@ -150,23 +154,39 @@ CONTAINS
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
        Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
 
-       IF ( Beam%deltas == 0.0 ) Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   ! Automatic step size selection
+       ! Automatic step size selection
+       IF ( Beam%deltas == 0.0 ) Beam%deltas = &
+           ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
        ! WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) freq
 
        WRITE( PRTFile, * )
-       WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) Beam%deltas
+       WRITE( PRTFile, & 
+              fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) &
+            Beam%deltas
        WRITE( PRTFile, * )
-       WRITE( PRTFile, fmt = '(  '' Maximum ray x-range, Box%x = '', G11.4, '' m'' )' ) Beam%Box%x
-       WRITE( PRTFile, fmt = '(  '' Maximum ray y-range, Box%y = '', G11.4, '' m'' )' ) Beam%Box%y
-       WRITE( PRTFile, fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' ) Beam%Box%z
+       WRITE( PRTFile, &
+              fmt = '(  '' Maximum ray x-range, Box%x = '', G11.4, '' m'' )' ) &
+            Beam%Box%x
+       WRITE( PRTFile, &
+              fmt = '(  '' Maximum ray y-range, Box%y = '', G11.4, '' m'' )' ) &
+            Beam%Box%y
+       WRITE( PRTFile, &
+              fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
+            Beam%Box%z
     ELSE
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%z, Beam%Box%r
 
        WRITE( PRTFile, * )
-       WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) Beam%deltas
+       WRITE( PRTFile, &
+              fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
+            Beam%deltas
        WRITE( PRTFile, * )
-       WRITE( PRTFile, fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) Beam%Box%z
-       WRITE( PRTFile, fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) Beam%Box%r
+       WRITE( PRTFile, &
+              fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) &
+            Beam%Box%z
+       WRITE( PRTFile, &
+              fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) &
+            Beam%Box%r
 
        Beam%Box%r = 1000.0 * Beam%Box%r   ! convert km to m
     END IF
@@ -181,7 +201,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'No beam shift in effect'
        END SELECT
 
-       IF ( Beam%RunType( 1 : 1 ) /= 'R' ) THEN   ! no worry about the beam type if this is a ray trace run
+       ! no worry about the beam type if this is a ray trace run
+       IF ( Beam%RunType( 1 : 1 ) /= 'R' ) THEN   
 
        ! Beam%Type( 1 : 1 ) is
        !   'G' or '^' Geometric hat beams in Cartesian coordinates
@@ -199,7 +220,8 @@ CONTAINS
        !   'D' Double
        !   'S' Single
        !   'Z' Zero
-       ! Beam%Type( 4 : 4 ) selects whether beam shifts are implemented on boundary reflection
+       ! Beam%Type( 4 : 4 ) selects whether beam shifts are implemented on 
+       ! boundary reflection
        !   'S' yes
        !   'N' no
 
@@ -208,8 +230,10 @@ CONTAINS
 
        Beam%Type( 1 : 1 ) = Beam%RunType( 2 : 2 )
        SELECT CASE ( Beam%Type( 1 : 1 ) )
-       CASE ( 'G', 'g' , '^', 'B', 'b', 'S' )   ! geometric hat beams, geometric Gaussian beams, or simple Gaussian beams
-       CASE ( 'R', 'C' )   ! Cerveny Gaussian Beams; read extra lines to specify the beam options
+! geometric hat beams, geometric Gaussian beams, or simple Gaussian beams
+       CASE ( 'G', 'g' , '^', 'B', 'b', 'S' )   
+! Cerveny Gaussian Beams; read extra lines to specify the beam options
+       CASE ( 'R', 'C' )   
           READ(  ENVFile, * ) Beam%Type( 2 : 3 ), Beam%epsMultiplier, Beam%rLoop
           WRITE( PRTFile, * )
           WRITE( PRTFile, * )
@@ -236,7 +260,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
           WRITE( PRTFile, * ) 'Component                 = ', Beam%Component
        CASE DEFAULT
-          CALL ERROUT( 'READIN', 'Unknown beam type (second letter of run type)' )
+          CALL ERROUT( 'READIN', &
+              'Unknown beam type (second letter of run type)' )
        END SELECT
     END IF
 
@@ -250,7 +275,7 @@ CONTAINS
   SUBROUTINE ReadTopOpt( TopOpt, BC, AttenUnit, FileRoot )
 
     CHARACTER (LEN= 6), INTENT( OUT ) :: TopOpt
-    CHARACTER (LEN= 1), INTENT( OUT ) :: BC                     ! Boundary condition type
+    CHARACTER (LEN= 1), INTENT( OUT ) :: BC         ! Boundary condition type
     CHARACTER (LEN= 2), INTENT( OUT ) :: AttenUnit
     CHARACTER (LEN=80), INTENT( IN  ) :: FileRoot
     INTEGER            :: iostat
@@ -277,14 +302,16 @@ CONTAINS
        WRITE( PRTFile, * ) '    Spline approximation to SSP'
     CASE ( 'Q' )
        WRITE( PRTFile, * ) '    Quad approximation to SSP'
-       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
+       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, &
+           FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
        IF ( IOSTAT /= 0 ) THEN   ! successful open?
           WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
           CALL ERROUT( 'BELLHOP - READIN', 'Unable to open the SSP file' )
        END IF
     CASE ( 'H' )
        WRITE( PRTFile, * ) '    Hexahedral approximation to SSP'
-       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
+       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, &
+           FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
        IF ( IOSTAT /= 0 ) THEN   ! successful open?
           WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
           CALL ERROUT( 'BELLHOP - READIN', 'Unable to open the SSP file' )
@@ -322,7 +349,8 @@ CONTAINS
     CASE ( 'F' )
        WRITE( PRTFile, * ) '    Francois-Garrison volume attenuation added'
        READ(  ENVFile, * ) T, Salinity, pH, z_bar
-       WRITE( PRTFile, "( ' T = ', G11.4, 'degrees   S = ', G11.4, ' psu   pH = ', G11.4, ' z_bar = ', G11.4, ' m' )" ) &
+       WRITE( PRTFile, &
+              "( ' T = ', G11.4, 'degrees   S = ', G11.4, ' psu   pH = ', G11.4, ' z_bar = ', G11.4, ' m' )" ) &
             T, Salinity, pH, z_bar
     CASE ( 'B' )
        WRITE( PRTFile, * ) '    Biological attenaution'
@@ -330,10 +358,12 @@ CONTAINS
        WRITE( PRTFile, * ) '      Number of Bio Layers = ', NBioLayers
 
        DO iBio = 1, NBioLayers
-          READ( ENVFile, *  ) bio( iBio )%Z1, bio( iBio )%Z2, bio( iBio )%f0, bio( iBio )%Q, bio( iBio )%a0
+          READ( ENVFile, *  ) bio( iBio )%Z1, bio( iBio )%Z2, bio( iBio )%f0, &
+                              bio( iBio )%Q, bio( iBio )%a0
           WRITE( PRTFile, * ) '      Top    of layer = ', bio( iBio )%Z1, ' m'
           WRITE( PRTFile, * ) '      Bottom of layer = ', bio( iBio )%Z2, ' m'
-          WRITE( PRTFile, * ) '      Resonance frequency = ', bio( iBio )%f0, ' Hz'
+          WRITE( PRTFile, * ) '      Resonance frequency = ', bio( iBio )%f0, &
+                              ' Hz'
           WRITE( PRTFile, * ) '      Q  = ', bio( iBio )%Q
           WRITE( PRTFile, * ) '      a0 = ', bio( iBio )%a0
        END DO
@@ -364,7 +394,8 @@ CONTAINS
 
   SUBROUTINE ReadRunType( RunType, PlotType )
 
-    ! Read the RunType variable and echo with explanatory information to the print file
+    ! Read the RunType variable and echo with explanatory information to the 
+    ! print file
 
     USE sourcereceiverpositions, only: Pos
 
@@ -423,14 +454,17 @@ CONTAINS
 
     SELECT CASE ( RunType( 5 : 5 ) )
     CASE ( 'R' )
-       WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at ( Rr( ir ), Rz( ir ) ) )'
+       WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at', &
+                           ' ( Rr( ir ), Rz( ir ) ) )'
        PlotType = 'rectilin  '
     CASE ( 'I' )
        WRITE( PRTFile, * ) 'Irregular grid: Receivers at Rr( : ) x Rz( : )'
-       IF ( Pos%NRz /= Pos%NRr ) CALL ERROUT( 'READIN', 'Irregular grid option selected with NRz not equal to Nr' )
+       IF ( Pos%NRz /= Pos%NRr ) CALL ERROUT( 'READIN', &
+           'Irregular grid option selected with NRz not equal to Nr' )
        PlotType = 'irregular '
     CASE DEFAULT
-       WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )'
+       WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at', &
+                           ' Rr( : ) x Rz( : )'
        RunType( 5 : 5 ) = 'R'
        PlotType = 'rectilin  '
     END SELECT
@@ -455,7 +489,7 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN    ) :: freq               ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
     TYPE( HSInfo ),    INTENT( INOUT ) :: HS
-    REAL (KIND=_RL90) :: Mz, vr, alpha2_f          ! values related to grain size
+    REAL (KIND=_RL90) :: Mz, vr, alpha2_f     ! values related to grain size
 
     ! Echo to PRTFile user's choice of boundary condition
 
@@ -497,11 +531,13 @@ CONTAINS
        betaPowerLaw  = 1.0
        ft            = 1000.0
 
-       HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, AttenUnit, betaPowerLaw, ft )
-       HS%cs  = CRCI( zTemp, betaR,  betaI,  freq, freq, AttenUnit, betaPowerLaw, ft )
+       HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, AttenUnit, &
+                      betaPowerLaw, ft )
+       HS%cs  = CRCI( zTemp, betaR,  betaI,  freq, freq, AttenUnit, &
+                      betaPowerLaw, ft )
 
        HS%rho = rhoR
-    CASE ( 'G' )                  ! *** Grain size (formulas from UW-APL HF Handbook)
+    CASE ( 'G' )            ! *** Grain size (formulas from UW-APL HF Handbook)
 
        ! These formulas are from the UW-APL Handbook
        ! The code is taken from older Matlab and is unnecesarily verbose
@@ -511,11 +547,13 @@ CONTAINS
        WRITE( PRTFile, FMT = "( F10.2, 3X, F10.2 )" ) zTemp, Mz
 
        IF ( Mz >= -1 .AND. Mz < 1 ) THEN
-          vr   = 0.002709 * Mz ** 2 - 0.056452 * Mz + 1.2778
-          rhor = 0.007797 * Mz ** 2 - 0.17057  * Mz + 2.3139
+          vr   = 0.002709 * Mz**2 - 0.056452 * Mz + 1.2778
+          rhor = 0.007797 * Mz**2 - 0.17057  * Mz + 2.3139
        ELSE IF ( Mz >= 1 .AND. Mz < 5.3 ) THEN
-          vr   = -0.0014881 * Mz ** 3 + 0.0213937 * Mz ** 2 - 0.1382798 * Mz + 1.3425
-          rhor = -0.0165406 * Mz ** 3 + 0.2290201 * Mz ** 2 - 1.1069031 * Mz + 3.0455
+          vr   = -0.0014881 * Mz**3 + 0.0213937 * Mz**2 - 0.1382798 * Mz &
+               + 1.3425
+          rhor = -0.0165406 * Mz**3 + 0.2290201 * Mz**2 - 1.1069031 * Mz &
+               + 3.0455
        ELSE
           vr   = -0.0024324 * Mz + 1.0019
           rhor = -0.0012973 * Mz + 1.1565
@@ -540,12 +578,14 @@ CONTAINS
 !!! should be sound speed in the water, just above the sediment
        ! the term vr / 1000 converts vr to units of m per ms 
        alphaR = vr * 1500.0
-       alphaI = alpha2_f * ( vr / 1000 ) * 1500.0 * log( 10.0 ) / ( 40.0 * pi )   ! loss parameter Sect. IV., Eq. (4) of handbook
+       ! loss parameter Sect. IV., Eq. (4) of handbook
+       alphaI = alpha2_f * ( vr / 1000 ) * 1500.0 * log( 10.0 ) / ( 40.0 * pi )
 
        HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, 'L ', betaPowerLaw, ft )
        HS%cs  = 0.0
        HS%rho = rhoR
-       WRITE( PRTFile, FMT = "( 'Converted sound speed =', 2F10.2, 3X, 'density = ', F10.2, 3X, 'loss parm = ', F10.4 )" ) &
+       WRITE( PRTFile, &
+              FMT = "( 'Converted sound speed =', 2F10.2, 3X, 'density = ', F10.2, 3X, 'loss parm = ', F10.4 )" ) &
             HS%cp, rhor, alphaI
 
     END SELECT
@@ -569,7 +609,8 @@ CONTAINS
 
     SELECT CASE ( Beam%RunType( 1 : 1 ) )
     CASE ( 'R', 'E' )   ! Ray trace or Eigenrays
-       OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, FORM = 'FORMATTED' )
+       OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
+              FORM = 'FORMATTED' )
        WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
        WRITE( RAYFile, * ) freq
        WRITE( RAYFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
@@ -584,7 +625,8 @@ CONTAINS
        END IF
 
     CASE ( 'A' )        ! arrival file in ascii format
-       OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, FORM = 'FORMATTED' )
+       OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
+              FORM = 'FORMATTED' )
 
        IF ( ThreeD ) THEN
           WRITE( ARRFile, * ) '''3D'''
@@ -613,7 +655,8 @@ CONTAINS
        END IF
 
     CASE ( 'a' )        ! arrival file in binary format
-       OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, FORM = 'UNFORMATTED' )
+       OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
+              FORM = 'UNFORMATTED' )
 
        IF ( ThreeD ) THEN
           WRITE( ARRFile ) '''3D'''
@@ -644,7 +687,8 @@ CONTAINS
     CASE DEFAULT
        atten = 0.0
 
-       ! following to set PlotType has alread been done in READIN if that was used for input
+       ! following to set PlotType has alread been done in READIN if that was 
+       ! used for input
        SELECT CASE ( Beam%RunType( 5 : 5 ) )
        CASE ( 'R' )
           PlotType = 'rectilin  '
@@ -654,7 +698,8 @@ CONTAINS
           PlotType = 'rectilin  '
        END SELECT
 
-       CALL WriteHeader( TRIM( FileRoot ) // '.shd', Title, REAL( freq ), atten, PlotType )
+       CALL WriteHeader( TRIM( FileRoot ) // '.shd', Title, REAL( freq ), &
+                         atten, PlotType )
     END SELECT
 
   END SUBROUTINE OpenOutputFiles

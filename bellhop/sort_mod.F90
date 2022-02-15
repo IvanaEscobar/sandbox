@@ -126,7 +126,8 @@ CONTAINS
        IF ( REAL( xTemp ) > REAL( x( 1 ) ) ) THEN
           x( 2 : I ) = x( 1 : I - 1 )
           x( 1 )     = xTemp  ! goes in the first position
-       ELSE IF ( REAL( xTemp ) > REAL( x( I - 1 ) ) ) THEN ! Binary search for its place
+       !else Binary search for its place
+       ELSE IF ( REAL( xTemp ) > REAL( x( I - 1 ) ) ) THEN 
 
           IRight = I - 1
           ILeft  = 1
