@@ -181,7 +181,7 @@ SUBROUTINE BellhopCore
   REAL (KIND=_RL90)                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
-  COMPLEX     (KIND=8) :: epsilon
+  COMPLEX     (KIND=_RL90) :: epsilon
 
 
   CALL CPU_TIME( Tstart )
@@ -369,7 +369,7 @@ END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
 
-COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, EpsMultiplier )
+COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, EpsMultiplier )
 
   ! Picks the optimum value for epsilon
 
@@ -380,7 +380,7 @@ COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha
   LOGICAL, SAVE      :: INIFlag = .TRUE.
   REAL (KIND=_RL90)                :: HalfWidth
   REAL (KIND=_RL90)                :: cz
-  COMPLEX   (KIND=8) :: epsilonOpt
+  COMPLEX   (KIND=_RL90) :: epsilonOpt
   CHARACTER (LEN=40) :: TAG
 
   SELECT CASE ( BeamType( 1 : 1 ) )
@@ -632,8 +632,8 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho       ! derivatives of sound speed
   REAL (KIND=_RL90) :: RM, RN, Tg, Th, rayt( 2 ), rayn( 2 ), rayt_tilde( 2 ), rayn_tilde( 2 ), cnjump, csjump  ! for curvature change
   REAL (KIND=_RL90) :: ck, co, si, cco, ssi, pdelta, rddelta, sddelta, theta_bot ! for beam shift
-  COMPLEX  (KIND=8) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, Refl   ! for tabulated reflection coef.
-  COMPLEX  (KIND=8) :: ch, a, b, d, sb, delta, ddelta                 ! for beam shift
+  COMPLEX  (KIND=_RL90) :: kx, kz, kzP, kzS, kzP2, kzS2, mu, f, g, y2, y4, Refl   ! for tabulated reflection coef.
+  COMPLEX  (KIND=_RL90) :: ch, a, b, d, sb, delta, ddelta                 ! for beam shift
   TYPE(ReflectionCoef) :: RInt
 
   is  = is + 1

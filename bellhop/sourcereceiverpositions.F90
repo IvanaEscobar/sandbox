@@ -29,7 +29,7 @@ MODULE sourcereceiverpositions
   INTEGER, PRIVATE            :: IAllocStat     ! used to capture status after allocation
   INTEGER, PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6   ! unit 5 is usually (not always) the ENVFile
   INTEGER                     :: Nfreq          ! number of frequencies
-  _RL, ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
+  REAL (KIND=_RL90), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
 
   TYPE Position
      INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
@@ -48,7 +48,7 @@ CONTAINS
     ! Optionally reads a vector of source frequencies for a broadband run
     ! If the broadband option is not selected, then the input freq (a scalar) is stored in the frequency vector
 
-    _RL, INTENT( IN ) :: freq0             ! Nominal or carrier frequency
+    REAL (KIND=_RL90), INTENT( IN ) :: freq0             ! Nominal or carrier frequency
     CHARACTER,     INTENT( IN ) :: BroadbandOption*( 1 )
     INTEGER                     :: ifreq
 

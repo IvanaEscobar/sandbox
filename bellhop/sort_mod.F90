@@ -73,7 +73,7 @@ CONTAINS
   SUBROUTINE Sort_dble( x, N )
 
     INTEGER, INTENT( IN ) :: N
-    _RL :: x( * ), xTemp
+    REAL (KIND=_RL90) :: x( * ), xTemp
 
     IF ( N == 1 ) RETURN
 
@@ -115,7 +115,7 @@ CONTAINS
     ! Based on order of decreasing real part
 
     INTEGER, INTENT( IN ) :: N
-    COMPLEX (KIND=8)      :: x( N ), xTemp
+    COMPLEX (KIND=_RL90)      :: x( N ), xTemp
 
     IF ( N == 1 ) RETURN
 

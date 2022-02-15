@@ -452,10 +452,10 @@ CONTAINS
 
     ! Handles top and bottom boundary conditions
 
-    _RL, INTENT( IN    ) :: freq               ! frequency
+    REAL (KIND=_RL90), INTENT( IN    ) :: freq               ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
     TYPE( HSInfo ),    INTENT( INOUT ) :: HS
-    _RL :: Mz, vr, alpha2_f          ! values related to grain size
+    REAL (KIND=_RL90) :: Mz, vr, alpha2_f          ! values related to grain size
 
     ! Echo to PRTFile user's choice of boundary condition
 

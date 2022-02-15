@@ -46,12 +46,12 @@ CONTAINS
 
     INTEGER,          INTENT( IN  )   :: N
     REAL (KIND=_RL90), INTENT( IN  )  :: x( * )
-    COMPLEX (KIND=8), INTENT( IN  )   :: y( * )
-    COMPLEX (KIND=8), INTENT( INOUT ) :: PolyCoef( 4, * ), csWork( 4, * )
+    COMPLEX (KIND=_RL90), INTENT( IN  )   :: y( * )
+    COMPLEX (KIND=_RL90), INTENT( INOUT ) :: PolyCoef( 4, * ), csWork( 4, * )
 
     INTEGER           :: ix, iBCBeg, iBCEnd
     REAL (KIND=_RL90) :: h1, h2
-    COMPLEX  (KIND=8) :: del1, del2, f1, f2, f1prime, f2prime, fprimeT
+    COMPLEX  (KIND=_RL90) :: del1, del2, f1, f2, f1prime, f2prime, fprimeT
 
     !  Precompute estimates of the derivatives at the nodes
     !  The vector PolyCoef(1,*) holds the ordinate values at the nodes
@@ -129,9 +129,9 @@ CONTAINS
 
     INTEGER,          INTENT( IN  ) :: ix   ! index of the center point
     REAL (KIND=_RL90), INTENT( IN  ) :: x( * )
-    COMPLEX (KIND=8), INTENT( IN  ) :: y( * )
+    COMPLEX (KIND=_RL90), INTENT( IN  ) :: y( * )
     REAL (KIND=_RL90), INTENT( OUT ) :: h1, h2
-    COMPLEX (KIND=8), INTENT( OUT ) :: del1, del2
+    COMPLEX (KIND=_RL90), INTENT( OUT ) :: del1, del2
 
     h1   =   x( ix     ) - x( ix - 1 )
     h2   =   x( ix + 1 ) - x( ix     )
@@ -146,13 +146,13 @@ CONTAINS
 
   FUNCTION fprime_interior_Cmplx( del1, del2, fprime )
 
-    COMPLEX (KIND=8), INTENT( IN ) :: del1, del2, fprime
-    COMPLEX (KIND=8)               :: fprime_interior_Cmplx
+    COMPLEX (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    COMPLEX (KIND=_RL90)               :: fprime_interior_Cmplx
 
     fprime_r = fprime_interior( REAL(  del1 ), REAL(  del2 ), REAL(  fprime ) )
     fprime_i = fprime_interior( AIMAG( del1 ), AIMAG( del2 ), AIMAG( fprime ) )
 
-    fprime_interior_Cmplx = CMPLX( fprime_r, fprime_i, KIND=8 )
+    fprime_interior_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
   END FUNCTION fprime_interior_Cmplx
 
@@ -160,13 +160,13 @@ CONTAINS
 
   FUNCTION fprime_left_end_Cmplx( del1, del2, fprime )
 
-    COMPLEX (KIND=8), INTENT( IN ) :: del1, del2, fprime
-    COMPLEX (KIND=8)               :: fprime_left_end_Cmplx
+    COMPLEX (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    COMPLEX (KIND=_RL90)               :: fprime_left_end_Cmplx
 
     fprime_r = fprime_left_end( REAL(  del1 ), REAL(  del2 ), REAL(  fprime ) )
     fprime_i = fprime_left_end( AIMAG( del1 ), AIMAG( del2 ), AIMAG( fprime ) )
 
-    fprime_left_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=8 )
+    fprime_left_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
   END FUNCTION fprime_left_end_Cmplx
 
@@ -174,13 +174,13 @@ CONTAINS
 
   FUNCTION fprime_right_end_Cmplx( del1, del2, fprime )
 
-    COMPLEX (KIND=8), INTENT( IN ) :: del1, del2, fprime
-    COMPLEX (KIND=8)               :: fprime_right_end_Cmplx
+    COMPLEX (KIND=_RL90), INTENT( IN ) :: del1, del2, fprime
+    COMPLEX (KIND=_RL90)               :: fprime_right_end_Cmplx
 
     fprime_r = fprime_right_end( REAL(  del1 ), REAL(  del2 ), REAL(  fprime ) )
     fprime_i = fprime_right_end( AIMAG( del1 ), AIMAG( del2 ), AIMAG( fprime ) )
 
-    fprime_right_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=8 )
+    fprime_right_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
   END FUNCTION fprime_right_end_Cmplx
 

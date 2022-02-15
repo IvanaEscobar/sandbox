@@ -27,10 +27,10 @@ MODULE attenmod
   INTEGER, PRIVATE, PARAMETER      :: PRTFile = 6
   INTEGER, PARAMETER               :: MaxBioLayers = 200
   INTEGER                          :: iBio, NBioLayers
-  _RL :: T = 20, Salinity = 35, pH = 8, z_bar = 0, FG   ! Francois-Garrison volume attenuation; temperature, salinity, ...
+  REAL (KIND=_RL90) :: T = 20, Salinity = 35, pH = 8, z_bar = 0, FG   ! Francois-Garrison volume attenuation; temperature, salinity, ...
 
   TYPE bioStructure
-     _RL :: Z1, Z2, f0, Q, a0
+     REAL (KIND=_RL90) :: Z1, Z2, f0, Q, a0
   END TYPE bioStructure
 
   TYPE( bioStructure ) :: bio( MaxBioLayers )
@@ -64,10 +64,10 @@ CONTAINS
 
     USE constants_mod,    only: pi
 
-    _RL, INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
+    REAL (KIND=_RL90), INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN )  :: AttenUnit
-    _RL                :: f2, omega, alphaT, Thorp, a, FG
-    COMPLEX  (KIND=8)                :: CRCI
+    REAL (KIND=_RL90)                :: f2, omega, alphaT, Thorp, a, FG
+    COMPLEX  (KIND=_RL90)                :: CRCI
 
     omega = 2.0 * pi * freq
 
@@ -160,8 +160,8 @@ CONTAINS
     !     Returns
     !        alpha = volume attenuation in dB/km
 
-    _RL :: f, Franc_Garr
-    _RL :: c, A1, A2, A3, P1, P2, P3, f1, f2
+    REAL (KIND=_RL90) :: f, Franc_Garr
+    REAL (KIND=_RL90) :: c, A1, A2, A3, P1, P2, P3, f1, f2
 
     c = 1412 + 3.21 * T + 1.19 * Salinity + 0.0167 * z_bar
 
