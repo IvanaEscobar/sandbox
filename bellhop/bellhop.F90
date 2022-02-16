@@ -66,7 +66,10 @@ SUBROUTINE BELLHOP_DRIVER
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
-  CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
+  ! HARDCODING FILE TO FORCE Munk_ray Demo run
+  !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
+
+  FileRoot = 'MunkB_ray'
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
         STATUS = 'UNKNOWN', IOSTAT = iostat )
