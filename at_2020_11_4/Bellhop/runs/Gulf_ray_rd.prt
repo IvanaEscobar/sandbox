@@ -1,17 +1,16 @@
  BELLHOP/BELLHOP3D
- 
- BELLHOP- Topgulf                                                               
-  
+
+ BELLHOP- Topgulf                                                                
  frequency =   50.00     Hz
 
  Dummy parameter NMedia =            1
- 
+
      Quad approximation to SSP
      Attenuation units: dB/wavelength
      VACUUM
- 
+
  Depth =    5000.00 m
- 
+
  Sound speed profile:
    z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI
 
@@ -26,10 +25,10 @@
    4000.00      1528.00      0.00     1.00       0.0000    0.0000
    5000.00      1545.00      0.00     1.00       0.0000    0.0000
  __________________________________________________________________________
- 
+
  Using range-dependent sound speed
  Number of SSP ranges =            9
- 
+
  Profile ranges (km):
       0.00
      12.50
@@ -40,7 +39,7 @@
     100.00
     125.00
     201.00
- 
+
  Sound speed matrix:
   Depth (m )     Soundspeed (m/s)
       0.00   1536.00   1536.00   1536.00   1536.00   1536.00   1536.00   1536.00   1536.00   1536.00
@@ -53,67 +52,67 @@
    3000.00   1512.00   1512.00   1512.00   1512.00   1512.00   1512.00   1512.00   1512.00   1512.00
    4000.00   1528.00   1528.00   1528.00   1528.00   1528.00   1528.00   1528.00   1528.00   1528.00
    5000.00   1545.00   1545.00   1545.00   1545.00   1545.00   1545.00   1545.00   1545.00   1545.00
- 
+
                                  ( RMS roughness =   0.00     )
      Bathymetry file selected
      ACOUSTO-ELASTIC half-space
    5000.00      1800.00      0.00     2.00       0.1000    0.0000
- 
+
  __________________________________________________________________________
- 
+
  Number of Source   depths, Sz =            1
  Source   depths, Sz (m)
    300.000    
- 
- 
+
+
  __________________________________________________________________________
- 
+
  Number of Receiver depths, Rz =          101
  Receiver depths, Rz (m)
    0.00000       50.0000       100.000       150.000       200.000    
    250.000       300.000       350.000       400.000       450.000    
           ... 
    5000.00    
- 
- 
+
+
  __________________________________________________________________________
- 
+
  Number of Receiver ranges, Rr =         1001
  Receiver ranges, Rr (km)
    0.00000      0.125000      0.250000      0.375000      0.500000    
   0.625000      0.750000      0.875000       1.00000       1.12500    
           ... 
    125.000    
- 
- 
+
+
  Ray trace run
  Geometric hat beams in Cartesian coordinates
  Point source (cylindrical coordinates)
  Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )
  __________________________________________________________________________
- 
+
  Number of beams in elevation   =           29
  Beam take-off angles (degrees)
   -14.0000      -13.0000      -12.0000      -11.0000      -10.0000    
   -9.00000      -8.00000      -7.00000      -6.00000      -5.00000    
           ... 
    14.0000    
- 
+
  __________________________________________________________________________
- 
- 
+
+
  Step length,       deltas =   1000.     m
- 
+
  Maximum ray depth, Box%z  =   5500.     m
  Maximum ray range, Box%r  =   124.9    km
  No beam shift in effect
- 
+
  __________________________________________________________________________
- 
+
  Using bottom-bathymetry file
  Piecewise linear interpolation
  Number of bathymetry points =            8
- 
+
  Short format (bathymetry only)
   Range (km)  Depth (m)
    0.00      0.500E+04
@@ -124,7 +123,7 @@
    75.0      0.500E+04
    100.      0.500E+04
    125.      0.500E+04
- 
+
 Tracing beam       1    -14.00
 Tracing beam       2    -13.00
 Tracing beam       3    -12.00
@@ -155,4 +154,4 @@ Tracing beam      27     12.00
 Tracing beam      28     13.00
 Tracing beam      29     14.00
 
- CPU Time =       0.309E-01s
+ CPU Time =       0.347E-01s
