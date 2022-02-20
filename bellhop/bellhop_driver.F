@@ -137,6 +137,9 @@ C--
       _RL dpFac(sNx,sNy)
       _RL conv_T2theta
       INTEGER k, kc
+
+
+      CALL BELLHOP_INIT
 c     INTEGER ioUnit
 c     _RS     dummyRS(1)
 !#ifdef COMPONENT_MODULE

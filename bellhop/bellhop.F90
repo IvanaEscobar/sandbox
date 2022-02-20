@@ -57,7 +57,7 @@ MODULE BELLHOP
   INTEGER              :: iostat, iAllocStat  
 
 CONTAINS
-SUBROUTINE BELLHOP_DRIVER
+SUBROUTINE BELLHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: jj 
 ! added locally previously read in from unknown mod ... IEsco2022
@@ -66,7 +66,10 @@ SUBROUTINE BELLHOP_DRIVER
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
-  CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
+  ! HARDCODING FILE TO FORCE MunkB_ray Demo run
+  !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
+  FileRoot = 'MunkB_ray'
+
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
         STATUS = 'UNKNOWN', IOSTAT = iostat )
@@ -180,7 +183,7 @@ SUBROUTINE BELLHOP_DRIVER
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
   CALL BellhopCore
-END SUBROUTINE BELLHOP_DRIVER
+END SUBROUTINE BELLHOP_INIT
 
 ! **********************************************************************!
 SUBROUTINE BellhopCore
