@@ -30,6 +30,9 @@ results/
 coverage.info
 coverage/
 
+# EffPy
+chapter*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
