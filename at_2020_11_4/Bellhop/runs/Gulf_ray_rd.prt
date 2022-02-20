@@ -1,7 +1,7 @@
  BELLHOP/BELLHOP3D
 
  BELLHOP- Topgulf                                                                
- frequency =   50.00     Hz
+ frequency =   3000.     Hz
 
  Dummy parameter NMedia =            1
 
@@ -154,4 +154,4 @@ Tracing beam      27     12.00
 Tracing beam      28     13.00
 Tracing beam      29     14.00
 
- CPU Time =       0.347E-01s
+ CPU Time =       0.406E-01s
