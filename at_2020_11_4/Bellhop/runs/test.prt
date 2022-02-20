@@ -1,7 +1,7 @@
  BELLHOP/BELLHOP3D
 
  BELLHOP- Topgulf                                                                
- frequency =   50.00     Hz
+ frequency =   3000.     Hz
 
  Dummy parameter NMedia =            1
 
@@ -129,8 +129,8 @@
 Tracing beam       1    -14.00
 
  Geometric hat beams                     
- halfwidth  =    549.10407547862860     
- epsilonOpt =                (0.0000000000000000,47361910.326144658)
+ halfwidth  =    9.1517345913104773     
+ epsilonOpt =                (0.0000000000000000,789365.17210241104)
  EpsMult    =    1.0000000000000000     
 
 Tracing beam       2    -13.00
@@ -162,4 +162,4 @@ Tracing beam      27     12.00
 Tracing beam      28     13.00
 Tracing beam      29     14.00
 
- CPU Time =        2.36    s
+ CPU Time =        2.30    s
