@@ -18,6 +18,9 @@ a.out
 build*/
 input/
 results/
+
+# BELLHOP
+*.arr
 .Krakel
 .Kraken
 .KrakenField

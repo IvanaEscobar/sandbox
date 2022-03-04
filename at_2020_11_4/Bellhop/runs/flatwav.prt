@@ -1,7 +1,7 @@
  BELLHOP/BELLHOP3D
 
  BELLHOP- Munk profile/Flat waveguide                                            
- frequency =   50.00     Hz
+ frequency =   3000.     Hz
 
  Dummy parameter NMedia =            1
 
@@ -161,4 +161,4 @@ Tracing beam      68     12.25
 Tracing beam      69     12.62
 Tracing beam      70     13.00
 
- CPU Time =       0.343    s
+ CPU Time =       0.335    s
