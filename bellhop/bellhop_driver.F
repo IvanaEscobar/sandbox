@@ -9,8 +9,8 @@ C !INTERFACE: ==========================================================
 C !DESCRIPTION:
 C Calculate ray travel times, tau
 
-C !USES: ===============================================================
-!      use bellhop
+C !FORTRAN90 USE MODULES: ===============================================
+      use bellhop
 
       IMPLICIT NONE
 #include "SIZE.h"
