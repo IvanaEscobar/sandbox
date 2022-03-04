@@ -19,6 +19,7 @@ function plotarr( ARRFIL, irr, ird, isd )
 narginchk( 4, 4 )
 
 % Narrmx = 5000;
+ARRFIL = [ARRFIL, '.arr'];
 [ Arr, Pos ] = read_arrivals_asc( ARRFIL );
 %[ Arr, Pos ] = read_arrivals_bin( ARRFIL );
 
@@ -31,6 +32,7 @@ ylabel( 'Amplitude' )
 title( [ 'Src_z  = ', num2str( Pos.s.z( isd ) ), ...
    ' m    Rcvr_z = ', num2str( Pos.r.z( ird ) ), ...
    ' m    Rcvr_r = ', num2str( Pos.r.r( irr ) ), ' m' ] )
+set(gca, 'FontSize', 20)
 
 % depth-time stem plot
 figure
@@ -44,6 +46,7 @@ end
 xlabel( 'Time (s)' )
 ylabel( 'Depth (m)' )
 title( [ 'Src_z = ', num2str( Pos.s.z( isd ) ), ' m    Rcvr_r = ', num2str( Pos.r.r( irr ) ), ' m' ] )
+set(gca, 'FontSize', 20)
 
 % range-time stem plot
 figure
@@ -57,3 +60,5 @@ end
 xlabel( 'Time (s)' )
 ylabel( 'Range (m)' )
 title( [ 'Src_z = ', num2str( Pos.s.z( isd ) ), ' m    Rcvr_z = ', num2str( Pos.r.z( ird ) ), ' m' ] )
+
+set(gca, 'FontSize', 20)

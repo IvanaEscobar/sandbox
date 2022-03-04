@@ -163,3 +163,5 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
+
+set(gca, 'FontSize', 20)

@@ -71,3 +71,5 @@ set( gca, 'YDir', 'Reverse' )   % because view messes up the zoom feature
 
 xlabel( 'Sound Speed (m/s)' )
 ylabel( 'Depth (m)' )
+
+set(gca, 'FontSize', 20)
