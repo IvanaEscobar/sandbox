@@ -10,16 +10,7 @@ C !DESCRIPTION:
 C Calculate ray travel times, tau
 
 C !USES: ===============================================================
-      use bellhop
-!      use lscale_cond_mod
-!      use dargan_bettsmiller_mod
-!      use surface_flux_mod
-!      use vert_turb_driver_mod
-!      use vert_diff_mod, only: gcm_vert_diff_down,
-!     &                         gcm_vert_diff_up,
-!     &                         surf_diff_type
-!      use mixed_layer_mod, only: mixed_layer
-!      use constants_mod, only:  HLv
+!      use bellhop
 
       IMPLICIT NONE
 #include "SIZE.h"
@@ -139,7 +130,7 @@ C--
       INTEGER k, kc
 
 
-      CALL BELLHOP_INIT
+!      CALL BELLHOP_INIT
 c     INTEGER ioUnit
 c     _RS     dummyRS(1)
 !#ifdef COMPONENT_MODULE
