@@ -43,9 +43,8 @@ MODULE constants_mod
 ! </DESCRIPTION>
 
   ! SAVE
-   implicit none
-   private
-   #include "EEPARAMS_90.h"
+  implicit none
+  private
 
    REAL (KIND=_RL90), PUBLIC, PARAMETER :: pi = 3.1415926535898D0, &
                                            RadDeg = 180.0D0 / pi, &

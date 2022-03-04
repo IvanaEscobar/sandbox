@@ -9,17 +9,8 @@ C !INTERFACE: ==========================================================
 C !DESCRIPTION:
 C Calculate ray travel times, tau
 
-C !USES: ===============================================================
+C !FORTRAN90 USE MODULES: ===============================================
       use bellhop
-!      use lscale_cond_mod
-!      use dargan_bettsmiller_mod
-!      use surface_flux_mod
-!      use vert_turb_driver_mod
-!      use vert_diff_mod, only: gcm_vert_diff_down,
-!     &                         gcm_vert_diff_up,
-!     &                         surf_diff_type
-!      use mixed_layer_mod, only: mixed_layer
-!      use constants_mod, only:  HLv
 
       IMPLICIT NONE
 #include "SIZE.h"
