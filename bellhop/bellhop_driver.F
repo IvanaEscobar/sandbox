@@ -130,7 +130,7 @@ C--
       INTEGER k, kc
 
 
-!      CALL BELLHOP_INIT
+      CALL BELLHOP_INIT
 c     INTEGER ioUnit
 c     _RS     dummyRS(1)
 !#ifdef COMPONENT_MODULE
