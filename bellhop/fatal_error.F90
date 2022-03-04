@@ -8,7 +8,7 @@ MODULE fatal_error
 
   IMPLICIT NONE
   INTEGER, PRIVATE :: PRTFile = 6
-  #include "EEPARAMS_90.h"
+#include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

@@ -19,7 +19,7 @@ MODULE read_environment_mod
 
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
+#include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

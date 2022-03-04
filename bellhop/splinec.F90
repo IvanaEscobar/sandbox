@@ -8,7 +8,7 @@ MODULE SPLINEC
 
 ! IMPLICIT NONE ! wish this wasn't the case
  PRIVATE
- #include "EEPARAMS_90.h"
+#include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

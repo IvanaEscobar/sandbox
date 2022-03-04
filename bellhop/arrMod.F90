@@ -11,7 +11,7 @@ MODULE arrmod
   ! Variables for arrival information
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
+#include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

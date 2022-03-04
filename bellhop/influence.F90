@@ -21,7 +21,7 @@ MODULE influence
 
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
+#include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================
