@@ -6,7 +6,7 @@ MODULE SPLINEC
     !   Ivana Escobar
     ! </CONTACT>
 
-! IMPLICIT NONE ! wish this wasn't the case
+ IMPLICIT NONE
  PRIVATE
 #include "EEPARAMS_90.h"
 
@@ -71,8 +71,10 @@ SUBROUTINE CSPLINE (TAU, C, N, IBCBEG, IBCEND, NDIM)
 
   ! **********************************************************************
 
-  IMPLICIT REAL (KIND=_RL90) (A-H,O-Z)
-  REAL    (KIND=_RL90) ::  TAU(N)
+  IMPLICIT INTEGER            (I-N) 
+  IMPLICIT REAL (KIND=_RL90)  (A-H,O-Z)
+  INTEGER              :: NDIM, IBCBEG, IBCEND
+  REAL    (KIND=_RL90) :: TAU(N)
   COMPLEX (KIND=_RL90) :: C(4,NDIM), G, DTAU, DIVDF1, DIVDF3
 
   L = N - 1
@@ -85,7 +87,7 @@ SUBROUTINE CSPLINE (TAU, C, N, IBCBEG, IBCEND, NDIM)
   !   * BEGINNING BOUNDARY CONDITION SECTION *
 
   IF (IBCBEG==0)  THEN                           ! IBCBEG = 0
-     IF (N.GT.2)  THEN                            !     N > 2
+     IF (N.GT.2)  THEN                           !     N > 2
         C(4,1) = C(3,3)
         C(3,1) = C(3,2) + C(3,3)
         C(2,1) = ((C(3,2) + 2.0*C(3,1))*C(4,2)*C(3,3) + &
