@@ -11,7 +11,6 @@ MODULE beampattern
   USE fatal_error, only: ERROUT
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

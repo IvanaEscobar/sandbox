@@ -19,7 +19,6 @@ MODULE writeray
 
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
 
 ! public interfaces
 !=======================================================================

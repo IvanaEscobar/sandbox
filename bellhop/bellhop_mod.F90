@@ -16,7 +16,6 @@ MODULE bellhop_mod
   USE constants_mod,            only: MaxN
   IMPLICIT NONE
   PRIVATE
-  #include "EEPARAMS_90.h"
 
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
