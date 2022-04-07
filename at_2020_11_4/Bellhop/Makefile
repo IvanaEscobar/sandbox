@@ -105,7 +105,7 @@ cov:
 lcov-report:
 	mkdir -p $(LCOV_DIR)
 	$(LCOV) --compat-libtool --capture --directory . --output-file $(LCOV_DIR)/coverage.info --gcov-tool $(GCOV)
-	genhtml -t "flatwave" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
+	genhtml -t "ihop" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
 	open $(LCOV_DIR)/html/index.html
 
 lcov-reset:

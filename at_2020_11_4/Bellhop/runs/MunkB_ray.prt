@@ -1,7 +1,7 @@
  BELLHOP/BELLHOP3D
 
  BELLHOP- Munk profile                                                           
- frequency =   3000.     Hz
+ frequency =   750.0     Hz
 
  Dummy parameter NMedia =            1
 
@@ -73,7 +73,7 @@
    125.000    
 
 
- Ray trace run
+ Arrivals calculation, ASCII  file output
  Geometric hat beams in Cartesian coordinates
  Point source (cylindrical coordinates)
  Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )
@@ -98,7 +98,15 @@
 
  Step length,       deltas =   500.0     m (automatically selected)
 
+ ( Maximum # of arrivals =          197 )
+
 Tracing beam       1    -14.00
+
+ Geometric hat beams                     
+ halfwidth  =    37.045208714328965     
+ epsilonOpt =                (0.0000000000000000,3233517.5914764330)
+ EpsMult    =    1.0000000000000000     
+
 Tracing beam       2    -13.00
 Tracing beam       3    -12.00
 Tracing beam       4    -11.00
@@ -128,4 +136,4 @@ Tracing beam      27     12.00
 Tracing beam      28     13.00
 Tracing beam      29     14.00
 
- CPU Time =       0.721E-01s
+ CPU Time =        2.99    s
