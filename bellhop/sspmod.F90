@@ -43,13 +43,13 @@ MODULE sspmod
 
   ! SSP
   TYPE SSPStructure
-    INTEGER              :: NPts, Nr, Nx, Ny, Nz
-    REAL (KIND=_RL90)                  :: z( MaxSSP ), rho( MaxSSP )
-    COMPLEX (KIND=_RL90)     :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), &
-                            n2z( MaxSSP ), cSpline( 4, MaxSSP )
-    COMPLEX (KIND=_RL90)     :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
-    REAL (KIND=_RL90), ALLOCATABLE     :: cMat( :, : ), czMat( :, : ), cMat3( :, :, : ), & 
-                            czMat3( :, :, : )
+    INTEGER                 :: NPts, Nr, Nx, Ny, Nz
+    REAL    (KIND=_RL90)    :: z( MaxSSP ), rho( MaxSSP )
+    COMPLEX (KIND=_RL90)    :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), &
+                               n2z( MaxSSP ), cSpline( 4, MaxSSP )
+    COMPLEX (KIND=_RL90)    :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
+    REAL    (KIND=_RL90), ALLOCATABLE   :: cMat( :, : ),     czMat( :, : ), &
+                                           cMat3( :, :, : ), czMat3( :, :, : )
     TYPE ( rxyz_vector ) :: Seg
     CHARACTER (LEN=1)    :: Type
     CHARACTER (LEN=2)    :: AttenUnit
@@ -60,11 +60,11 @@ MODULE sspmod
   ! *** Halfspace properties structure ***
 
   TYPE HSInfo
-     REAL (KIND=_RL90) :: alphaR, alphaI, betaR, betaI    ! compressional and shear wave speeds/attenuations in user units
-     COMPLEX  (KIND=_RL90) :: cP, cS            ! P-wave, S-wave speeds
-     REAL (KIND=_RL90)               :: rho, Depth        ! density, depth
-     CHARACTER (LEN=1) :: BC                ! Boundary condition type
-     CHARACTER (LEN=6) :: Opt
+     REAL   (KIND=_RL90)    :: alphaR, alphaI, betaR, betaI    ! compressional and shear wave speeds/attenuations in user units
+     COMPLEX(KIND=_RL90)    :: cP, cS            ! P-wave, S-wave speeds
+     REAL   (KIND=_RL90)    :: rho, Depth        ! density, depth
+     CHARACTER (LEN=1)      :: BC                ! Boundary condition type
+     CHARACTER (LEN=6)      :: Opt
   END TYPE HSInfo
 
   TYPE BdryPt
