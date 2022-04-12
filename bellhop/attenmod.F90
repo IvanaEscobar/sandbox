@@ -65,10 +65,10 @@ CONTAINS
 
     USE constants_mod,    only: pi
 
-    REAL (KIND=_RL90), INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
-    CHARACTER (LEN=2), INTENT( IN )  :: AttenUnit
-    REAL (KIND=_RL90)                :: f2, omega, alphaT, Thorp, a, FG
-    COMPLEX  (KIND=_RL90)                :: CRCI
+    REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
+    CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
+    REAL    (KIND=_RL90)            :: f2, omega, alphaT, Thorp, a, FG
+    COMPLEX (KIND=_RL90)            :: CRCI
 
     omega = 2.0 * pi * freq
 
@@ -132,7 +132,7 @@ CONTAINS
 
     ! Convert Nepers/m to equivalent imaginary sound speed 
     alphaT = alphaT * c * c / omega
-    CRCI   = CMPLX( c, alphaT, KIND=8 )
+    CRCI   = CMPLX( c, alphaT, KIND=_RL90 )
 
     IF ( alphaT > c ) THEN
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI

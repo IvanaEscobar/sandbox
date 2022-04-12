@@ -106,10 +106,10 @@ CONTAINS
     ENDIF
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from 
-    !first SSP point
-    ! bottom depth should perhaps be set the same way?
+    ! first SSP point
 
     ! *** Bottom BC ***
+    ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = '  '   ! initialize to blanks
     READ(  ENVFile, * ) Bdry%Bot%HS%Opt, Sigma
     WRITE( PRTFile, * )
@@ -129,9 +129,9 @@ CONTAINS
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( ThreeD )     ! Read source/receiver x-y coordinates
-
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
+
     CALL ReadSzRz( ZMin, ZMax )
     CALL ReadRcvrRanges
     IF ( ThreeD ) CALL ReadRcvrBearings
@@ -140,14 +140,14 @@ CONTAINS
 
     Depth = Zmax - Zmin   ! water depth
     CALL ReadRayElevationAngles( freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
-    IF ( ThreeD ) CALL ReadRayBearingAngles(   freq, Bdry%Top%HS%Opt, Beam%RunType )
+    IF ( ThreeD ) CALL ReadRayBearingAngles( freq, Bdry%Top%HS%Opt, Beam%RunType )
 
     WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '___________________________________________________', &
+                        '_______________________'
     WRITE( PRTFile, * )
 
     ! Limits for tracing beams
-
     IF ( ThreeD ) THEN
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
@@ -279,7 +279,7 @@ CONTAINS
     CHARACTER (LEN=80), INTENT( IN  ) :: FileRoot
     INTEGER            :: iostat
 
-    TopOpt = '      '   ! initialize to blanks
+    TopOpt = '      '   ! initialize to 6 blank spaces
     READ(  ENVFile, * ) TopOpt
     WRITE( PRTFile, * )
 
@@ -393,8 +393,7 @@ CONTAINS
 
   SUBROUTINE ReadRunType( RunType, PlotType )
 
-    ! Read the RunType variable and echo with explanatory information to the 
-    ! print file
+    ! Read the RunType variable and print to .prt file
 
     USE sourcereceiverpositions, only: Pos
 
@@ -485,16 +484,16 @@ CONTAINS
 
     ! Handles top and bottom boundary conditions
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: freq               ! frequency
+    REAL (KIND=_RL90), INTENT( IN    ) :: freq  ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
-    TYPE( HSInfo ),    INTENT( INOUT ) :: HS
+    TYPE ( HSInfo ),   INTENT( INOUT ) :: HS
     REAL (KIND=_RL90) :: Mz, vr, alpha2_f     ! values related to grain size
 
     ! Echo to PRTFile user's choice of boundary condition
 
     SELECT CASE ( HS%BC )
     CASE ( 'V' )
-       WRITE( PRTFile, * ) '    VACUUM'
+       WRITE( PRTFile, * ) '    Surface modeled as a VACUUM'
     CASE ( 'R' )
        WRITE( PRTFile, * ) '    Perfectly RIGID'
     CASE ( 'A' )

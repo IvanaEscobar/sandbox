@@ -45,12 +45,12 @@ CONTAINS
     ! csWork is a temporary work space for the cubic spline
 
     INTEGER,              INTENT( IN  )   :: N
-    REAL (KIND=_RL90),    INTENT( IN  )   :: x( * )
+    REAL    (KIND=_RL90), INTENT( IN  )   :: x( * )
     COMPLEX (KIND=_RL90), INTENT( IN  )   :: y( * )
     COMPLEX (KIND=_RL90), INTENT( INOUT ) :: PolyCoef( 4, * ), csWork( 4, * )
 
     INTEGER               :: ix, iBCBeg, iBCEnd
-    REAL (KIND=_RL90)     :: h1, h2
+    REAL     (KIND=_RL90) :: h1, h2
     COMPLEX  (KIND=_RL90) :: del1, del2, f1, f2, f1prime, f2prime, fprimeT
 
     !  Precompute estimates of the derivatives at the nodes
