@@ -43,7 +43,7 @@ MODULE bellhop_mod
   TYPE BeamStructure
      INTEGER           :: NBeams, Nimage, Nsteps, iBeamWindow
      REAL (KIND=_RL90) :: deltas, epsMultiplier = 1, rLoop
-     CHARACTER (LEN=1) :: Component              ! Pressure or displacement
+     CHARACTER (LEN=1) :: Component ! Pressure or displacement
      CHARACTER (LEN=4) :: Type = 'G S '
      CHARACTER (LEN=7) :: RunType
      TYPE( rxyz )      :: Box

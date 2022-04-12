@@ -140,14 +140,14 @@ CONTAINS
 
     Depth = Zmax - Zmin   ! water depth
     CALL ReadRayElevationAngles( freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
-    IF ( ThreeD ) CALL ReadRayBearingAngles(   freq, Bdry%Top%HS%Opt, Beam%RunType )
+    IF ( ThreeD ) CALL ReadRayBearingAngles( freq, Bdry%Top%HS%Opt, Beam%RunType )
 
     WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '___________________________________________________', &
+                        '_______________________'
     WRITE( PRTFile, * )
 
     ! Limits for tracing beams
-
     IF ( ThreeD ) THEN
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
@@ -393,8 +393,7 @@ CONTAINS
 
   SUBROUTINE ReadRunType( RunType, PlotType )
 
-    ! Read the RunType variable and echo with explanatory information to the 
-    ! print file
+    ! Read the RunType variable and print to .prt file
 
     USE sourcereceiverpositions, only: Pos
 

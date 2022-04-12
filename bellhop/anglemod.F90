@@ -27,9 +27,10 @@ MODULE anglemod
   REAL (KIND=_RL90), PRIVATE, PARAMETER :: c0 = 1500.0
 
   TYPE AnglesStructure
-     INTEGER       :: Nalpha = 0, Nbeta = 1, iSingle_alpha = 0, iSingle_beta = 0
-     REAL (KIND=_RL90) :: Dalpha, Dbeta
-     REAL (KIND=_RL90), ALLOCATABLE:: alpha( : ), beta( : )
+     INTEGER                        :: Nalpha = 0, Nbeta = 1, &
+                                       iSingle_alpha = 0, iSingle_beta = 0
+     REAL (KIND=_RL90)              :: Dalpha, Dbeta
+     REAL (KIND=_RL90), ALLOCATABLE :: alpha( : ), beta( : )
   END TYPE AnglesStructure
 
   Type( AnglesStructure ) :: Angles
@@ -37,12 +38,11 @@ MODULE anglemod
 CONTAINS
   SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType )
 
-    REAL (KIND=_RL90), INTENT( IN  ) :: freq, Depth
+    REAL (KIND=_RL90),  INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
-    REAL (KIND=_RL90)                :: d_theta_recommended
+    REAL (KIND=_RL90)   :: d_theta_recommended
 
-    IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
-       ! option to trace a single beam
+    IF ( TopOpt( 6 : 6 ) == 'I' ) THEN ! option to trace a single beam
        READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha 
     ELSE
        READ( ENVFile, * ) Angles%Nalpha
@@ -81,7 +81,8 @@ CONTAINS
                     Angles%alpha( 1 ), 360.0D0 ) ) < 10.0 * TINY( 1.0D0 ) ) &
                     Angles%Nalpha = Angles%Nalpha - 1
 
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '_________________________________________________', &
+                        '_________________________'
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Number of beams in elevation   = ', Angles%Nalpha
     IF ( Angles%iSingle_alpha > 0 ) WRITE( PRTFile, * ) &
@@ -146,13 +147,14 @@ CONTAINS
     ! Nx2D CASE: beams must lie on rcvr radials--- replace beta with theta
     IF ( RunType( 6 : 6 ) == '2' .AND. RunType( 1 : 1 ) /= 'R' ) THEN
        WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Replacing beam take-off angles, beta, with receiver bearing lines, theta'
+       WRITE( PRTFile, * ) 'Replacing beam take-off angles, beta, with ', &
+                           'receiver bearing lines, theta'
        DEALLOCATE( Angles%beta )
 
        Angles%Nbeta = Pos%Ntheta
        ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
        IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', &
-                                    'Insufficient memory to store beam angles'  )
+                                    'Insufficient memory to store beam angles')
        ! Nbeta should = Ntheta
        Angles%beta( 1 : Angles%Nbeta ) = Pos%theta( 1 : Pos%Ntheta )  
     END IF

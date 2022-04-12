@@ -23,7 +23,7 @@ MODULE BELLHOP
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
   ! Systems Center
   
-  USE bellhop_mod ! Added to get title, freq, Beam
+  USE bellhop_mod               ! Added to get title, freq, Beam
   USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
                                       ARRFile, RAYFile, MaxN
   USE read_Environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
