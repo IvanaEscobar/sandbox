@@ -487,7 +487,7 @@ CONTAINS
 
     REAL (KIND=_RL90), INTENT( IN    ) :: freq  ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
-    TYPE( HSInfo ),    INTENT( INOUT ) :: HS
+    TYPE ( HSInfo ),   INTENT( INOUT ) :: HS
     REAL (KIND=_RL90) :: Mz, vr, alpha2_f     ! values related to grain size
 
     ! Echo to PRTFile user's choice of boundary condition

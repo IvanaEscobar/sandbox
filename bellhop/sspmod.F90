@@ -49,12 +49,13 @@ MODULE sspmod
     REAL    (KIND=_RL90)    :: z( MaxSSP ), rho( MaxSSP )
     COMPLEX (KIND=_RL90)    :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), &
                                n2z( MaxSSP ), cSpline( 4, MaxSSP )
-    COMPLEX (KIND=_RL90)    :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
     REAL    (KIND=_RL90), ALLOCATABLE   :: cMat( :, : ),     czMat( :, : ), &
                                            cMat3( :, :, : ), czMat3( :, :, : )
     TYPE ( rxyz_vector ) :: Seg
     CHARACTER (LEN=1)    :: Type
     CHARACTER (LEN=2)    :: AttenUnit
+    ! for PCHIP coefs.
+    COMPLEX (KIND=_RL90)    :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   
   END TYPE SSPStructure
 
   TYPE( SSPStructure ) :: SSP
@@ -286,13 +287,14 @@ END SUBROUTINE EvaluateSSP2D
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                                        rho ! sound speed and its derivatives
     REAL    (KIND=_RL90) :: xt
     COMPLEX (KIND=_RL90) :: c_cmplx
 
     IF ( Task == 'INI' ) THEN   ! read in SSP data
 
-       Depth     = x( 2 )
+       Depth = x( 2 )
        CALL ReadSSP( Depth, freq )
 
        !                                                               2      3
@@ -301,7 +303,7 @@ END SUBROUTINE EvaluateSSP2D
 
        CALL PCHIP( SSP%z, SSP%c, SSP%NPts, SSP%cCoef, SSP%CSWork )
 
-    ELSE                        ! return SSP info
+    ELSE    ! return SSP info
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
@@ -327,10 +329,13 @@ END SUBROUTINE EvaluateSSP2D
 
        crr   = 0.0D0
        crz   = 0.0D0
-       czz   = REAL( 2.0D0 * SSP%cCoef( 3, iSegz ) + 6.0D0 * SSP%cCoef( 4, iSegz ) * xt )
+       czz   = REAL( 2.0D0 * SSP%cCoef( 3, iSegz ) + &
+               6.0D0 * SSP%cCoef( 4, iSegz ) * xt )
 
-       W     = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
-       rho   = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )   ! linear interp of density
+       W     = ( x( 2 ) - SSP%z( iSegz ) ) / &
+               ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
+       ! linear interp of density
+       rho   = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )  
 
     END IF
 
@@ -345,10 +350,11 @@ END SUBROUTINE EvaluateSSP2D
     REAL (KIND=_RL90), INTENT( IN )  :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
-    INTEGER                          :: iBCBeg, iBCEnd
-    REAL (KIND=_RL90)                :: hSpline
-    COMPLEX  (KIND=_RL90)                :: c_cmplx, cz_cmplx, czz_cmplx
+    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                                        rho ! sound speed and its derivatives
+    INTEGER                 :: iBCBeg, iBCEnd
+    REAL     (KIND=_RL90)   :: hSpline
+    COMPLEX  (KIND=_RL90)   :: c_cmplx, cz_cmplx, czz_cmplx
     
     IF ( Task == 'INI' ) THEN
 
@@ -362,7 +368,7 @@ END SUBROUTINE EvaluateSSP2D
        ! Compute spline coefs
        iBCBeg = 0
        iBCEnd = 0
-       CALL CSpline( SSP%z, SSP%cSpline(   1, 1 ), SSP%NPts, iBCBeg, iBCEnd, SSP%NPts )
+       CALL CSpline( SSP%z, SSP%cSpline( 1, 1 ), SSP%NPts, iBCBeg, iBCEnd, SSP%NPts )
     ELSE
 
        ! *** Section to return SSP info ***
@@ -405,13 +411,14 @@ END SUBROUTINE EvaluateSSP2D
 
     ! Bilinear quadrilatteral interpolation of SSP data in 2D
 
-    INTEGER,           PARAMETER      :: SSPFile = 40
+    INTEGER,           PARAMETER     :: SSPFile = 40
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
-    CHARACTER (LEN=3),  INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
-    INTEGER                           :: AllocateStatus, iSegT, iz2
-    REAL (KIND=_RL90)                :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
+    CHARACTER (LEN=3), INTENT( IN  ) :: Task
+    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                                        rho ! sound speed and its derivatives
+    INTEGER             :: AllocateStatus, iSegT, iz2
+    REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
     
     IF ( Task == 'INI' ) THEN
 
@@ -479,10 +486,12 @@ END SUBROUTINE EvaluateSSP2D
           END DO
        END IF
 
-       ! The following tries to be more efficient than the code above by searching away from the current layer
+       ! The following tries to be more efficient than the code above by 
+       ! searching away from the current layer
        ! rather than searching through all the layers
        ! However, seems to be no faster
-       ! Also, this code caused a problem on at/tests/Gulf for the range-dep. test cases
+       ! Also, this code caused a problem on at/tests/Gulf for the 
+       ! range-dep. test cases
 !!$     IF ( x( 2 ) < SSP%z( iSegz ) .AND. iSegz > 1 ) THEN
 !!$        DO iz = iSegz - 1, 1, -1   ! Search for bracketting Depths
 !!$           IF ( x( 2 ) > SSP%z( iz ) ) THEN
@@ -564,13 +573,15 @@ END SUBROUTINE EvaluateSSP2D
     ! assumes a rectilinear case (not the most general hexahedral)
 
     INTEGER, PARAMETER :: SSPFile = 40
-    REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90),  INTENT( IN  ) :: freq
+    REAL (KIND=_RL90),  INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
     CHARACTER (LEN =3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho ! sound speed and its derivatives
-    INTEGER            :: AllocateStatus, iSegxt, iSegyt, iy2, iz2, iSegxTT( 1 ), iSegyTT( 1 ), iSegzTT( 1 )
-    REAL (KIND=_RL90)                :: c1, c2, c11, c12, c21, c22, cz11, cz12, cz21, &
-                          cz22, cz1, cz2, cx, cy, cz, s1, s2, s3
+    REAL (KIND=_RL90),  INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, &
+                                         cxy, cxz, cyz, rho ! sound speed and its derivatives
+    INTEGER             :: AllocateStatus, iSegxt, iSegyt, iy2, iz2, &
+                           iSegxTT( 1 ), iSegyTT( 1 ), iSegzTT( 1 )
+    REAL (KIND=_RL90)   :: c1, c2, c11, c12, c21, c22, cz11, cz12, cz21, &
+                           cz22, cz1, cz2, cx, cy, cz, s1, s2, s3
 
     IF ( Task == 'INI' ) THEN
 
@@ -867,7 +878,8 @@ END SUBROUTINE EvaluateSSP2D
 
 SUBROUTINE Analytic3D( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho )
 
-  REAL (KIND=_RL90) :: x( 3 ), c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, c0, W, Wz, epsilon, epsilon_y
+  REAL (KIND=_RL90) :: x( 3 ), c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, &
+                       cyz, c0, W, Wz, epsilon, epsilon_y
   REAL (KIND=_RL90) :: rho
   
   iSegz = 1
@@ -908,7 +920,7 @@ END SUBROUTINE Analytic3D
 !**********************************************************************!
 
   SUBROUTINE ReadSSP( Depth, freq )
-    ! reads the SSP data from the environmental file and convert to Nepers/m
+    ! reads SSP in m/s from .env file and convert to AttenUnit (ie. Nepers/m)
 
     USE attenmod, only: CRCI
 
