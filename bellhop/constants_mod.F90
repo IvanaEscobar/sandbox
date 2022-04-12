@@ -54,6 +54,7 @@ MODULE constants_mod
    INTEGER, PUBLIC, PARAMETER :: ENVFile = 5, PRTFile = 6, RAYFile = 21, &
                                  SHDFile = 25, ARRFile = 36, SSPFile = 40, &
                                  MaxN = 10000
+    ! NOTE: SSPFile and ATIFile are both set to 40.... seems wrong for now
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 

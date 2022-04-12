@@ -35,7 +35,7 @@ MODULE bdrymod
   ! Halfspace properties
   TYPE HSInfo2
      ! compressional and shear wave speeds/attenuations in user units
-     REAL (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
+     REAL     (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
      COMPLEX  (KIND=_RL90) :: cP, cS    ! P-wave, S-wave speeds
      REAL (KIND=_RL90) :: rho, Depth    ! density, depth
      CHARACTER (LEN=1) :: BC            ! Boundary condition type
@@ -66,7 +66,8 @@ CONTAINS
 
     SELECT CASE ( TopATI )
     CASE ( '~', '*' )
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
+       WRITE( PRTFile, * ) '______________________________________________', &
+                           '____________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using top-altimetry file'
 
@@ -106,14 +107,14 @@ CONTAINS
           SELECT CASE ( atiType( 2 : 2 ) )
           CASE ( 'S', '' )
              READ(  ATIFile, * ) Top( ii )%x
-             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   ! echo some values
+             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x
              END IF
           CASE ( 'L' )
              READ(  ATIFile, * ) Top( ii )%x, Top( ii )%HS%alphaR, &
                                  Top( ii )%HS%betaR, Top( ii )%HS%rho, &
                                  Top( ii )%HS%alphaI, Top( ii )%HS%betaI
-             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   ! echo some values
+             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
                 WRITE( PRTFile, FMT = "(7G11.3)" ) &
                     Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, &
                     Top( ii )%HS%rho, Top( ii )%HS%alphaI, Top( ii )%HS%betaI
@@ -158,12 +159,13 @@ CONTAINS
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
-    REAL (KIND=_RL90), INTENT( IN ) :: DepthB
+    REAL (KIND=_RL90),  INTENT( IN ) :: DepthB
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( BotBTY )
     CASE ( '~', '*' )
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
+       WRITE( PRTFile, * ) '________________________________________________', &
+                           '__________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
 
@@ -215,14 +217,14 @@ CONTAINS
           SELECT CASE ( btyType( 2 : 2 ) )
           CASE ( 'S', '' )   ! short format
              READ(  BTYFile, * ) Bot( ii )%x
-             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  ! echo some values
+             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( ii )%x
              END IF
           CASE ( 'L' )       ! long format
              READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, &
                                  Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
                                  Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
-             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   ! echo some values
+             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   
                 WRITE( PRTFile, FMT="( F10.2, F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
                    Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
                    Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
