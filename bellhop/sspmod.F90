@@ -35,7 +35,9 @@ MODULE sspmod
   INTEGER,       PRIVATE :: iz
   REAL (KIND=_RL90), PRIVATE :: Depth, W
   REAL (KIND=_RL90)          :: zTemp, betaPowerLaw = 1, fT = 1D20
-  REAL (KIND=_RL90)          :: alphaR = 1500, betaR = 0, alphaI = 0, betaI = 0, rhoR = 1
+  ! DEFAULT values, BELLHOP only uses alphaR
+  REAL (KIND=_RL90)          :: alphaR = 1500, betaR = 0, alphaI = 0, &
+                                betaI = 0, rhoR = 1
 
   TYPE rxyz_vector
     REAL (KIND=_RL90), ALLOCATABLE :: r(:), x(:), y(:), z(:)
@@ -80,13 +82,14 @@ MODULE sspmod
 CONTAINS
   SUBROUTINE EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! Call the particular profil routine indicated by the SSP%Type and perform Task
-    !   Task = 'TAB'  then tabulate cp, cs, rhoT 
-    !   Task = 'INI' then initialize
+    ! Call the particular profile routine indicated by the SSP%Type and 
+    ! perform Task
+    !   Task = 'TAB' to tabulate cp, cs, rhoT 
+    !   Task = 'INI' to initialize
 
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )      ! r-z coordinate where SSP is to be evaluated
-    CHARACTER ( LEN=3), INTENT( IN  ) :: Task
+    CHARACTER( LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
     REAL (KIND=_RL90)                :: gradc_3d( 3 ), cxx, cyy, cxy, cxz, cyz
     REAL (KIND=_RL90)                :: x3( 3 )
@@ -198,10 +201,10 @@ END SUBROUTINE EvaluateSSP2D
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
-       Depth     = x( 2 )
+       Depth = x( 2 )
        CALL ReadSSP( Depth, freq )
               
-       SSP%n2(  1 : SSP%NPts ) = 1.0 / SSP%c( 1 : SSP%NPts ) ** 2
+       SSP%n2(  1 : SSP%NPts ) = 1.0 / SSP%c( 1 : SSP%NPts )**2
 
        ! compute gradient, n2z
        DO iz = 2, SSP%Npts
@@ -276,7 +279,7 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE cPCHIP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! This implements the new monotone piecewise cubic Hermite interpolating
+    ! This implements the monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
 
     USE pchipmod,  only: PCHIP
@@ -284,8 +287,8 @@ END SUBROUTINE EvaluateSSP2D
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
-    REAL (KIND=_RL90) :: xt
-    COMPLEX  (KIND=_RL90) :: c_cmplx
+    REAL    (KIND=_RL90) :: xt
+    COMPLEX (KIND=_RL90) :: c_cmplx
 
     IF ( Task == 'INI' ) THEN   ! read in SSP data
 
@@ -905,7 +908,6 @@ END SUBROUTINE Analytic3D
 !**********************************************************************!
 
   SUBROUTINE ReadSSP( Depth, freq )
-
     ! reads the SSP data from the environmental file and convert to Nepers/m
 
     USE attenmod, only: CRCI
@@ -919,7 +921,7 @@ END SUBROUTINE Analytic3D
        
     SSP%NPts = 1
 
-    DO iz = 1, MaxSSP
+    DO iz = 1, MaxSSP !NOTE: hard coded in this file to 100001
 
        READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
@@ -927,7 +929,7 @@ END SUBROUTINE Analytic3D
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                              SSP%AttenUnit, betaPowerLaw, fT )
-       SSP%rho( iz ) = rhoR
+       SSP%rho( iz ) = rhoR !NOTE: set to a default value of 1 in this file
 
        ! verify that the depths are monotone increasing
        IF ( iz > 1 ) THEN

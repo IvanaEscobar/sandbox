@@ -279,7 +279,7 @@ CONTAINS
     CHARACTER (LEN=80), INTENT( IN  ) :: FileRoot
     INTEGER            :: iostat
 
-    TopOpt = '      '   ! initialize to blanks
+    TopOpt = '      '   ! initialize to 6 blank spaces
     READ(  ENVFile, * ) TopOpt
     WRITE( PRTFile, * )
 
@@ -485,7 +485,7 @@ CONTAINS
 
     ! Handles top and bottom boundary conditions
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: freq               ! frequency
+    REAL (KIND=_RL90), INTENT( IN    ) :: freq  ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
     TYPE( HSInfo ),    INTENT( INOUT ) :: HS
     REAL (KIND=_RL90) :: Mz, vr, alpha2_f     ! values related to grain size
@@ -494,7 +494,7 @@ CONTAINS
 
     SELECT CASE ( HS%BC )
     CASE ( 'V' )
-       WRITE( PRTFile, * ) '    VACUUM'
+       WRITE( PRTFile, * ) '    Surface modeled as a VACUUM'
     CASE ( 'R' )
        WRITE( PRTFile, * ) '    Perfectly RIGID'
     CASE ( 'A' )
