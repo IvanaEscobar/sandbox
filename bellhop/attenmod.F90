@@ -132,7 +132,7 @@ CONTAINS
 
     ! Convert Nepers/m to equivalent imaginary sound speed 
     alphaT = alphaT * c * c / omega
-    CRCI   = CMPLX( c, alphaT, KIND=8 )
+    CRCI   = CMPLX( c, alphaT, KIND=_RL90 )
 
     IF ( alphaT > c ) THEN
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI

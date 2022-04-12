@@ -9,6 +9,7 @@ MODULE subtabulate
   ! If x(3) = -999.9 then subtabulation is performed
   ! i.e., a vector is generated with Nx points in [ x(1), x(2) ]
   ! If x(2) = -999.9 then x(1) is repeated into x(2)
+  ! tabulates info in outputfile
 
   ! mbp 1/2015
 
@@ -47,9 +48,9 @@ CONTAINS
 
   SUBROUTINE SubTab_dble( x, Nx )
 
-    INTEGER,       INTENT( IN )    :: Nx
-    REAL (KIND=_RL90), INTENT( INOUT ) :: x( Nx )
-    REAL (KIND=_RL90)                  :: deltax
+    INTEGER,            INTENT( IN    ) :: Nx
+    REAL (KIND=_RL90),  INTENT( INOUT ) :: x( Nx )
+    REAL (KIND=_RL90)   :: deltax
 
     IF ( Nx >= 3 ) THEN
        IF ( x( 3 ) == -999.9 ) THEN   ! testing for equality here is dangerous

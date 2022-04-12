@@ -8,10 +8,11 @@ MODULE sourcereceiverpositions
 
   ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
 
-  USE fatal_error, only: ERROUT
-  USE subtabulate, only: SubTab
-  USE monotonic_mod, only: monotonic
+  USE fatal_error,  only: ERROUT
+  USE subtabulate,  only: SubTab
+  USE monotonic_mod,only: monotonic
   USE sort_mod,     only: Sort
+  USE constants_mod,only: ENVFile, PRTFile
 
   IMPLICIT NONE
   PRIVATE
@@ -19,27 +20,27 @@ MODULE sourcereceiverpositions
 ! public interfaces
 !=======================================================================
 
-    public Pos, Number_to_Echo, Nfreq, freqVec, ReadSxSy, ReadSzRz,&
+    public Pos, Number_to_Echo, Nfreq, freqVec, ReadSxSy, ReadSzRz, &
            ReadRcvrRanges, ReadRcvrBearings, ReadFreqVec
 
 !=======================================================================
 
-  INTEGER, PARAMETER          :: Number_to_Echo = 10
-  INTEGER, PRIVATE            :: IAllocStat     ! used to capture status after allocation
-  INTEGER, PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6   ! unit 5 is usually (not always) the ENVFile
-  INTEGER                     :: Nfreq          ! number of frequencies
+  INTEGER, PARAMETER    :: Number_to_Echo = 10
+  INTEGER, PRIVATE      :: IAllocStat     ! used to capture status after allocation
+  INTEGER               :: Nfreq          ! number of frequencies
   REAL (KIND=_RL90), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
 
   TYPE Position
+      ! NOTE: use ReadVector subroutine to see if there are more than 1 source
      INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
-     REAL                 :: Delta_r, Delta_theta
-     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )
+     REAL                 :: Delta_r, Delta_theta               ! receiver spacing
+     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )                 ! indeces for interpolation of source and receiver weights
      REAL,    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
      REAL,    ALLOCATABLE :: Rr( : ), Rz( : ), ws( : ), wr( : ) ! Receiver r, z coordinates and weights for interpolation
      REAL,    ALLOCATABLE :: theta( : )                         ! Receiver bearings
   END TYPE Position
 
-  TYPE ( Position ) :: Pos   ! structure containing source and receiver positions
+  TYPE ( Position ) :: Pos ! structure containing source and receiver positions
 
 CONTAINS
   SUBROUTINE ReadfreqVec( freq0, BroadbandOption )
@@ -48,16 +49,17 @@ CONTAINS
     ! If the broadband option is not selected, then the input freq (a scalar) 
     ! is stored in the frequency vector
 
-    REAL (KIND=_RL90), INTENT( IN ) :: freq0    ! Nominal or carrier frequency
-    CHARACTER,     INTENT( IN ) :: BroadbandOption*( 1 )
-    INTEGER                     :: ifreq
+    REAL (KIND=_RL90),  INTENT( IN ) :: freq0   ! Source frequency
+    CHARACTER,          INTENT( IN ) :: BroadbandOption*( 1 )
+    INTEGER :: ifreq
 
     Nfreq = 1
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
        READ( ENVFile, * ) Nfreq
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
+       WRITE( PRTFile, * ) '________________________________________________', &
+                           '__________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
@@ -117,7 +119,6 @@ CONTAINS
     ! shifted to be within those limits
 
     REAL,    INTENT( IN ) :: zMin, zMax
-    !LOGICAL               :: monotonic
 
     CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm' )
     CALL ReadVector( Pos%NRz, Pos%Rz, 'Receiver depths, Rz', 'm' )
@@ -134,8 +135,8 @@ CONTAINS
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
-          WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
-                              'near the top bdry has been moved down'
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
+                           'near the top bdry has been moved down'
     END IF
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
@@ -169,7 +170,7 @@ CONTAINS
     Pos%delta_r = 0.0
     IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr - 1 )
 
-    IF ( .NOT. monotonic( Pos%rr, Pos%NRr ) ) THEN
+    IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
        CALL ERROUT( 'ReadRcvrRanges', &
            'Receiver ranges are not monotonically increasing' )
     END IF 
@@ -179,7 +180,7 @@ CONTAINS
 
   !********************************************************************!
 
-  SUBROUTINE ReadRcvrBearings
+  SUBROUTINE ReadRcvrBearings   ! for 3D bellhop
 
     CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
         'degrees' )
@@ -212,13 +213,15 @@ CONTAINS
     ! Description is something like 'receiver ranges'
     ! Units       is something like 'km'
  
-    INTEGER,   INTENT( OUT ) :: Nx
-    REAL,      ALLOCATABLE, INTENT( OUT ) :: x( : )
-    CHARACTER, INTENT( IN  ) :: Description*( * ), Units*( * )
-    INTEGER                  :: ix
+    INTEGER,                        INTENT( OUT ) :: Nx
+    REAL (KIND=_RL90), ALLOCATABLE, INTENT( OUT ) :: x( : )
+    CHARACTER,                      INTENT( IN  ) :: Description*( * ), &
+                                                     Units*( * )
+    INTEGER :: ix
    
     WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '__________________________________________________', &
+                        '________________________'
     WRITE( PRTFile, * )
 
     READ(  ENVFile, * ) Nx

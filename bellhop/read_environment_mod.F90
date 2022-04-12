@@ -106,10 +106,10 @@ CONTAINS
     ENDIF
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from 
-    !first SSP point
-    ! bottom depth should perhaps be set the same way?
+    ! first SSP point
 
     ! *** Bottom BC ***
+    ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = '  '   ! initialize to blanks
     READ(  ENVFile, * ) Bdry%Bot%HS%Opt, Sigma
     WRITE( PRTFile, * )
@@ -129,9 +129,9 @@ CONTAINS
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( ThreeD )     ! Read source/receiver x-y coordinates
-
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
+
     CALL ReadSzRz( ZMin, ZMax )
     CALL ReadRcvrRanges
     IF ( ThreeD ) CALL ReadRcvrBearings
