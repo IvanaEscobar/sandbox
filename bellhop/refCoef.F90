@@ -18,10 +18,10 @@ MODULE refcoef
            ReflectionCoef, RBot, RTop, NBotPts, NTopPts
 !=======================================================================
 
-  INTEGER, PARAMETER            :: BRCFile = 31, TRCFile = 32, IRCFile = 12
-  INTEGER                       :: NBotPts, NTopPts
-  INTEGER                       :: NkTab
-  INTEGER,          ALLOCATABLE :: iTab( : )
+  INTEGER, PARAMETER    :: BRCFile = 31, TRCFile = 32, IRCFile = 12
+  INTEGER               :: NBotPts, NTopPts
+  INTEGER               :: NkTab
+  INTEGER,              ALLOCATABLE :: iTab( : )
   REAL    (KIND=_RL90), ALLOCATABLE :: xTab( : )
   COMPLEX (KIND=_RL90), ALLOCATABLE :: fTab( : ), gTab( : )
 
@@ -46,7 +46,8 @@ CONTAINS
     CHARACTER (LEN=80) :: Title2
 
     IF ( BotRC == 'F' ) THEN
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
+       WRITE( PRTFile, * ) '_______________________________________________', &
+                           '___________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated bottom reflection coef.'
        OPEN( FilE = TRIM( FileRoot ) // '.brc', UNIT = BRCFile, STATUS = 'OLD',&
@@ -78,7 +79,8 @@ CONTAINS
     ! Optionally read in top reflection coefficient
 
     IF ( TopRC == 'F' ) THEN
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
+       WRITE( PRTFile, * ) '_______________________________________________', &
+                           '___________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated top    reflection coef.'
        OPEN( FILE = TRIM( FileRoot ) // '.trc', UNIT = TRCFile, STATUS = 'OLD',&
