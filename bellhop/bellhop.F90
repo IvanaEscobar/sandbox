@@ -163,7 +163,8 @@ SUBROUTINE BELLHOP_INIT
      SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
      SrcBmPat( 2, : ) = [  180.0, 0.0 ]
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
-  ELSE
+  ELSE ! Read and allocate user input 
+     ! Read .env file
      CALL ReadEnvironment(  FileRoot, ThreeD )
      ! AlTImetry
      CALL ReadATI( FileRoot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
