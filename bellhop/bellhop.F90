@@ -195,7 +195,7 @@ SUBROUTINE BellhopCore
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, &
                           NalphaOpt, iSeg
   REAL                 :: Tstart, Tstop
-  REAL (KIND=_RL90)                  :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
+  REAL    (KIND=_RL90) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX (KIND=_RL90) :: epsilon
@@ -206,7 +206,7 @@ SUBROUTINE BellhopCore
   omega = 2.0 * pi * freq
 
   IF ( Beam%deltas == 0.0 ) THEN
-     ! Automatic step size selection
+      ! Automatic step size selection; done when last line of .env starts w 0.0
      Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
      WRITE( PRTFile, * )
      WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatically selected)'' )' ) Beam%deltas
@@ -219,6 +219,7 @@ SUBROUTINE BellhopCore
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
 
   ! convert range-dependent geoacoustic parameters from user to program units
+  ! W is dB/wavelength
   IF ( atiType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NatiPts
         Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, &
@@ -248,8 +249,8 @@ SUBROUTINE BellhopCore
      NRz_per_range = Pos%NRz   ! rectilinear grid
   END SELECT
 
-  ! for a TL calculation, allocate space for the pressure matrix
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
+  ! for a TL calculation, allocate space for the pressure matrix
   CASE ( 'C', 'S', 'I' )        ! TL calculation
      ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) &
@@ -262,7 +263,7 @@ SUBROUTINE BellhopCore
   ! for an arrivals run, allocate space for arrivals matrices
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
   CASE ( 'A', 'a' )
-     ! allow space for at least 10 arrivals
+     ! allow space for at least MinNArr arrivals
      MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
      WRITE( PRTFile, * )
      WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
