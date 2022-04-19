@@ -303,7 +303,7 @@ END SUBROUTINE EvaluateSSP2D
 
        CALL PCHIP( SSP%z, SSP%c, SSP%NPts, SSP%cCoef, SSP%CSWork )
 
-    ELSE    ! return SSP info
+    ELSE    ! return SSP info, recall iSegz is initiated to 1
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths

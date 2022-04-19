@@ -67,7 +67,7 @@ SUBROUTINE BELLHOP_INIT
 
   ! HARDCODING FILE TO FORCE MunkB_ray Demo run
   !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  FileRoot = 'MunkB_ray'
+  FileRoot = 'MunkB_ray' ! IEsco HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
@@ -142,7 +142,7 @@ SUBROUTINE BELLHOP_INIT
 
      CALL ComputeBdryTangentNormal( Top, 'Top' )
 
-     ! *** bathymetry ***
+     ! *** Bathymetry ***
 
      ALLOCATE( Bot( 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
@@ -278,12 +278,12 @@ SUBROUTINE BellhopCore
                 NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
   END SELECT
 
-  NArr( 1 : NRz_per_range, 1 : Pos%NRr ) = 0
+  NArr( 1 : NRz_per_range, 1 : Pos%NRr ) = 0 ! IEsco22 unnecessary? see L292
 
   WRITE( PRTFile, * )
 
   SourceDepth: DO is = 1, Pos%NSz
-     xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate
+     xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate, assuming source @ r=0
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' ) ! TL calculation, zero out pressure matrix
@@ -293,16 +293,17 @@ SUBROUTINE BellhopCore
      END SELECT
 
      CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
-     RadMax = 5 * c / freq  ! 5 wavelength max radius
+     RadMax = 5 * c / freq  ! 5 wavelength max radius IEsco22: unused
 
-     ! Are there enough beams?
-     DalphaOpt = SQRT( c / ( 6.0 * freq * Pos%Rr( Pos%NRr ) ) )
-     NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) )& 
-                 / DalphaOpt )
-
-     IF ( Beam%RunType( 1 : 1 ) == 'C' .AND. Angles%Nalpha < NalphaOpt ) THEN
-        WRITE( PRTFile, * ) 'Warning in BELLHOP : Too few beams'
-        WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
+     IF ( Beam%RunType( 1 : 1 ) == 'C' ) THEN ! for Coherent TL Run
+     ! Are there enough rays?
+        DalphaOpt = SQRT( c / ( 6.0 * freq * Pos%Rr( Pos%NRr ) ) )
+        NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) &
+                             - Angles%alpha( 1 ) ) / DalphaOpt )
+        IF ( Angles%Nalpha < NalphaOpt ) THEN
+           WRITE( PRTFile, * ) 'Warning in BELLHOP : Too few beams'
+           WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
+        ENDIF
      ENDIF
 
      ! Trace successive beams
@@ -311,7 +312,7 @@ SUBROUTINE BellhopCore
         ! take-off declination angle in degrees
         SrcDeclAngle = RadDeg * Angles%alpha( ialpha ) 
 
-        ! Single beam run?
+        ! Single ray run?
         IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN
 
            IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) &
@@ -319,6 +320,7 @@ SUBROUTINE BellhopCore
            IBP    = IBPvec( 1 )
            IBP    = MAX( IBP, 1 )           ! don't go before beginning of table
            IBP    = MIN( IBP, NSBPPts - 1 ) ! don't go past end of table
+           ! IEsco22: When a beam pattern isn't specified, IBP = 1
 
            ! linear interpolation to get amplitude
            s    = ( SrcDeclAngle  - SrcBmPat( IBP, 1 ) ) &
@@ -330,7 +332,7 @@ SUBROUTINE BellhopCore
               Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( omega / c * xs( 2 ) &
                      * SIN( Angles%alpha( ialpha ) ) ) )
 
-           ! show progress ...
+           ! print progress in PRTFile
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) &
                      ialpha, SrcDeclAngle
