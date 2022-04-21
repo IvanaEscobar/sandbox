@@ -502,7 +502,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! x-y coordinate of the source
   REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! initial angle, amplitude
-  INTEGER           :: is, is1                   ! indx for a step along the ray
+  INTEGER           :: is, is1                   ! index for a ray step
   REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), &
                        ToptInt( 2 ), BottInt( 2 )
@@ -516,9 +516,9 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
-  ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! ray unit direction
-  ray2D( 1 )%p         = [ 1.0, 0.0 ]
-  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! Init Cond...
+  ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
+  ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! Init Cond unit vector
+  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! Init Cond unit vector
   ray2D( 1 )%tau       = 0.0
   ray2D( 1 )%Amp       = Amp0
   ray2D( 1 )%Phase     = 0.0
@@ -556,7 +556,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
      Beam%Nsteps = 1
      WRITE( PRTFile, * ) &
-         'Terminating the ray trace because the source is on or outside the boundaries'
+         'Terminating the ray trace because the source is on or', &
+         ' outside the boundaries'
      RETURN       ! source must be within the medium
   END IF
 
@@ -594,7 +595,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      END IF
 
      ! Reflections?
-     ! Tests that ray at step is is inside, and ray at step is+1 is outside
+     ! Tests that ray at step is IS inside, and ray at step is+1 is outside
      ! to detect only a crossing from inside to outside
      ! DistBeg is the distance at step is,   which is saved
      ! DistEnd is the distance at step is+1, which needs to be calculated
@@ -608,11 +609,11 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         IF ( atiType == 'C' ) THEN
            ! proportional distance along segment
            sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) &
-                     / Top( IsegTop )%Len   
-           TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &
-                     + sss * Top( 1 + IsegTop )%Noden
+                     / Top( IsegTop )%LeIS 
            ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet &
                      + sss * Top( 1 + IsegTop )%Nodet
+           TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &
+                     + sss * Top( 1 + IsegTop )%Noden
         ELSE
            TopnInt = Top( IsegTop )%n   ! normal is constant in a segment
            ToptInt = Top( IsegTop )%t
@@ -656,8 +657,6 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
           ray2D( is+1 )%Amp < 0.005 .OR. &
           ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
           ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
-          ! ray2D( is + 1 )%t( 1 ) < 0 ) THEN ! this last test kills off a 
-          ! backward traveling ray
         Beam%Nsteps = is + 1
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
@@ -774,7 +773,6 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ray2D( is1 )%q   = ray2D( is )%q
 
   ! account for phase change
-
   SELECT CASE ( HS%BC )
   CASE ( 'R' )                 ! rigid
      ray2D( is1 )%Amp   = ray2D( is )%Amp
@@ -790,7 +788,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
      ray2D( is1 )%Phase = ray2D( is )%Phase + RInt%phi
   CASE ( 'A', 'G' )     ! half-space
      kx = omega * Tg    ! wavenumber in direction parallel      to bathymetry
-     kz = omega * Th    ! wavenumber in direction perpendicular to bathymetry (in ocean)
+     kz = omega * Th    ! wavenumber in direction perpendicular to bathymetry
 
      ! notation below is a bit mis-leading
      ! kzS, kzP is really what I called gamma in other codes, and differs by a 
@@ -816,8 +814,9 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         f   = kzP
         g   = HS%rho
      ENDIF
-
-     Refl =  - ( rho*f - i * kz*g ) / ( rho*f + i * kz*g )   ! complex reflection coef.
+     
+     ! complex reflection coef.
+     Refl =  - ( rho*f - i * kz*g ) / ( rho*f + i * kz*g )   
      
      IF ( ABS( Refl ) < 1.0E-5 ) THEN   ! kill a ray that has lost its energy in reflection
         ray2D( is1 )%Amp   = 0.0
@@ -826,18 +825,6 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         ray2D( is1 )%Amp   = ABS( Refl ) * ray2D(  is )%Amp
         ray2D( is1 )%Phase = ray2D( is )%Phase + &
                              ATAN2( AIMAG( Refl ), REAL( Refl ) )
-
-        ! compute beam-displacement Tindle, Eq. (14)
-        ! needs a correction to beam-width as well ...
-        !  IF ( REAL( kz2Sq ) < 0.0 ) THEN
-        !     rhoW   = 1.0   ! density of water
-        !     rhoWSq  = rhoW  * rhoW
-        !     rhoHSSq = rhoHS * rhoHS
-        !     DELTA = 2 * GK * rhoW * rhoHS * ( kz1Sq - kz2Sq ) /
-        ! &( kz1 * i * kz2 *
-        ! &( -rhoWSq * kz2Sq + rhoHSSq * kz1Sq ) )
-        !     RV( is + 1 ) = RV( is + 1 ) + DELTA
-        !  END IF
 
         if ( Beam%Type( 4:4 ) == 'S' ) then   ! beam displacement & width change (Seongil's version)
            ch = ray2D( is )%c / conjg( HS%cP )

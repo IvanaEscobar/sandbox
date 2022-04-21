@@ -465,7 +465,7 @@ CONTAINS
 
     ! Geometric, hat-shaped beams in Cartesisan coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle, angular spacing
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, Dalpha ! take-off angle, angular spacing
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr ) ! complex pressure field
     INTEGER              :: irT( 1 ), irTT
     REAL (KIND=_RL90)    :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), &
