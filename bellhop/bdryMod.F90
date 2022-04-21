@@ -10,6 +10,7 @@ MODULE bdrymod
 
   USE monotonic_mod,    only: monotonic
   USE fatal_error,      only: ERROUT
+  USE constants_mod,    only: PRTFile
 
   IMPLICIT NONE
   PRIVATE
@@ -32,22 +33,28 @@ MODULE bdrymod
   REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  
   CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
 
-  ! Halfspace properties
+  ! ***Halfspace properties***
   TYPE HSInfo2
      ! compressional and shear wave speeds/attenuations in user units
      REAL     (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
      COMPLEX  (KIND=_RL90) :: cP, cS    ! P-wave, S-wave speeds
-     REAL (KIND=_RL90) :: rho, Depth    ! density, depth
+     REAL     (KIND=_RL90) :: rho, Depth! density, depth
      CHARACTER (LEN=1) :: BC            ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE
 
+  ! ***Boundary properties***
   TYPE BdryPt
-     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), n( 2 ) ! coordinate, tangent, and outward normal for a segment
-     REAL (KIND=_RL90) :: Nodet( 2 ), Noden( 2 ) ! tangent and normal at the node, if the curvilinear option is used
-     REAL (KIND=_RL90) :: Len, Kappa             ! length and curvature of a segement
-     REAL (KIND=_RL90) :: Dx, Dxx, Dss           ! first, second derivatives wrt depth; s is along tangent
+     REAL (KIND=_RL90) :: x( 2 ), &     ! segment coordinate
+                          t( 2 ), &     ! segment tangent
+                          n( 2 )        ! segment outward
+     REAL (KIND=_RL90) :: Len, Kappa    ! length and curvature of a segement
+     REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
+                          Dss           ! derivative along tangent
      TYPE( HSInfo2 )   :: HS
+     ! For the curvilinea grid option
+     REAL (KIND=_RL90) :: Nodet( 2 ), & ! tangent at the node
+                          Noden( 2 )    ! normal at the node 
   END TYPE
 
   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
@@ -382,7 +389,6 @@ CONTAINS
 
     ! Get the Top segment info (index and range interval) for range, r
 
-    INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegTopT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
 

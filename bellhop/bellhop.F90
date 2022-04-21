@@ -514,18 +514,18 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   iSmallStepCtr = 0
   CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
-  ray2D( 1 )%c         = c
-  ray2D( 1 )%x         = xs
-  ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c
+  ray2D( 1 )%c         = c              ! sound speed at source [m/s]
+  ray2D( 1 )%x         = xs             ! range and depth of source
+  ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! ray unit direction
   ray2D( 1 )%p         = [ 1.0, 0.0 ]
-  ray2D( 1 )%q         = [ 0.0, 1.0 ]
+  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! Init Cond...
   ray2D( 1 )%tau       = 0.0
   ray2D( 1 )%Amp       = Amp0
   ray2D( 1 )%Phase     = 0.0
   ray2D( 1 )%NumTopBnc = 0
   ray2D( 1 )%NumBotBnc = 0
 
-  ! second component of qv is not used in geometric beam tracing
+  ! second component of q is not used in geometric beam tracing
   ! set I.C. to 0 in hopes of saving run time
   IF ( Beam%RunType( 2 : 2 ) == 'G' ) ray2D( 1 )%q = [ 0.0, 0.0 ]
 
@@ -548,10 +548,10 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   END IF
 
   ! Trace the beam (note that Reflect alters the step index is)
-  is = 0
-  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop, &
-                    dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, DistBegTop, & 
-                    DistBegBot )
+  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
+                                  dEndTop,          dEndBot, &
+                                  Top( IsegTop )%n, Bot( IsegBot )%n, &
+                                  DistBegTop,       DistBegBot )
 
   IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
      Beam%Nsteps = 1
@@ -560,6 +560,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      RETURN       ! source must be within the medium
   END IF
 
+  is = 0
   Stepping: DO istep = 1, MaxN - 1
      is  = is + 1
      is1 = is + 1
