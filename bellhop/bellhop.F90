@@ -112,7 +112,7 @@ SUBROUTINE BELLHOP_INIT
 
      ALLOCATE( Pos%sz( Pos%NSz ), Pos%ws( Pos%NSz ), Pos%isz( Pos%NSz ) )
      ALLOCATE( Pos%rz( Pos%NRz ), Pos%wr( Pos%NRz ), Pos%irz( Pos%NRz ) )
-     ALLOCATE( Pos%Rr(  Pos%NRr  ) )
+     ALLOCATE( Pos%Rr( Pos%NRr ) )
 
      Pos%Sz( 1 ) = 50.
      !Pos%Rz     = [ 0, 50, 100 ]

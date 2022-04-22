@@ -369,8 +369,9 @@ CONTAINS
 
     ! During reflection imag(q) is constant and adjacent normals cannot bracket 
     ! a segment of the TL line, so no special treatment is necessary
-
-    IF ( Beam%RunType( 4:4 ) == 'R' ) Ratio1 = SQRT( ABS( COS( alpha ) ) )  ! point source
+ 
+    ! point source
+    IF ( Beam%RunType( 4:4 ) == 'R' ) Ratio1 = SQRT( ABS( COS( alpha ) ) ) 
 
     ray2D( 1:Beam%Nsteps )%Amp = Ratio1 * SQRT( ray2D( 1:Beam%Nsteps )%c ) &
                         * ray2D( 1:Beam%Nsteps )%Amp   ! pre-apply some scaling
@@ -488,7 +489,7 @@ CONTAINS
     ! if ray is left-traveling, get the first receiver to the left of rA
     IF ( ray2D( 1 )%t( 1 ) < 0.0d0 .AND. ir > 1 ) ir = ir - 1  
 
-    ! point source
+    ! point source: the default option
     IF ( Beam%RunType( 4 : 4 ) == 'R' ) Ratio1 = SQRT( ABS( COS( alpha ) ) )  
 
     Stepping: DO iS = 2, Beam%Nsteps
@@ -500,7 +501,8 @@ CONTAINS
        rayt = ray2D( iS )%x - ray2D( iS - 1 )%x
        rlen = NORM2( rayt )
        ! if duplicate point in ray, skip to next step along the ray
-       IF ( rlen < 1.0D3 * SPACING( ray2D( iS )%x( 1 ) ) ) CYCLE Stepping  
+       IF ( rlen < 1.0D3 * SPACING( ray2D( iS )%x( 1 ) ) ) &
+           CYCLE Stepping  
        rayt = rayt / rlen                    ! unit tangent to ray
        rayn = [ -rayt( 2 ), rayt( 1 ) ]      ! unit normal  to ray
        RcvrDeclAngle = RadDeg * ATAN2( rayt( 2 ), rayt( 1 ) )
@@ -563,6 +565,7 @@ CONTAINS
                    IF ( q <= 0.0d0 .AND. qOld > 0.0d0 &
                         .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) &
                     phaseInt = phase + pi / 2.   ! phase shifts at caustics
+                    ! EscoI22: shouldn't this be = phaseInt + pi/2
 
                    CALL ApplyContribution( U( iz, ir ) )
                 END IF
@@ -744,7 +747,6 @@ CONTAINS
                     ray2D( iS )%NumBotBnc )
     CASE ( 'C' )                ! coherent TL
        U = U + CMPLX( Amp * EXP( -i * ( omega * delay - phaseInt ) ) )
-       ! omega * n * n / ( 2 * ray2d( iS )%c**2 * delay ) ) ) ) ! curvature correction
     CASE DEFAULT                ! incoherent/semicoherent TL
        IF ( Beam%Type( 1:1 ) == 'B' ) THEN   ! Gaussian beam
           U = U + SNGL( SQRT( 2. * pi ) &
