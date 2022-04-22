@@ -13,7 +13,7 @@ MODULE bellhop_mod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE constants_mod,            only: MaxN
+  USE constants_mod,            only: MaxN ! 10000
   IMPLICIT NONE
   PRIVATE
 
@@ -54,9 +54,9 @@ MODULE bellhop_mod
   ! *** ray structure ***
 
   TYPE ray2DPt
-     INTEGER           :: NumTopBnc, NumBotBnc
-     REAL (KIND=_RL90) :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
-     COMPLEX (KIND=_RL90)  :: tau
+     INTEGER                :: NumTopBnc, NumBotBnc
+     REAL    (KIND=_RL90)   :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
+     COMPLEX (KIND=_RL90)   :: tau
   END TYPE ray2DPt
   TYPE( ray2DPt )      :: ray2D( MaxN )
 

@@ -16,6 +16,7 @@ MODULE sspmod
 
   USE fatal_error,  only: ERROUT
   USE splinec,      only: cspline, splineall
+  USE constants_mod,only: PRTFile, ENVFile
 
   IMPLICIT NONE
   PRIVATE
@@ -29,10 +30,9 @@ MODULE sspmod
 !=======================================================================
 
   !SAVE
-  INTEGER, PARAMETER, PRIVATE :: ENVFile = 5, PRTFile = 6
   INTEGER, PARAMETER     :: MaxSSP = 100001
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
-  INTEGER,       PRIVATE :: iz
+  INTEGER,           PRIVATE :: iz
   REAL (KIND=_RL90), PRIVATE :: Depth, W
   REAL (KIND=_RL90)          :: zTemp, betaPowerLaw = 1, fT = 1D20
   ! DEFAULT values, BELLHOP only uses alphaR
@@ -89,7 +89,7 @@ CONTAINS
     !   Task = 'INI' to initialize
 
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )      ! r-z coordinate where SSP is to be evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER( LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
     REAL (KIND=_RL90)                :: gradc_3d( 3 ), cxx, cyy, cxy, cxz, cyz
@@ -132,15 +132,19 @@ SUBROUTINE EvaluateSSP2D( x2D, c, cimag, gradc, crr, crz, czz, rho, xs, tradial,
   REAL (KIND=_RL90)                :: x( 3 ), gradc3D(3 ), cxx, cyy, cxy, cxz, cyz
 
   ! convert polar coordinate to cartesian
-  x = [ xs( 1 ) + x2D( 1 ) * tradial( 1 ), xs( 2 ) + x2D( 1 ) * tradial( 2 ), x2D( 2 ) ]
+  x = [ xs( 1 ) + x2D( 1 ) * tradial( 1 ), &
+        xs( 2 ) + x2D( 1 ) * tradial( 2 ), &
+        x2D( 2 ) ]
 
-  CALL EvaluateSSP3D( x, c, cimag, gradc3D, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, 'TAB' )
+  CALL EvaluateSSP3D( x, c, cimag, gradc3D, cxx, cyy, czz, cxy, cxz, cyz, &
+                      rho, freq, 'TAB' )
 
   gradc( 1 )  = DOT_PRODUCT( tradial, gradc3D( 1 : 2 ) )  ! r derivative
   gradc( 2 )  = gradc3D( 3 )                              ! z derivative
 
   crz = tradial( 1 ) * cxz + tradial( 2 ) * cyz
-  crr = cxx * ( tradial( 1 ) )**2 + 2.0 * cxy * tradial( 1 ) * tradial( 2 ) + cyy * ( tradial( 2 ) )**2
+  crr = cxx * ( tradial( 1 ) )**2 + 2.0 * cxy * tradial( 1 ) * tradial( 2 ) &
+        + cyy * ( tradial( 2 ) )**2
 
   RETURN
 END SUBROUTINE EvaluateSSP2D
@@ -197,9 +201,10 @@ END SUBROUTINE EvaluateSSP2D
     ! N2-linear interpolation of SSP data
 
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
+    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                                        rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
        Depth = x( 2 )
@@ -225,13 +230,15 @@ END SUBROUTINE EvaluateSSP2D
 
        W = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
 
-       c     = REAL(  1.0D0 / SQRT( ( 1.0D0 - W ) * SSP%n2( iSegz ) + W * SSP%n2( iSegz + 1 ) ) )
-       cimag = AIMAG( 1.0D0 / SQRT( ( 1.0D0 - W ) * SSP%n2( iSegz ) + W * SSP%n2( iSegz + 1 ) ) )
+       c     = REAL(  1.0D0 / SQRT( ( 1.0D0 - W ) * SSP%n2( iSegz ) &
+               + W * SSP%n2( iSegz + 1 ) ) )
+       cimag = AIMAG( 1.0D0 / SQRT( ( 1.0D0 - W ) * SSP%n2( iSegz ) &
+               + W * SSP%n2( iSegz + 1 ) ) )
 
        gradc = [ 0.0D0, -0.5D0 * c * c * c * REAL( SSP%n2z( iSegz ) ) ]
        crr   = 0.0d0
        crz   = 0.0d0
-       czz   = 3.0d0 * gradc( 2 ) * gradc( 2 ) / C
+       czz   = 3.0d0 * gradc( 2 ) * gradc( 2 ) / c
 
        rho   = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
@@ -245,7 +252,7 @@ END SUBROUTINE EvaluateSSP2D
     ! c-linear interpolation of SSP data
 
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
@@ -285,7 +292,7 @@ END SUBROUTINE EvaluateSSP2D
 
     USE pchipmod,  only: PCHIP
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
                                         rho ! sound speed and its derivatives
@@ -303,7 +310,7 @@ END SUBROUTINE EvaluateSSP2D
 
        CALL PCHIP( SSP%z, SSP%c, SSP%NPts, SSP%cCoef, SSP%CSWork )
 
-    ELSE    ! return SSP info
+    ELSE    ! return SSP info, recall iSegz is initiated to 1
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
@@ -323,14 +330,14 @@ END SUBROUTINE EvaluateSSP2D
        c     = REAL(  c_cmplx )
        cimag = AIMAG( c_cmplx )
 
-       gradc = [ 0.0D0, REAL( SSP%cCoef( 2, iSegz ) &
-                  + ( 2.0D0 * SSP%cCoef( 3, iSegz ) &
-                    + 3.0D0 * SSP%cCoef( 4, iSegz ) * xt ) * xt ) ]
+       gradc = [ 0.0D0, &
+                 REAL( SSP%cCoef( 2, iSegz ) + ( 2.0D0 * SSP%cCoef( 3, iSegz ) &
+                       + 3.0D0 * SSP%cCoef( 4, iSegz ) * xt ) * xt ) ]
 
        crr   = 0.0D0
        crz   = 0.0D0
        czz   = REAL( 2.0D0 * SSP%cCoef( 3, iSegz ) + &
-               6.0D0 * SSP%cCoef( 4, iSegz ) * xt )
+                     6.0D0 * SSP%cCoef( 4, iSegz ) * xt )   ! dgradc(2)/dxt
 
        W     = ( x( 2 ) - SSP%z( iSegz ) ) / &
                ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
@@ -348,7 +355,7 @@ END SUBROUTINE EvaluateSSP2D
     ! Cubic spline interpolation
 
     REAL (KIND=_RL90), INTENT( IN )  :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
                                         rho ! sound speed and its derivatives
@@ -413,7 +420,7 @@ END SUBROUTINE EvaluateSSP2D
 
     INTEGER,           PARAMETER     :: SSPFile = 40
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
+    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
                                         rho ! sound speed and its derivatives
