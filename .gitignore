@@ -18,6 +18,7 @@ a.out
 build*/
 input/
 results/
+testhere
 
 # BELLHOP
 *.arr
