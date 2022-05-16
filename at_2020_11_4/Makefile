@@ -128,8 +128,10 @@ FFLAGS+= -frecursive
 # export FFLAGS= -p -g -pg -march=native -Wall -std=gnu
 # export FFLAGS= -p -g -march=native -Bstatic -Wa,-q -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -std=gnu -O3 -ffast-math -funroll-all-loops -fcheck=all
 
-# MITgcm:
-FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
+# MITgcm on Mac:
+#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
+# MITgcm on Sverdrup
+FFLAGS+= -fconvert=big-endian -Wunused -Wuninitialized -ftree-vectorize
 F90FLAGS=${FFLAGS}
 
 # Code Coverage with gcov and lcov
