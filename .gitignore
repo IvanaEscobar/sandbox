@@ -26,6 +26,11 @@ testhere
 .Kraken
 .KrakenField
 .Scooter
+*.rts.mat
+#BELLHOP output files
+*.arr
+*.prt
+*.ray
 
 # Code Coverage
 *.gcno
@@ -166,7 +171,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-#BELLHOP output files
-*.arr
-*.prt
-*.ray
+
+# MATLab
+*.asv
