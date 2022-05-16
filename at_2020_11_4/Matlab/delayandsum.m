@@ -70,7 +70,7 @@ nsts = length( sts );   % number of samples in the source time series
 % following can be further optimized if we know that ray-angle limits
 % further restrict possible Doppler factors
 
-if ( norm( v ) > 0 )
+if ( norm( v ) > 0 ) % if receiver is moving
    disp( 'Setting up Dopplerized waveforms' )
    %v_vec = linspace( min( v ), max( v ), 10 );   % vector of Doppler velocity bins
    v_vec       = linspace( 1.9, 2, 51 );   % vector of Doppler velocity bins
@@ -89,7 +89,8 @@ else
 end
 
 figure
-plot( t_sts, imag( sts_hilbert ) )
+plot( t_sts, imag( sts_hilbert ), t_sts, real( sts_hilbert ) )
+legend({'imag sts','real sts'});
 xlabel( 'Time (s)' )
 ylabel( 's^+(t)' )
 
@@ -116,7 +117,7 @@ for ird = 1 : nrd   % loop over receiver depths
    disp( ird )
    
    for irr = 1 : nrr   % loop over receiver ranges
-      tstart = Pos.r.range( irr ) / c - 0.1;   % min( delay( ir, :, ird ) )
+      tstart = Pos.r.r( irr ) / c - 0.1;   % min( delay( ir, :, ird ) )
 
       % compute channel transfer function
       
@@ -202,7 +203,7 @@ end
 % plot snapshots
 
 % figure
-% for it = 1 : nt
+% for it = 1 : 500 :nrts
 %    imagesc( squeeze( rtsmat( it, :, : ) ) )
 %    colorbar
 %    drawnow
@@ -215,19 +216,21 @@ irr = 26;   % select range
 %irr = 6;   % select range
 
 % calculate time vector that goes with that range
-tstart = Pos.r.range( irr ) / c - 0.1;   % min( delay( ir, :, ird ) )
+tstart = Pos.r.r( irr ) / c - 0.1;   % min( delay( ir, :, ird ) )
 tend   = tstart + T - deltat;
 tout   = tstart : deltat : tend;
 
 PlotTitle = fileroot;
 
 RTS = -squeeze( rtsmat( :, :, irr ) );
-save( [ fileroot '.rts.mat' ], 'PlotTitle', 'Pos', 'tout', 'RTS' )
+%save( [ fileroot '.rts.mat' ], 'PlotTitle', 'Pos', 'tout', 'RTS' )
 
 % save autec
 %
-% figure; pcolor( Pos.r.r, linspace( 0, T, nt ), 20 * log10 ( abs( hilbert( rtsmat ) )' ) );
-% shading flat
-% colorbar
-% xlabel( 'Time (s)' )
-% ylabel( 'Range (m)' )
+tmp = abs( hilbert( rtsmat ) );
+tmp = squeeze(tmp(:,1,:));
+figure; pcolor( Pos.r.r, linspace( 0, T, nrts ), 20 * log10 ( tmp' ) );
+shading flat
+colorbar
+xlabel( 'Time (s)' )
+ylabel( 'Range (m)' )

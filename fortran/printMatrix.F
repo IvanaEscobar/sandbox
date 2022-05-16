@@ -1,4 +1,6 @@
+! ------------------------------------------------------
 ! Print matrix A to screen
+! ------------------------------------------------------
       subroutine print_matrix(n,m,A)
         implicit none
         integer, intent(in) :: n
