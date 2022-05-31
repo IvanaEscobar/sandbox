@@ -201,7 +201,7 @@ CONTAINS
        END SELECT
 
        ! no worry about the beam type if this is a ray trace run
-       IF ( Beam%RunType( 1 : 1 ) /= 'R' ) THEN   
+       IF ( Beam%RunType( 1:1 ) /= 'R' .OR. Beam%RunType( 1:1 ) /= 'E' ) THEN 
 
        ! Beam%Type( 1 : 1 ) is
        !   'G' or '^' Geometric hat beams in Cartesian coordinates

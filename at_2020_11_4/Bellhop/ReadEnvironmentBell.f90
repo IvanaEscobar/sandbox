@@ -102,7 +102,7 @@ CONTAINS
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
     CALL TopBot( freq, AttenUnit, Bdry%Bot%HS )
 
-    ! *** source and receiver locations ***
+    ! *** source and receiver locations and run type ***
 
     CALL ReadSxSy( ThreeD )     ! Read source/receiver x-y coordinates
 
@@ -161,7 +161,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'No beam shift in effect'
        END SELECT
 
-       IF ( Beam%RunType( 1 : 1 ) /= 'R' ) THEN   ! no worry about the beam type if this is a ray trace run
+       ! Only apply beam type structure if NOT a ray trace run
+       IF ( Beam%RunType( 1 : 1 ) /= 'R' .OR. Beam%RunType( 1 : 1 ) /= 'E') THEN
 
        ! Beam%Type( 1 : 1 ) is
        !   'G' or '^' Geometric hat beams in Cartesian coordinates
