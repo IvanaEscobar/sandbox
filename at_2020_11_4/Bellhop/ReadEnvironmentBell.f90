@@ -344,7 +344,7 @@ CONTAINS
 
   SUBROUTINE ReadRunType( RunType, PlotType )
 
-    ! Read the RunType variable and echo with explanatory information to the print file
+    ! Read the RunType variable and write expalnations to the print file
 
     USE SourceReceiverPositions
 
