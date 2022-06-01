@@ -462,7 +462,7 @@ CONTAINS
 
 
              RcvrDepths: DO iz = 1, NRz_per_range
-                ! is x_rcvr( 2, iz ) contained in ( zmin, zmax )?
+                ! is receiver depth x_rcvr( 2, iz ) contained in ( zmin, zmax )?
                 IF ( x_rcvr( 2, iz ) < zmin .OR. x_rcvr( 2, iz ) > zmax ) CYCLE RcvrDepths
 
                 s         =      DOT_PRODUCT( x_rcvr( :, iz ) - x_ray, rayt ) / rlen ! proportional distance along ray
