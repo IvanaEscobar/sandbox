@@ -542,6 +542,7 @@ CONTAINS
              END IF
 
              RcvrDepths: DO iz = 1, NRz_per_range
+                ! is x_rcvr( 2, iz ) contained in ( zmin, zmax )?
                 IF ( x_rcvr( 2, iz ) < zmin &
                      .OR. x_rcvr( 2, iz ) > zmax ) CYCLE RcvrDepths
                 ! proportional distance along ray
