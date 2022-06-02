@@ -84,11 +84,15 @@ for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
       alpha0    = fscanf( fid, '%f', 1 );
       nsteps    = fscanf( fid, '%i', 1 );
+      
 
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
-      if isempty( nsteps ); break; end
+      if isempty( nsteps )
+          fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam -1 );
+          break; 
+      end
       switch Type
          case 'rz'
             ray = fscanf( fid, '%f', [2 nsteps] );
@@ -108,10 +112,6 @@ for isz = 1 : Nsz
          r = r / 1000;   % convert to km
       end
       
-      %lincol = 'kbgrcmy';
-      %ii = NumBotBnc;
-      %ii = mod( ii, 3 ) + 1;
-      %plot( r, z, lincol( ii ) );
       if NumTopBnc >= 1 && NumBotBnc >= 1
          plot( r, z, 'k' )    % hits both boundaries
       elseif NumBotBnc >= 1
