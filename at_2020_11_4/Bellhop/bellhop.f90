@@ -344,13 +344,13 @@ END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
 
-COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, EpsMultiplier )
+COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, epsMultiplier )
 
   ! Picks the optimum value for epsilon
 
   REAL      (KIND=8), INTENT( IN  ) :: omega, c, gradc( 2 ) ! angular frequency, sound speed and gradient
   REAL      (KIND=8), INTENT( IN  ) :: alpha, Dalpha        ! angular spacing for ray fan
-  REAL      (KIND=8), INTENT( IN  ) :: epsMultiplier, Rloop ! multiplier, loop range
+  REAL      (KIND=8), INTENT( IN  ) :: epsMultiplier, rloop ! multiplier, loop range
   CHARACTER (LEN= 2), INTENT( IN  ) :: BeamType
   LOGICAL, SAVE      :: INIFlag = .TRUE.
   REAL      (KIND=8) :: HalfWidth
@@ -400,7 +400,7 @@ COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha
      epsilonOpt = i * 0.5 * omega * halfwidth ** 2
   END SELECT
 
-  PickEpsilon = EpsMultiplier * epsilonOpt
+  PickEpsilon = epsMultiplier * epsilonOpt
 
   ! On first call write info to prt file
   IF ( INIFlag ) THEN
@@ -408,7 +408,7 @@ COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha
      WRITE( PRTFile, * ) TAG
      WRITE( PRTFile, * ) 'halfwidth  = ', halfwidth
      WRITE( PRTFile, * ) 'epsilonOpt = ', epsilonOpt
-     WRITE( PRTFile, * ) 'EpsMult    = ', EpsMultiplier
+     WRITE( PRTFile, * ) 'epsMult    = ', epsMultiplier
      WRITE( PRTFile, * )
      INIFlag = .FALSE.
   END IF
