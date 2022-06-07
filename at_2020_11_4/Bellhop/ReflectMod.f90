@@ -3,7 +3,6 @@ MODULE ReflectMod
   USE bellhopMod
   IMPLICIT NONE
 CONTAINS
-
   SUBROUTINE Reflect2D( is, HS, BotTop, nBdry3d, z_xx, z_xy, z_yy, kappa_xx, kappa_xy, kappa_yy, RefC, Npts, xs, tradial )
 
     !USE norms

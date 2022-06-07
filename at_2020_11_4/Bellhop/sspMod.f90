@@ -31,9 +31,9 @@ MODULE sspmod
     COMPLEX (KIND=8)     :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), n2z( MaxSSP ), cSpline( 4, MaxSSP )
     COMPLEX (KIND=8)     :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
     REAL (KIND=8), ALLOCATABLE :: cMat( :, : ), czMat( :, : ), cMat3( :, :, : ), czMat3( :, :, : )
-    TYPE ( rxyz_vector ) :: Seg
     CHARACTER (LEN=1)    :: Type
     CHARACTER (LEN=2)    :: AttenUnit
+    TYPE ( rxyz_vector ) :: Seg
   END TYPE SSPStructure
 
   TYPE( SSPStructure ) :: SSP
@@ -42,8 +42,8 @@ MODULE sspmod
 
   TYPE HSInfo
      REAL     (KIND=8) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
-     COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
      REAL     (KIND=8) :: rho, Depth             ! density, depth
+     COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
      CHARACTER (LEN=1) :: BC                     ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE HSInfo
@@ -59,7 +59,6 @@ MODULE sspmod
   TYPE(BdryType) :: Bdry
 
 CONTAINS
-
   SUBROUTINE EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
     ! Call the particular profil routine indicated by the SSP%Type and perform Task
