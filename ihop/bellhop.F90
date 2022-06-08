@@ -76,7 +76,6 @@ SUBROUTINE BELLHOP_INIT
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
 
   IF ( Inline ) THEN
-     ! NPts, Sigma not used by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'
      freq  = 250
      ! NMedia variable is not used by BELLHOP

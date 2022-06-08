@@ -24,7 +24,7 @@ CONTAINS
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NPts, NMedia, iostat
     REAL               :: ZMin, ZMax
-    REAL      (KIND=8) :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, sigma, Depth
+    REAL      (KIND=8) :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, Sigma, Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
@@ -61,12 +61,13 @@ CONTAINS
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
 
     ! *** Top BC ***
-    ! If top BC is a acousto-elastic half-space: move to TopBot subroutine
+    ! If top BC is a acousto-elastic half-space: move to TopBot subroutine?
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
 
     CALL TopBot( freq, AttenUnit, Bdry%Top%HS )
 
     ! ****** Read in ocean SSP data ******
+    ! NPts, Sigma not used in BELLHOP
     READ(  ENVFile, * ) NPts, Sigma, Bdry%Bot%HS%Depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
@@ -433,7 +434,7 @@ CONTAINS
 
     ! Handles top and bottom boundary conditions
 
-    REAL     (KIND=8), INTENT( IN    ) :: freq               ! frequency
+    REAL     (KIND=8), INTENT( IN    ) :: freq     ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
     TYPE( HSInfo ),    INTENT( INOUT ) :: HS
     REAL     (KIND=8) :: Mz, vr, alpha2_f          ! values related to grain size

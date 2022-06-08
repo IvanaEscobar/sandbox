@@ -171,7 +171,7 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! N2-linear interpolation of SSP data
+    ! N2-linear interpolation of SSP data, SSP%Tpye = 'N'
 
     REAL     (KIND=8), INTENT( IN  ) :: freq
     REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
@@ -219,7 +219,7 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE cLinear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! c-linear interpolation of SSP data
+    ! c-linear interpolation of SSP data, SSP%Tpye = 'C'
 
     REAL     (KIND=8), INTENT( IN  ) :: freq
     REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
@@ -259,6 +259,7 @@ END SUBROUTINE EvaluateSSP2D
 
     ! This implements the new monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
+    ! SSP%Type = 'P'
 
     USE pchipMod
     REAL     (KIND=8), INTENT( IN  ) :: freq
@@ -318,7 +319,7 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE cCubic( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! Cubic spline interpolation
+    ! Cubic spline interpolation, SSP%Type = 'S'
 
     REAL     (KIND=8), INTENT( IN )  :: freq
     REAL     (KIND=8), INTENT( IN  ) :: x( 2 )   ! r-z coordinate where sound speed is evaluated
@@ -340,7 +341,7 @@ END SUBROUTINE EvaluateSSP2D
        ! Compute spline coefs
        iBCBeg = 0
        iBCEnd = 0
-       CALL CSpline( SSP%z, SSP%cSpline(   1, 1 ), SSP%NPts, iBCBeg, iBCEnd, SSP%NPts )
+       CALL cSpline( SSP%z, SSP%cSpline( 1, 1 ), SSP%NPts, iBCBeg, iBCEnd, SSP%NPts )
     ELSE
 
        ! *** Section to return SSP info ***
@@ -356,10 +357,6 @@ END SUBROUTINE EvaluateSSP2D
        END IF
 
        hSpline = x( 2 ) - SSP%z( iSegz )
-
-       ! c   = Spline(   SSP%cSpline( 1, iSegz ), hSpline )
-       ! cz  = SplineX(  SSP%cSpline( 1, iSegz ), hSpline )
-       ! czz = SplineXX( SSP%cSpline( 1, iSegz ), hSpline )
 
        CALL SplineALL( SSP%cSpline( 1, iSegz ), hSpline, c_cmplx, cz_cmplx, czz_cmplx )
 
@@ -381,7 +378,7 @@ END SUBROUTINE EvaluateSSP2D
 
   SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! Bilinear quadrilatteral interpolation of SSP data in 2D
+    ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
 
     INTEGER,           PARAMETER      :: SSPFile = 40
     REAL      (KIND=8), INTENT( IN  ) :: freq
@@ -516,6 +513,7 @@ END SUBROUTINE EvaluateSSP2D
 
     ! Trilinear hexahedral interpolation of SSP data in 3D
     ! assumes a rectilinear case (not the most general hexahedral)
+    ! SSP%Type = 'H'
 
     INTEGER,            PARAMETER     :: SSPFile = 40
     REAL      (KIND=8), INTENT( IN  ) :: freq
@@ -751,6 +749,8 @@ END SUBROUTINE EvaluateSSP2D
 !**********************************************************************!
 
   SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
+
+  ! SSP%Type = 'A'
 
     REAL (KIND=8), INTENT( IN  ) :: x( 2 )
     REAL (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho

@@ -44,7 +44,7 @@ CONTAINS
     INTEGER            :: NPts, NMedia, iostat
     REAL               :: ZMin, ZMax
     REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, &
-                          sigma, Depth
+                          NOTUSED, Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
@@ -90,9 +90,11 @@ CONTAINS
 
     ! ****** Read in ocean SSP data ******
 
-    READ(  ENVFile, * ) NPts, Sigma, Bdry%Bot%HS%Depth
+    ! NPts and NOTUSED not used by BELLHOP
+    READ(  ENVFile, * ) NPts, NOTUSED, Bdry%Bot%HS%Depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
+    WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
     IF ( Bdry%Top%HS%Opt( 1 : 1 ) == 'A' ) THEN
        WRITE( PRTFile, * ) 'Analytic SSP option'
@@ -111,9 +113,10 @@ CONTAINS
     ! *** Bottom BC ***
     ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = '  '   ! initialize to blanks
-    READ(  ENVFile, * ) Bdry%Bot%HS%Opt, Sigma
+    READ(  ENVFile, * ) Bdry%Bot%HS%Opt, NOTUSED
     WRITE( PRTFile, * )
-    WRITE( PRTFile, FMT = "(33X, '( RMS roughness = ', G10.3, ' )' )" ) Sigma
+    !WRITE( PRTFile, FMT = "(33X, '( RMS roughness = ', G10.3, ' )' )" ) NOTUSED
+    WRITE( PRTFile, * ) 'Bottom options: ', Bdry%Bot%HS%Opt
 
     SELECT CASE ( Bdry%Bot%HS%Opt( 2 : 2 ) )
     CASE ( '~', '*' )
