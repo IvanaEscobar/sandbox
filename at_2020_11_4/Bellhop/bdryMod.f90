@@ -315,9 +315,6 @@ CONTAINS
           Bdry( ii )%Dxx   = ( Bdry( ii + 1 )%Dx     - Bdry( ii )%Dx     ) / &   ! second derivative
                              ( Bdry( ii + 1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
           Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 ) ** 3   ! derivative in direction of tangent
-          !write( *, * ) 'kappa, Dss, Dxx', Bdry( ii )%kappa, Bdry( ii )%Dss, Bdry( ii )%Dxx, &
-               ! 1 / ( ( 8 / 1000 ** 2 ) * ABS( Bdry( ii )%x( 2 ) ) ** 3 ), Bdry( ii )%x( 2 )
-               !  -1 / ( 4 * ( Bdry( ii )%x( 2 ) ) ** 3 / 1000000 ), Bdry( ii )%x( 2 )
 
           Bdry( ii )%kappa = Bdry( ii )%Dss   !over-ride kappa !!!!!
        END DO

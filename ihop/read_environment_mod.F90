@@ -522,7 +522,6 @@ CONTAINS
        READ(  ENVFile, *    ) zTemp, alphaR, betaR, rhoR, alphaI, betaI
        WRITE( PRTFile, FMT = "( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
             zTemp, alphaR, betaR, rhoR, alphaI, betaI
-
        ! dummy parameters for a layer with a general power law for attenuation
        ! these are not in play because the AttenUnit for this is not allowed yet
        !freq0         = freq
@@ -536,7 +535,6 @@ CONTAINS
 
        HS%rho = rhoR
     CASE ( 'G' )            ! *** Grain size (formulas from UW-APL HF Handbook)
-
        ! These formulas are from the UW-APL Handbook
        ! The code is taken from older Matlab and is unnecesarily verbose
        ! vr   is the sound speed ratio
@@ -585,7 +583,6 @@ CONTAINS
        WRITE( PRTFile, &
               FMT = "( 'Converted sound speed =', 2F10.2, 3X, 'density = ', F10.2, 3X, 'loss parm = ', F10.4 )" ) &
             HS%cp, rhor, alphaI
-
     END SELECT
 
   END SUBROUTINE TopBot

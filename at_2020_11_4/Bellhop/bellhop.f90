@@ -143,9 +143,7 @@ PROGRAM BELLHOP
   CALL BellhopCore
 
   CONTAINS
-
 ! **********************************************************************!
-
 SUBROUTINE BellhopCore
 
   USE ArrMod

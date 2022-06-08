@@ -61,7 +61,7 @@ MODULE sspmod
 CONTAINS
   SUBROUTINE EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! Call the particular profil routine indicated by the SSP%Type and perform Task
+    ! Call the particular profile routine indicated by the SSP%Type and perform Task
     !   Task = 'TAB'  then tabulate cp, cs, rhoT 
     !   Task = 'INI' then initialize
 
@@ -226,7 +226,7 @@ END SUBROUTINE EvaluateSSP2D
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL     (KIND=8), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
-    IF ( Task == 'INI' ) THEN   ! read in SSP data
+    IF ( Task == 'INI' ) THEN   ! read in SSP data: SSP%z,SSP%c, and SSP%cz
        Depth     = x( 2 )
        CALL ReadSSP( Depth, freq )
     ELSE                        ! return SSP info
@@ -425,8 +425,6 @@ END SUBROUTINE EvaluateSSP2D
        WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
        DO iz2 = 1, SSP%NPts
           READ(  SSPFile, * ) SSP%cMat( iz2, : )
-          ! WRITE( PRTFile, FMT="( 'iSegz depth = ', F10.2, ' m' )"  ) SSP%z( iz2 )
-          ! WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%cMat( iz2, : )
           WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz2 ), SSP%cMat( iz2, : )
        END DO
 
@@ -456,28 +454,6 @@ END SUBROUTINE EvaluateSSP2D
              END IF
           END DO
        END IF
-
-       ! The following tries to be more efficient than the code above by searching away from the current layer
-       ! rather than searching through all the layers
-       ! However, seems to be no faster
-       ! Also, this code caused a problem on at/tests/Gulf for the range-dep. test cases
-!!$     IF ( x( 2 ) < SSP%z( iSegz ) .AND. iSegz > 1 ) THEN
-!!$        DO iz = iSegz - 1, 1, -1   ! Search for bracketting Depths
-!!$           IF ( x( 2 ) > SSP%z( iz ) ) THEN
-!!$              iSegz = iz
-!!$              EXIT
-!!$           END IF
-!!$        END DO
-!!$     END IF
-!!$
-!!$     IF ( x( 2 ) > SSP%z( iSegz + 1 ) .AND. iSegz < SSP%NPts - 2 ) THEN
-!!$        DO iz = iSegz + 2, SSP%NPts   ! Search for bracketting Depths
-!!$           IF ( x( 2 ) < SSP%z( iz ) ) THEN
-!!$              iSegz = iz - 1
-!!$              EXIT
-!!$           END IF
-!!$        END DO
-!!$     END IF
 
        ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN ! .OR. &
@@ -905,7 +881,7 @@ END SUBROUTINE Analytic3D
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, SSP%AttenUnit, betaPowerLaw, fT )
-       SSP%rho( iz ) = rhoR
+       SSP%rho( iz ) = rhoR ! Used in BELLHOP??
 
        ! verify that the depths are monotone increasing
        IF ( iz > 1 ) THEN
@@ -927,7 +903,7 @@ END SUBROUTINE Analytic3D
               CALL ERROUT( 'ReadSSP', 'The SSP must have at least 2 points' )
           END IF
 
-          RETURN
+          RETURN ! Break do loop
        ENDIF
 
        SSP%NPts = SSP%NPts + 1

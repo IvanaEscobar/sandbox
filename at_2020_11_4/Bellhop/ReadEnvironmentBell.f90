@@ -57,16 +57,16 @@ CONTAINS
     IF ( NMedia /= 1 ) CALL ERROUT( 'READIN', &
          'Only one medium or layer is allowed in BELLHOP; sediment layers must be handled using a reflection coefficient' )
 
+    ! *** Top Options ***
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
 
     ! *** Top BC ***
-
+    ! If top BC is a acousto-elastic half-space: move to TopBot subroutine
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
 
     CALL TopBot( freq, AttenUnit, Bdry%Top%HS )
 
     ! ****** Read in ocean SSP data ******
-
     READ(  ENVFile, * ) NPts, Sigma, Bdry%Bot%HS%Depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth

@@ -49,7 +49,7 @@ CONTAINS
     REAL     (KIND=8), INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN )  :: AttenUnit
     REAL     (KIND=8)                :: f2, omega, alphaT, Thorp, a, FG
-    COMPLEX  (KIND=8)                :: CRCI
+    COMPLEX  (KIND=8)                :: CRCI ! Shouldn't this have INTENT( OUT )??
 
     omega = 2.0 * pi * freq
 
