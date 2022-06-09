@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE beampattern
@@ -8,7 +8,7 @@ MODULE beampattern
 
   ! Loads a source beam pattern
 
-  USE fatal_error, only: ERROUT
+  USE fatalError, only: ERROUT
   IMPLICIT NONE
   PRIVATE
 

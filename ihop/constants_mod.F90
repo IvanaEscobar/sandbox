@@ -22,10 +22,10 @@
 !!          http://www.gnu.org/licenses/gpl.txt                      !!
 !!                                                                   !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE constants_mod
+MODULE iHopParams
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -35,11 +35,8 @@ MODULE constants_mod
 ! </OVERVIEW>
 
 ! <DESCRIPTION>
-!   Constants are defined as real parameters,
-!   except for PI and RADIAN, which are calculated in constants_init to promote
-!   consistency and accuracy among various compilers.
-!
 !   Constants are accessed through the "use" statement.
+!
 ! </DESCRIPTION>
 
   ! SAVE
@@ -64,4 +61,4 @@ MODULE constants_mod
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 
-END MODULE constants_mod
+END MODULE iHopParams

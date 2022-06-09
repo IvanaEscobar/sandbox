@@ -28,8 +28,8 @@
 !C     *==========================================================*
 !CEOP
 
-#ifndef _CPP_EEOPTIONS_90_H_
-#define _CPP_EEOPTIONS_90_H_
+#ifndef _CPP_EEOPTIONS_H_
+#define _CPP_EEOPTIONS_H_
 
 !C     In general the following convention applies:
 !C     ALLOW  - indicates an feature will be included but it may
@@ -151,7 +151,7 @@
 !C--   Activate some pieces of code for coupling to GEOS AGCM
 #undef HACK_FOR_GMAO_CPL
 
-#endif /* _CPP_EEOPTIONS_90_H_ */
+#endif /* _CPP_EEOPTIONS_H_ */
 
-#include "CPP_EEMACROS_90.h"
+#include "CPP_EEMACROS.h"
 

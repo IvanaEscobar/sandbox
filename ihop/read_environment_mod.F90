@@ -1,21 +1,20 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE read_environment_mod
+MODULE readEnviHop
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE constants_mod,    only: pi, PRTFile, ENVFile, SSPFile, RAYFile, ARRFile
+  USE iHopParams,   only: pi, PRTFile, ENVFile, SSPFile, RAYFile, ARRFile
                               
-  USE bellhop_mod
-  USE sspmod,           only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, &
-                              betaR, alphaI, betaI, rhoR, betaPowerLaw, fT
-  USE fatal_error,      only: ERROUT
-  USE attenmod,         only: CRCI, T, Salinity, pH, z_bar, iBio, &
-                              NBioLayers, bio
+  USE iHopMod
+  USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
+                          alphaI, betaI, rhoR, betaPowerLaw, fT
+  USE fatalError,   only: ERROUT
+  USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
   IMPLICIT NONE
   PRIVATE
@@ -33,10 +32,9 @@ CONTAINS
     ! Routine to read in and echo all the input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
-    USE anglemod,               only: ReadRayElevationAngles, &
-                                      ReadRayBearingAngles
-    USE sourcereceiverpositions, only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,&
-                                       ReadRcvrBearings, ReadFreqVec
+    USE angleMod,       only: ReadRayElevationAngles, ReadRayBearingAngles
+    USE srPositions,    only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
+                              ReadRcvrBearings, ReadFreqVec
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
@@ -398,7 +396,7 @@ CONTAINS
 
     ! Read the RunType variable and print to .prt file
 
-    USE sourcereceiverpositions, only: Pos
+    USE srPositions, only: Pos
 
     CHARACTER (LEN= 7), INTENT( OUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
@@ -595,10 +593,10 @@ CONTAINS
   SUBROUTINE OpenOutputFiles( FileRoot, ThreeD )
     ! Write appropriate header information
 
-    USE anglemod, only: Angles
-    USE sourcereceiverpositions,    only: Pos
+    USE anglemod,       only: Angles
+    USE srPositions,    only: Pos
     !USE bdrymod
-    USE rwshd_file,                 only: WriteHeader
+    USE rwshd_file,     only: WriteHeader
 
     LOGICAL,            INTENT( IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
@@ -702,4 +700,4 @@ CONTAINS
 
   END SUBROUTINE OpenOutputFiles
 
-END MODULE read_environment_mod
+END MODULE readEnviHop

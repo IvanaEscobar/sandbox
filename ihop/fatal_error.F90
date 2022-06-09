@@ -1,13 +1,14 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE fatal_error
+MODULE fatalError
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
 
+  USE iHopParams,   only: PRTFile
+
   IMPLICIT NONE
-  INTEGER, PRIVATE :: PRTFile = 6
 
 ! public interfaces
 !=======================================================================
@@ -43,4 +44,4 @@ MODULE fatal_error
 
   END SUBROUTINE ERROUT
 
-END MODULE fatal_error
+END MODULE fatalError

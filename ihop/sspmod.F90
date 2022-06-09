@@ -1,7 +1,7 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE sspmod
+MODULE sspMod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -14,9 +14,9 @@ MODULE sspmod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE fatal_error,  only: ERROUT
+  USE fatalError,   only: ERROUT
   USE splinec,      only: cspline, splineall
-  USE constants_mod,only: PRTFile, ENVFile, SSPFile
+  USE iHopParams,   only: PRTFile, ENVFile, SSPFile
 
   IMPLICIT NONE
   PRIVATE
@@ -291,7 +291,8 @@ END SUBROUTINE EvaluateSSP2D
     ! This implements the monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
 
-    USE pchipmod,  only: PCHIP
+    USE pchipMod,  only: PCHIP
+
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
@@ -929,7 +930,7 @@ END SUBROUTINE Analytic3D
     ! reads SSP in m/s from .env file and convert to AttenUnit (ie. Nepers/m)
     ! Populates SSPStructure: SSP
 
-    USE attenmod, only: CRCI
+    USE attenMod, only: CRCI
 
     REAL (KIND=_RL90), INTENT(IN) :: freq, Depth
 
@@ -983,4 +984,4 @@ END SUBROUTINE Analytic3D
 
   END SUBROUTINE ReadSSP
 
-END MODULE sspmod
+END MODULE sspMod

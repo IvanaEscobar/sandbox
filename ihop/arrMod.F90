@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE arrmod
@@ -6,7 +6,7 @@ MODULE arrmod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE constants_mod,    only: pi, RadDeg, ARRFile
+  USE iHopParams,   only: pi, RadDeg, ARRFile
 
   ! Variables for arrival information
   IMPLICIT NONE

@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE attenmod
@@ -10,7 +10,7 @@ MODULE attenmod
   ! Routines to convert a sound speed and attenuation in user units to a complex sound speed
   ! Includes a formula for volume attenuation
 
-  USE fatal_error,              only: ERROUT
+  USE fatalError,   only: ERROUT
   IMPLICIT NONE
   PRIVATE
 

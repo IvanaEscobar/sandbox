@@ -6,15 +6,15 @@
 !C     *==========================================================*
 !C     | CPP_EEMACROS.h
 !C     *==========================================================*
-!C     | !C preprocessor "execution environment" supporting
+!C     | C preprocessor "execution environment" supporting
 !C     | macros. Use this file to define macros for  simplifying
 !C     | execution environment in which a model runs - as opposed
 !C     | to the dynamical problem the model solves.
 !C     *==========================================================*
 !CEOP
 
-#ifndef _CPP_EEMACROS_90_H_
-#define _CPP_EEMACROS_90_H_
+#ifndef _CPP_EEMACROS_H_
+#define _CPP_EEMACROS_H_
 
 !C     In general the following convention applies:
 !C     ALLOW  - indicates a feature will be included but it may
@@ -196,4 +196,4 @@
 !C     and S/R open_copy_data_file.
 #define FMT_TSK_ID 'I6.6'
 
-#endif /* _CPP_EEMACROS_90_H_ */
+#endif /* _CPP_EEMACROS_H_ */

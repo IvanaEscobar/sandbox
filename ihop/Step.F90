@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE step
@@ -6,9 +6,9 @@ MODULE step
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE bellhop_mod
-  USE constants_mod,only: RAYFile
-  USE sspmod,       only: EvaluateSSP, SSP, iSegz, iSegr
+  USE iHopMod
+  USE iHopParams,   only: RAYFile
+  USE sspMod,       only: EvaluateSSP, SSP, iSegz, iSegr
 
   IMPLICIT NONE
   PRIVATE

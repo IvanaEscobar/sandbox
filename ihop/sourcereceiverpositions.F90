@@ -1,18 +1,18 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE sourcereceiverpositions
+MODULE srPositions
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
 
   ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
 
-  USE fatal_error,  only: ERROUT
-  USE subtabulate,  only: SubTab
-  USE monotonic_mod,only: monotonic
-  USE sort_mod,     only: Sort
-  USE constants_mod,only: ENVFile, PRTFile
+  USE fatalError,   only: ERROUT
+  USE subTabulate,  only: SubTab
+  USE monotonicMod, only: monotonic
+  USE sortMod,      only: Sort
+  USE iHopParams,   only: ENVFile, PRTFile
 
   IMPLICIT NONE
   PRIVATE
@@ -254,4 +254,4 @@ CONTAINS
 
   END SUBROUTINE ReadVector
 
-END MODULE sourcereceiverpositions
+END MODULE srPositions

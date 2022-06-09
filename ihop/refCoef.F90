@@ -1,15 +1,15 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE refcoef
+MODULE refCoef
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
 
   ! reflection coefficient data
 
-  USE fatal_error,      only: ERROUT
-  USE constants_mod,    only: BRCFile, TRCFile, IRCFile, pi, DegRad
+  USE fatalError,   only: ERROUT
+  USE iHopParams,   only: BRCFile, TRCFile, IRCFile, pi, DegRad
 
   IMPLICIT NONE
   PRIVATE
@@ -203,7 +203,7 @@ CONTAINS
     ! Uses polynomial interpolation to approximate the function between the 
     ! tabulated values
 
-    USE polymod, only: Poly
+    USE polyMod, only: Poly
 
     INTEGER, PARAMETER :: N = 3     ! order of the polynomial for interpolation
     INTEGER,                INTENT( IN  ) :: NkTab, iTab( NkTab )
@@ -265,4 +265,4 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE InterpolateIRC
-END MODULE refcoef
+END MODULE refCoef

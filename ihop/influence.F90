@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE influence
@@ -10,14 +10,13 @@ MODULE influence
   ! complex pressure
   ! mbp 12/2018, based on much older subroutines
 
-  USE bellhop_mod ! added to get Beam
-  USE constants_mod,            only: pi, i, RadDeg, PRTFile, MaxN
-  USE sourcereceiverpositions,  only: Pos
+  USE iHopMod       ! added to get BeamStructure: Beam
+  USE iHopParams,   only: pi, i, RadDeg, PRTFile, MaxN
+  USE srPositions,  only: Pos
 ! sspMod used to construct image beams in the Cerveny style beam routines
-  USE SSPMod,                   only: EvaluateSSP, Bdry 
-  USE arrmod,                   only: WriteArrivalsASCII, WriteArrivalsBinary,&
-                                      AddArr
-  USE WriteRay,                 only: WriteRay2D
+  USE SSPMod,       only: EvaluateSSP, Bdry 
+  USE arrMod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
+  USE WriteRay,     only: WriteRay2D
 
   IMPLICIT NONE
   PRIVATE

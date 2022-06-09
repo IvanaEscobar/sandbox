@@ -1,28 +1,28 @@
-#include "BELLHOP_OPTIONS.h"
+#include "IHOP_OPTIONS.h"
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: BELLHOP_READPARMS
+C !ROUTINE: IHOP_READPARMS
 
 C !INTERFACE:
-      SUBROUTINE BELLHOP_READPARMS( myThid )
+      SUBROUTINE IHOP_READPARMS( myThid )
 
 C     !DESCRIPTION:
-C     Initialize BELLHOP variables and constants.
+C     Initialize IHOP variables and constants.
 
 C     !USES:
       IMPLICIT NONE
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C     !INPUT PARAMETERS:
       INTEGER myThid
 CEOP
 
-#ifdef ALLOW_BELLHOP
+#ifdef ALLOW_IHOP
 
 C     !LOCAL VARIABLES:
 C     msgBuf     :: Informational/error message buffer
@@ -30,7 +30,7 @@ C     iUnit      :: Work variable for IO unit number
       CHARACTER*(MAX_LEN_MBUF) msgBuf
       INTEGER iUnit
 
-      NAMELIST /BELLHOP_PARM01/
+      NAMELIST /IHOP_PARM01/
      &       myPa_MNC,
      &       myPa_StaV_Cgrid, myPa_Tend_Cgrid,
      &       myPa_applyTendT, myPa_applyTendS,
@@ -43,19 +43,19 @@ C     iUnit      :: Work variable for IO unit number
      &       myPa_VelUFile,   myPa_VelVFile,
      &       myPa_Surf1File,  myPa_Surf2File
 
-      IF ( .NOT.useBELLHOP ) THEN
-C-    pkg BELLHOP is not used
+      IF ( .NOT.useIHOP ) THEN
+C-    pkg IHOP is not used
         _BEGIN_MASTER(myThid)
 C-    Track pkg activation status:
 C     print a (weak) warning if data.bellhop is found
-         CALL PACKAGES_UNUSED_MSG( 'useBELLHOP', ' ', ' ' )
+         CALL PACKAGES_UNUSED_MSG( 'useIHOP', ' ', ' ' )
         _END_MASTER(myThid)
         RETURN
       ENDIF
 
       _BEGIN_MASTER(myThid)
 
-C--   Default values for BELLHOP
+C--   Default values for IHOP
       myPa_MNC         = useMNC
       myPa_StaV_Cgrid  = .TRUE.
       myPa_Tend_Cgrid  = .TRUE.
@@ -80,18 +80,18 @@ C-    file names for initial conditions:
       myPa_Surf1File   = ' '
       myPa_Surf2File   = ' '
 
-      WRITE(msgBuf,'(A)') 'BELLHOP_READPARMS: opening data.bellhop'
+      WRITE(msgBuf,'(A)') 'IHOP_READPARMS: opening data.bellhop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                    SQUEEZE_RIGHT , 1)
       CALL OPEN_COPY_DATA_FILE(
-     I                     'data.bellhop', 'BELLHOP_READPARMS',
+     I                     'data.bellhop', 'IHOP_READPARMS',
      O                     iUnit,
      I                     myThid )
 
 C     Read parameters from open data file
-      READ(UNIT=iUnit,NML=BELLHOP_PARM01)
+      READ(UNIT=iUnit,NML=IHOP_PARM01)
       WRITE(msgBuf,'(A)')
-     &    'BELLHOP_READPARMS: finished reading data.bellhop'
+     &    'IHOP_READPARMS: finished reading data.bellhop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &    SQUEEZE_RIGHT , 1)
 C     Close the open data file
@@ -114,7 +114,7 @@ C     Fix to avoid running without getting any output:
 C--   Everyone else must wait for the parameters to be loaded
       _BARRIER
 
-#endif /* ALLOW_BELLHOP */
+#endif /* ALLOW_IHOP */
 
       RETURN
       END

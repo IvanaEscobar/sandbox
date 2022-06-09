@@ -1,7 +1,7 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE bellhop_mod
+MODULE bellhopMod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -13,7 +13,7 @@ MODULE bellhop_mod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE constants_mod,            only: MaxN ! 10000
+  USE iHopParams,   only: MaxN ! 10000
   IMPLICIT NONE
   PRIVATE
 
@@ -72,4 +72,4 @@ MODULE bellhop_mod
   END TYPE ray3DPt
   TYPE( ray3DPt )          :: ray3D( MaxN )
 
-END MODULE bellhop_mod
+END MODULE bellhopMod

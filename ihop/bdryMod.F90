@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE bdrymod
@@ -8,9 +8,9 @@ MODULE bdrymod
 
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
 
-  USE monotonic_mod,    only: monotonic
-  USE fatal_error,      only: ERROUT
-  USE constants_mod,    only: PRTFile, ATIFile, BTYFile
+  USE monotonicMod, only: monotonic
+  USE fatalError,   only: ERROUT
+  USE constantsMod, only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
   PRIVATE

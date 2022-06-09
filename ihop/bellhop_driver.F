@@ -1,10 +1,10 @@
-#include "BELLHOP_OPTIONS.h"
+#include "IHOP_OPTIONS.h"
 
 CBOP
-C !ROUTINE: BELLHOP_DRIVER
+C !ROUTINE: IHOP_DRIVER
 
 C !INTERFACE: ==========================================================
-      SUBROUTINE BELLHOP_DRIVER( myTime, myIter, myThid )
+      SUBROUTINE IHOP_DRIVER( myTime, myIter, myThid )
 
 C !DESCRIPTION:
 C Calculate ray travel times, tau
@@ -19,8 +19,8 @@ C !FORTRAN90 USE MODULES: ===============================================
 #include "GRID.h"
 #include "SURFACE.h"
 #include "FFIELDS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C !INPUT PARAMETERS: ===================================================
 C  myTime   :: Current time in simulation
@@ -130,7 +130,7 @@ C--
       INTEGER k, kc
 
 
-      CALL BELLHOP_INIT
+      CALL IHOP_INIT
 c     INTEGER ioUnit
 c     _RS     dummyRS(1)
 !#ifdef COMPONENT_MODULE
@@ -180,7 +180,7 @@ c     _RS     dummyRS(1)
 !        ENDDO
 !
 !C--   Get grid and dynamical fields from main model common blocks
-!        CALL BELLHOP_DYN2PHYS(
+!        CALL IHOP_DYN2PHYS(
 !     O                    lat2d, pHalf3d, pFull3d,
 !     O                    zHalf3d, zFull3d,
 !     O                    t3d, q3d, u3d, v3d,
@@ -525,4 +525,4 @@ c     _RS     dummyRS(1)
 !#endif /* COMPONENT_MODULE */
 !
 !      RETURN
-      END SUBROUTINE BELLHOP_DRIVER
+      END SUBROUTINE IHOP_DRIVER

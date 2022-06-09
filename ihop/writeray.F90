@@ -1,7 +1,7 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE writeray
+MODULE writeRay
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -13,9 +13,9 @@ MODULE writeray
   ! During an eigenray calculation, subsets of the full ray may be passed
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
-  USE bellhop_mod
-  USE constants_mod,only: RAYFile
-  USE sspmod,       only: Bdry
+  USE iHopMod
+  USE iHopParams,   only: RAYFile
+  USE sspMod,       only: Bdry
 
   IMPLICIT NONE
   PRIVATE
@@ -115,4 +115,4 @@ CONTAINS
 
   END SUBROUTINE WriteRay3D
 
-END MODULE writeray
+END MODULE writeRay

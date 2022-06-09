@@ -1,10 +1,10 @@
-#ifndef CPP_OPTIONS_90_H
-#define CPP_OPTIONS_90_H
+#ifndef CPP_OPTIONS_H
+#define CPP_OPTIONS_H
 
 !CBOP
-!C !ROUTINE: CPP_OPTIONS_90.h
+!C !ROUTINE: CPP_OPTIONS.h
 !C !INTERFACE:
-!C #include "CPP_OPTIONS_90.h"
+!C #include "CPP_OPTIONS.h"
 !
 !C !DESCRIPTION:
 !C *==================================================================*
@@ -169,7 +169,7 @@
 !C-- Other option files:
 
 !C o Execution environment support options
-#include "CPP_EEOPTIONS_90.h"
+#include "CPP_EEOPTIONS.h"
 
 !C o Include/exclude single header file containing multiple packages options
 !C   (AUTODIFF, COST, CTRL, ECCO, EXF ...) instead of the standard way where
@@ -181,4 +181,4 @@
 !c# include "ECCO_CPPOPTIONS.h"
 !c#endif
 
-#endif /* CPP_OPTIONS_90_H */
+#endif /* CPP_OPTIONS_H */

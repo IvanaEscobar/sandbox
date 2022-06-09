@@ -1,17 +1,17 @@
-#include "BELLHOP_OPTIONS.h"
-C--  File bellhop_tendency_apply.F: Routines to apply BELLHOP tendencies
+#include "IHOP_OPTIONS.h"
+C--  File bellhop_tendency_apply.F: Routines to apply IHOP tendencies
 C--   Contents
-C--   o BELLHOP_TENDENCY_APPLY_U
-C--   o BELLHOP_TENDENCY_APPLY_V
-C--   o BELLHOP_TENDENCY_APPLY_T
-C--   o BELLHOP_TENDENCY_APPLY_S
+C--   o IHOP_TENDENCY_APPLY_U
+C--   o IHOP_TENDENCY_APPLY_V
+C--   o IHOP_TENDENCY_APPLY_T
+C--   o IHOP_TENDENCY_APPLY_S
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: BELLHOP_TENDENCY_APPLY_U
+C !ROUTINE: IHOP_TENDENCY_APPLY_U
 
 C !INTERFACE:
-      SUBROUTINE BELLHOP_TENDENCY_APPLY_U(
+      SUBROUTINE IHOP_TENDENCY_APPLY_U(
      U                    gU_arr,
      I                    iMin,iMax,jMin,jMax, k, bi, bj,
      I                    myTime, myIter, myThid )
@@ -28,8 +28,8 @@ C     !USES:
 #include "GRID.h"
 c#include "DYNVARS.h"
 c#include "FFIELDS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gU_arr    :: the tendency array
@@ -48,7 +48,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef BELLHOP_TENDENCY
+#ifdef IHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -71,17 +71,17 @@ C--   Assume Agrid position:
         ENDDO
       ENDIF
 
-#endif /* BELLHOP_TENDENCY */
+#endif /* IHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: BELLHOP_TENDENCY_APPLY_V
+C !ROUTINE: IHOP_TENDENCY_APPLY_V
 
 C !INTERFACE:
-      SUBROUTINE BELLHOP_TENDENCY_APPLY_V(
+      SUBROUTINE IHOP_TENDENCY_APPLY_V(
      U                    gV_arr,
      I                    iMin,iMax,jMin,jMax, k, bi, bj,
      I                    myTime, myIter, myThid )
@@ -98,8 +98,8 @@ C     !USES:
 #include "GRID.h"
 c#include "DYNVARS.h"
 c#include "FFIELDS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gV_arr    :: the tendency array
@@ -118,7 +118,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef BELLHOP_TENDENCY
+#ifdef IHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -141,17 +141,17 @@ C--   Assume Agrid position:
         ENDDO
       ENDIF
 
-#endif /* BELLHOP_TENDENCY */
+#endif /* IHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: BELLHOP_TENDENCY_APPLY_T
+C !ROUTINE: IHOP_TENDENCY_APPLY_T
 
 C !INTERFACE:
-      SUBROUTINE BELLHOP_TENDENCY_APPLY_T(
+      SUBROUTINE IHOP_TENDENCY_APPLY_T(
      U                    gT_arr,
      I                    iMin,iMax,jMin,jMax, k, bi, bj,
      I                    myTime, myIter, myThid )
@@ -167,8 +167,8 @@ C     !USES:
 #include "GRID.h"
 c#include "DYNVARS.h"
 c#include "FFIELDS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gT_arr    :: the tendency array
@@ -187,7 +187,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef BELLHOP_TENDENCY
+#ifdef IHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -200,17 +200,17 @@ C     !LOCAL VARIABLES:
         ENDDO
       ENDIF
 
-#endif /* BELLHOP_TENDENCY */
+#endif /* IHOP_TENDENCY */
 
       RETURN
       END
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: BELLHOP_TENDENCY_APPLY_S
+C !ROUTINE: IHOP_TENDENCY_APPLY_S
 
 C !INTERFACE:
-      SUBROUTINE BELLHOP_TENDENCY_APPLY_S(
+      SUBROUTINE IHOP_TENDENCY_APPLY_S(
      U                     gS_arr,
      I                     iMin,iMax,jMin,jMax, k, bi, bj,
      I                     myTime, myIter, myThid )
@@ -226,8 +226,8 @@ C     !USES:
 #include "GRID.h"
 c#include "DYNVARS.h"
 c#include "FFIELDS.h"
-#include "BELLHOP_PARAMS.h"
-#include "BELLHOP_VARS.h"
+#include "IHOP_PARAMS.h"
+#include "IHOP_VARS.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     gS_arr    :: the tendency array
@@ -246,7 +246,7 @@ C     myThid    :: my Thread Id number
       INTEGER myThid
 CEOP
 
-#ifdef BELLHOP_TENDENCY
+#ifdef IHOP_TENDENCY
 C     !LOCAL VARIABLES:
       INTEGER i, j
 
@@ -259,7 +259,7 @@ C     !LOCAL VARIABLES:
         ENDDO
       ENDIF
 
-#endif /* BELLHOP_TENDENCY */
+#endif /* IHOP_TENDENCY */
 
       RETURN
       END

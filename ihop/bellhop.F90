@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE BELLHOP
@@ -23,32 +23,28 @@ MODULE BELLHOP
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
   ! Systems Center
   
-  USE bellhop_mod               ! Added to get title, freq, Beam
-  USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
-                                      ARRFile, RAYFile, MaxN
-  USE read_Environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
-                                      TopBot, OpenOutputFiles
-  USE fatal_Error,              only: ERROUT
-  USE AngleMod,                 only: Angles, ialpha
-  USE SourceReceiverPositions,  only: Pos
-  USE SSPMod,                   only: EvaluateSSP, HSInfo, Bdry, SSP, &
-                                      betaPowerLaw, fT
-  USE BdryMod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
-                                      Bot, Top, atiType, btyType, NatiPts,&
-                                      NbtyPts, iSmallStepCtr, IsegTop, IsegBot,&
-                                      rTopSeg, rBotSeg
-  USE RefCoef,                  only: ReadReflectionCoefficient,&
-                                      InterpolateReflectionCoefficient,&
-                                      ReflectionCoef, RTop, RBot, NBotPts, & 
-                                      NTopPts
-  USE Influence,                only: InfluenceCervenyRayCen,&
-                                      InfluenceCervenyCart,&
-                                      InfluenceGeoHatRayCen, InfluenceSGB,&
-                                      InfluenceGeoGaussianCart,&
-                                      InfluenceGeoHatCart, ScalePressure
-  USE AttenMod,                 only: CRCI
+  USE iHopMod       ! Added to get title, freq, Beam
+  USE iHopParams,   only:   pi, i, DegRad, RadDeg, PRTFile, SHDFile,           &
+                            ARRFile, RAYFile, MaxN
+  USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
+                            OpenOutputFiles
+  USE fatalError,   only:   ERROUT
+  USE AngleMod,     only:   Angles, ialpha
+  USE srPositions,  only:   Pos
+  USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
+  USE BdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
+                            atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
+                            IsegTop, IsegBot, rTopSeg, rBotSeg
+  USE RefCoef,      only:   ReadReflectionCoefficient,                         &
+                            InterpolateReflectionCoefficient, ReflectionCoef,  &
+                            RTop, RBot, NBotPts, NTopPts
+  USE Influence,    only:   InfluenceCervenyRayCen, InfluenceCervenyCart,      &
+                            InfluenceGeoHatRayCen, InfluenceSGB,               &
+                            InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
+                            ScalePressure
+  USE AttenMod,     only:   CRCI
   USE BeamPattern
-  USE WriteRay,                 only: WriteRay2D
+  USE WriteRay,     only:   WriteRay2D
 
   IMPLICIT NONE
   ! PRIVATE
