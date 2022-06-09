@@ -2,7 +2,6 @@ MODULE bdrymod
 
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
 
-  !USE norms
   USE monotonicMod
   USE FatalError
 

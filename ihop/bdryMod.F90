@@ -10,7 +10,7 @@ MODULE bdrymod
 
   USE monotonic_mod,    only: monotonic
   USE fatal_error,      only: ERROUT
-  USE constants_mod,    only: PRTFile
+  USE constants_mod,    only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
   PRIVATE
@@ -24,7 +24,7 @@ MODULE bdrymod
 
 !=======================================================================
 
-  INTEGER, PARAMETER :: ATIFile = 40, BTYFile = 41, Number_to_Echo = 21
+  INTEGER, PARAMETER :: Number_to_Echo = 21
   INTEGER            :: IsegTop, IsegBot ! indices point to current active segment
   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
@@ -37,9 +37,9 @@ MODULE bdrymod
   TYPE HSInfo2
      ! compressional and shear wave speeds/attenuations in user units
      REAL     (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
-     COMPLEX  (KIND=_RL90) :: cP, cS    ! P-wave, S-wave speeds
-     REAL     (KIND=_RL90) :: rho, Depth! density, depth
-     CHARACTER (LEN=1) :: BC            ! Boundary condition type
+     REAL     (KIND=_RL90) :: rho, Depth        ! density, depth
+     COMPLEX  (KIND=_RL90) :: cP, cS            ! P-wave, S-wave speeds
+     CHARACTER (LEN=1) :: BC                    ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE
 
@@ -52,7 +52,7 @@ MODULE bdrymod
      REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
                           Dss           ! derivative along tangent
      TYPE( HSInfo2 )   :: HS
-     ! For the curvilinea grid option
+     ! For the curvilinear grid option
      REAL (KIND=_RL90) :: Nodet( 2 ), & ! tangent at the node
                           Noden( 2 )    ! normal at the node 
   END TYPE
@@ -60,15 +60,14 @@ MODULE bdrymod
   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
 
 CONTAINS
-
   SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, PRTFile )
 
     ! Reads in the top altimetry
 
     INTEGER,            INTENT( IN ) :: PRTFile
     CHARACTER (LEN= 1), INTENT( IN ) :: TopATI
-    REAL (KIND=_RL90), INTENT( IN ) :: DepthT
-    REAL (KIND=_RL90), ALLOCATABLE  :: phi( : )
+    REAL (KIND=_RL90),  INTENT( IN ) :: DepthT
+    REAL (KIND=_RL90),  ALLOCATABLE  :: phi( : )
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     SELECT CASE ( TopATI )
@@ -414,7 +413,6 @@ CONTAINS
 
     ! Get the Bottom segment info (index and range interval) for range, r
 
-    INTEGER, PARAMETER :: PRTFile = 6
     INTEGER IsegBotT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
 

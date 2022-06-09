@@ -31,10 +31,10 @@ MODULE sourcereceiverpositions
   REAL (KIND=_RL90), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
 
   TYPE Position
-      ! NOTE: use ReadVector subroutine to see if there are more than 1 source
+     ! NOTE: use ReadVector subroutine to see if there are more than 1 source
      INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
+     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )                 ! indices for interpolation of source and receiver weights
      REAL                 :: Delta_r, Delta_theta               ! receiver spacing
-     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )                 ! indeces for interpolation of source and receiver weights
      REAL,    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
      REAL,    ALLOCATABLE :: Rr( : ), Rz( : ), ws( : ), wr( : ) ! Receiver r, z coordinates and weights for interpolation
      REAL,    ALLOCATABLE :: theta( : )                         ! Receiver bearings
