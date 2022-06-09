@@ -114,8 +114,6 @@ SUBROUTINE BELLHOP_INIT
      ALLOCATE( Pos%Rr( Pos%NRr ) )
 
      Pos%Sz( 1 ) = 50.
-     !Pos%Rz     = [ 0, 50, 100 ]
-     !Pos%r      = 1000. * [ 1, 2, 3, 4, 5 ]   ! meters !!!
      Pos%Rz      = [ ( jj, jj = 1, Pos%NRz ) ]
      Pos%Rr      = 10. * [ ( jj, jj = 1 , Pos%NRr ) ]   ! meters !!!
 

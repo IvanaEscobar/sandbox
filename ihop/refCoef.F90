@@ -9,6 +9,8 @@ MODULE refcoef
   ! reflection coefficient data
 
   USE fatal_error,      only: ERROUT
+  USE constants_mod,    only: BRCFile, TRCFile, IRCFile, pi, DegRad
+
   IMPLICIT NONE
   PRIVATE
 
@@ -18,7 +20,6 @@ MODULE refcoef
            ReflectionCoef, RBot, RTop, NBotPts, NTopPts
 !=======================================================================
 
-  INTEGER, PARAMETER    :: BRCFile = 31, TRCFile = 32, IRCFile = 12
   INTEGER               :: NBotPts, NTopPts
   INTEGER               :: NkTab
   INTEGER,              ALLOCATABLE :: iTab( : )
@@ -36,10 +37,8 @@ CONTAINS
 
     ! Optionally read in reflection coefficient for Top or Bottom boundary
 
-    USE constants_mod,    only: pi, DegRad
-
-    INTEGER,            INTENT( IN ) :: PRTFile         ! unit number for print file
-    CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC    ! flag set to 'F' if refl. coef. is to be read from a File
+    INTEGER,            INTENT( IN ) :: PRTFile     ! prtfile ID
+    CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC! flag set to 'F' if refl. coef. is to be read from a File
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     INTEGER            :: itheta, ik, IOStat, iAllocStat
     REAL  (KIND=_RL90) :: freq

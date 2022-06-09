@@ -16,7 +16,7 @@ MODULE sspmod
 
   USE fatal_error,  only: ERROUT
   USE splinec,      only: cspline, splineall
-  USE constants_mod,only: PRTFile, ENVFile
+  USE constants_mod,only: PRTFile, ENVFile, SSPFile
 
   IMPLICIT NONE
   PRIVATE
@@ -419,7 +419,6 @@ END SUBROUTINE EvaluateSSP2D
 
     ! Bilinear quadrilatteral interpolation of SSP data in 2D
 
-    INTEGER,           PARAMETER     :: SSPFile = 40
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
@@ -580,7 +579,6 @@ END SUBROUTINE EvaluateSSP2D
     ! Trilinear hexahedral interpolation of SSP data in 3D
     ! assumes a rectilinear case (not the most general hexahedral)
 
-    INTEGER, PARAMETER :: SSPFile = 40
     REAL (KIND=_RL90),  INTENT( IN  ) :: freq
     REAL (KIND=_RL90),  INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
     CHARACTER (LEN =3), INTENT( IN  ) :: Task
@@ -929,6 +927,7 @@ END SUBROUTINE Analytic3D
 
   SUBROUTINE ReadSSP( Depth, freq )
     ! reads SSP in m/s from .env file and convert to AttenUnit (ie. Nepers/m)
+    ! Populates SSPStructure: SSP
 
     USE attenmod, only: CRCI
 

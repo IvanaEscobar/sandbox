@@ -51,11 +51,16 @@ MODULE constants_mod
                                            DegRad = pi / 180.0D0 
    COMPLEX (KIND=_RL90), PUBLIC, PARAMETER :: i = ( 0.0D0, 1.0D0 )
 
-   INTEGER, PUBLIC, PARAMETER :: ENVFile = 5, PRTFile = 6, RAYFile = 21, &
-                                 SHDFile = 25, ARRFile = 36, SSPFile = 40, &
-                                 ATIFile = 41, BTYFile = 42, &
+   INTEGER, PUBLIC, PARAMETER :: ENVFile = 5, &     ! Input file
+                                 PRTFile = 6, &     ! standard output file
+                                 RAYFile = 21, &    ! ray paths file
+                                 SHDFile = 25, &    ! TL calc output file
+                                 ARRFile = 36, &    ! Arrivals calc output file
+                                 SSPFile = 40, &    ! optional 2D/3D SSP file
+                                 ATIFile = 41, &    ! optional 2D/3D altimetry
+                                 BTYFile = 42, &    ! optional 2D/3D bathymetry
+                                 BRCFile = 31, TRCFile = 32, IRCFile = 12, &
                                  MaxN = 10000
-    ! NOTE: SSPFile and ATIFile are both set to 40.... seems wrong for now
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 

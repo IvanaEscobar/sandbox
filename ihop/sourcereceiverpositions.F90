@@ -131,7 +131,7 @@ CONTAINS
     ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
     IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadSzRz', 'Too many receivers'  )
 
-    ! *** Check for Sz/Rz in upper or lower halfspace ***
+    ! *** Check for Sz/Rz in water column ***
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
