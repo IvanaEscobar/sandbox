@@ -58,7 +58,7 @@ C     2-dim.
 #ifdef IHOP_2D_STATE
         DO j=1-Oly,sNy+OLy
          DO i=1-Olx,sNx+Olx
-          bellhop_SST(i,j,bi,bj) = 0. _d 0
+          iHop_SST(i,j,bi,bj) = 0. _d 0
           myPa_Surf2(i,j,bi,bj) = 0. _d 0
          ENDDO
         ENDDO
