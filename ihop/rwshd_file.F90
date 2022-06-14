@@ -23,7 +23,7 @@ MODULE rwshd_file
   INTEGER, PARAMETER, PRIVATE :: SHDFile = 25
   INTEGER LRecl
 
-  ! variables taken from SourceReceiverPositions:
+  ! variables taken from srPositions.F90:
   ! freqVec vector of frequencies
   ! theta   vector of bearing lines,   theta( 1 : Ntheta )
   ! Sz      vector of source   depths, Sz(    1 : NSz    )

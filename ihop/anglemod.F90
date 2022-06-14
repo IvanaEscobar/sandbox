@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE anglemod
+MODULE angleMod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -187,4 +187,4 @@ CONTAINS
 
   END SUBROUTINE ReadRayBearingAngles
 
-END MODULE anglemod
+END MODULE angleMod
