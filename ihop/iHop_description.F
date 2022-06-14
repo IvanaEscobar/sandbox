@@ -1,7 +1,7 @@
 %%
 %%
 
-Package ``BELLHOP'' is a ray-trace code, for calculating acoustics.
+Package ''iHop'' is a ray-trace code, for calculating acoustics.
 The package should interact with the MITgcm kernel on various levels 
 (initialisation, time-stepping, post-processing).
 
@@ -10,4 +10,4 @@ calculates arrival times. Lastly, it output the travel time and ray angle as
 diagnostics.
 
 
-ADD useBELLHOP to PARAMS.h in the code modifications to use this package
+ADD useIHOP to PARAMS.h in the code modifications to use this package
