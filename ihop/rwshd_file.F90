@@ -7,8 +7,8 @@ MODULE rwshd_file
 
   ! routines to read or write the SHDFile
 
-  USE sourcereceiverpositions, only: Pos, Nfreq, freqVec
-  USE fatal_error,      only: ERROUT
+  USE srPositions,  only: Pos, Nfreq, freqVec
+  USE fatalError,   only: ERROUT
 
   IMPLICIT NONE
   PRIVATE
@@ -23,7 +23,7 @@ MODULE rwshd_file
   INTEGER, PARAMETER, PRIVATE :: SHDFile = 25
   INTEGER LRecl
 
-  ! variables taken from SourceReceiverPositions:
+  ! variables taken from srPositions.F90:
   ! freqVec vector of frequencies
   ! theta   vector of bearing lines,   theta( 1 : Ntheta )
   ! Sz      vector of source   depths, Sz(    1 : NSz    )

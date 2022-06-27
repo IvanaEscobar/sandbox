@@ -468,7 +468,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Trace the beam (note that Reflect alters the step index is)
   is = 0
-  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
+  CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop, dEndBot,  &
        Top( IsegTop )%n, Bot( IsegBot )%n, DistBegTop, DistBegBot )
 
   IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN

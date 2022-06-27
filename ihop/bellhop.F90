@@ -1,4 +1,4 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
 MODULE BELLHOP
@@ -23,32 +23,27 @@ MODULE BELLHOP
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
   ! Systems Center
   
-  USE bellhop_mod               ! Added to get title, freq, Beam
-  USE constants_mod,            only: pi, i, DegRad, RadDeg, PRTFile, SHDFile,&
-                                      ARRFile, RAYFile, MaxN
-  USE read_Environment_mod,     only: ReadEnvironment, ReadTopOpt, ReadRunType,&
-                                      TopBot, OpenOutputFiles
-  USE fatal_Error,              only: ERROUT
-  USE AngleMod,                 only: Angles, ialpha
-  USE SourceReceiverPositions,  only: Pos
-  USE SSPMod,                   only: EvaluateSSP, HSInfo, Bdry, SSP, &
-                                      betaPowerLaw, fT
-  USE BdryMod,                  only: ReadATI, ReadBTY, GetTopSeg, GetBotSeg,&
-                                      Bot, Top, atiType, btyType, NatiPts,&
-                                      NbtyPts, iSmallStepCtr, IsegTop, IsegBot,&
-                                      rTopSeg, rBotSeg
-  USE RefCoef,                  only: ReadReflectionCoefficient,&
-                                      InterpolateReflectionCoefficient,&
-                                      ReflectionCoef, RTop, RBot, NBotPts, & 
-                                      NTopPts
-  USE Influence,                only: InfluenceCervenyRayCen,&
-                                      InfluenceCervenyCart,&
-                                      InfluenceGeoHatRayCen, InfluenceSGB,&
-                                      InfluenceGeoGaussianCart,&
-                                      InfluenceGeoHatCart, ScalePressure
-  USE AttenMod,                 only: CRCI
-  USE BeamPattern
-  USE WriteRay,                 only: WriteRay2D
+  USE iHopMod       ! Added to get title, freq, Beam
+  USE iHopParams,   only:   pi, i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
+                            ARRFile, RAYFile, MaxN
+  USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
+                            OpenOutputFiles
+  USE fatalError,   only:   ERROUT
+  USE angleMod,     only:   Angles, ialpha
+  USE srPositions,  only:   Pos
+  USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
+  USE bdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
+                            atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
+                            IsegTop, IsegBot, rTopSeg, rBotSeg
+  USE refCoef,      only:   ReadReflectionCoefficient,                         &
+                            InterpolateReflectionCoefficient, ReflectionCoef,  &
+                            RTop, RBot, NBotPts, NTopPts
+  USE influence,    only:   InfluenceGeoHatRayCen, InfluenceSGB,               &
+                            InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
+                            ScalePressure
+  USE attenMod,     only:   CRCI
+  USE beamPattern
+  USE writeRay,     only:   WriteRay2D
 
   IMPLICIT NONE
   ! PRIVATE
@@ -56,7 +51,7 @@ MODULE BELLHOP
   INTEGER              :: iostat, iAllocStat  
 
 CONTAINS
-SUBROUTINE BELLHOP_INIT
+SUBROUTINE IHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: jj 
 ! added locally previously read in from unknown mod ... IEsco2022
@@ -180,7 +175,7 @@ SUBROUTINE BELLHOP_INIT
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
   CALL BellhopCore
-END SUBROUTINE BELLHOP_INIT
+END SUBROUTINE IHOP_INIT
 
 ! **********************************************************************!
 SUBROUTINE BellhopCore
@@ -280,7 +275,7 @@ SUBROUTINE BellhopCore
   WRITE( PRTFile, * )
 
   SourceDepth: DO is = 1, Pos%NSz
-     xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate, assuming source @ r=0
+     xs = [ zero, Pos%Sz( is ) ]   ! source coordinate, assuming source @ r=0
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' ) ! TL calculation, zero out pressure matrix
@@ -348,16 +343,6 @@ SUBROUTINE BellhopCore
                                      Beam%rLoop, Beam%epsMultiplier )
 
               SELECT CASE ( Beam%Type( 1 : 1 ) )
-              CASE ( 'R' )
-                 iBeamWindow2 = Beam%iBeamWindow**2
-                 RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyRayCen( U, epsilon, Angles%alpha(ialpha),& 
-                                              iBeamWindow2, RadMax )
-              CASE ( 'C' )
-                 iBeamWindow2 = Beam%iBeamWindow**2
-                 RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyCart( U, epsilon, Angles%alpha( ialpha ),& 
-                                            iBeamWindow2, RadMax )
               CASE ( 'g' )
                  CALL InfluenceGeoHatRayCen( U, Angles%alpha( ialpha ), &
                                              Angles%Dalpha )
@@ -606,7 +591,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         IF ( atiType == 'C' ) THEN
            ! proportional distance along segment
            sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) &
-                     / Top( IsegTop )%LeIS 
+                     / Top( IsegTop )%Len
            ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet &
                      + sss * Top( 1 + IsegTop )%Nodet
            TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &

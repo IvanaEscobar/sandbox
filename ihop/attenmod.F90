@@ -1,7 +1,7 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE attenmod
+MODULE attenMod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -10,7 +10,7 @@ MODULE attenmod
   ! Routines to convert a sound speed and attenuation in user units to a complex sound speed
   ! Includes a formula for volume attenuation
 
-  USE fatal_error,              only: ERROUT
+  USE fatalError,   only: ERROUT
   IMPLICIT NONE
   PRIVATE
 
@@ -63,7 +63,7 @@ CONTAINS
     ! c     real      part of sound speed
     ! alpha imaginary part of sound speed
 
-    USE constants_mod,    only: pi
+    USE iHopParams,    only: pi
 
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
@@ -193,4 +193,4 @@ CONTAINS
 
   END FUNCTION Franc_Garr
 
-END MODULE attenmod
+END MODULE attenMod

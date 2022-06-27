@@ -1,7 +1,7 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE subtabulate
+MODULE subTabulate
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -62,4 +62,4 @@ CONTAINS
 
   END SUBROUTINE SubTab_dble
 
-END MODULE subtabulate
+END MODULE subTabulate

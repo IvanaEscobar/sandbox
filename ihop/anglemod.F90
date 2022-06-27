@@ -1,16 +1,16 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE anglemod
+MODULE angleMod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE constants_mod,    only: pi, DegRad, ENVFile, PRTFile
-  USE fatal_error,      only: ERROUT
-  USE subtabulate,      only: SubTab
-  USE sourcereceiverpositions, only: Pos, Number_to_Echo
-  USE sort_mod,         only: Sort
+  USE iHopParams,   only: pi, DegRad, ENVFile, PRTFile
+  USE fatalError,   only: ERROUT
+  USE subTabulate,  only: SubTab
+  USE srPositions,  only: Pos, Number_to_Echo
+  USE sortMod,      only: Sort
 
   IMPLICIT NONE
   PRIVATE
@@ -187,4 +187,4 @@ CONTAINS
 
   END SUBROUTINE ReadRayBearingAngles
 
-END MODULE anglemod
+END MODULE angleMod

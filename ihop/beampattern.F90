@@ -1,14 +1,14 @@
-#include "BELLHOP_OPTIONS_90.h"
+#include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE beampattern
+MODULE beamPattern
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
 
   ! Loads a source beam pattern
 
-  USE fatal_error, only: ERROUT
+  USE fatalError, only: ERROUT
   IMPLICIT NONE
   PRIVATE
 
@@ -71,4 +71,4 @@ CONTAINS
 
   END SUBROUTINE ReadPat
 
-END MODULE beampattern
+END MODULE beamPattern

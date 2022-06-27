@@ -1,0 +1,258 @@
+#include "IHOP_OPTIONS.h"
+!BOP
+! !INTERFACE:
+MODULE srPositions
+! <CONTACT EMAIL="ivana@utexas.edu">
+!   Ivana Escobar
+! </CONTACT>
+
+  ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
+
+  USE fatalError,   only: ERROUT
+  USE subTabulate,  only: SubTab
+  USE monotonicMod, only: monotonic
+  USE sortMod,      only: Sort
+  USE iHopParams,   only: ENVFile, PRTFile
+
+  IMPLICIT NONE
+  PRIVATE
+
+! public interfaces
+!=======================================================================
+
+    public Pos, Number_to_Echo, Nfreq, freqVec, ReadSxSy, ReadSzRz, &
+           ReadRcvrRanges, ReadRcvrBearings, ReadFreqVec
+
+!=======================================================================
+
+  INTEGER, PARAMETER    :: Number_to_Echo = 10
+  INTEGER, PRIVATE      :: IAllocStat     ! used to capture status after allocation
+  INTEGER               :: Nfreq          ! number of frequencies
+  REAL (KIND=_RL90), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
+
+  TYPE Position
+     ! NOTE: use ReadVector subroutine to see if there are more than 1 source
+     INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
+     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : ) ! indices for interpolation of source and receiver weights
+     REAL (KIND=_RL90), ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : ), & ! Source coord
+                                       Rr( : ), Rz( : ), & ! receiver coord
+                                       ws( : ), wr( : )  ! Receiver weights for interpolation
+     REAL (KIND=_RL90), ALLOCATABLE :: theta( : )        ! Receiver 3d bearings
+     REAL (KIND=_RL90)              :: Delta_r, Delta_theta ! receiver spacing
+  END TYPE Position
+
+  TYPE ( Position ) :: Pos ! structure containing source and receiver positions
+
+CONTAINS
+  SUBROUTINE ReadfreqVec( freq0, BroadbandOption )
+
+    ! Optionally reads a vector of source frequencies for a broadband run
+    ! If the broadband option is not selected, then the input freq (a scalar) 
+    ! is stored in the frequency vector
+
+    REAL (KIND=_RL90),  INTENT( IN ) :: freq0   ! Source frequency
+    CHARACTER,          INTENT( IN ) :: BroadbandOption*( 1 )
+    INTEGER :: ifreq
+
+    Nfreq = 1
+
+    ! Broadband run?
+    IF ( BroadbandOption == 'B' ) THEN
+       READ( ENVFile, * ) Nfreq
+       WRITE( PRTFile, * ) '________________________________________________', &
+                           '__________________________'
+       WRITE( PRTFile, * )
+       WRITE( PRTFile, * )
+       WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
+       IF ( Nfreq <= 0 ) CALL ERROUT( 'ReadEnvironment', &
+                                    'Number of frequencies must be positive'  )
+    END IF
+
+    IF ( ALLOCATED( freqVec ) ) DEALLOCATE( freqVec )
+    ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadEnvironment', &
+                                        'Too many frequencies'  )
+
+    IF ( BroadbandOption == 'B' ) THEN
+       WRITE( PRTFile, * ) 'Frequencies (Hz)'
+       freqVec( 3 ) = -999.9
+       READ(  ENVFile, * ) freqVec( 1 : Nfreq )
+       CALL SubTab( freqVec, Nfreq )
+
+       WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
+                                      MIN( Nfreq, Number_to_Echo ) )
+       IF ( Nfreq > Number_to_Echo ) &
+           WRITE( PRTFile,  "( G14.6 )" ) ' ... ', freqVec( Nfreq )
+    ELSE
+       freqVec( 1 ) = freq0
+    END IF
+
+    RETURN
+
+  END SUBROUTINE ReadfreqVec
+
+  !********************************************************************!
+
+  SUBROUTINE ReadSxSy( ThreeD )
+
+    ! Reads source x-y coordinates
+
+    LOGICAL, INTENT( IN ) :: ThreeD   ! flag indicating whether this is a 3D run
+
+    IF ( ThreeD ) THEN
+       CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km' )
+       CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km' )
+    ELSE
+       ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ) )
+       Pos%Sx( 1 ) = 0.
+       Pos%Sy( 1 ) = 0.
+    END IF
+
+    RETURN
+  END SUBROUTINE ReadSxSy
+
+  !********************************************************************!
+
+  SUBROUTINE ReadSzRz( zMin, zMax )
+
+    ! Reads source and receiver z-coordinates (depths)
+    ! zMin and zMax are limits for those depths; sources and receivers are 
+    ! shifted to be within those limits
+
+    REAL,    INTENT( IN ) :: zMin, zMax
+
+    CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm' )
+    CALL ReadVector( Pos%NRz, Pos%Rz, 'Receiver depths, Rz', 'm' )
+
+    IF ( ALLOCATED( Pos%ws ) ) DEALLOCATE( Pos%ws, Pos%iSz )
+    ALLOCATE( Pos%ws( Pos%NSz ), Pos%iSz( Pos%NSz ), Stat = IAllocStat )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadSzRz', 'Too many sources'  )
+
+    IF ( ALLOCATED( Pos%wr ) ) DEALLOCATE( Pos%wr, Pos%iRz )
+    ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadSzRz', 'Too many receivers'  )
+
+    ! *** Check for Sz/Rz in water column ***
+
+    IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
+       WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
+                           'near the top bdry has been moved down'
+    END IF
+
+    IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
+       WHERE( Pos%Sz > zMax ) Pos%Sz = zMax
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source below or too ',&
+                           'near the bottom bdry has been moved up'
+    END IF
+
+    IF ( ANY( Pos%Rz( 1 : Pos%NRz ) < zMin ) ) THEN
+       WHERE( Pos%Rz < zMin ) Pos%Rz = zMin
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver above or too ',&
+           'near the top bdry has been moved down'
+    END IF
+
+    IF ( ANY( Pos%Rz( 1 : Pos%NRz ) > zMax ) ) THEN
+       WHERE( Pos%Rz > zMax ) Pos%Rz = zMax
+       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too ',&
+                           'near the bottom bdry has been moved up'
+    END IF
+
+    RETURN
+  END SUBROUTINE ReadSzRz
+
+  !********************************************************************!
+
+  SUBROUTINE ReadRcvrRanges
+
+    CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km' )
+
+    ! calculate range spacing
+    Pos%delta_r = 0.0
+    IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr - 1 )
+
+    IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
+       CALL ERROUT( 'ReadRcvrRanges', &
+           'Receiver ranges are not monotonically increasing' )
+    END IF 
+ 
+    RETURN
+  END SUBROUTINE ReadRcvrRanges
+
+  !********************************************************************!
+
+  SUBROUTINE ReadRcvrBearings   ! for 3D bellhop
+
+    CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
+        'degrees' )
+
+    ! full 360-degree sweep? remove duplicate angle
+    IF ( Pos%Ntheta > 1 ) THEN
+       IF ( ABS( MOD( Pos%theta( Pos%Ntheta ) - Pos%theta( 1 ), 360.0 ) ) &
+           < 10.0 * TINY( 1.0D0 ) ) &
+          Pos%Ntheta = Pos%Ntheta - 1
+    END IF
+
+    ! calculate angular spacing
+    Pos%Delta_theta = 0.0
+    IF ( Pos%Ntheta /= 1 ) Pos%Delta_theta = Pos%theta( Pos%Ntheta ) &
+                                           - Pos%theta( Pos%Ntheta - 1 )
+
+    IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
+       CALL ERROUT( 'ReadRcvrBearings', &
+           'Receiver bearings are not monotonically increasing' )
+    END IF 
+ 
+    RETURN
+  END SUBROUTINE ReadRcvrBearings
+
+  !********************************************************************!
+
+  SUBROUTINE ReadVector( Nx, x, Description, Units )
+
+    ! Read a vector x
+    ! Description is something like 'receiver ranges'
+    ! Units       is something like 'km'
+ 
+    INTEGER,                        INTENT( OUT ) :: Nx
+    REAL (KIND=_RL90), ALLOCATABLE, INTENT( OUT ) :: x( : )
+    CHARACTER,                      INTENT( IN  ) :: Description*( * ), &
+                                                     Units*( * )
+    INTEGER :: ix
+   
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, * ) '__________________________________________________', &
+                        '________________________'
+    WRITE( PRTFile, * )
+
+    READ(  ENVFile, * ) Nx
+    WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
+
+    IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
+                                'must be positive'  )
+
+    IF ( ALLOCATED( x ) ) DEALLOCATE( x )
+    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
+    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
+                                        Description )
+
+    WRITE( PRTFile, * ) Description // ' (' // Units // ')'
+    x( 3 ) = -999.9
+    READ( ENVFile, * ) x( 1 : Nx )
+
+    CALL SubTab( x, Nx )
+    CALL Sort(   x, Nx )
+
+    WRITE( PRTFile, "( 5G14.6 )" ) ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
+    IF ( Nx > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', x( Nx )
+
+    WRITE( PRTFile, * )
+
+    ! Vectors in km should be converted to m for internal use
+    IF ( LEN_TRIM( Units ) >= 2 ) THEN
+       IF ( Units( 1 : 2 ) == 'km' ) x = 1000.0 * x
+    END IF
+
+  END SUBROUTINE ReadVector
+
+END MODULE srPositions
