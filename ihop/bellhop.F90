@@ -51,7 +51,7 @@ MODULE BELLHOP
   INTEGER              :: iostat, iAllocStat  
 
 CONTAINS
-SUBROUTINE BELLHOP_INIT
+SUBROUTINE IHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: jj 
 ! added locally previously read in from unknown mod ... IEsco2022
@@ -175,7 +175,7 @@ SUBROUTINE BELLHOP_INIT
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
   CALL BellhopCore
-END SUBROUTINE BELLHOP_INIT
+END SUBROUTINE IHOP_INIT
 
 ! **********************************************************************!
 SUBROUTINE BellhopCore
@@ -343,16 +343,6 @@ SUBROUTINE BellhopCore
                                      Beam%rLoop, Beam%epsMultiplier )
 
               SELECT CASE ( Beam%Type( 1 : 1 ) )
-              CASE ( 'R' )
-                 iBeamWindow2 = Beam%iBeamWindow**2
-                 RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyRayCen( U, epsilon, Angles%alpha(ialpha),& 
-                                              iBeamWindow2, RadMax )
-              CASE ( 'C' )
-                 iBeamWindow2 = Beam%iBeamWindow**2
-                 RadMax       = 50 * c / freq  ! 50 wavelength max radius
-                 CALL InfluenceCervenyCart( U, epsilon, Angles%alpha( ialpha ),& 
-                                            iBeamWindow2, RadMax )
               CASE ( 'g' )
                  CALL InfluenceGeoHatRayCen( U, Angles%alpha( ialpha ), &
                                              Angles%Dalpha )
