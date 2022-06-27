@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE bellhopMod
+MODULE iHopMod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -72,4 +72,4 @@ MODULE bellhopMod
   END TYPE ray3DPt
   TYPE( ray3DPt )          :: ray3D( MaxN )
 
-END MODULE bellhopMod
+END MODULE iHopMod
