@@ -43,8 +43,8 @@ MODULE BELLHOP
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
   USE AttenMod,     only:   CRCI
-  USE BeamPattern
-  USE WriteRay,     only:   WriteRay2D
+  USE beamPattern
+  USE writeRay,     only:   WriteRay2D
 
   IMPLICIT NONE
   ! PRIVATE

@@ -10,7 +10,7 @@ MODULE bdrymod
 
   USE monotonicMod, only: monotonic
   USE fatalError,   only: ERROUT
-  USE constantsMod, only: PRTFile, ATIFile, BTYFile
+  USE iHopParams,   only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
   PRIVATE

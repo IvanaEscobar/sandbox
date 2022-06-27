@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE beampattern
+MODULE beamPattern
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -71,4 +71,4 @@ CONTAINS
 
   END SUBROUTINE ReadPat
 
-END MODULE beampattern
+END MODULE beamPattern
