@@ -16,7 +16,7 @@ MODULE influence
 ! sspMod used to construct image beams in the Cerveny style beam routines
   USE SSPMod,       only: EvaluateSSP, Bdry 
   USE arrMod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
-  USE WriteRay,     only: WriteRay2D
+  USE writeRay,     only: WriteRay2D
 
   IMPLICIT NONE
   PRIVATE
