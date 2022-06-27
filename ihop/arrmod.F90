@@ -112,7 +112,7 @@ CONTAINS
     ! ASCII output file
 
     INTEGER,           INTENT( IN ) :: Nrz, Nr      ! NRz per range, NRr
-    REAL,              INTENT( IN ) :: r( Nr )      ! Rr
+    REAL (KIND=_RL90), INTENT( IN ) :: r( Nr )      ! Rr
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType   ! Beam%RunType(4:4)
     INTEGER             :: ir, iz, iArr
     REAL (KIND=_RL90)   :: factor
@@ -160,7 +160,7 @@ CONTAINS
     ! Binary output file
 
     INTEGER,           INTENT( IN ) :: Nrz, Nr      ! NRz per range, NRr
-    REAL,              INTENT( IN ) :: r( Nr )      ! Rr
+    REAL (KIND=_RL90), INTENT( IN ) :: r( Nr )      ! Rr
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType   ! Beam%RunType(4:4)
     INTEGER                 :: ir, iz, iArr
     REAL     (KIND=_RL90)   :: factor

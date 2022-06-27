@@ -63,7 +63,7 @@ CONTAINS
     ! c     real      part of sound speed
     ! alpha imaginary part of sound speed
 
-    USE iHopMod,    only: pi
+    USE iHopParams,    only: pi
 
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit

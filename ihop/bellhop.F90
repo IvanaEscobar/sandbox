@@ -24,25 +24,24 @@ MODULE BELLHOP
   ! Systems Center
   
   USE iHopMod       ! Added to get title, freq, Beam
-  USE iHopParams,   only:   pi, i, DegRad, RadDeg, PRTFile, SHDFile,           &
+  USE iHopParams,   only:   pi, i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
                             OpenOutputFiles
   USE fatalError,   only:   ERROUT
-  USE AngleMod,     only:   Angles, ialpha
+  USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
   USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
-  USE BdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
+  USE bdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
                             atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
                             IsegTop, IsegBot, rTopSeg, rBotSeg
-  USE RefCoef,      only:   ReadReflectionCoefficient,                         &
+  USE refCoef,      only:   ReadReflectionCoefficient,                         &
                             InterpolateReflectionCoefficient, ReflectionCoef,  &
                             RTop, RBot, NBotPts, NTopPts
-  USE Influence,    only:   InfluenceCervenyRayCen, InfluenceCervenyCart,      &
-                            InfluenceGeoHatRayCen, InfluenceSGB,               &
+  USE influence,    only:   InfluenceGeoHatRayCen, InfluenceSGB,               &
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
-  USE AttenMod,     only:   CRCI
+  USE attenMod,     only:   CRCI
   USE beamPattern
   USE writeRay,     only:   WriteRay2D
 
@@ -276,7 +275,7 @@ SUBROUTINE BellhopCore
   WRITE( PRTFile, * )
 
   SourceDepth: DO is = 1, Pos%NSz
-     xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate, assuming source @ r=0
+     xs = [ zero, Pos%Sz( is ) ]   ! source coordinate, assuming source @ r=0
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' ) ! TL calculation, zero out pressure matrix
@@ -602,7 +601,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         IF ( atiType == 'C' ) THEN
            ! proportional distance along segment
            sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) &
-                     / Top( IsegTop )%LeIS 
+                     / Top( IsegTop )%Len
            ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet &
                      + sss * Top( 1 + IsegTop )%Nodet
            TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &

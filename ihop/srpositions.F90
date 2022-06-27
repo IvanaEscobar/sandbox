@@ -33,11 +33,12 @@ MODULE srPositions
   TYPE Position
      ! NOTE: use ReadVector subroutine to see if there are more than 1 source
      INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
-     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )                 ! indices for interpolation of source and receiver weights
-     REAL                 :: Delta_r, Delta_theta               ! receiver spacing
-     REAL,    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
-     REAL,    ALLOCATABLE :: Rr( : ), Rz( : ), ws( : ), wr( : ) ! Receiver r, z coordinates and weights for interpolation
-     REAL,    ALLOCATABLE :: theta( : )                         ! Receiver bearings
+     INTEGER, ALLOCATABLE :: iSz( : ), iRz( : ) ! indices for interpolation of source and receiver weights
+     REAL (KIND=_RL90), ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : ), & ! Source coord
+                                       Rr( : ), Rz( : ), & ! receiver coord
+                                       ws( : ), wr( : )  ! Receiver weights for interpolation
+     REAL (KIND=_RL90), ALLOCATABLE :: theta( : )        ! Receiver 3d bearings
+     REAL (KIND=_RL90)              :: Delta_r, Delta_theta ! receiver spacing
   END TYPE Position
 
   TYPE ( Position ) :: Pos ! structure containing source and receiver positions
