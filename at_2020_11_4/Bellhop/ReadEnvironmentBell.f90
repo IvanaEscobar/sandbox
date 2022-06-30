@@ -53,7 +53,7 @@ CONTAINS
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) freq
 
     READ(  ENVFile, * ) NMedia
-    WRITE( PRTFile, * ) 'Dummy parameter NMedia = ', NMedia
+    WRITE( PRTFile, * ) 'Unused parameter NMedia = ', NMedia
     IF ( NMedia /= 1 ) CALL ERROUT( 'READIN', &
          'Only one medium or layer is allowed in BELLHOP; sediment layers must be handled using a reflection coefficient' )
 

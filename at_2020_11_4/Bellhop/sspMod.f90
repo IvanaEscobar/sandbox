@@ -379,6 +379,7 @@ END SUBROUTINE EvaluateSSP2D
   SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
     ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
+    ! IEsco22: Assuming an SSPFile is required. Missing defensive check for SSPFile
 
     INTEGER,           PARAMETER      :: SSPFile = 40
     REAL      (KIND=8), INTENT( IN  ) :: freq
@@ -410,6 +411,7 @@ END SUBROUTINE EvaluateSSP2D
        ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts - 1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
        IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Quad', 'Insufficient memory to store SSP'  )
 
+       ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
        READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Profile ranges (km):'
@@ -881,7 +883,7 @@ END SUBROUTINE Analytic3D
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, SSP%AttenUnit, betaPowerLaw, fT )
-       SSP%rho( iz ) = rhoR ! Used in BELLHOP??
+       SSP%rho( iz ) = rhoR ! IEsco22: Used in BELLHOP?? Not really for eigenray calc
 
        ! verify that the depths are monotone increasing
        IF ( iz > 1 ) THEN

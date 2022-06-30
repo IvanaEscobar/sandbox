@@ -45,7 +45,6 @@ PROGRAM BELLHOP
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', STATUS = 'UNKNOWN', IOSTAT = iostat )
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
-
   IF ( Inline ) THEN
      ! NPts, Sigma not used by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'

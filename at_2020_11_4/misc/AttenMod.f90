@@ -49,7 +49,7 @@ CONTAINS
     REAL     (KIND=8), INTENT( IN )  :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN )  :: AttenUnit
     REAL     (KIND=8)                :: f2, omega, alphaT, Thorp, a, FG
-    COMPLEX  (KIND=8)                :: CRCI ! Shouldn't this have INTENT( OUT )??
+    COMPLEX  (KIND=8)                :: CRCI ! IEsco22: Shouldn't this have INTENT( OUT )??
 
     omega = 2.0 * pi * freq
 
@@ -111,7 +111,7 @@ CONTAINS
 
     ! Convert Nepers/m to equivalent imaginary sound speed 
     alphaT = alphaT * c * c / omega
-    CRCI   = CMPLX( c, alphaT, KIND=8 )
+    CRCI   = CMPLX( c, alphaT, KIND=8 ) !IEsco22: alphaT is calc'd to 0 at initialization for eigenray calcs I use
 
     IF ( alphaT > c ) THEN
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI
