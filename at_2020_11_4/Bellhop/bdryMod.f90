@@ -167,7 +167,7 @@ CONTAINS
 
        WRITE( PRTFile, * )
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
-       CASE ( 'S', '' )
+       CASE ( '', 'S' )
           WRITE( PRTFile, * ) 'Short format (bathymetry only)'
           WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
        CASE ( 'L' )
@@ -201,13 +201,14 @@ CONTAINS
              CALL ERROUT( 'BELLHOP:ReadBTY', 'Bathymetry drops below lowest point in the sound speed profile' )
           END IF
  
-       END DO btypt
+       END DO btyPt
 
        CLOSE( BTYFile )
 
        Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
+       WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
        ALLOCATE( Bot( 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', 'Insufficient memory for bathymetry data'  )
        Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]

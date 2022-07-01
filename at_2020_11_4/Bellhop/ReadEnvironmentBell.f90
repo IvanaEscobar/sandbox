@@ -104,12 +104,10 @@ CONTAINS
     CALL TopBot( freq, AttenUnit, Bdry%Bot%HS )
 
     ! *** source and receiver locations and run type ***
-
     CALL ReadSxSy( ThreeD )     ! Read source/receiver x-y coordinates
 
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
-    ! CALL ReadSzRz( ZMin + 100 * SPACING( ZMin ), ZMax - 100 * SPACING( ZMax ) )   ! not sure why I had this
     CALL ReadSzRz( ZMin, ZMax )
     CALL ReadRcvrRanges
     IF ( ThreeD ) CALL ReadRcvrBearings
