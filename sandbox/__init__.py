@@ -1,5 +1,6 @@
 from .utils import (
-        testFunction
+        testFunction,
+        loadMatFile
         )
 
 __all__ = ['utils']
