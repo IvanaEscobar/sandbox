@@ -1,13 +1,50 @@
+### Makefile from top level directory ###
+export FC=gfortran
+export F90C=${FC}
 
-EXECUTABLES = bellhop.exe bellhop3d.exe
+export FFLAGS= -march=native -Bstatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation         -std=gnu  -O3 -ffast-math -funroll-all-loops -fomit-frame-pointer -mtune=native
+FFLAGS+= -frecursive
 
-BELLHOP_OBJECTS   = angleMod.o ArrMod.o bdryMod.o   bellhopMod.o sspMod.o ReflectMod.o                       WriteRay.o              influence.o               Step.o   ReadEnvironmentBell.o bellhop.o ../misc/libmisc.a
-BELLHOP_LIBS = -L../misc -lmisc
+# MITgcm on Mac:
+#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftre    e-vectorize
+# MITgcm on Sverdrup
+FFLAGS+= -fconvert=big-endian -Wunused -Wuninitialized -ftree-vectorize
+F90FLAGS=${FFLAGS}
 
-BELLHOP3D_OBJECTS = angleMod.o ArrMod.o bdry3DMod.o bellhopMod.o sspMod.o ReflectMod.o Reflect3DMod.o Cone.o WriteRay.o RayNormals.o influence.o influence3D.o Step3DMod.o ReadEnvironmentBell.o bellhop3D.o ../misc/libmisc.a
-BELLHOP3D_LIBS = -L../misc -lmisc
+ifeq (${FC}, gfortran)
+	# Code Coverage with gcov and lcov
+	FFLAGS+= --coverage
+	F90FLAGS+= --coverage
+
+	## On Mac
+	#LCOV=/usr/local/bin/lcov
+	#LCOV_DIR=${PWD}/coverage
+	#GCOV=/usr/local/bin/gcov-11
+	# On Sverdrup
+	LCOV=/usr/bin/lcov
+	LCOV_DIR=${PWD}/coverage
+	GCOV=/usr/bin/gcov
+endif
+
+# ______________________________________________________________________________
+
+EXECUTABLES = bellhop.exe 
+
+MISC_OBJECTS 	= 	FatalError.o 		AttenMod.o 		beampattern.o \
+					MathConstants.o 	monotonicMod.o 	pchipMod.o \
+					PolyMod.o 			RefCoef.o 		RWSHDFile.o \
+					SortMod.o 			SourceReceiverPositions.o \
+					splinec.o 			subtabulate.o
+TSLIB_OBJECTS 	= 	bandpassc.o			cans.o			cfft.o hilbert.o\
+					preenv.o			sourceMod.o
+BELLHOP_OBJECTS	=	angleMod.o			ArrMod.o 		bdryMod.o \
+					bellhopMod.o 		sspMod.o 		ReflectMod.o \
+					WriteRay.o 			influence.o 	Step.o \
+					ReadEnvironmentBell.o bellhop.o	
+BELLHOP_LIBS =
 
 all: $(EXECUTABLES)
+	@echo "*************"
 	@echo "Bellhop built"
 	@echo "*************"
 	@echo " "
@@ -18,7 +55,33 @@ install: all
 	done
 
 clean:
+	-rm -f bin/*.exe
+	find . -name '*.dSYM' -exec rm -r {} +
+	find . -name '*.png'  -exec rm -r {} +
+	find . -name '*.eps'  -exec rm -r {} +
+	find . -name '*.mod'  -exec rm -r {} +
+	find . -name '*.grn'  -exec rm -r {} +
+	find . -name '*.shd'  -exec rm -r {} +
+	find . -name '*.shd.mat'  -exec rm -r {} +
+	find . -name '*.prt'  -exec rm -r {} +
+	#(cd ../tests;  make -k -i clean)
 	-rm -f *.o *.mod *.exe *_genmod.f90
+
+### COVERAGE TARGETS ###
+cov:
+	$(GCOV) *.f90
+
+lcov-report:
+	mkdir -p $(LCOV_DIR)
+	$(LCOV) --compat-libtool --capture --directory . --output-file $(LCOV_DIR)/coverage.info --gcov-tool $(GCOV)
+	genhtml -t "ihop" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
+	open $(LCOV_DIR)/html/index.html
+
+cov-reset:
+	find ../ -name '*.gcda'  -exec rm -r {} +
+	find ../ -name '*.gcno'  -exec rm -r {} +
+
+cleanall: clean cov-reset
 
 # Declare implicit rules (for make utilities with missing or broken build rules)
 
@@ -35,11 +98,62 @@ clean:
 
 # Declare explicit dependencies (and explicit build rules as needed)
 
-bellhop.exe: $(BELLHOP_OBJECTS)
-	$(FC) -o $@ $(FFLAGS) $(BELLHOP_OBJECTS) $(BELLHOP_LIBS)
+###########################
+### from misc directory ###
+###########################
+AttenMod.o: AttenMod.f90 MathConstants.mod
+	$(FC) -c $(FFLAGS) $<
 
-bellhop3d.exe: $(BELLHOP3D_OBJECTS)
-	$(FC) -o $@ $(FFLAGS) $(BELLHOP3D_OBJECTS) $(BELLHOP3D_LIBS)
+beampattern.o beampattern.mod: beampattern.f90 fatalerror.mod
+	$(FC) -c $(FFLAGS) $<
+
+FatalError.o fatalerror.mod: FatalError.f90
+
+MathConstants.o mathconstants.mod: MathConstants.f90
+	$(FC) -c $(FFLAGS) $<
+
+monotonicMod.o monotonicmod.mod: monotonicMod.f90
+	$(FC) -c $(FFLAGS) $<
+
+pchipMod.o pchipmod.mod: pchipMod.f90
+	$(FC) -c $(FFLAGS) $<
+
+PolyMod.o polymod.mod: PolyMod.f90
+	$(FC) -c $(FFLAGS) $<
+
+RefCoef.o refcoef.mod: RefCoef.f90 polymod.mod
+	$(FC) -c $(FFLAGS) $<
+
+RWSHDFile.o: RWSHDFile.f90 sourcereceiverpositions.mod
+
+SortMod.o sortmod.mod: SortMod.f90
+	$(FC) -c $(FFLAGS) $<
+
+SourceReceiverPositions.o sourcereceiverpositions.mod: SourceReceiverPositions.f90 monotonicmod.mod sortmod.mod subtabulate.mod
+	$(FC) -c $(FFLAGS) $<
+
+splinec.o: splinec.f90
+
+subtabulate.o subtabulate.mod: subtabulate.f90
+	$(FC) -c $(FFLAGS) $<
+
+############################
+### from tslib directory ###
+############################
+bandpassc.o: bandpassc.f90
+cans.o: cans.f90
+cfft.o: cfft.f90
+hilbert.o: hilbert.f90
+preenv.o: preenv.f90
+
+sourceMod.o sourcemod.mod: sourceMod.f90
+	$(FC) -c $(FFLAGS) $<
+
+##############################
+### from bellhop directory ###
+##############################
+bellhop.exe: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
+	$(FC) -o $@ $(FFLAGS) $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS) $(BELLHOP_LIBS)
 
 angleMod.o anglemod.mod: angleMod.f90
 	$(FC) -c $(FFLAGS) $< 
@@ -48,9 +162,6 @@ ArrMod.o arrmod.mod: ArrMod.f90
 	$(FC) -c $(FFLAGS) $< 
 
 bdryMod.o bdrymod.mod: bdryMod.f90
-	$(FC) -c $(FFLAGS) $< 
-
-bdry3DMod.o bdry3dmod.mod: bdry3DMod.f90
 	$(FC) -c $(FFLAGS) $< 
 
 bellhopMod.o bellhopmod.mod: bellhopMod.f90
@@ -62,9 +173,6 @@ Cone.o cone.mod: Cone.f90
 influence.o influence.mod: influence.f90
 	$(FC) -c $(FFLAGS) $< 
 
-influence3D.o influence3d.mod: influence3D.f90
-	$(FC) -c $(FFLAGS) $< 
-
 RayNormals.o raynormals.mod: RayNormals.f90
 	$(FC) -c $(FFLAGS) $<
 
@@ -74,39 +182,13 @@ ReadEnvironmentBell.o readenvironmentbell.mod: ReadEnvironmentBell.f90
 ReflectMod.o   reflectmod.mod:   ReflectMod.f90   Cone.o
 	$(FC) -c $(FFLAGS) $<
 
-Reflect3DMod.o reflect3dmod.mod: Reflect3DMod.f90 Cone.o
-	$(FC) -c $(FFLAGS) $<
-
 sspMod.o sspmod.mod: sspMod.f90
 	$(FC) -c $(FFLAGS) $< 
 
 Step.o step.mod: Step.f90
 	$(FC) -c $(FFLAGS) $<
 
-Step3DMod.o step3dmod.mod: Step3DMod.f90
-	$(FC) -c $(FFLAGS) $<
-
 WriteRay.o writeray.mod: WriteRay.f90
 	$(FC) -c $(FFLAGS) $<
 
 bellhop.o:   arrmod.mod anglemod.mod bdrymod.mod   readenvironmentbell.mod bellhopmod.mod sspmod.mod reflectmod.mod                  writeray.mod raynormals.mod influence.mod   step.mod      bellhop.f90
-
-bellhop3D.o: arrmod.mod anglemod.mod bdry3dmod.mod readenvironmentbell.mod bellhopmod.mod sspmod.mod reflectmod.mod reflect3dmod.mod writeray.mod raynormals.mod influence3d.mod step3dmod.mod bellhop3D.f90
-
-
-## COVERAGE TARGETS (on Mac)
-LCOV=/usr/local/bin/lcov
-LCOV_DIR=${PWD}/coverage
-GCOV=/usr/local/bin/gcov-11
-
-cov:
-	$(GCOV) *.f90
-
-lcov-report:
-	mkdir -p $(LCOV_DIR)
-	$(LCOV) --compat-libtool --capture --directory . --output-file $(LCOV_DIR)/coverage.info --gcov-tool $(GCOV)
-	genhtml -t "ihop" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
-	open $(LCOV_DIR)/html/index.html
-
-lcov-reset:
-	rm -rf *.gcda *.gcov

@@ -158,10 +158,6 @@ all:
 	(cd misc;	make -k all)
 	(cd tslib;	make -k all)
 	(cd Bellhop;	make -k all)
-#	(cd Kraken;	make -k all)
-#	(cd KrakenField;	make -k all)
-#	# (cd Krakel;	make -k all)
-#	(cd Scooter;	make -k all)
 	@echo " "
 	@echo "***********************************"
 	@echo "***** Acoustics Toolbox built *****"
@@ -171,10 +167,6 @@ install:
 	(cd misc;	make -k all)
 	(cd tslib;	make -k all)
 	(cd Bellhop;	make -k install)
-#	(cd Kraken;	make -k install)
-#	(cd KrakenField;        make -k install)
-#	# (cd Krakel;	make -k install)
-#	(cd Scooter;	make -k install)
 	@echo " "
 	@echo "***************************************"
 	@echo "***** Acoustics Toolbox installed *****"
@@ -193,10 +185,6 @@ clean:
 	(cd misc;	make -k -i clean)
 	(cd tslib;	make -k -i clean)
 	(cd Bellhop;	make -k -i clean)
-#	(cd Kraken;	make -k -i clean)
-#	(cd KrakenField;	make -k -i clean)
-#	(cd Krakel;	make -k -i clean)
-#	(cd Scooter;	make -k -i clean)
 	(cd tests;	make -k -i clean)
 
 cleancov: 
