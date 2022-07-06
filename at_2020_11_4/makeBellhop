@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd Bellhop
+
+if [[ "$HOST" == "sverdrup"* ]] ; then
+    ln -s ../optfiles/Makefile_ifort Makefile
+elif [[ "$USER" == "ivanaescobar" ]] ; then
+    ln -s ../optfiles/Makefile_gfortran Makefile
+fi
+
+make all
