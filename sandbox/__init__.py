@@ -1,6 +1,7 @@
 from .utils import (
-        testFunction,
-        loadMatFile
+        loadMatFile,
+        degMinSec2decimal,
+        wgs84Distance
         )
 
 __all__ = ['utils']
