@@ -271,7 +271,7 @@ SUBROUTINE BellhopCore
            ! show progress ...
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) ialpha, SrcDeclAngle
-              CALL FLUSH( PRTFile )
+              FLUSH( PRTFile )
            END IF
 
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
@@ -330,7 +330,7 @@ SUBROUTINE BellhopCore
      CLOSE( SHDFile )
   CASE ( 'A', 'a' )           ! arrivals calculation
      CLOSE( ARRFile )
-  CASE ( 'R' )                ! ray trace
+  CASE ( 'R', 'E' )           ! ray trace
      CLOSE( RAYFile )
   END SELECT
 
@@ -465,7 +465,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      Bdry%Bot%HS%rho = Bot( IsegBot )%HS%rho
   END IF
 
-  ! Trace the beam (note that Reflect alters the step index is)
+  ! Trace the beam (note that Reflect alters the step index, is)
   is = 0
   CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop, dEndBot,  &
        Top( IsegTop )%n, Bot( IsegBot )%n, DistBegTop, DistBegBot )
