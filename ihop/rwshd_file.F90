@@ -8,7 +8,7 @@ MODULE rwshd_file
   ! routines to read or write the SHDFile
 
   USE srPositions,  only: Pos, Nfreq, freqVec
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
 
   IMPLICIT NONE
   PRIVATE

@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE fatalError
+MODULE ihop_fatalError
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -44,4 +44,4 @@ MODULE fatalError
 
   END SUBROUTINE ERROUT
 
-END MODULE fatalError
+END MODULE ihop_fatalError

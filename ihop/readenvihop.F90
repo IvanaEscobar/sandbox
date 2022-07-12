@@ -13,7 +13,7 @@ MODULE readEnviHop
   USE iHopMod
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
   IMPLICIT NONE

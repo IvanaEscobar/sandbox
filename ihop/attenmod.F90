@@ -10,7 +10,7 @@ MODULE attenMod
   ! Routines to convert a sound speed and attenuation in user units to a complex sound speed
   ! Includes a formula for volume attenuation
 
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   IMPLICIT NONE
   PRIVATE
 

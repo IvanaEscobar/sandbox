@@ -14,7 +14,7 @@ MODULE sspMod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE splinec,      only: cspline, splineall
   USE iHopParams,   only: PRTFile, ENVFile, SSPFile
 

@@ -8,7 +8,7 @@ MODULE beamPattern
 
   ! Loads a source beam pattern
 
-  USE fatalError, only: ERROUT
+  USE ihop_fatalError, only: ERROUT
   IMPLICIT NONE
   PRIVATE
 

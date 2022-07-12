@@ -28,7 +28,7 @@ MODULE BELLHOP
                             ARRFile, RAYFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
                             OpenOutputFiles
-  USE fatalError,   only:   ERROUT
+  USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
   USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
