@@ -33,8 +33,8 @@ C     iUnit      :: Work variable for IO unit number
       INTEGER iUnit
 
       NAMELIST /IHOP_PARM01/
-     &      IHOP_bellOn,
-     &      IHOP_MNC
+     &      IHOP_bellOn
+C     &      IHOP_MNC
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
@@ -52,11 +52,6 @@ C     print a (weak) warning if data.ihop is found
 
 C--   Default values for IHOP
       IHOP_bellOn   =.TRUE.
-#ifdef ALLOW_MNC
-      IHOP_MNC      = useMNC
-#else
-      IHOP_MNC      = .FALSE.
-#endif /* ALLOW_MNC */
 
 C     Open and read data.ihop file
       WRITE(msgBuf,'(A)') 'IHOP_READPARMS: opening data.ihop'
@@ -81,13 +76,13 @@ C     Close the open data file
       CLOSE(iUnit,STATUS='DELETE')
 #endif /* SINGLE_DISK_IO */
 
-C     Make sure that we locally honor the global MNC on/off flag
-      IHOP_MNC = IHOP_MNC .AND. useMNC
-#ifndef ALLOW_MNC
-C     Fix to avoid running without getting any output:
-      IHOP_MNC = .FALSE.
-#endif
-      IHOP_MDSIO = (.NOT. IHOP_MNC) .OR. outputTypesInclusive
+CC     Make sure that we locally honor the global MNC on/off flag
+C      IHOP_MNC = IHOP_MNC .AND. useMNC
+C#ifndef ALLOW_MNC
+CC     Fix to avoid running without getting any output:
+C      IHOP_MNC = .FALSE.
+C#endif
+C      IHOP_MDSIO = (.NOT. IHOP_MNC) .OR. outputTypesInclusive
 
       _END_MASTER(myThid)
 C--   Everyone else must wait for the parameters to be loaded

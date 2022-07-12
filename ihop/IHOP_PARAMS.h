@@ -14,12 +14,12 @@ C     IHOP parameters
 C--   COMMON /IHOP_PARAMS_L/ IHOP logical-type parameters:
 C     IHOP_bellOn       :: true if bellhop driver needs to run
       LOGICAL IHOP_bellOn
-      LOGICAL 
-     &      IHOP_MNC, IHOP_MDSIO
+C      LOGICAL 
+C     &      IHOP_MNC, IHOP_MDSIO
 
       COMMON /IHOP_PARAMS_L/
-     &      IHOP_bellOn,
-     &      IHOP_MNC, IHOP_MDSIO
+     &      IHOP_bellOn
+C     &      IHOP_MNC, IHOP_MDSIO
 
 #ifdef IHOP_3D_STATE
 C     IHOP 3-dim. fields

@@ -25,48 +25,12 @@ CEOP
 
 #ifdef ALLOW_IHOP
 C     !LOCAL VARIABLES:
-C     === Local variables ===
-C     msgBuf     :: Informational/error message buffer
-C     iUnit      :: Work variable for IO unit number
-      CHARACTER*(MAX_LEN_MBUF) msgBuf
-      INTEGER iUnit
-      INTEGER axes(4)
-      INTEGER i,j,k,bi,bj
-      _RL ihop_test
 
-      namelist / ihop_nml /
-     &   IHOP_bellOn
-
-      _BEGIN_MASTER(myThid)
-      ihop_test = 1.3
-
-      IHOP_bellOn   =.false.
-      WRITE(msgBuf,'(A)') 'IHOP_INIT_FIXED: opening data.ihop'
-      CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
-     &                    SQUEEZE_RIGHT , 1)
-      CALL OPEN_COPY_DATA_FILE(
-     I                     'data.ihop', 'IHOP_INIT_FIXED',
-     O                     iUnit,
-     I                     myThid )
-
-C      Read parameters from open data file
-      READ(UNIT=iUnit,NML=ihop_nml)
-      WRITE(msgBuf,'(A)')
-     &     'IHOP_INIT_FIXED: finished reading data.ihop'
-      CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
-     &                    SQUEEZE_RIGHT , 1)
-C     Close the open data file
-#ifdef SINGLE_DISK_IO
-      CLOSE(iUnit)
-#else
-      CLOSE(iUnit,STATUS='DELETE')
-#endif /* SINGLE_DISK_IO */
-
-      _END_MASTER(myThid)
-      _BARRIER
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
 #ifdef ALLOW_MNC
       IF (useMNC) THEN
+C       Initialize the MNC variable types for IHOP
         CALL IHOP_MNC_INIT( myThid )
       ENDIF
 #endif /* ALLOW_MNC */
@@ -76,7 +40,6 @@ C     Close the open data file
         CALL IHOP_DIAGNOSTICS_INIT( myThid )
       ENDIF
 #endif /* ALLOW_DIAGNOSTICS */
-
 
 #endif /* ALLOW_IHOP */
       RETURN
