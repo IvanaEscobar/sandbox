@@ -62,9 +62,9 @@ CEOP
 
         lChar = ILNBLNK(suff)
         IF ( lChar.EQ.0 ) THEN
-          WRITE(fn,'(2A)') 'pickup_bellhop'
+          WRITE(fn,'(2A)') 'pickup_ihop'
         ELSE
-          WRITE(fn,'(2A)') 'pickup_bellhop.',suff(1:lChar)
+          WRITE(fn,'(2A)') 'pickup_ihop.',suff(1:lChar)
         ENDIF
         fp = precFloat64
         j  = 0

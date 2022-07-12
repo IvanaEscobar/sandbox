@@ -2,13 +2,13 @@
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 CBOP 0
-C !ROUTINE: IHOP_INIT_FIXED
+C     !ROUTINE: IHOP_INIT_FIXED
 
-C !INTERFACE:
+C     !INTERFACE:
       SUBROUTINE IHOP_INIT_FIXED( myThid )
 
 C     !DESCRIPTION:
-C     Initialize IHOP variables that are kept fixed during the run.
+C     Initialize IHOP constant
 
 C     !USES:
       IMPLICIT NONE
@@ -23,6 +23,7 @@ C     myThid ::  my Thread Id number
       INTEGER myThid
 CEOP
 
+#ifdef ALLOW_IHOP
 C     !LOCAL VARIABLES:
 C     === Local variables ===
 C     msgBuf     :: Informational/error message buffer
@@ -34,15 +35,12 @@ C     iUnit      :: Work variable for IO unit number
       _RL ihop_test
 
       namelist / ihop_nml /
-     &   bellOn, mixTS
+     &   IHOP_bellOn
 
+      _BEGIN_MASTER(myThid)
       ihop_test = 1.3
 
-      _BARRIER
-      _BEGIN_MASTER(myThid)
-      module_is_initialized =.false.
-      bellOn                =.false.
-      mixTS                 = 0.03
+      IHOP_bellOn   =.false.
       WRITE(msgBuf,'(A)') 'IHOP_INIT_FIXED: opening data.ihop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                    SQUEEZE_RIGHT , 1)
@@ -65,6 +63,7 @@ C     Close the open data file
 #endif /* SINGLE_DISK_IO */
 
       _END_MASTER(myThid)
+      _BARRIER
 
 #ifdef ALLOW_MNC
       IF (useMNC) THEN
@@ -76,7 +75,9 @@ C     Close the open data file
       IF ( useDiagnostics ) THEN
         CALL IHOP_DIAGNOSTICS_INIT( myThid )
       ENDIF
-#endif
+#endif /* ALLOW_DIAGNOSTICS */
 
+
+#endif /* ALLOW_IHOP */
       RETURN
       END

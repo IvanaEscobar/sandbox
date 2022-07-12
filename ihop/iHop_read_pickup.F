@@ -54,13 +54,13 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
        IF ( pickupSuff.EQ.' ' ) THEN
         IF ( rwSuffixType.EQ.0 ) THEN
-          WRITE(fn,'(A,I10.10)') 'pickup_bellhop.', myIter
+          WRITE(fn,'(A,I10.10)') 'pickup_ihop.', myIter
         ELSE
           CALL RW_GET_SUFFIX( suff, startTime, myIter, myThid )
-          WRITE(fn,'(A,A)') 'pickup_bellhop.', suff
+          WRITE(fn,'(A,A)') 'pickup_ihop.', suff
         ENDIF
        ELSE
-        WRITE(fn,'(A,A10)') 'pickup_bellhop.', pickupSuff
+        WRITE(fn,'(A,A10)') 'pickup_ihop.', pickupSuff
        ENDIF
        fp = precFloat64
 
@@ -181,14 +181,6 @@ C--    Update overlap regions:
 #ifdef IHOP_3D_STATE
         CALL EXCH_3D_RL( myPa_StatScal1, Nr, myThid )
         CALL EXCH_3D_RL( myPa_StatScal2, Nr, myThid )
-        IF ( myPa_StaV_Cgrid ) THEN
-         CALL EXCH_UV_3D_RL( myPa_StatVelU, myPa_StatVelV,
-     &                       .TRUE., Nr, myThid )
-        ELSE
-C-      Assume Agrid position:
-         CALL EXCH_UV_AGRID_3D_RL( myPa_StatVelU, myPa_StatVelV,
-     &                       .TRUE., Nr, myThid )
-        ENDIF
 #endif /* IHOP_3D_STATE */
 #ifdef IHOP_2D_STATE
         CALL EXCH_XY_RL( myPa_Surf1, myThid )
