@@ -31,30 +31,30 @@ C     iUnit      :: Work variable for IO unit number
       INTEGER iUnit
       INTEGER axes(4)
       INTEGER i,j,k,bi,bj
-      _RL bellhop_test
+      _RL ihop_test
 
-      namelist / bellhop_nml /
+      namelist / ihop_nml /
      &   bellOn, mixTS
 
-      bellhop_test = 1.3
+      ihop_test = 1.3
 
       _BARRIER
       _BEGIN_MASTER(myThid)
       module_is_initialized =.false.
       bellOn                =.false.
       mixTS                 = 0.03
-      WRITE(msgBuf,'(A)') 'IHOP_INIT_FIXED: opening data.bellhop'
+      WRITE(msgBuf,'(A)') 'IHOP_INIT_FIXED: opening data.ihop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                    SQUEEZE_RIGHT , 1)
       CALL OPEN_COPY_DATA_FILE(
-     I                     'data.bellhop', 'IHOP_INIT_FIXED',
+     I                     'data.ihop', 'IHOP_INIT_FIXED',
      O                     iUnit,
      I                     myThid )
 
 C      Read parameters from open data file
-      READ(UNIT=iUnit,NML=bellhop_nml)
+      READ(UNIT=iUnit,NML=ihop_nml)
       WRITE(msgBuf,'(A)')
-     &     'IHOP_INIT_FIXED: finished reading data.bellhop'
+     &     'IHOP_INIT_FIXED: finished reading data.ihop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                    SQUEEZE_RIGHT , 1)
 C     Close the open data file
