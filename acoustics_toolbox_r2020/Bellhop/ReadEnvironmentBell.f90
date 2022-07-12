@@ -62,7 +62,10 @@ CONTAINS
 
     ! *** Top BC ***
     ! If top BC is a acousto-elastic half-space: move to TopBot subroutine?
-    IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+    IF ( Bdry%Top%HS%BC == 'A' ) THEN
+       WRITE( PRTFile, "( //, '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
+       WRITE( PRTFile, "(     '     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)', / )" )
+    END IF
 
     CALL TopBot( freq, AttenUnit, Bdry%Top%HS )
 

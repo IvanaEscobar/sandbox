@@ -34,7 +34,6 @@ MODULE bellhopMod
      REAL    (KIND=8) :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
      COMPLEX (KIND=8) :: tau
   END TYPE ray2DPt
-
   TYPE( ray2DPt )     :: ray2D( MaxN )
 
   ! uncomment COMPLEX below if using paraxial beams !!!

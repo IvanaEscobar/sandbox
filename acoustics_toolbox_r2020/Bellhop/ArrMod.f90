@@ -4,9 +4,11 @@ MODULE ArrMod
 
   ! Variables for arrival information
   IMPLICIT NONE
+  REAL,      PARAMETER :: PhaseTol = 0.05  ! arrivals with essentially the same phase are grouped into one
   INTEGER, PARAMETER, PRIVATE :: ARRFile = 36
   INTEGER                     :: MaxNArr
   INTEGER, ALLOCATABLE        :: NArr( :, : ), NArr3D( :, :, : )
+  REAL         (KIND=4) :: factor = 1.0
 
   TYPE Arrival
      INTEGER :: NTopBnc, NBotBnc
@@ -20,10 +22,9 @@ CONTAINS
 
   SUBROUTINE AddArr( omega, id, ir, Amp, Phase, delay, SrcDeclAngle, RcvrDeclAngle, NumTopBnc, NumBotBnc )
 
-    ! ADDs the amplitude and delay for an ARRival into a matrix of same.
+    ! Adds the amplitude and delay for an ARRival into a matrix of same.
     ! Extra logic included to keep only the strongest arrivals.
 
-    REAL,      PARAMETER :: PhaseTol = 0.05  ! arrivals with essentially the same phase are grouped into one
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, id, ir
     REAL    ( KIND = 8 ), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, RcvrDeclAngle
     COMPLEX ( KIND = 8 ), INTENT( IN ) :: delay
@@ -94,7 +95,6 @@ CONTAINS
     REAL,              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
-    REAL     (KIND=8) :: factor
 
     WRITE( ARRFile, * ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
@@ -125,7 +125,7 @@ CONTAINS
                               Arr( id, ir, iArr )%NBotBnc
           END DO  ! next arrival
        END DO  ! next receiver depth
-    END DO  ! next range
+    END DO  ! next receiver range
 
     RETURN
   END SUBROUTINE WriteArrivalsASCII
@@ -141,7 +141,6 @@ CONTAINS
     REAL,              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
-    REAL     (KIND=8) :: factor
 
     WRITE( ARRFile ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
@@ -172,7 +171,7 @@ CONTAINS
 
           END DO   ! next arrival
        END DO   ! next receiver depth
-    END DO   ! next range
+    END DO   ! next receiver range
 
     RETURN
   END SUBROUTINE WriteArrivalsBinary
@@ -182,7 +181,7 @@ CONTAINS
   SUBROUTINE AddArr3D( omega, itheta, id, ir, Amp, Phase, delay, SrcDeclAngle, &
        SrcAzimAngle, RcvrDeclAngle, RcvrAzimAngle, NumTopBnc, NumBotBnc )
 
-    ! ADDs the amplitude and delay for an ARRival into a matrix of same.
+    ! Adds the amplitude and delay for an ARRival into a matrix of same.
     ! Extra logic included to keep only the strongest arrivals.
 
     REAL,                 PARAMETER    :: PhaseTol = 0.5  ! arrivals with essentially the same phase are grouped into one

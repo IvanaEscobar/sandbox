@@ -156,7 +156,6 @@ CONTAINS
           CALL ERROUT( 'ReadBTY', 'Unknown option for selecting bathymetry interpolation' )
        END SELECT BathyType
 
-
        READ(  BTYFile, * ) NbtyPts
        WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
 
@@ -167,7 +166,7 @@ CONTAINS
 
        WRITE( PRTFile, * )
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
-       CASE ( '', 'S' )
+       CASE ( 'S', '' )
           WRITE( PRTFile, * ) 'Short format (bathymetry only)'
           WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
        CASE ( 'L' )

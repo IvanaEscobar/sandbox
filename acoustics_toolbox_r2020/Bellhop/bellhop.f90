@@ -45,6 +45,7 @@ PROGRAM BELLHOP
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', STATUS = 'UNKNOWN', IOSTAT = iostat )
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
+
   IF ( Inline ) THEN
      ! NPts, Sigma not used by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'
@@ -83,7 +84,7 @@ PROGRAM BELLHOP
 
      Pos%Sz( 1 ) = 50.
      !Pos%Rz     = [ 0, 50, 100 ]
-     !Pos%r      = 1000. * [ 1, 2, 3, 4, 5 ]   ! meters !!!
+     !Pos%Rr     = 1000. * [ 1, 2, 3, 4, 5 ]   ! meters !!!
      Pos%Rz      = [ ( jj, jj = 1, Pos%NRz ) ]
      Pos%Rr      = 10. * [ ( jj, jj = 1 , Pos%NRr ) ]   ! meters !!!
 
@@ -324,6 +325,10 @@ SUBROUTINE BellhopCore
 
   END DO SourceDepth
 
+  ! Display run time
+  CALL CPU_TIME( Tstop )
+  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+
   ! close all files
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
   CASE ( 'C', 'S', 'I' )      ! TL calculation
@@ -334,14 +339,14 @@ SUBROUTINE BellhopCore
      CLOSE( RAYFile )
   END SELECT
 
-  ! Display run time
-  CALL CPU_TIME( Tstop )
-  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+  CLOSE( PRTFile )
+
 END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
 
-COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, Dalpha, rLoop, epsMultiplier )
+COMPLEX (KIND=8 ) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, &
+    Dalpha, rLoop, epsMultiplier )
 
   ! Picks the optimum value for epsilon
 
@@ -701,8 +706,8 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         g   = HS%rho
      ENDIF
 
-     Refl =  - ( rho * f - i * kz * g ) / ( rho * f + i * kz * g )   ! complex reflection coef.
-     
+     Refl =  - ( rho * f - i * kz * g ) / ( rho * f + i * kz * g )   ! complex reflection coef. 
+
      IF ( ABS( Refl ) < 1.0E-5 ) THEN   ! kill a ray that has lost its energy in reflection
         ray2D( is1 )%Amp   = 0.0
         ray2D( is1 )%Phase = ray2D( is )%Phase
@@ -752,9 +757,11 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
            ! that tracks crossing into new segments after the ray displacement.
            
            theta_bot = datan( tBdry( 2 ) / tBdry( 1 ))  ! bottom angle
-           ray2D( is1 )%x( 1 ) = ray2D( is1 )%x( 1 ) + real( delta ) * dcos( theta_bot )   ! range displacement
-           ray2D( is1 )%x( 2 ) = ray2D( is1 )%x( 2 ) + real( delta ) * dsin( theta_bot )   ! depth displacement
-           ray2D( is1 )%tau    = ray2D( is1 )%tau + pdelta             ! phase change
+           ray2D( is1 )%x( 1 ) = ray2D( is1 )%x( 1 ) + real( delta ) * &
+               dcos( theta_bot )   ! range displacement
+           ray2D( is1 )%x( 2 ) = ray2D( is1 )%x( 2 ) + real( delta ) * &
+               dsin( theta_bot )   ! depth displacement
+           ray2D( is1 )%tau    = ray2D( is1 )%tau + pdelta  ! phase change
            ray2D( is1 )%q      = ray2D( is1 )%q + sddelta * rddelta * si * c * ray2D( is )%p   ! beam-width change
         endif
 

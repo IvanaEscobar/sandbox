@@ -10,11 +10,12 @@ MODULE SourceReceiverPositions
   INTEGER, PARAMETER          :: Number_to_Echo = 10
   INTEGER, PRIVATE            :: IAllocStat     ! used to capture status after allocation
   INTEGER, PRIVATE, PARAMETER :: ENVFile = 5, PRTFile = 6   ! unit 5 is usually (not always) the ENVFile
-  INTEGER                     :: Nfreq          ! number of frequencies
+  INTEGER                     :: Nfreq = 1      ! number of frequencies
   REAL (KIND=8), ALLOCATABLE  :: freqVec( : )   ! frequency vector for braodband runs
 
   TYPE Position
-     INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
+     INTEGER              :: NSx = 1, NSy = 1, NSz = 1, &
+                             NRz = 1, NRr = 1, Ntheta = 1    ! number of x, y, z, r, theta coordinates
      REAL                 :: Delta_r, Delta_theta
      INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )
      REAL,    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
@@ -34,8 +35,6 @@ CONTAINS
     REAL (KIND=8), INTENT( IN ) :: freq0             ! Nominal or carrier frequency
     CHARACTER,     INTENT( IN ) :: BroadbandOption*( 1 )
     INTEGER                     :: ifreq
-
-    Nfreq = 1
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN

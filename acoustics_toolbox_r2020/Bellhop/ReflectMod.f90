@@ -3,7 +3,8 @@ MODULE ReflectMod
   USE bellhopMod
   IMPLICIT NONE
 CONTAINS
-  SUBROUTINE Reflect2D( is, HS, BotTop, nBdry3d, z_xx, z_xy, z_yy, kappa_xx, kappa_xy, kappa_yy, RefC, Npts, xs, tradial )
+  SUBROUTINE Reflect2D( is, HS, BotTop, nBdry3d, z_xx, z_xy, z_yy, kappa_xx, &
+          kappa_xy, kappa_yy, RefC, Npts, xs, tradial )
 
     !USE norms
     USE RefCoef
@@ -36,7 +37,6 @@ CONTAINS
     nBdry( 1 ) = DOT_PRODUCT( nBdry3d( 1 : 2 ), tradial )
     nBdry( 2 ) = nBdry3d( 3 )
 
-    !CALL ConeFormulas( z_xx, z_xy, z_yy, nBdry, xs, tradial, ray2D( is )%x, BotTop )   ! special case of a conical seamount
 
     !!!! use kappa_xx or z_xx?
     ! kappa = ( z_xx * tradial( 1 ) ** 2 + 2 * z_xy * tradial( 1 ) * tradial( 2 ) + z_yy * tradial( 2 ) ** 2 )

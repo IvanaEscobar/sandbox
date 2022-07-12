@@ -625,8 +625,8 @@ CONTAINS
   ! **********************************************************************!
   
   SUBROUTINE ApplyContribution( U )
-    COMPLEX, INTENT( INOUT ) :: U
-    
+    COMPLEX, INTENT( INOUT ) :: U 
+
     SELECT CASE( Beam%RunType( 1 : 1 ) )
     CASE ( 'E' )                ! eigenrays
        CALL WriteRay2D( SrcDeclAngle, iS )

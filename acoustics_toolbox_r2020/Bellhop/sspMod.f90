@@ -13,7 +13,7 @@ MODULE sspmod
 
   SAVE
   INTEGER, PARAMETER, PRIVATE :: ENVFile = 5, PRTFile = 6
-  INTEGER, PARAMETER     :: MaxSSP = 100001
+  INTEGER, PARAMETER     :: MaxSSP = 20001
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
   INTEGER,       PRIVATE :: iz
   REAL (KIND=8), PRIVATE :: Depth, W
@@ -31,9 +31,9 @@ MODULE sspmod
     COMPLEX (KIND=8)     :: c( MaxSSP ), cz( MaxSSP ), n2( MaxSSP ), n2z( MaxSSP ), cSpline( 4, MaxSSP )
     COMPLEX (KIND=8)     :: cCoef( 4, MaxSSP ), CSWork( 4, MaxSSP )   ! for PCHIP coefs.
     REAL (KIND=8), ALLOCATABLE :: cMat( :, : ), czMat( :, : ), cMat3( :, :, : ), czMat3( :, :, : )
+    TYPE ( rxyz_vector ) :: Seg
     CHARACTER (LEN=1)    :: Type
     CHARACTER (LEN=2)    :: AttenUnit
-    TYPE ( rxyz_vector ) :: Seg
   END TYPE SSPStructure
 
   TYPE( SSPStructure ) :: SSP
@@ -42,8 +42,8 @@ MODULE sspmod
 
   TYPE HSInfo
      REAL     (KIND=8) :: alphaR, alphaI, betaR, betaI  ! compressional and shear wave speeds/attenuations in user units
-     REAL     (KIND=8) :: rho, Depth             ! density, depth
      COMPLEX  (KIND=8) :: cP, cS                 ! P-wave, S-wave speeds
+     REAL     (KIND=8) :: rho, Depth             ! density, depth
      CHARACTER (LEN=1) :: BC                     ! Boundary condition type
      CHARACTER (LEN=6) :: Opt
   END TYPE HSInfo
@@ -84,7 +84,7 @@ CONTAINS
     CASE ( 'Q' )
        CALL Quad(     x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
     CASE ( 'H' )
-       ! this is called by BELLHOP3D only once, during READIN
+       ! this is called by BELLHOP3D only once, during sspMod
        ! possibly the logic should be changed to call EvaluateSSP2D or 3D
        x3 = [ 0.0D0, 0.0D0, x( 2 ) ]
        CALL Hexahedral( x3, c, cimag, gradc_3d, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, Task )
@@ -92,7 +92,7 @@ CONTAINS
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       CALL ERROUT( 'BELLHOP: EvaluateSSP', 'Invalid profile option' )
+       CALL ERROUT( 'EvaluateSSP', 'Invalid profile option' )
     END SELECT
 
   END SUBROUTINE EvaluateSSP
@@ -405,11 +405,11 @@ END SUBROUTINE EvaluateSSP2D
        WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
 
        IF ( SSP%Nr < 2 ) THEN
-          CALL ERROUT( 'READIN: Quad', 'You must have a least two profiles in your 2D SSP field'  )
+          CALL ERROUT( 'sspMod: Quad', 'You must have a least two profiles in your 2D SSP field'  )
        END IF
 
        ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts - 1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Quad', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'sspMod: Quad', 'Insufficient memory to store SSP'  )
 
        ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
        READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
@@ -458,7 +458,7 @@ END SUBROUTINE EvaluateSSP2D
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN ! .OR. &
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
-          CALL ERROUT( 'Quad', 'ray is outside the box where the soundspeed is defined' )
+          CALL ERROUT( 'sspMod: Quad', 'ray is outside the box where the soundspeed is defined' )
        END IF
 
        ! check range-segment contains x( 1 ) in [ SSP%Seg%r( iSSP%Seg ), SSP%Seg%r( iSegr + 1 ) )
@@ -543,10 +543,9 @@ END SUBROUTINE EvaluateSSP2D
 
        ! x coordinates
        READ( SSPFile,  * ) SSP%Nx
-       WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of points in x = ', SSP%Nx
        ALLOCATE( SSP%Seg%x( SSP%Nx ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'sspMod: Hexahedral', 'Insufficient memory to store SSP'  )
        READ( SSPFile,  * ) SSP%Seg%x
        !WRITE( PRTFile, * )
        !WRITE( PRTFile, * ) 'x-coordinates of SSP (km):'
@@ -554,10 +553,9 @@ END SUBROUTINE EvaluateSSP2D
 
        ! y coordinates
        READ( SSPFile,  * ) SSP%Ny
-       WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of points in y = ', SSP%Ny
        ALLOCATE( SSP%Seg%y( SSP%Ny ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'sspMod: Hexahedral', 'Insufficient memory to store SSP'  )
        READ( SSPFile,  * ) SSP%Seg%y
        !WRITE( PRTFile, * )
        !WRITE( PRTFile, * ) 'y-coordinates of SSP (km):'
@@ -565,10 +563,9 @@ END SUBROUTINE EvaluateSSP2D
 
        ! z coordinates
        READ( SSPFile,  * ) SSP%Nz
-       WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of points in z = ', SSP%Nz
        ALLOCATE( SSP%Seg%z( SSP%Nz ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'sspMod: Hexahedral', 'Insufficient memory to store SSP'  )
        READ( SSPFile,  * ) SSP%Seg%z
        !WRITE( PRTFile, * )
        !WRITE( PRTFile, * ) 'z-coordinates of SSP (km):'
@@ -576,12 +573,12 @@ END SUBROUTINE EvaluateSSP2D
 
        ! SSP matrix should be bigger than 2x2x2
        IF ( SSP%Nx < 2 .OR. SSP%Ny < 2 .OR. SSP%Nz < 2 ) THEN
-          CALL ERROUT( 'READIN: Hexahedral', &
+          CALL ERROUT( 'sspMod: Hexahedral', &
                'You must have a least two points in x, y, z directions in your 3D SSP field'  )
        END IF
 
        ALLOCATE( SSP%cMat3( SSP%Nx, SSP%Ny, SSP%Nz ), SSP%czMat3( SSP%Nx, SSP%Ny, SSP%Nz - 1 ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'sspMod: Hexahedral', 'Insufficient memory to store SSP'  )
 
        WRITE( PRTFile, * )
        ! WRITE( PRTFile, * ) 'Sound speed matrix:'
@@ -625,7 +622,7 @@ END SUBROUTINE EvaluateSSP2D
 !!$          x( 3 ) < SSP%Seg%z( 1 ) .OR. x( 3 ) > SSP%Seg%z( SSP%Nz ) ) THEN
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( x, y, z ) = ', x
-          CALL ERROUT( 'Hexahedral', 'ray is outside the box where the soundspeed is defined' )
+          CALL ERROUT( 'sspMod: Hexahedral', 'ray is outside the box where the soundspeed is defined' )
        END IF
 
        ! check x-segment contains x( 1 ) in [ SSP%Seg%x( iSegx ), SSP%Seg%x( iSegx + 1 ) )
@@ -873,8 +870,9 @@ END SUBROUTINE Analytic3D
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
-    WRITE( PRTFile, "( '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
-       
+    WRITE( PRTFile, "( '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
+    WRITE( PRTFile, "( '     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)', / )" )
+
     SSP%NPts = 1
 
     DO iz = 1, MaxSSP
@@ -918,4 +916,3 @@ END SUBROUTINE Analytic3D
   END SUBROUTINE ReadSSP
 
 END MODULE sspmod
- 
