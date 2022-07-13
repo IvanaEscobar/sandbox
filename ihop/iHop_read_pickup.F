@@ -52,143 +52,135 @@ CEOP
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
-       IF ( pickupSuff.EQ.' ' ) THEN
-        IF ( rwSuffixType.EQ.0 ) THEN
-          WRITE(fn,'(A,I10.10)') 'pickup_ihop.', myIter
-        ELSE
-          CALL RW_GET_SUFFIX( suff, startTime, myIter, myThid )
-          WRITE(fn,'(A,A)') 'pickup_ihop.', suff
-        ENDIF
-       ELSE
-        WRITE(fn,'(A,A10)') 'pickup_ihop.', pickupSuff
-       ENDIF
-       fp = precFloat64
-
-       CALL READ_MFLDS_SET(
-     I                      fn,
-     O                      nbFields, filePrec,
-     I                      Nr, myIter, myThid )
-       _BEGIN_MASTER( myThid )
-c      IF ( filePrec.NE.0 .AND. filePrec.NE.fp ) THEN
-       IF ( nbFields.GE.0 .AND. filePrec.NE.fp ) THEN
-         WRITE(msgBuf,'(2A,I4)') 'IHOP_READ_PICKUP: ',
-     &    'pickup-file binary precision do not match !'
-         CALL PRINT_ERROR( msgBuf, myThid )
-         WRITE(msgBuf,'(A,2(A,I4))') 'IHOP_READ_PICKUP: ',
-     &    'file prec.=', filePrec, ' but expecting prec.=', fp
-         CALL PRINT_ERROR( msgBuf, myThid )
-         CALL ALL_PROC_DIE( 0 )
-         STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP (data-prec Pb)'
-       ENDIF
-       _END_MASTER( myThid )
-
-       IF ( nbFields.LE.0 ) THEN
-C-      No meta-file or old meta-file without List of Fields
-        ioUnit = errorMessageUnit
-        IF ( pickupStrictlyMatch ) THEN
-          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
-     &      'no field-list found in meta-file',
-     &      ' => cannot check for strick-matching'
-          CALL PRINT_ERROR( msgBuf, myThid )
-          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
-     &      'try with " pickupStrictlyMatch=.FALSE.,"',
-     &      ' in file: "data", NameList: "PARM03"'
-          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-          CALL ALL_PROC_DIE( myThid )
-          STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
-        ELSE
-          WRITE(msgBuf,'(4A)') 'WARNING >> IHOP_READ_PICKUP: ',
-     &      ' no field-list found'
-          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-         IF ( nbFields.EQ.-1 ) THEN
-C-      No meta-file
-          WRITE(msgBuf,'(4A)') 'WARNING >> ',
-     &      ' try to read pickup as currently written'
-          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-         ELSE
-C-      Old meta-file without List of Fields
-c         WRITE(msgBuf,'(4A)') 'WARNING >> ',
-c    &      ' try to read pickup as it used to be written'
-c         CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-c         WRITE(msgBuf,'(4A)') 'WARNING >> ',
-c    &      ' until checkpoint59l (2007 Dec 17)'
-c         CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
-     &      'no field-list found in meta-file'
-          CALL PRINT_ERROR( msgBuf, myThid )
-          CALL ALL_PROC_DIE( myThid )
-          STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
-         ENDIF
-        ENDIF
-       ENDIF
-
-C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
-
-       IF ( nbFields.EQ.0 ) THEN
-C---   Old way to read pickup:
-
-       ELSE
-C---   New way to read IHOP pickup:
-        nj = 0
-C---    read IHOP 3-D fields for restart
-#ifdef IHOP_3D_STATE
-        CALL READ_MFLDS_3D_RL( 'myPaSta1', myPa_StatScal1,
-     &                                 nj, fp, Nr, myIter, myThid )
-        CALL READ_MFLDS_3D_RL( 'myPaSta2', myPa_StatScal2,
-     &                                 nj, fp, Nr, myIter, myThid )
-        CALL READ_MFLDS_3D_RL( 'myPaStaU', myPa_StatVelU,
-     &                                 nj, fp, Nr, myIter, myThid )
-        CALL READ_MFLDS_3D_RL( 'myPaStaV', myPa_StatVelV,
-     &                                 nj, fp, Nr, myIter, myThid )
-#endif /* IHOP_3D_STATE */
-        nj = nj*Nr
-C---    read IHOP 2-D fields for restart
-#ifdef IHOP_2D_STATE
-        CALL READ_MFLDS_3D_RL( 'myPaSur1', myPa_Surf1,
-     &                                 nj, fp, 1 , myIter, myThid )
-        CALL READ_MFLDS_3D_RL( 'myPaSur2', myPa_Surf2,
-     &                                 nj, fp, 1 , myIter, myThid )
-#endif /* IHOP_2D_STATE */
-
-C--    end: new way to read pickup file
-       ENDIF
-
-C--    Check for missing fields:
-       nMissing = missFldDim
-       CALL READ_MFLDS_CHECK(
-     O                     missFldList,
-     U                     nMissing,
-     I                     myIter, myThid )
-       IF ( nMissing.GT.missFldDim ) THEN
-         WRITE(msgBuf,'(2A,I4)') 'IHOP_READ_PICKUP: ',
-     &     'missing fields list has been truncated to', missFldDim
-         CALL PRINT_ERROR( msgBuf, myThid )
-         CALL ALL_PROC_DIE( myThid )
-         STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP (list-size Pb)'
-       ENDIF
-       IF ( nMissing.GE.1 ) THEN
-        ioUnit = errorMessageUnit
-        DO j=1,nMissing
-         WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
-     &       'cannot restart without field "',missFldList(nj),'"'
-         CALL PRINT_ERROR( msgBuf, myThid )
-        ENDDO
-        CALL ALL_PROC_DIE( myThid )
-        STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
-       ENDIF
-
-C--    Update overlap regions:
-#ifdef IHOP_3D_STATE
-        CALL EXCH_3D_RL( myPa_StatScal1, Nr, myThid )
-        CALL EXCH_3D_RL( myPa_StatScal2, Nr, myThid )
-#endif /* IHOP_3D_STATE */
-#ifdef IHOP_2D_STATE
-        CALL EXCH_XY_RL( myPa_Surf1, myThid )
-        CALL EXCH_XY_RL( myPa_Surf2, myThid )
-#endif /* IHOP_2D_STATE */
-
-#endif /* IHOP_3D_STATE or IHOP_2D_STATE */
-#endif /* ALLOW_IHOP */
+C       IF ( pickupSuff.EQ.' ' ) THEN
+C        IF ( rwSuffixType.EQ.0 ) THEN
+C          WRITE(fn,'(A,I10.10)') 'pickup_ihop.', myIter
+C        ELSE
+C          CALL RW_GET_SUFFIX( suff, startTime, myIter, myThid )
+C          WRITE(fn,'(A,A)') 'pickup_ihop.', suff
+C        ENDIF
+C       ELSE
+C        WRITE(fn,'(A,A10)') 'pickup_ihop.', pickupSuff
+C       ENDIF
+C       fp = precFloat64
+C
+C       CALL READ_MFLDS_SET(
+C     I                      fn,
+C     O                      nbFields, filePrec,
+C     I                      Nr, myIter, myThid )
+C       _BEGIN_MASTER( myThid )
+C       IF ( nbFields.GE.0 .AND. filePrec.NE.fp ) THEN
+C         WRITE(msgBuf,'(2A,I4)') 'IHOP_READ_PICKUP: ',
+C     &    'pickup-file binary precision do not match !'
+C         CALL PRINT_ERROR( msgBuf, myThid )
+C         WRITE(msgBuf,'(A,2(A,I4))') 'IHOP_READ_PICKUP: ',
+C     &    'file prec.=', filePrec, ' but expecting prec.=', fp
+C         CALL PRINT_ERROR( msgBuf, myThid )
+C         CALL ALL_PROC_DIE( 0 )
+C         STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP (data-prec Pb)'
+C       ENDIF
+C       _END_MASTER( myThid )
+C
+C       IF ( nbFields.LE.0 ) THEN
+CC-      No meta-file or old meta-file without List of Fields
+C        ioUnit = errorMessageUnit
+C        IF ( pickupStrictlyMatch ) THEN
+C          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
+C     &      'no field-list found in meta-file',
+C     &      ' => cannot check for strick-matching'
+C          CALL PRINT_ERROR( msgBuf, myThid )
+C          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
+C     &      'try with " pickupStrictlyMatch=.FALSE.,"',
+C     &      ' in file: "data", NameList: "PARM03"'
+C          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
+C          CALL ALL_PROC_DIE( myThid )
+C          STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
+C        ELSE
+C          WRITE(msgBuf,'(4A)') 'WARNING >> IHOP_READ_PICKUP: ',
+C     &      ' no field-list found'
+C          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
+C         IF ( nbFields.EQ.-1 ) THEN
+CC-      No meta-file
+C          WRITE(msgBuf,'(4A)') 'WARNING >> ',
+C     &      ' try to read pickup as currently written'
+C          CALL PRINT_MESSAGE( msgBuf, ioUnit, SQUEEZE_RIGHT, myThid )
+C         ELSE
+C          WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
+C     &      'no field-list found in meta-file'
+C          CALL PRINT_ERROR( msgBuf, myThid )
+C          CALL ALL_PROC_DIE( myThid )
+C          STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
+C         ENDIF
+C        ENDIF
+C       ENDIF
+C
+CC---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C
+C       IF ( nbFields.EQ.0 ) THEN
+CC---   Old way to read pickup:
+C
+C       ELSE
+CC---   New way to read IHOP pickup:
+C        nj = 0
+CC---    read IHOP 3-D fields for restart
+C#ifdef IHOP_3D_STATE
+C        CALL READ_MFLDS_3D_RL( 'myPaSta1', myPa_StatScal1,
+C     &                                 nj, fp, Nr, myIter, myThid )
+C        CALL READ_MFLDS_3D_RL( 'myPaSta2', myPa_StatScal2,
+C     &                                 nj, fp, Nr, myIter, myThid )
+C        CALL READ_MFLDS_3D_RL( 'myPaStaU', myPa_StatVelU,
+C     &                                 nj, fp, Nr, myIter, myThid )
+C        CALL READ_MFLDS_3D_RL( 'myPaStaV', myPa_StatVelV,
+C     &                                 nj, fp, Nr, myIter, myThid )
+C#endif /* IHOP_3D_STATE */
+C        nj = nj*Nr
+CC---    read IHOP 2-D fields for restart
+C#ifdef IHOP_2D_STATE
+C        CALL READ_MFLDS_3D_RL( 'myPaSur1', myPa_Surf1,
+C     &                                 nj, fp, 1 , myIter, myThid )
+C        CALL READ_MFLDS_3D_RL( 'myPaSur2', myPa_Surf2,
+C     &                                 nj, fp, 1 , myIter, myThid )
+C#endif /* IHOP_2D_STATE */
+C
+CC--    end: new way to read pickup file
+C       ENDIF
+C
+CC--    Check for missing fields:
+C       nMissing = missFldDim
+C       CALL READ_MFLDS_CHECK(
+C     O                     missFldList,
+C     U                     nMissing,
+C     I                     myIter, myThid )
+C       IF ( nMissing.GT.missFldDim ) THEN
+C         WRITE(msgBuf,'(2A,I4)') 'IHOP_READ_PICKUP: ',
+C     &     'missing fields list has been truncated to', missFldDim
+C         CALL PRINT_ERROR( msgBuf, myThid )
+C         CALL ALL_PROC_DIE( myThid )
+C         STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP (list-size Pb)'
+C       ENDIF
+C       IF ( nMissing.GE.1 ) THEN
+C        ioUnit = errorMessageUnit
+C        DO j=1,nMissing
+C         WRITE(msgBuf,'(4A)') 'IHOP_READ_PICKUP: ',
+C     &       'cannot restart without field "',missFldList(nj),'"'
+C         CALL PRINT_ERROR( msgBuf, myThid )
+C        ENDDO
+C        CALL ALL_PROC_DIE( myThid )
+C        STOP 'ABNORMAL END: S/R IHOP_READ_PICKUP'
+C       ENDIF
+C
+CC--    Update overlap regions:
+C#ifdef IHOP_3D_STATE
+C        CALL EXCH_3D_RL( myPa_StatScal1, Nr, myThid )
+C        CALL EXCH_3D_RL( myPa_StatScal2, Nr, myThid )
+C#endif /* IHOP_3D_STATE */
+C#ifdef IHOP_2D_STATE
+C        CALL EXCH_XY_RL( myPa_Surf1, myThid )
+C        CALL EXCH_XY_RL( myPa_Surf2, myThid )
+C#endif /* IHOP_2D_STATE */
+C
+C#endif /* IHOP_3D_STATE or IHOP_2D_STATE */
+C#endif /* ALLOW_IHOP */
 
       RETURN
       END

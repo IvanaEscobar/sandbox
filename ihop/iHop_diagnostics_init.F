@@ -57,23 +57,23 @@ c     IF ( useDiagnotics ) THEN
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
 
-        diagName  = 'MYPaStaU'
-        diagTitle = 'uVel-type state variable for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'UM      MR      '
-        diagMate  = diagNum + 2
-        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'U'
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
-
-        diagName  = 'MYPaStaV'
-        diagTitle = 'vVel-type state variable for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'VM      MR      '
-        diagMate  = diagNum
-        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'V'
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
+C        diagName  = 'MYPaStaU'
+C        diagTitle = 'uVel-type state variable for package IHOP'
+C        diagUnits = 'unit            '
+C        diagCode  = 'UM      MR      '
+C        diagMate  = diagNum + 2
+C        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'U'
+C        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
+C     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
+C
+C        diagName  = 'MYPaStaV'
+C        diagTitle = 'vVel-type state variable for package IHOP'
+C        diagUnits = 'unit            '
+C        diagCode  = 'VM      MR      '
+C        diagMate  = diagNum
+C        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'V'
+C        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
+C     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
 
         diagName  = 'MYPaSur1'
         diagTitle = 'Surface field 1 for package IHOP'
@@ -102,24 +102,6 @@ c     IF ( useDiagnotics ) THEN
         diagCode  = 'SMR     MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-        diagName  = 'MYPadUdt'
-        diagTitle = 'u-Velocity tendency from package IHOP'
-        diagUnits = 'm/s^2           '
-        diagCode  = 'UMR     MR      '
-        diagMate  = diagNum + 2
-        IF ( myPa_Tend_Cgrid ) diagCode(2:2) = 'U'
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
-
-        diagName  = 'MYPadVdt'
-        diagTitle = 'v-Velocity tendency from package IHOP'
-        diagUnits = 'm/s^2           '
-        diagCode  = 'VMR     MR      '
-        diagMate  = diagNum
-        IF ( myPa_Tend_Cgrid ) diagCode(2:2) = 'V'
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
 
 C--     an example of how to set "free levels option" diagnostics
         diagName  = 'MYPaLev3'
