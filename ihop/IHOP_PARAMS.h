@@ -3,11 +3,13 @@
 CBOP
 C     !ROUTINE: IHOP_PARAMS.h
 C     !INTERFACE:
-C #include IHOP_PARAMS.h
+C     #include IHOP_PARAMS.h
 
 C     !DESCRIPTION:
-C Contains ihop exclusive parameters
-
+C     *================================================================*
+C     | IHOP.h
+C     | o Header file defining "ihop" parameters and variables
+C     *================================================================*
 CEOP
 
 C     IHOP parameters
