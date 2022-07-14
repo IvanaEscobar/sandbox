@@ -7,7 +7,7 @@ MODULE angleMod
     ! </CONTACT>
 
   USE iHopParams,   only: pi, DegRad, ENVFile, PRTFile
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE srPositions,  only: Pos, Number_to_Echo
   USE sortMod,      only: Sort

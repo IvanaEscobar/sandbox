@@ -8,7 +8,7 @@ MODULE srPositions
 
   ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
 
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE monotonicMod, only: monotonic
   USE sortMod,      only: Sort

@@ -28,7 +28,7 @@ MODULE BELLHOP
                             ARRFile, RAYFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
                             OpenOutputFiles
-  USE fatalError,   only:   ERROUT
+  USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
   USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
@@ -60,9 +60,9 @@ SUBROUTINE IHOP_INIT
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
-  ! HARDCODING FILE TO FORCE MunkB_ray Demo run
+  ! HARDCODING FILE TO FORCE nesba eigenray run
   !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  FileRoot = 'MunkB_ray' ! IEsco HARDCODED
+  FileRoot = 'nesba-tm4' ! IEsco HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
@@ -71,6 +71,7 @@ SUBROUTINE IHOP_INIT
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
 
   IF ( Inline ) THEN
+     ! NPts, Sigma not used by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'
      freq  = 250
      ! NMedia variable is not used by BELLHOP
@@ -96,7 +97,7 @@ SUBROUTINE IHOP_INIT
      SSP%NPts = 2     ! number of SSP points
      SSP%z(  1 : 2 ) = [    0,  100 ]
      SSP%c(  1 : 2 ) = [ 1500, 1500 ]
-     SSP%cz( 1 : 2 ) = [    0,    0 ]   ! user should not have to supply this ...
+     SSP%cz( 1 : 2 ) = [    0,    0 ]   ! user should not supply this ...
 
      ! *** source and receiver positions ***
 
@@ -119,8 +120,6 @@ SUBROUTINE IHOP_INIT
      Beam%Box%r   = 5100 ! meters
 
      Angles%Nalpha = 1789
-     ! Angles%alpha  = [ -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, &
-     !                   30, 40, 50, 60, 70, 80 ] ! -89 89
      Angles%alpha  = ( 180. / Angles%Nalpha ) * &
                      [ ( jj, jj = 1, Angles%Nalpha ) ] - 90.
 
@@ -328,7 +327,7 @@ SUBROUTINE BellhopCore
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) &
                      ialpha, SrcDeclAngle
-              CALL FLUSH( PRTFile )
+              FLUSH( PRTFile )
            END IF
 
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
@@ -381,19 +380,22 @@ SUBROUTINE BellhopCore
 
   END DO SourceDepth
 
+  ! Display run time
+  CALL CPU_TIME( Tstop )
+  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+
   ! close all files
   SELECT CASE ( Beam%RunType( 1 : 1 ) )
   CASE ( 'C', 'S', 'I' )      ! TL calculation
      CLOSE( SHDFile )
   CASE ( 'A', 'a' )           ! arrivals calculation
      CLOSE( ARRFile )
-  CASE ( 'R' )                ! ray trace
+  CASE ( 'R', 'E' )           ! ray and eigen ray trace
      CLOSE( RAYFile )
   END SELECT
 
-  ! Display run time
-  CALL CPU_TIME( Tstop )
-  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+  CLOSE( PRTFile )
+
 END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
@@ -402,7 +404,7 @@ COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, &
                                            Dalpha, rLoop, EpsMultiplier )
 
   ! Picks the optimum value for epsilon
-  
+
   ! angular frequency, sound speed and gradient
   REAL (KIND=_RL90), INTENT( IN  )  :: omega, c, gradc( 2 ) 
   ! angular spacing for ray fan
@@ -529,7 +531,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      Bdry%Bot%HS%rho = Bot( IsegBot )%HS%rho
   END IF
 
-  ! Trace the beam (note that Reflect alters the step index is)
+  ! Trace the beam (note that Reflect alters the step index, is)
+  is = 0
   CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                                   dEndTop,          dEndBot, &
                                   Top( IsegTop )%n, Bot( IsegBot )%n, &
@@ -543,7 +546,6 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      RETURN       ! source must be within the medium
   END IF
 
-  is = 0
   Stepping: DO istep = 1, MaxN - 1
      is  = is + 1
      is1 = is + 1
@@ -606,7 +608,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         ray2D( is+1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, & 
-                          dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, &
+                          dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,&
                           DistEndTop, DistEndBot )
 
      ELSE IF ( DistBegBot > 0.0d0 .AND. DistEndBot <= 0.0d0 ) THEN  ! test bottom reflection
@@ -713,8 +715,9 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ! Calculate the change in curvature
   ! Based on formulas given by Muller, Geoph. J. R.A.S., 79 (1984).
 
+  ! Get c
   CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, freq,& 
-                    'TAB' )   ! just to get c
+                    'TAB' )
 
   ! incident unit ray tangent and normal
   rayt = c * ray2D( is )%t                              ! unit tangent to ray
@@ -755,6 +758,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ray2D( is1 )%q   = ray2D( is )%q
 
   ! account for phase change
+
   SELECT CASE ( HS%BC )
   CASE ( 'R' )                 ! rigid
      ray2D( is1 )%Amp   = ray2D( is )%Amp

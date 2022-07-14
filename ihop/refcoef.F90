@@ -8,7 +8,7 @@ MODULE refCoef
 
   ! reflection coefficient data
 
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE iHopParams,   only: BRCFile, TRCFile, IRCFile, pi, DegRad
 
   IMPLICIT NONE

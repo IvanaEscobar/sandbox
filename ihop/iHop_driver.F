@@ -20,7 +20,6 @@ C !FORTRAN90 USE MODULES: ===============================================
 #include "SURFACE.h"
 #include "FFIELDS.h"
 #include "IHOP_PARAMS.h"
-#include "IHOP_VARS.h"
 
 C !INPUT PARAMETERS: ===================================================
 C  myTime   :: Current time in simulation

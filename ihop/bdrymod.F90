@@ -9,7 +9,7 @@ MODULE bdrymod
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
 
   USE monotonicMod, only: monotonic
-  USE fatalError,   only: ERROUT
+  USE ihop_fatalError,   only: ERROUT
   USE iHopParams,   only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE

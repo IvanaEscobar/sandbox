@@ -64,7 +64,6 @@ clean:
 	find . -name '*.shd'  -exec rm -r {} +
 	find . -name '*.shd.mat'  -exec rm -r {} +
 	find . -name '*.prt'  -exec rm -r {} +
-	#(cd ../tests;  make -k -i clean)
 	-rm -f *.o *.mod *.exe *_genmod.f90
 
 ### COVERAGE TARGETS ###
