@@ -178,9 +178,9 @@ C#ifdef IHOP_2D_STATE
 C        CALL EXCH_XY_RL( myPa_Surf1, myThid )
 C        CALL EXCH_XY_RL( myPa_Surf2, myThid )
 C#endif /* IHOP_2D_STATE */
-C
-C#endif /* IHOP_3D_STATE or IHOP_2D_STATE */
-C#endif /* ALLOW_IHOP */
+
+#endif /* IHOP_3D_STATE or IHOP_2D_STATE */
+#endif /* ALLOW_IHOP */
 
       RETURN
       END
