@@ -28,14 +28,14 @@
 #ifdef ALLOW_GCHEM
 # include "GCHEM_OPTIONS.h"
 #endif
-#ifdef ALLOW_IHOP
-# include "IHOP_OPTIONS.h"
-#endif
 #ifdef ALLOW_DIC
 # include "DIC_OPTIONS.h"
 #endif
 #ifdef ALLOW_BLING
 # include "BLING_OPTIONS.h"
+#endif
+#ifdef ALLOW_IHOP
+# include "IHOP_OPTIONS.h"
 #endif
 #ifdef ALLOW_EXF
 # include "EXF_OPTIONS.h"
@@ -171,6 +171,7 @@ C       |
 C       |-- DO_STAGGER_FIELDS_EXCHANGES
 C       |
 C       |-- DYNAMICS
+C       ? myIter and myTime are incremented after this
 C       |
 C       |-- MNC_UPDATE_TIME
 C       |
@@ -205,6 +206,8 @@ C       |-- LONGSTEP_AVERAGE
 C       |-- LONGSTEP_THERMODYNAMICS
 C       |
 C       |-- GCHEM_FORCING_SEP
+C       |
+C       ?IHOP HERE FOR NOW?   
 C       |
 C       |-- DO_FIELDS_BLOCKING_EXCHANGES
 C       |
@@ -311,10 +314,6 @@ C     == Global variables ==
 #  include "GCHEM_SIZE.h"
 #  include "GCHEM_FIELDS.h"
 # endif
-# ifdef ALLOW_IHOP
-#  include "IHOP_VARS.h"
-#  include "IHOP_PARAMS.h"
-# endif
 # ifdef ALLOW_CFC
 #  include "CFC.h"
 # endif
@@ -327,6 +326,9 @@ C     == Global variables ==
 # ifdef ALLOW_BLING
 #  include "BLING_VARS.h"
 #  include "BLING_LOAD.h"
+# endif
+# ifdef ALLOW_IHOP
+#  include "IHOP.h"
 # endif
 # ifdef ALLOW_OBCS
 #  include "OBCS_PARAMS.h"
@@ -1101,6 +1103,11 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
         CALL TIMER_STOP ('GCHEM_FORCING_SEP  [FORWARD_STEP]',myThid)
       ENDIF
 #endif /* ALLOW_GCHEM */
+
+#ifdef ALLOW_IHOP
+C     if on 2nd timestep
+      IF( myIter .EQ. nIter0+1 ) CALL IHOP_DRIVER(myTime,myIter,myThid)
+#endif /* ALLOW_IHOP */
 
 C--   Do "blocking" sends and receives for tendency "overlap" terms
 c     CALL TIMER_START('BLOCKING_EXCHANGES  [FORWARD_STEP]',myThid)
