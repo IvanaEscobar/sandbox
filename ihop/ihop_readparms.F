@@ -15,8 +15,7 @@ C     !USES:
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "IHOP_PARAMS.h"
-#include "IHOP_VARS.h"
+#include "IHOP.h"
 #ifdef ALLOW_MNC
 #include "MNC_PARAMS.h"
 #endif

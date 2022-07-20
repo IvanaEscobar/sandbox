@@ -19,7 +19,7 @@ C !FORTRAN90 USE MODULES: ===============================================
 #include "GRID.h"
 #include "SURFACE.h"
 #include "FFIELDS.h"
-#include "IHOP_PARAMS.h"
+#include "IHOP.h"
 
 C !INPUT PARAMETERS: ===================================================
 C  myTime   :: Current time in simulation

@@ -69,7 +69,7 @@ if ( strcmp( units, 'km' ) )
    xlabel( 'Range (km)' )
 end
 ylabel( 'Depth (m)' )
-title( TITLE )
+title( strcat(TITLE, '; Nalpha = ', num2str(Nalpha)) );
 hold on
 
 % axis limits
