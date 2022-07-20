@@ -14,8 +14,7 @@ C     !USES:
       IMPLICIT NONE
 #include "EEPARAMS.h"
 #include "SIZE.h"
-#include "IHOP_PARAMS.h"
-#include "IHOP_VARS.h"
+#include "IHOP.h"
 
 C     !INPUT/OUTPUT PARAMETERS:
 C     myThid ::  my Thread Id number

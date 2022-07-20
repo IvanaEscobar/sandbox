@@ -15,8 +15,7 @@ C !USES: ===============================================================
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "IHOP_PARAMS.h"
-#include "IHOP_VARS.h"
+#include "IHOP.h"
 
 C !INPUT PARAMETERS: ===================================================
 C     permPickup      :: write a permanent pickup
@@ -100,8 +99,8 @@ C-    switch to 2-D fields:
         j = j + 1
         nj = nj-1
         CALL WRITE_REC_3D_RL( fn, fp, 1,
-     &                        myPa_Surf1, nj, myIter, myThid )
-        IF (j.LE.listDim) wrFldList(j) = 'myPaSur1'
+     &                        ihop_SST, nj, myIter, myThid )
+        IF (j.LE.listDim) wrFldList(j) = 'ihop_SST'
 
         j = j + 1
         nj = nj-1
