@@ -69,7 +69,7 @@ if ( strcmp( units, 'km' ) )
    xlabel( 'Range (km)' )
 end
 ylabel( 'Depth (m)' )
-title( strcat(TITLE, '; Nalpha = ', num2str(Nalpha)) );
+title( strcat(rayfil, ': Nalpha = ', num2str(Nalpha)) );
 hold on
 
 % axis limits
@@ -83,6 +83,7 @@ zmax = -1e9;
 for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
       alpha0    = fscanf( fid, '%f', 1 );
+      fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
       
 
