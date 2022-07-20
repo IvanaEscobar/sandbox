@@ -26,8 +26,8 @@ CONTAINS
     REAL     (KIND=8) :: kappa                                            ! Boundary curvature
     REAL     (KIND=8) :: tBdry( 2 ), nBdry( 2 )                           ! tangent, normal to boundary
     TYPE(ReflectionCoef) :: RInt
-    REAL     (KIND=8) :: z_xx, z_xy, z_yy, &
-         t_rot( 2 ), n_rot( 2 ), RotMat( 2, 2 ), kappaMat( 2, 2 ), DMat( 2, 2 )   ! for cone reflection
+    REAL     (KIND=8) :: z_xx, z_xy, z_yy!, &
+!         t_rot( 2 ), n_rot( 2 ), RotMat( 2, 2 ), kappaMat( 2, 2 ), DMat( 2, 2 )   ! for cone reflection
     REAL     (KIND=8) :: kappa_xx, kappa_xy, kappa_yy
 
     is  = is + 1

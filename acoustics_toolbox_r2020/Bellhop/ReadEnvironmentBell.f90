@@ -94,6 +94,7 @@ CONTAINS
     READ(  ENVFile, * ) Bdry%Bot%HS%Opt, Sigma
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "(33X, '( RMS roughness = ', G10.3, ' )' )" ) Sigma
+    WRITE( PRTFile, * ) Bdry%Bot%HS%Opt
 
     SELECT CASE ( Bdry%Bot%HS%Opt( 2 : 2 ) )
     CASE ( '~', '*' )

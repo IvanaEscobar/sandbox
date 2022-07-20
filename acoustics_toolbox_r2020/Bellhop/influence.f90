@@ -85,6 +85,8 @@ CONTAINS
              CASE ( 3 )                ! Bottom-reflected beam
                 rnV = -rnV
                 nB  = ( zR - ( 2.0 * Bdry%Bot%HS%Depth - ray2D( iS )%x( 2 ) ) ) / znV( iS )
+            CASE DEFAULT ! True beam same as case 1
+                nB  = ( zR -                             ray2D( iS )%x( 2 )   ) / znV( iS )
              END SELECT
 
              rB  = ray2D( iS )%x( 1 ) + nB * rnV( iS )
@@ -263,6 +265,9 @@ CONTAINS
                 CASE ( 3 )   ! Bottom  reflected beam
                    deltaz = -zR + 2.0 * Bdry%Bot%HS%Depth - x( 2 )
                    Polarity = +1.0D0   ! assumes rigid bottom
+               CASE DEFAULT ! True beam aka case 1
+                   deltaz = zR - x( 2 )
+                   Polarity = +1.0D0
                 END SELECT
 
                 IF ( omega * AIMAG( gamma ) * deltaz ** 2 < iBeamWindow2 ) &

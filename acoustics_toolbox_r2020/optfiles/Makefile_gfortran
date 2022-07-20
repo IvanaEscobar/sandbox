@@ -78,7 +78,7 @@ lcov-report:
 
 cov-reset:
 	find ../ -name '*.gcda'  -exec rm -r {} +
-	find ../ -name '*.gcno'  -exec rm -r {} +
+	find ../ -name '*.gcov'  -exec rm -r {} +
 
 cleanall: clean cov-reset
 
