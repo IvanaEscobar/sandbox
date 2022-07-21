@@ -107,95 +107,16 @@ CONTAINS
        CALL cCubic(   x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
     CASE ( 'Q' )
        CALL Quad(     x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
-    CASE ( 'H' )
-       ! this is called by BELLHOP3D only once, during READIN
-       ! possibly the logic should be changed to call EvaluateSSP2D or 3D
-       x3 = [ 0.0D0, 0.0D0, x( 2 ) ]
-       CALL Hexahedral( x3, c, cimag, gradc_3d, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, Task )
     CASE ( 'A' )  !  Analytic profile option
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       CALL ERROUT( 'BELLHOP: EvaluateSSP', 'Invalid profile option' )
+       CALL ERROUT( 'EvaluateSSP', 'Invalid profile option' )
     END SELECT
 
   END SUBROUTINE EvaluateSSP
   
 !**********************************************************************!
-
-SUBROUTINE EvaluateSSP2D( x2D, c, cimag, gradc, crr, crz, czz, rho, xs, tradial, freq )
-
-  ! Converts cartesian gradients to polar
-  ! Called from BELLHOP3D to get a 2D slice out of the 3D SSP
-
-  REAL (KIND=_RL90), INTENT( IN  ) :: x2D( 2 ), xs( 3 ), tradial( 2 ), freq
-  REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), czz, crz, crr, rho
-  REAL (KIND=_RL90)                :: x( 3 ), gradc3D(3 ), cxx, cyy, cxy, cxz, cyz
-
-  ! convert polar coordinate to cartesian
-  x = [ xs( 1 ) + x2D( 1 ) * tradial( 1 ), &
-        xs( 2 ) + x2D( 1 ) * tradial( 2 ), &
-        x2D( 2 ) ]
-
-  CALL EvaluateSSP3D( x, c, cimag, gradc3D, cxx, cyy, czz, cxy, cxz, cyz, &
-                      rho, freq, 'TAB' )
-
-  gradc( 1 )  = DOT_PRODUCT( tradial, gradc3D( 1 : 2 ) )  ! r derivative
-  gradc( 2 )  = gradc3D( 3 )                              ! z derivative
-
-  crz = tradial( 1 ) * cxz + tradial( 2 ) * cyz
-  crr = cxx * ( tradial( 1 ) )**2 + 2.0 * cxy * tradial( 1 ) * tradial( 2 ) &
-        + cyy * ( tradial( 2 ) )**2
-
-  RETURN
-END SUBROUTINE EvaluateSSP2D
-
-  !**********************************************************************!
-
-  SUBROUTINE EvaluateSSP3D( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, Task )
-
-    ! Call the particular profil routine indicated by the SSP%Type and perform Task
-    !   Task = 'TAB'  then tabulate cp, cs, rhoT 
-    !   Task = 'INI' then initialize
-
-    REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 3 )      ! x-y-z coordinate where SSP is to be evaluated
-    CHARACTER ( LEN=3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, cyz, rho
-    REAL (KIND=_RL90)                :: x_rz( 2 ), gradc_rz( 2 ), crr, crz
-
-    x_rz = [ 0.0D0, x( 3 ) ]   ! convert x-y-z coordinate to cylindrical coordinate
-
-    SELECT CASE ( SSP%Type )
-    CASE ( 'N' )
-       CALL n2Linear( x_rz, c, cimag, gradc_rz, crr, crz, czz, rho, freq, Task )
-    CASE ( 'C' )
-       CALL cLinear(  x_rz, c, cimag, gradc_rz, crr, crz, czz, rho, freq, Task )
-    CASE ( 'S' )
-       CALL cCubic(   x_rz, c, cimag, gradc_rz, crr, crz, czz, rho, freq, Task )
-    CASE ( 'H' )
-       CALL Hexahedral( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, Task )
-    CASE ( 'A' )
-       CALL Analytic3D( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho )
-    CASE DEFAULT
-       WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       CALL ERROUT( 'BELLHOP3D: EvaluateSSP3D', 'Invalid profile option' )
-    END SELECT
-
-    SELECT CASE ( SSP%Type )
-    CASE ( 'N', 'C', 'S' )
-       gradc = [ 0.0D0, 0.0D0, gradc_rz( 2 ) ]
-
-       cxx   = 0.0D0
-       cyy   = 0.0D0
-       cxy   = 0.0D0
-       cxz   = 0.0D0
-       cyz   = 0.0D0
-    END SELECT
-
-  END SUBROUTINE EvaluateSSP3D
-
-  !**********************************************************************!
 
   SUBROUTINE n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
@@ -444,11 +365,11 @@ END SUBROUTINE EvaluateSSP2D
        WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
 
        IF ( SSP%Nr < 2 ) THEN
-          CALL ERROUT( 'READIN: Quad', 'You must have a least two profiles in your 2D SSP field'  )
+          CALL ERROUT( 'SSPMOD: Quad', 'You must have a least two profiles in your 2D SSP field'  )
        END IF
 
        ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts - 1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Quad', 'Insufficient memory to store SSP'  )
+       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP'  )
 
        READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
        WRITE( PRTFile, * )
@@ -522,7 +443,7 @@ END SUBROUTINE EvaluateSSP2D
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN ! .OR. &
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
-          CALL ERROUT( 'Quad', 'ray is outside the box where the soundspeed is defined' )
+          CALL ERROUT( 'SSPMOD: Quad', 'ray is outside the box where the soundspeed is defined' )
        END IF
 
        ! check range-segment contains x( 1 ) in [ SSP%Seg%r( iSSP%Seg ), SSP%Seg%r( iSegr + 1 ) )
@@ -573,245 +494,6 @@ END SUBROUTINE EvaluateSSP2D
 
   END SUBROUTINE Quad
 
-  !**********************************************************************!
-
-  SUBROUTINE Hexahedral( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho, freq, Task )
-
-    ! Trilinear hexahedral interpolation of SSP data in 3D
-    ! assumes a rectilinear case (not the most general hexahedral)
-
-    REAL (KIND=_RL90),  INTENT( IN  ) :: freq
-    REAL (KIND=_RL90),  INTENT( IN  ) :: x( 3 )   ! x-y-z coordinate where sound speed is evaluated
-    CHARACTER (LEN =3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90),  INTENT( OUT ) :: c, cimag, gradc( 3 ), cxx, cyy, czz, &
-                                         cxy, cxz, cyz, rho ! sound speed and its derivatives
-    INTEGER             :: AllocateStatus, iSegxt, iSegyt, iy2, iz2, &
-                           iSegxTT( 1 ), iSegyTT( 1 ), iSegzTT( 1 )
-    REAL (KIND=_RL90)   :: c1, c2, c11, c12, c21, c22, cz11, cz12, cz21, &
-                           cz22, cz1, cz2, cx, cy, cz, s1, s2, s3
-
-    IF ( Task == 'INI' ) THEN
-
-       !  *** Section to read in SSP data ***
-
-       ! Read dummy SSP information from the environmental file
-       ! This is over-ridden by the info in the SSP file
-       ! However, cz info is used in beam selection
-       Depth = x( 3 )
-       CALL ReadSSP( Depth, freq )
-
-       ! Read the 3D SSP matrix
-
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Reading sound speed profile from file'
-
-       ! x coordinates
-       READ( SSPFile,  * ) SSP%Nx
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Number of points in x = ', SSP%Nx
-       ALLOCATE( SSP%Seg%x( SSP%Nx ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
-       READ( SSPFile,  * ) SSP%Seg%x
-       !WRITE( PRTFile, * )
-       !WRITE( PRTFile, * ) 'x-coordinates of SSP (km):'
-       !WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%x( 1 : SSP%Nx )
-
-       ! y coordinates
-       READ( SSPFile,  * ) SSP%Ny
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Number of points in y = ', SSP%Ny
-       ALLOCATE( SSP%Seg%y( SSP%Ny ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
-       READ( SSPFile,  * ) SSP%Seg%y
-       !WRITE( PRTFile, * )
-       !WRITE( PRTFile, * ) 'y-coordinates of SSP (km):'
-       !WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%y( 1 : SSP%Ny )
-
-       ! z coordinates
-       READ( SSPFile,  * ) SSP%Nz
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Number of points in z = ', SSP%Nz
-       ALLOCATE( SSP%Seg%z( SSP%Nz ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
-       READ( SSPFile,  * ) SSP%Seg%z
-       !WRITE( PRTFile, * )
-       !WRITE( PRTFile, * ) 'z-coordinates of SSP (km):'
-       !WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%z( 1 : SSP%Nz )
-
-       ! SSP matrix should be bigger than 2x2x2
-       IF ( SSP%Nx < 2 .OR. SSP%Ny < 2 .OR. SSP%Nz < 2 ) THEN
-          CALL ERROUT( 'READIN: Hexahedral', &
-               'You must have a least two points in x, y, z directions in your 3D SSP field'  )
-       END IF
-
-       ALLOCATE( SSP%cMat3( SSP%Nx, SSP%Ny, SSP%Nz ), SSP%czMat3( SSP%Nx, SSP%Ny, SSP%Nz - 1 ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'READIN: Hexahedral', 'Insufficient memory to store SSP'  )
-
-       WRITE( PRTFile, * )
-       ! WRITE( PRTFile, * ) 'Sound speed matrix:'
-       DO iz2 = 1, SSP%Nz
-          DO iy2 = 1, SSP%Ny
-             READ(  SSPFile, * ) SSP%cMat3( :, iy2, iz2 )
-             ! WRITE( PRTFile, FMT="( 'z-section = ', F10.2, '  m' )"  ) SSP%Seg%z( iz2 )
-             ! WRITE( PRTFile, FMT="( 'y-section = ', F10.2, ' km' )"  ) SSP%Seg%y( iy2 )
-             ! WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%cMat3( :, iy2, iz2 )
-          END DO
-       END DO
-
-       CLOSE( SSPFile )
-
-       SSP%Seg%x = 1000.0 * SSP%Seg%x   ! convert km to m
-       SSP%Seg%y = 1000.0 * SSP%Seg%y   ! convert km to m
-
-       ! calculate cz
-       DO iSegxt = 1, SSP%Nx
-          DO iSegyt = 1, SSP%Ny
-             DO iz2 = 2, SSP%Nz
-                SSP%czMat3( iSegxt, iSegyt, iz2 - 1 ) = &
-                     ( SSP%cMat3( iSegxt, iSegyt, iz2 ) - SSP%cMat3( iSegxt, iSegyt, iz2 - 1 ) ) / &
-                     ( SSP%Seg%z(                 iz2 ) - SSP%Seg%z(                 iz2 - 1 ) )
-             END DO
-          END DO
-       END DO
-
-       ! over-ride the SSP%z values read in from the environmental file with these new values
-       SSP%NPts = SSP%Nz
-       SSP%z( 1 : SSP%Nz ) = SSP%Seg%z
-
-       RETURN
-    ELSE
-
-       ! *** Section to return SSP info ***
-
-       ! Check that x is inside the box where the sound speed is defined
-       IF ( x( 1 ) < SSP%Seg%x( 1 ) .OR. x( 1 ) > SSP%Seg%x( SSP%Nx ) .OR. &
-            x( 2 ) < SSP%Seg%y( 1 ) .OR. x( 2 ) > SSP%Seg%y( SSP%Ny ) ) THEN ! .OR. &
-!!$          x( 3 ) < SSP%Seg%z( 1 ) .OR. x( 3 ) > SSP%Seg%z( SSP%Nz ) ) THEN
-          WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
-          WRITE( PRTFile, * ) ' x = ( x, y, z ) = ', x
-          CALL ERROUT( 'Hexahedral', 'ray is outside the box where the soundspeed is defined' )
-       END IF
-
-       ! check x-segment contains x( 1 ) in [ SSP%Seg%x( iSegx ), SSP%Seg%x( iSegx + 1 ) )
-       !IF ( x( 1 ) <  SSP%Seg%x( iSegx     ) ) iSegx = MAX( 1,          iSegx - 1 )   ! bump left
-       !IF ( x( 1 ) >= SSP%Seg%x( iSegx + 1 ) ) iSegx = MIN( SSP%Nx - 1, iSegx + 1 )   ! bump right
-
-       IF ( x( 1 ) < SSP%Seg%x( iSegx ) .OR. x( 1 ) >= SSP%Seg%x( iSegx + 1 ) ) THEN
-!!$          DO iSegxT = 2, SSP%Nx   ! Search for bracketting segment ranges
-!!$             IF ( x( 1 ) < SSP%Seg%x( iSegxT ) ) THEN
-!!$                iSegx = iSegxT - 1
-!!$                EXIT
-!!$             END IF
-!!$          END DO
-
-          iSegxTT = MAXLOC( SSP%Seg%x( : ), SSP%Seg%x( : ) < x( 1 ) )
-
-          IF ( iSegxTT( 1 ) > 0 .AND. iSegxTT( 1 ) < SSP%Nx ) THEN  ! iSegx MUST LIE IN [ 1, SSP%Nx - 1 ]
-             iSegx = iSegxTT( 1 )   
-          END IF
-
-       END IF
-
-       ! check y-segment contains x( 2 ) in [ SSP%Seg%y( iSegy ), SSP%Seg%y( iSegy + 1 ) )
-       IF ( x( 2 ) < SSP%Seg%y( iSegy ) .OR. x( 2 ) >= SSP%Seg%y( iSegy + 1 ) ) THEN
-!!$          DO iSegyT = 2, SSP%Ny   ! Search for bracketting segment ranges
-!!$             IF ( x( 2 ) < SSP%Seg%y( iSegyT ) ) THEN
-!!$                iSegy = iSegyT - 1
-!!$                EXIT
-!!$             END IF
-!!$          END DO
-
-          iSegyTT = MAXLOC( SSP%Seg%y( : ), SSP%Seg%y( : ) < x( 2 ) )
-
-          IF ( iSegyTT( 1 ) > 0 .AND. iSegyTT( 1 ) < SSP%Ny ) THEN  ! iSegx MUST LIE IN [ 1, SSP%Ny - 1 ]
-             iSegy = iSegyTT( 1 )   
-          END IF
-
-       END IF
-
-       ! check depth-layer contains x( 3 ) in [ SSP%Seg%z( iSegz ), SSP%Seg%z( iSegz + 1 ) ]
-       IF ( x( 3 ) < SSP%Seg%z( iSegz ) .OR. x( 3 ) > SSP%Seg%z( iSegz + 1 ) ) THEN
-!!$          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
-!!$             IF ( x( 3 ) < SSP%Seg%z( iz ) ) THEN
-!!$                iSegz = iz - 1
-!!$                EXIT
-!!$             END IF
-!!$          END DO
-
-          iSegzTT = MAXLOC( SSP%Seg%z( : ), SSP%Seg%z( : ) < x( 3 ) )
-
-          IF ( iSegzTT( 1 ) > 0 .AND. iSegzTT( 1 ) < SSP%Nz ) THEN  ! iSegx MUST LIE IN [ 1, SSP%Nz - 1 ]
-             iSegz = iSegzTT( 1 )   
-          END IF
-
-       END IF
-
-       ! cz at the corners of the current rectangle
-       cz11 = SSP%czMat3( iSegx,     iSegy    , iSegz )
-       cz12 = SSP%czMat3( iSegx + 1, iSegy    , iSegz )
-       cz21 = SSP%czMat3( iSegx,     iSegy + 1, iSegz )
-       cz22 = SSP%czMat3( iSegx + 1, iSegy + 1, iSegz )
-
-       ! for this depth, x( 3 ) get the sound speed at the corners of the current rectangle
-       s3 = x( 3 ) - SSP%Seg%z( iSegz )
-       c11 = SSP%cMat3( iSegx,     iSegy    , iSegz ) + s3 * cz11
-       c21 = SSP%cMat3( iSegx + 1, iSegy    , iSegz ) + s3 * cz12
-       c12 = SSP%cMat3( iSegx,     iSegy + 1, iSegz ) + s3 * cz21
-       c22 = SSP%cMat3( iSegx + 1, iSegy + 1, iSegz ) + s3 * cz22
-
-       ! s1 = proportional distance of x( 1 ) in x
-       s1 = ( x( 1 ) - SSP%Seg%x( iSegx ) ) / ( SSP%Seg%x( iSegx + 1 ) - SSP%Seg%x( iSegx ) )
-       s1 = MIN( s1, 1.0D0 )   ! force piecewise constant extrapolation for points outside the box
-       s1 = MAX( s1, 0.0D0 )   ! "
-
-       ! s2 = proportional distance of x( 2 ) in y
-       s2 = ( x( 2 ) - SSP%Seg%y( iSegy ) ) / ( SSP%Seg%y( iSegy + 1 ) - SSP%Seg%y( iSegy ) )
-       s2 = MIN( s2, 1.0D0 )   ! force piecewise constant extrapolation for points outside the box
-       s2 = MAX( s2, 0.0D0 )   ! "
-
-       ! interpolate the soundspeed in the x direction, at the two endpoints in y (top and bottom sides of rectangle)
-       c1 = c11 + s1 * ( c21 - c11 )
-       c2 = c12 + s1 * ( c22 - c12 )
-       !c  = ( 1.0D0 - s2 ) * c1  + s2 * c2   ! interpolation in y
-       cy = ( c2 - c1 ) / ( SSP%Seg%y( iSegy + 1 ) - SSP%Seg%y( iSegy ) )
-
-       ! interpolate the soundspeed in the y direction, at the two endpoints in x (left and right sides of rectangle)
-       c1 = c11 + s2 * ( c12 - c11 )
-       c2 = c21 + s2 * ( c22 - c21 )
-
-       c  = c1  + s1 * ( c2 - c1   )   ! interpolation in x
-
-       ! interpolate the attenuation !!!! This will use the wrong segment if the ssp in the envil is sampled at different depths
-       s3 = s3 / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )   ! convert s3 to a proportional distance in thew layer
-       cimag = AIMAG( ( 1.0D0 - s3 ) * SSP%c( Isegz )  + s3 * SSP%c( Isegz + 1 ) )   ! volume attenuation is taken from the single c(z) profile
-
-       cx = ( c2 - c1 ) / ( SSP%Seg%x( iSegx + 1 ) - SSP%Seg%x( iSegx ) )
-
-       ! same thing on cz
-       cz1 = cz11 + s2 * ( cz21 - cz11 )
-       cz2 = cz12 + s2 * ( cz22 - cz12 )
-       cz  = cz1  + s1 * ( cz2  - cz1  )   ! interpolation in x
-
-       !gradc = [ cx, cy, cz ]
-       gradc( 1 ) = cx
-       gradc( 2 ) = cy
-       gradc( 3 ) = cz
-
-       cxx   = 0.0D0
-       cyy   = 0.0D0
-       czz   = 0.0D0
-       cxy   = 0.0D0
-       cxz   = 0.0D0
-       cyz   = 0.0D0
-       ! write( *, FMT="( 'SSP', I3, 2X, 4F10.2, F10.4 )" ) layer, x, c, cz
-
-       ! linear interpolation for density
-       W   = ( x( 3 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
-       rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
-    END IF
-
-  END SUBROUTINE Hexahedral
-
 !**********************************************************************!
 
   SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
@@ -848,81 +530,6 @@ END SUBROUTINE EvaluateSSP2D
 
     RETURN
   END SUBROUTINE Analytic
-
-  !**********************************************************************!
-
-  SUBROUTINE AnalyticCosh( x, c, cimag, gradc, crr, crz, czz, rho )
-
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
-    REAL (KIND=_RL90)                :: cr, cz, A, B, D, z
-
-    iSegz = 1
-    rho   = 1.0
-    
-    D = 3000.0
-    z = x( 2 )
-
-    A = 1500.0
-    B = 0.0003
-    D = 1500.0
-
-    c   =         A * COSH( B * ( Z - D ) )
-    cz  =     B * A * SINH( B * ( Z - D ) )
-    czz = B * B * A * COSH( B * ( Z - D ) )
-      
-    cimag = 0.
-
-    cr = 0.0
-    gradc = [ cr, cz ]
-    crz = 0.0
-    crr = 0.0
-
-    RETURN
-  END SUBROUTINE AnalyticCosh
-
-!**********************************************************************!
-
-SUBROUTINE Analytic3D( x, c, cimag, gradc, cxx, cyy, czz, cxy, cxz, cyz, rho )
-
-  REAL (KIND=_RL90) :: x( 3 ), c, cimag, gradc( 3 ), cxx, cyy, czz, cxy, cxz, &
-                       cyz, c0, W, Wz, epsilon, epsilon_y
-  REAL (KIND=_RL90) :: rho
-  
-  iSegz = 1
-  c0    = 1500.0
-  rho   = 1.0
-
-!!$  IF ( x( 3 ) .LT. 5000.0 ) THEN
-     epsilon   = 0.00737 + x( 2 ) / 100000.0 * 0.003
-     epsilon_y = 0.003 / 100000.0
-
-     W   = 2.0 * ( x( 3 ) - 1300.0 ) / 1300.0
-     Wz  = 2.0 / 1300.0
-
-     c           = c0 * ( 1.0 + epsilon * ( W - 1.0 + EXP( -W ) ) )
-     cimag       = 0.
-     gradc( 2 )  = c0 * epsilon_y * ( W - 1.0 + EXP( -W ) )
-     gradc( 3 )  = c0 * epsilon * ( 1.0 - EXP( -W ) ) * Wz
-     czz         = c0 * epsilon * EXP( -W ) * Wz **2
-     cyz         = c0 * epsilon_y * ( 1.0 - EXP( -W ) ) * Wz
-!!$  ELSE    ! HOMOGENEOUS HALF-SPACE
-!!$     W           = 2.0 * ( 5000.0 - 1300.0 ) / 1300.0
-!!$     c           = c0*( 1.0 + 0.00737 * ( W - 1.0 + EXP( -W ) ) )
-!!$     gradc( 2 )  = 0.0
-!!$     gradc( 3 )  = 0.0
-!!$     czz         = 0.0
-!!$     cyz         = 0.0
-!!$  END IF
-
-  gradc( 1 )  = 0.0
-  cxx = 0.0
-  cyy = 0.0
-  cxz = 0.0
-  cxy = 0.0
-
-  RETURN
-END SUBROUTINE Analytic3D
 
 !**********************************************************************!
 

@@ -55,7 +55,7 @@ CONTAINS
           IOSTAT = iostat, ACTION = 'READ' )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
        WRITE( PRTFile, * ) 'ENVFile = ', TRIM( FileRoot ) // '.env'
-       CALL ERROUT( 'BELLHOP - READIN', &
+       CALL ERROUT( 'READENV', &
                     'Unable to open the environmental file' )
     END IF
 
@@ -75,7 +75,7 @@ CONTAINS
 
     READ(  ENVFile, * ) NMedia
     WRITE( PRTFile, * ) 'Dummy parameter NMedia = ', NMedia
-    IF ( NMedia /= 1 ) CALL ERROUT( 'READIN', &
+    IF ( NMedia /= 1 ) CALL ERROUT( 'READENV', &
          'Only one medium or layer is allowed in BELLHOP; sediment layers must be handled using a reflection coefficient' )
 
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
@@ -122,7 +122,7 @@ CONTAINS
        WRITE( PRTFile, * ) '    Bathymetry file selected'
     CASE( '-', '_', ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown bottom option letter in second position' )
+       CALL ERROUT( 'READENV', 'Unknown bottom option letter in second position' )
     END SELECT
 
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
@@ -254,10 +254,10 @@ CONTAINS
           CASE ( 'S' )
              WRITE( PRTFile, * ) 'Standard curvature condition'
           CASE DEFAULT
-             CALL ERROUT( 'READIN', 'Unknown curvature condition' )
+             CALL ERROUT( 'READENV', 'Unknown curvature condition' )
           END SELECT
 
-          WRITE( PRTFile, * ) 'Epsilon multiplier', Beam%epsMultiplier
+          WRITE( PRTFile, * ) 'UNUSED epsMultiplier', Beam%epsMultiplier
           WRITE( PRTFile, * ) 'Range for choosing beam width', Beam%rLoop
 
           ! Images, windows
@@ -267,7 +267,7 @@ CONTAINS
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
           WRITE( PRTFile, * ) 'Component                 = ', Beam%Component
        CASE DEFAULT
-          CALL ERROUT( 'READIN', &
+          CALL ERROUT( 'READENV', &
               'Unknown beam type (second letter of run type)' )
        END SELECT
     END IF
@@ -313,7 +313,7 @@ CONTAINS
            FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
        IF ( IOSTAT /= 0 ) THEN   ! successful open?
           WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
-          CALL ERROUT( 'BELLHOP - READIN', 'Unable to open the SSP file' )
+          CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
        END IF
     CASE ( 'H' )
        WRITE( PRTFile, * ) '    Hexahedral approximation to SSP'
@@ -321,12 +321,12 @@ CONTAINS
            FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
        IF ( IOSTAT /= 0 ) THEN   ! successful open?
           WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
-          CALL ERROUT( 'BELLHOP - READIN', 'Unable to open the SSP file' )
+          CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
        END IF
     CASE ( 'A' )
        WRITE( PRTFile, * ) '    Analytic SSP option'
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown option for SSP approximation' )
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown option for SSP approximation' )
     END SELECT
 
     ! Attenuation options
@@ -345,7 +345,7 @@ CONTAINS
     CASE ( 'L' )
        WRITE( PRTFile, * ) '    Attenuation units: Loss parameter'
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown attenuation units' )
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown attenuation units' )
     END SELECT
 
     ! optional addition of volume attenuation using standard formulas
@@ -376,7 +376,7 @@ CONTAINS
        END DO
     CASE ( ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown top option letter in fourth position' )
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in fourth position' )
     END SELECT
 
     SELECT CASE ( TopOpt( 5 : 5 ) )
@@ -384,7 +384,7 @@ CONTAINS
        WRITE( PRTFile, * ) '    Altimetry file selected'
     CASE ( '-', '_', ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown top option letter in fifth position' )
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in fifth position' )
     END SELECT
 
     SELECT CASE ( TopOpt( 6 : 6 ) )
@@ -392,7 +392,7 @@ CONTAINS
        WRITE( PRTFile, * ) '    Development options enabled'
     CASE ( ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown top option letter in sixth position' )
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in sixth position' )
     END SELECT
 
   END SUBROUTINE ReadTopOpt
@@ -427,7 +427,7 @@ CONTAINS
     CASE ( 'a' )
        WRITE( PRTFile, * ) 'Arrivals calculation, binary file output'
     CASE DEFAULT
-       CALL ERROUT( 'READIN', 'Unknown RunType selected' )
+       CALL ERROUT( 'READENV: ReadRunType', 'Unknown RunType selected' )
     END SELECT
 
     SELECT CASE ( RunType( 2 : 2 ) )
@@ -465,7 +465,7 @@ CONTAINS
        PlotType = 'rectilin  '
     CASE ( 'I' )
        WRITE( PRTFile, * ) 'Irregular grid: Receivers at Rr( : ) x Rz( : )'
-       IF ( Pos%NRz /= Pos%NRr ) CALL ERROUT( 'READIN', &
+       IF ( Pos%NRz /= Pos%NRr ) CALL ERROUT( 'READENV: ReadRunType', &
            'Irregular grid option selected with NRz not equal to Nr' )
        PlotType = 'irregular '
     CASE DEFAULT
@@ -515,7 +515,7 @@ CONTAINS
     CASE ( 'P' )
        WRITE( PRTFile, * ) '    reading PRECALCULATED IRC'
     CASE DEFAULT
-       CALL ERROUT( 'TopBot', 'Unknown boundary condition type' )
+       CALL ERROUT( 'READENV: TopBot', 'Unknown boundary condition type' )
     END SELECT
 
     ! ****** Read in BC parameters depending on particular choice ******

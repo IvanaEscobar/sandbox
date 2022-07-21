@@ -211,16 +211,18 @@ SUBROUTINE BellhopCore
   REAL    (KIND=_RL90) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
-  COMPLEX (KIND=_RL90) :: epsilon
-
 
   omega = 2.0 * pi * freq
 
   Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
-  IF ( Angles%Nalpha /= 1 ) &
+  IF ( Angles%Nalpha > 1 ) THEN
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
+  ELSE
+      CALL ERROUT( 'BELLHOP CORE', 'remember Nalpha>1, else add iSingle_alpha
+      (see angleMod)' )
+  END IF
 
   ! convert range-dependent geoacoustic parameters from user to program units
   ! W is dB/wavelength
@@ -258,7 +260,7 @@ SUBROUTINE BellhopCore
   CASE ( 'C', 'S', 'I' )        ! TL calculation
      ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) &
-          CALL ERROUT( 'BELLHOP', &
+          CALL ERROUT( 'BELLHOP CORE', &
                        'Insufficient memory for TL matrix: reduce Nr * NRz'  )
   CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
      ALLOCATE ( U( 1, 1 ), Stat = iAllocStat )   ! open a dummy variable
@@ -274,7 +276,7 @@ SUBROUTINE BellhopCore
 
      ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
                 NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
+     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP CORE', &
           'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage' )
   CASE DEFAULT
      MaxNArr = 1
@@ -282,10 +284,13 @@ SUBROUTINE BellhopCore
                 NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
   END SELECT
 
-  NArr( 1 : NRz_per_range, 1 : Pos%NRr ) = 0 ! IEsco22 unnecessary? see L292
+  NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
 
   WRITE( PRTFile, * )
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !         begin solve         !
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SourceDepth: DO is = 1, Pos%NSz
      xs = [ zero, Pos%Sz( is ) ]   ! source coordinate, assuming source @ r=0
 
@@ -297,8 +302,9 @@ SUBROUTINE BellhopCore
      END SELECT
 
      CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
-     RadMax = 5 * c / freq  ! 5 wavelength max radius IEsco22: unused
 
+     !!IESCO22: BEAM stuff !!
+     RadMax = 5 * c / freq  ! 5 wavelength max radius IEsco22: unused
      IF ( Beam%RunType( 1 : 1 ) == 'C' ) THEN ! for Coherent TL Run
      ! Are there enough rays?
         DalphaOpt = SQRT( c / ( 6.0 * freq * Pos%Rr( Pos%NRr ) ) )
@@ -309,16 +315,17 @@ SUBROUTINE BellhopCore
            WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
         ENDIF
      ENDIF
+     !!IESCO22: end BEAM stuff !!
 
      ! Trace successive beams
-
      DeclinationAngle: DO ialpha = 1, Angles%Nalpha
         ! take-off declination angle in degrees
         SrcDeclAngle = RadDeg * Angles%alpha( ialpha ) 
 
-        ! Single ray run?
+        ! Single ray run? then don't visit code below
         IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN
 
+           !!IESCO22: BEAM stuff !!
            IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) &
                     < SrcDeclAngle )  ! index of ray angle in beam pattern
            IBP    = IBPvec( 1 )
@@ -330,13 +337,15 @@ SUBROUTINE BellhopCore
            s    = ( SrcDeclAngle  - SrcBmPat( IBP, 1 ) ) &
                   / ( SrcBmPat( IBP + 1, 1 ) - SrcBmPat( IBP, 1 ) )
            Amp0 = ( 1 - s ) * SrcBmPat( IBP, 2 ) + s * SrcBmPat( IBP + 1, 2 )
+           ! IEsco22: When a beam pattern isn't specified, Amp0 = 0
 
            ! Lloyd mirror pattern for semi-coherent option
            IF ( Beam%RunType( 1 : 1 ) == 'S' ) &
               Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( omega / c * xs( 2 ) &
                      * SIN( Angles%alpha( ialpha ) ) ) )
+           !!IESCO22: end BEAM stuff !!
 
-           ! print progress in PRTFile
+           ! report progress in PRTFile (skipping some angles)
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) &
                      ialpha, SrcDeclAngle
@@ -349,11 +358,6 @@ SUBROUTINE BellhopCore
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
            ELSE ! Compute the contribution to the field
-              ! 'optimal' beam constant
-              epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, &
-                                     Angles%alpha( ialpha ), Angles%Dalpha, &
-                                     Beam%rLoop, Beam%epsMultiplier )
-
               SELECT CASE ( Beam%Type( 1 : 1 ) )
               CASE ( 'g' )
                  CALL InfluenceGeoHatRayCen( U, Angles%alpha( ialpha ), &
@@ -363,7 +367,7 @@ SUBROUTINE BellhopCore
               CASE ( 'B' )
                  CALL InfluenceGeoGaussianCart( U, Angles%alpha( ialpha ), &
                                                 Angles%Dalpha )
-             CASE DEFAULT
+             CASE DEFAULT !IEsco22: thesis is in default behavior
                  CALL InfluenceGeoHatCart( U, Angles%alpha( ialpha ), &
                                            Angles%Dalpha )
               END SELECT
@@ -395,84 +399,6 @@ SUBROUTINE BellhopCore
 
 
 END SUBROUTINE BellhopCore
-
-! **********************************************************************!
-
-COMPLEX (KIND=_RL90) FUNCTION PickEpsilon( BeamType, omega, c, gradc, alpha, &
-                                           Dalpha, rLoop, EpsMultiplier )
-
-  ! Picks the optimum value for epsilon
-
-  ! angular frequency, sound speed and gradient
-  REAL (KIND=_RL90), INTENT( IN  )  :: omega, c, gradc( 2 ) 
-  ! angular spacing for ray fan
-  REAL (KIND=_RL90), INTENT( IN  )  :: alpha, Dalpha        
-  ! multiplier, loop range
-  REAL (KIND=_RL90),  INTENT( IN  ) :: epsMultiplier, Rloop 
-  CHARACTER (LEN= 2), INTENT( IN  ) :: BeamType
-  LOGICAL, SAVE                     :: INIFlag = .TRUE.
-  REAL (KIND=_RL90)                 :: HalfWidth
-  REAL (KIND=_RL90)                 :: cz
-  COMPLEX   (KIND=_RL90)            :: epsilonOpt
-  CHARACTER (LEN=40)                :: TAG
-
-  SELECT CASE ( BeamType( 1:1 ) )
-  CASE ( 'C', 'R' )
-     TAG    = 'Paraxial beams'
-     SELECT CASE ( BeamType( 2:2 ) )
-     CASE ( 'F' )
-        TAG       = 'Space filling beams'
-        halfwidth = 2.0 / ( ( omega / c ) * Dalpha )
-        epsilonOpt    = i * 0.5 * omega * halfwidth ** 2
-     CASE ( 'M' )
-        TAG       = 'Minimum width beams'
-        halfwidth = SQRT( 2.0 * c * 1000.0 * rLoop / omega )
-        epsilonOpt    = i * 0.5 * omega * halfwidth ** 2
-     CASE ( 'W' )
-        TAG       = 'WKB beams'
-        halfwidth = HUGE( halfwidth )
-        cz        = gradc( 2 )
-        IF ( cz == 0.0 ) THEN
-           epsilonOpt = 1.0D10
-        ELSE
-           epsilonOpt = ( -SIN( alpha ) / COS( alpha ** 2 ) ) * c * c / cz
-        ENDIF
-     END SELECT
-
-  CASE ( 'G', 'g' )
-     TAG        = 'Geometric hat beams'
-     halfwidth  = 2.0 / ( ( omega / c ) * Dalpha )
-     epsilonOpt = i * 0.5 * omega * halfwidth ** 2
-
-  CASE ( 'B' )
-     TAG        = 'Geometric Gaussian beams'
-     halfwidth  = 2.0 / ( ( omega / c ) * Dalpha )
-     epsilonOpt = i * 0.5 * omega * halfwidth ** 2
-
-  CASE ( 'b' )
-     CALL ERROUT( 'BELLHOP', &
-         'Geo Gaussian beams in ray-cent. coords. not implemented in BELLHOP' )
-
-  CASE ( 'S' )
-     TAG        = 'Simple Gaussian beams'
-     halfwidth  = 2.0 / ( ( omega / c ) * Dalpha )
-     epsilonOpt = i * 0.5 * omega * halfwidth ** 2
-  END SELECT
-
-  PickEpsilon = EpsMultiplier * epsilonOpt
-
-  ! On first call write info to prt file
-  IF ( INIFlag ) THEN
-     WRITE( PRTFile, * )
-     WRITE( PRTFile, * ) TAG
-     WRITE( PRTFile, * ) 'halfwidth  = ', halfwidth
-     WRITE( PRTFile, * ) 'epsilonOpt = ', epsilonOpt
-     WRITE( PRTFile, * ) 'EpsMult    = ', EpsMultiplier
-     WRITE( PRTFile, * )
-     INIFlag = .FALSE.
-  END IF
-
-END FUNCTION PickEpsilon
 
 ! **********************************************************************!
 
