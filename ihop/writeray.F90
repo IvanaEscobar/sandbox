@@ -23,7 +23,7 @@ MODULE writeRay
 ! public interfaces
 !=======================================================================
 
-    public WriteRay2D, WriteRay3D
+    public WriteRay2D
 
 !=======================================================================
 
@@ -68,51 +68,5 @@ CONTAINS
   END SUBROUTINE WriteRay2D
 
   ! **********************************************************************!
-
-  SUBROUTINE WriteRay3D( alpha0, beta0, Nsteps1, xs )
-
-    ! The 3D version is for ray traces in (x,y,z) coordinates
-
-    INTEGER,       INTENT( IN ) :: Nsteps1
-    REAL (KIND=_RL90), INTENT( IN ) :: alpha0, beta0   ! take-off angle of ray
-    REAL (KIND=_RL90), INTENT( IN ) :: xs( 3 )         ! source location
-
-    ! if Nx2D run, copy r-z rays to x-y-z rays
-
-    IF ( Beam%RunType( 6 : 6 ) == '2' ) THEN
-       ray3D%x( 1 )    = xs( 1 ) + ray2D%x( 1 ) * COS( beta0 )
-       ray3D%x( 2 )    = xs( 2 ) + ray2D%x( 1 ) * SIN( beta0 )
-       ray3D%x( 3 )    = ray2D%x( 2 )
-       ray3D%NumTopBnc = ray2D%NumTopBnc
-       ray3D%NumBotBnc = ray2D%NumBotBnc
-    END IF
-
-    ! compression
-
-    N2    = 1
-    iSkip = MAX( Nsteps1 / MaxNRayPoints, 1 )
-    iSkip = 1
-
-    Stepping: DO is = 2, Nsteps1
-       ! ensure that we always write ray points near boundary reflections
-       IF ( MIN( Bdry%Bot%HS%Depth - ray3D( is )%x( 3 ),  &
-                 ray3D( is )%x( 3 ) - Bdry%Top%HS%Depth ) < 0.2 .OR. &
-            MOD( is, iSkip ) == 0 .OR. is == Nsteps1 ) THEN
-          N2 = N2 + 1
-          ray3D( N2 )%x = ray3D( is )%x
-       END IF
-    END DO Stepping
-
-    ! write to ray file
-
-    WRITE( RAYFile, * ) alpha0
-    WRITE( RAYFile, * ) N2, ray3D( Nsteps1 )%NumTopBnc, &
-                        ray3D( Nsteps1 )%NumBotBnc
-
-    DO is = 1, N2
-       WRITE( RAYFile, * ) ray3D( is )%x
-    END DO
-
-  END SUBROUTINE WriteRay3D
 
 END MODULE writeRay
