@@ -176,11 +176,17 @@ CONTAINS
             Beam%Box%z
     ELSE
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%z, Beam%Box%r
-
        WRITE( PRTFile, * )
-       WRITE( PRTFile, &
-              fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
-            Beam%deltas
+       IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
+           Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+           WRITE( PRTFile, &
+                  fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatic step)'' )' ) & 
+                Beam%deltas
+       ELSE
+            WRITE( PRTFile, &
+                   fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
+                 Beam%deltas
+       END IF
        WRITE( PRTFile, * )
        WRITE( PRTFile, &
               fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) &

@@ -174,11 +174,15 @@ SUBROUTINE IHOP_INIT
     END IF
   END IF
 
+  ! open all output files
   CALL OpenOutputFiles( FileRoot, ThreeD )
+
+  ! Run Bellhop solver
+  CALL CPU_TIME( Tstart )
   CALL BellhopCore
+  CALL CPU_TIME( Tstop )
 
   ! Display run time
-  CALL CPU_TIME( Tstop )
   WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
 
   ! close all files
@@ -210,16 +214,7 @@ SUBROUTINE BellhopCore
   COMPLEX (KIND=_RL90) :: epsilon
 
 
-  CALL CPU_TIME( Tstart )
-
   omega = 2.0 * pi * freq
-
-  IF ( Beam%deltas == 0.0 ) THEN
-      ! Automatic step size selection; done when last line of .env starts w 0.0
-     Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
-     WRITE( PRTFile, * )
-     WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatically selected)'' )' ) Beam%deltas
-  END IF
 
   Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
