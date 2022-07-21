@@ -50,21 +50,7 @@ clean:
 	#(cd ../tests;  make -k -i clean)
 	-rm -f *.o *.mod *.exe *_genmod.f90
 
-### COVERAGE TARGETS ###
-cov:
-	$(GCOV) *.f90
-
-lcov-report:
-	mkdir -p $(LCOV_DIR)
-	$(LCOV) --compat-libtool --capture --directory . --output-file $(LCOV_DIR)/coverage.info --gcov-tool $(GCOV)
-	genhtml -t "ihop" -o $(LCOV_DIR)/html $(LCOV_DIR)/coverage.info
-	open $(LCOV_DIR)/html/index.html
-
-cov-reset:
-	find ../ -name '*.gcda'  -exec rm -r {} +
-	find ../ -name '*.gcno'  -exec rm -r {} +
-
-cleanall: clean cov-reset
+cleanall: clean
 
 # Declare implicit rules (for make utilities with missing or broken build rules)
 
