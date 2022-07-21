@@ -155,25 +155,43 @@ SUBROUTINE IHOP_INIT
      SrcBmPat( 2, : ) = [  180.0, 0.0 ]
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
-     ! Read .env file
+     ! Read .env file: REQUIRED
      CALL ReadEnvironment(  FileRoot, ThreeD )
-     ! AlTImetry
+     ! AlTImetry: OPTIONAL, default is no ATIFile
      CALL ReadATI( FileRoot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
-     ! BaThYmetry
+     ! BaThYmetry: OPTIONAL, default is no BTYFile
      CALL ReadBTY( FileRoot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, PRTFile )
-     ! (top and bottom)
+     ! (top and bottom): OPTIONAL
      CALL ReadReflectionCoefficient( FileRoot, Bdry%Bot%HS%Opt( 1:1 ), &
                                      Bdry%Top%HS%Opt( 2:2 ), PRTFile ) 
+     ! Source Beam Pattern: OPTIONAL, default is omni source pattern
      SBPFlag = Beam%RunType( 3:3 )
-     CALL ReadPat( FileRoot, PRTFile )   ! Source Beam Pattern
-     ! dummy bearing angles
-     Pos%Ntheta = 1
-     ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
-     Pos%theta( 1 ) = 0.
+     CALL ReadPat( FileRoot, PRTFile )
+     ! 3d angle data: unmodified and unused in 2d code; dummy bearing angles
+     IF ( ThreeD == .FALSE. ) THEN
+        ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
+        Pos%theta( 1 ) = 0.
+    END IF
   END IF
 
   CALL OpenOutputFiles( FileRoot, ThreeD )
   CALL BellhopCore
+
+  ! Display run time
+  CALL CPU_TIME( Tstop )
+  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+
+  ! close all files
+  SELECT CASE ( Beam%RunType( 1 : 1 ) )
+  CASE ( 'C', 'S', 'I' )      ! TL calculation
+     CLOSE( SHDFile )
+  CASE ( 'A', 'a' )           ! arrivals calculation
+     CLOSE( ARRFile )
+  CASE ( 'R', 'E' )           ! ray and eigen ray trace
+     CLOSE( RAYFile )
+  END SELECT
+
+  CLOSE( PRTFile )
 END SUBROUTINE IHOP_INIT
 
 ! **********************************************************************!
@@ -380,21 +398,6 @@ SUBROUTINE BellhopCore
 
   END DO SourceDepth
 
-  ! Display run time
-  CALL CPU_TIME( Tstop )
-  WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
-
-  ! close all files
-  SELECT CASE ( Beam%RunType( 1 : 1 ) )
-  CASE ( 'C', 'S', 'I' )      ! TL calculation
-     CLOSE( SHDFile )
-  CASE ( 'A', 'a' )           ! arrivals calculation
-     CLOSE( ARRFile )
-  CASE ( 'R', 'E' )           ! ray and eigen ray trace
-     CLOSE( RAYFile )
-  END SELECT
-
-  CLOSE( PRTFile )
 
 END SUBROUTINE BellhopCore
 

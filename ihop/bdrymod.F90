@@ -7,10 +7,12 @@ MODULE bdrymod
     ! </CONTACT>
 
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
+  ! IEsco22: want to rname this for clarity to readTopBot since it takes user
+  ! input and populates various structures used in the code
 
-  USE monotonicMod, only: monotonic
-  USE ihop_fatalError,   only: ERROUT
-  USE iHopParams,   only: PRTFile, ATIFile, BTYFile
+  USE monotonicMod,     only: monotonic
+  USE ihop_fatalError,  only: ERROUT
+  USE iHopParams,       only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
   PRIVATE

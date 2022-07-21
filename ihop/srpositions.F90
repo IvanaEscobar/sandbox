@@ -32,7 +32,8 @@ MODULE srPositions
 
   TYPE Position
      ! NOTE: use ReadVector subroutine to see if there are more than 1 source
-     INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
+     INTEGER              ::    NSx = 1, NSy = 1, Ntheta=1,  & ! 3D source coord
+                                NSz, NRz, NRr   ! 2D source z, r, coord
      INTEGER, ALLOCATABLE :: iSz( : ), iRz( : ) ! indices for interpolation of source and receiver weights
      REAL (KIND=_RL90), ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : ), & ! Source coord
                                        Rr( : ), Rz( : ), & ! receiver coord
