@@ -38,9 +38,9 @@ MISC_OBJECTS 	= 	FatalError.o 		AttenMod.o 		beampattern.o \
 TSLIB_OBJECTS 	= 	bandpassc.o			cans.o			cfft.o hilbert.o\
 					preenv.o			sourceMod.o
 BELLHOP_OBJECTS	=	angleMod.o			ArrMod.o 		bdryMod.o \
-					bellhopMod.o 		sspMod.o 		ReflectMod.o \
-					WriteRay.o 			influence.o 	Step.o \
-					ReadEnvironmentBell.o bellhop.o	
+					bellhopMod.o 		sspMod.o 		WriteRay.o \
+					influence.o 		Step.o 			ReadEnvironmentBell.o \
+					bellhop.o	
 BELLHOP_LIBS =
 
 all: $(EXECUTABLES)
@@ -166,20 +166,11 @@ bdryMod.o bdrymod.mod: bdryMod.f90
 bellhopMod.o bellhopmod.mod: bellhopMod.f90
 	$(FC) -c $(FFLAGS) $< 
 
-Cone.o cone.mod: Cone.f90
-	$(FC) -c $(FFLAGS) $<
-
 influence.o influence.mod: influence.f90
 	$(FC) -c $(FFLAGS) $< 
 
-RayNormals.o raynormals.mod: RayNormals.f90
-	$(FC) -c $(FFLAGS) $<
-
 ReadEnvironmentBell.o readenvironmentbell.mod: ReadEnvironmentBell.f90
 	$(FC) -c $(FFLAGS) $< 
-
-ReflectMod.o   reflectmod.mod:   ReflectMod.f90   Cone.o
-	$(FC) -c $(FFLAGS) $<
 
 sspMod.o sspmod.mod: sspMod.f90
 	$(FC) -c $(FFLAGS) $< 
@@ -190,4 +181,7 @@ Step.o step.mod: Step.f90
 WriteRay.o writeray.mod: WriteRay.f90
 	$(FC) -c $(FFLAGS) $<
 
-bellhop.o:   arrmod.mod anglemod.mod bdrymod.mod   readenvironmentbell.mod bellhopmod.mod sspmod.mod reflectmod.mod                  writeray.mod raynormals.mod influence.mod   step.mod      bellhop.f90
+bellhop.o:  arrmod.mod 				anglemod.mod	bdrymod.mod \
+			readenvironmentbell.mod bellhopmod.mod 	sspmod.mod \
+			writeray.mod 			influence.mod   step.mod \
+			bellhop.f90
