@@ -346,7 +346,7 @@ CONTAINS
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
                                         rho ! sound speed and its derivatives
-    INTEGER             :: AllocateStatus, iSegT, iz2
+    INTEGER             :: AllocateStatus, irT, iz2
     REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
     
     IF ( Task == 'INI' ) THEN
@@ -401,11 +401,11 @@ CONTAINS
        SSP%Nz = SSP%NPts
        RETURN
 
-    ELSE
-
+    ELSE ! Task == 'TAB'
        ! *** Section to return SSP info ***
 
-       ! check depth-layer contains x( 2 ) in [ SSP%z( iSegz ), SSP%z( iSegz + 1 ) ]
+       ! IESCO22: iSegz is the depth index containing x depth
+       ! find depth-layer where x(2) in ( SSP%z( iSegz ), SSP%z( iSegz+1 ) )
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
@@ -415,83 +415,61 @@ CONTAINS
           END DO
        END IF
 
-       ! The following tries to be more efficient than the code above by 
-       ! searching away from the current layer
-       ! rather than searching through all the layers
-       ! However, seems to be no faster
-       ! Also, this code caused a problem on at/tests/Gulf for the 
-       ! range-dep. test cases
-!!$     IF ( x( 2 ) < SSP%z( iSegz ) .AND. iSegz > 1 ) THEN
-!!$        DO iz = iSegz - 1, 1, -1   ! Search for bracketting Depths
-!!$           IF ( x( 2 ) > SSP%z( iz ) ) THEN
-!!$              iSegz = iz
-!!$              EXIT
-!!$           END IF
-!!$        END DO
-!!$     END IF
-!!$
-!!$     IF ( x( 2 ) > SSP%z( iSegz + 1 ) .AND. iSegz < SSP%NPts - 2 ) THEN
-!!$        DO iz = iSegz + 2, SSP%NPts   ! Search for bracketting Depths
-!!$           IF ( x( 2 ) < SSP%z( iz ) ) THEN
-!!$              iSegz = iz - 1
-!!$              EXIT
-!!$           END IF
-!!$        END DO
-!!$     END IF
-
-       ! Check that x is inside the box where the sound speed is defined
-       IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN ! .OR. &
+       ! Check if x is inside the range of box where the sound speed is defined
+       IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
           CALL ERROUT( 'SSPMOD: Quad', 'ray is outside the box where the soundspeed is defined' )
        END IF
 
-       ! check range-segment contains x( 1 ) in [ SSP%Seg%r( iSSP%Seg ), SSP%Seg%r( iSegr + 1 ) )
+       ! find range-layer where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
        IF ( x( 1 ) < SSP%Seg%r( iSegr ) .OR. x( 1 ) >= SSP%Seg%r( iSegr + 1 ) ) THEN
-          DO iSegT = 2, SSP%Nr   ! Search for bracketting segment ranges
-             IF ( x( 1 ) < SSP%Seg%r( iSegT ) ) THEN
-                iSegr = iSegT - 1
+          DO irT = 2, SSP%Nr   ! Search for bracketting segment ranges
+             IF ( x( 1 ) < SSP%Seg%r( irT ) ) THEN
+                iSegr = irT - 1
                 EXIT
              END IF
           END DO
        END IF
 
-       ! for this depth, x( 2 ), get the sound speed at both ends of the segment
-       cz1 = SSP%czMat( iSegz, iSegr )
-       cz2 = SSP%czMat( iSegz, iSegr + 1 )
+       ! for depth, x(2), get the sound speed at both ends of range segment
+       cz1 = SSP%czMat( iSegz, iSegr   )
+       cz2 = SSP%czMat( iSegz, iSegr+1 )
 
-       s2      = x( 2 ) - SSP%z( iSegz )
-       delta_z = SSP%z( iSegz + 1 ) - SSP%z( iSegz )
+       ! IESCO22: s2 is distance btwn field point, x(2), and ssp depth @ iSegz
+       s2      = x( 2 )           - SSP%z( iSegz )            
+       delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
+       IF (delta_z <= 0 .OR. s2 > delta_z) CALL ERROUT('SSPMOD: Quad', &
+           'depth is not monotonically increasing in SSPFile')
        
-       c1 = SSP%cMat( iSegz, iSegr     ) + s2 * cz1
-       c2 = SSP%cMat( iSegz, iSegr + 1 ) + s2 * cz2
+       c1 = SSP%cMat( iSegz, iSegr   ) + s2*cz1
+       c2 = SSP%cMat( iSegz, iSegr+1 ) + s2*cz2
 
-       ! s1 = proportional distance of x( 1 ) in range
-       delta_r = ( SSP%Seg%r( iSegr + 1 ) - SSP%Seg%r( iSegr ) )
+       ! s1 = proportional distance of x(1) in range
+       delta_r = SSP%Seg%r( iSegr+1 ) - SSP%Seg%r( iSegr )
        s1 = ( x( 1 ) - SSP%Seg%r( iSegr ) ) / delta_r
-       s1 = MIN( s1, 1.0D0 )   ! force piecewise constant extrapolation for points outside the box
+       s1 = MIN( s1, 1.0D0 )   ! piecewise constant extrapolation for ranges outside SSPFile box
        s1 = MAX( s1, 0.0D0 )   ! "
 
-       c     = ( 1.0D0 - s1 ) * c1  + s1 * c2
+       c = ( 1.0D0-s1 )*c1 + s1*c2 ! c @ x
 
-       ! interpolate the attenuation !!!! This will use the wrong segment if the ssp in the envil is sampled at different depths
-       s2    = s2 / delta_z   ! convert to a proportional depth in the layer
-       cimag = AIMAG( ( 1.0D0 - s2 ) * SSP%c( Isegz )  + s2 * SSP%c( Isegz + 1 ) )   ! volume attenuation is taken from the single c(z) profile
+       ! interpolate the attenuation !!!! SSP in ENVFile needs to match first column of SSPFile
+       s2    = s2 / delta_z   ! normalize depth layer
+       cimag = AIMAG( ( 1.0D0-s2 )*SSP%c( Isegz )  + s2*SSP%c( Isegz+1 ) )   ! volume attenuation is taken from the single c(z) profile
+       ! vertical linear interpolation for density 
+       rho = ( 1.0D0-s2 )*SSP%rho( iSegz ) + s2*SSP%rho( iSegz+1 )
 
-       cz  = ( 1.0D0 - s1 ) * cz1 + s1 * cz2
+       cz  = ( 1.0D0-s1 )*cz1 + s1*cz2 ! cz @ x
 
-       cr  = ( c2  - c1  ) / delta_r
-       crz = ( cz2 - cz1 ) / delta_r
+       cr  = ( c2  - c1  ) / delta_r ! SSPFile grid cr
+       crz = ( cz2 - cz1 ) / delta_r ! SSPFile grid crz
 
        gradc = [ cr, cz ]
        crr   = 0.0D0
        czz   = 0.0D0
-
-       ! linear interpolation for density
-       W   = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
-       rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
 
+    !IESCO22: for thesis, czz=crr=0, and rho=1 at all times
   END SUBROUTINE Quad
 
 !**********************************************************************!

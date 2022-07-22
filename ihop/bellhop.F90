@@ -404,13 +404,13 @@ END SUBROUTINE BellhopCore
 
 SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
-  ! Traces the beam corresponding to a particular take-off angle
+  ! Traces the beam corresponding to a particular take-off angle, alpha
 
   USE step,     only: Step2D
 
-  REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! x-y coordinate of the source
-  REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! initial angle, amplitude
-  INTEGER           :: is, is1                   ! index for a ray step
+  REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! coordinate of source
+  REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! init angle, beam amplitude
+  INTEGER           :: is, is1                   ! indices for ray step
   REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), &
                        ToptInt( 2 ), BottInt( 2 )
@@ -418,22 +418,21 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   REAL (KIND=_RL90) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot 
   REAL (KIND=_RL90) :: sss
 
-  ! Initial conditions
-
+  ! Initial conditions (IC)
   iSmallStepCtr = 0
   CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
-  ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! Init Cond unit vector
-  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! Init Cond unit vector
+  ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! IC unit vector
+  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! IC unit vector
   ray2D( 1 )%tau       = 0.0
   ray2D( 1 )%Amp       = Amp0
   ray2D( 1 )%Phase     = 0.0
   ray2D( 1 )%NumTopBnc = 0
   ray2D( 1 )%NumBotBnc = 0
 
-  ! second component of q is not used in geometric beam tracing
+  ! second component of qv is not used in geometric beam tracing
   ! set I.C. to 0 in hopes of saving run time
   IF ( Beam%RunType( 2 : 2 ) == 'G' ) ray2D( 1 )%q = [ 0.0, 0.0 ]
 
