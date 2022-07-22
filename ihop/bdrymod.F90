@@ -399,7 +399,7 @@ CONTAINS
     IF ( IsegTopT( 1 ) > 0 .AND. IsegTopT( 1 ) < NatiPts ) THEN  
        IsegTop = IsegTopT( 1 )
        ! segment limits in range
-       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop + 1 )%x( 1 ) ]   
+       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop+1 )%x( 1 ) ]   
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )

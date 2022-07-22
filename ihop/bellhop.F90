@@ -404,7 +404,7 @@ END SUBROUTINE BellhopCore
 
 SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
-  ! Traces the beam corresponding to a particular take-off angle, alpha
+  ! Traces the beam corresponding to a particular take-off angle, alpha [rad]
 
   USE step,     only: Step2D
 
@@ -425,29 +425,31 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
   ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! IC unit vector
-  ray2D( 1 )%q         = [ 0.0, 1.0 ]   ! IC unit vector
+  ! second component of qv is not used in geometric beam tracing
+  ! set I.C. to 0 in hopes of saving run time
+  IF ( Beam%RunType( 2:2 ) == 'G' ) THEN
+      ray2D( 1 )%q = [ 0.0, 0.0 ]
+  ELSE
+      ray2D( 1 )%q = [ 0.0, 1.0 ]   ! IC unit vector
+  END IF
   ray2D( 1 )%tau       = 0.0
   ray2D( 1 )%Amp       = Amp0
   ray2D( 1 )%Phase     = 0.0
   ray2D( 1 )%NumTopBnc = 0
   ray2D( 1 )%NumBotBnc = 0
 
-  ! second component of qv is not used in geometric beam tracing
-  ! set I.C. to 0 in hopes of saving run time
-  IF ( Beam%RunType( 2 : 2 ) == 'G' ) ray2D( 1 )%q = [ 0.0, 0.0 ]
+  ! IESCO22: update IsegTop, rTopSeg and IsegBot, rBotSeg in bdrymod.f90
+  CALL GetTopSeg( xs(1) )   ! identify alimetry   segment above the source
+  CALL GetBotSeg( xs(1) )   ! identify bathymetry segment below the source
 
-  CALL GetTopSeg( xs( 1 ) )   ! identify the top    segment above the source
-  CALL GetBotSeg( xs( 1 ) )   ! identify the bottom segment below the source
-
-  ! convert range-dependent geoacoustic parameters from user to program units
-  ! compiler is not accepting the copy of the whole structure at once ...
+  ! IESCO22: 'L' is long format. See BeadBTY s/r in bdrymod.f90. Default is to
+  ! calculate cp, cs, and rho instead of reading them in
   IF ( atiType( 2 : 2 ) == 'L' ) THEN
      ! grab the geoacoustic info for the new segment
      Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   
      Bdry%Top%HS%cs  = Top( IsegTop )%HS%cs
      Bdry%Top%HS%rho = Top( IsegTop )%HS%rho
   END IF
-
   IF ( btyType( 2 : 2 ) == 'L' ) THEN
      Bdry%Bot%HS%cp  = Bot( IsegBot )%HS%cp
      Bdry%Bot%HS%cs  = Bot( IsegBot )%HS%cs
@@ -464,9 +466,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
      Beam%Nsteps = 1
      WRITE( PRTFile, * ) &
-         'Terminating the ray trace because the source is on or', &
-         ' outside the boundaries'
-     RETURN       ! source must be within the medium
+         'WARNING: TraceRay2D: The source is outside the domain boundaries'
+     RETURN       ! source must be within the domain
   END IF
 
   Stepping: DO istep = 1, MaxN - 1
@@ -482,7 +483,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
           ray2D( is1 )%x( 1 ) > rTopSeg( 2 ) ) THEN
         CALL GetTopSeg( ray2D( is1 )%x( 1 ) )
         IF ( atiType( 2 : 2 ) == 'L' ) THEN
-           ! grab the geoacoustic info for the new segment, cp
+           ! ATIFile geoacoustic info from new segment, cp
            Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   
            Bdry%Top%HS%cs  = Top( IsegTop )%HS%cs
            Bdry%Top%HS%rho = Top( IsegTop )%HS%rho
@@ -494,62 +495,64 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
           ray2D( is1 )%x( 1 ) > rBotSeg( 2 ) ) THEN
         CALL GetBotSeg( ray2D( is1 )%x( 1 ) )
         IF ( btyType( 2 : 2 ) == 'L' ) THEN
-           ! grab the geoacoustic info for the new segment, cp
+           ! BTYFile geoacoustic info from new segment, cp
            Bdry%Bot%HS%cp  = Bot( IsegBot )%HS%cp   
            Bdry%Bot%HS%cs  = Bot( IsegBot )%HS%cs
            Bdry%Bot%HS%rho = Bot( IsegBot )%HS%rho
         END IF
      END IF
 
-     ! Reflections?
-     ! Tests that ray at step is IS inside, and ray at step is+1 is outside
-     ! to detect only a crossing from inside to outside
+     ! Reflections
+     ! Tests ray at step is IS inside, and ray at step is+1 IS outside
      ! DistBeg is the distance at step is,   which is saved
      ! DistEnd is the distance at step is+1, which needs to be calculated
 
      CALL Distances2D( ray2D( is1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                        dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, &
                        DistEndTop, DistEndBot )
+     
+     ! IESCO22: Did ray cross top boundary? Then reflect
+     IF ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN 
 
-     IF ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN  ! test top reflection
-
-        IF ( atiType == 'C' ) THEN
+        IF ( atiType == 'C' ) THEN ! curvilinear interpolation
            ! proportional distance along segment
            sss     = DOT_PRODUCT( dEndTop, Top( IsegTop )%t ) &
                      / Top( IsegTop )%Len
-           ToptInt = ( 1 - sss ) * Top( IsegTop )%Nodet &
-                     + sss * Top( 1 + IsegTop )%Nodet
-           TopnInt = ( 1 - sss ) * Top( IsegTop )%Noden &
-                     + sss * Top( 1 + IsegTop )%Noden
+           ToptInt = ( 1-sss ) * Top( IsegTop   )%Nodet &
+                     + sss     * Top( 1+IsegTop )%Nodet
+           TopnInt = ( 1-sss ) * Top( IsegTop   )%Noden &
+                     + sss     * Top( 1+IsegTop )%Noden
         ELSE
            TopnInt = Top( IsegTop )%n   ! normal is constant in a segment
            ToptInt = Top( IsegTop )%t
         END IF
 
         CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, &
-                        Top( IsegTop )%kappa, RTop, NTopPTS )
+                        Top( IsegTop )%kappa, RTop, NTopPTS ) !IESCO22 is incremented?
         ray2D( is+1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, & 
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,&
                           DistEndTop, DistEndBot )
 
-     ELSE IF ( DistBegBot > 0.0d0 .AND. DistEndBot <= 0.0d0 ) THEN  ! test bottom reflection
+     ! IESCO22: Did ray cross bottom boundary? Then reflect
+     ELSE IF ( DistBegBot > 0.0d0 .AND. DistEndBot <= 0.0d0 ) THEN
 
-        IF ( btyType == 'C' ) THEN
+        IF ( btyType == 'C' ) THEN ! curvilinear interpolation
+           ! proportional distance along segment
            sss     = DOT_PRODUCT( dEndBot, Bot( IsegBot )%t ) &
-                     / Bot( IsegBot )%Len ! proportional distance along segment
-           BotnInt = ( 1 - sss ) * Bot( IsegBot )%Noden &
-                     + sss * Bot( 1+IsegBot )%Noden
-           BottInt = ( 1 - sss ) * Bot( IsegBot )%Nodet &
-                     + sss * Bot( 1+IsegBot )%Nodet
+                     / Bot( IsegBot )%Len
+           BotnInt = ( 1-sss ) * Bot( IsegBot   )%Noden &
+                     + sss     * Bot( 1+IsegBot )%Noden
+           BottInt = ( 1-sss ) * Bot( IsegBot   )%Nodet &
+                     + sss     * Bot( 1+IsegBot )%Nodet
         ELSE
            BotnInt = Bot( IsegBot )%n   ! normal is constant in a segment
            BottInt = Bot( IsegBot )%t
         END IF
 
         CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, &
-                        Bot( IsegBot )%kappa, RBot, NBotPTS )
+                        Bot( IsegBot )%kappa, RBot, NBotPTS ) !IESCO22 is incremented?
         ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,& 
@@ -557,18 +560,19 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
      END IF
 
-     ! Has the ray left the box, lost its energy, escaped the boundaries, or 
-     ! exceeded storage limit?
-     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r .OR. &
-          ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z .OR. &
-          ray2D( is+1 )%Amp < 0.005 .OR. &
+     ! Ray termination
+     ! Check if ray left the box, lost its energy, escaped vertical boundaries, 
+     ! or exceeded storage limit
+     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r .OR. & ! ray out of range
+          ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z .OR. & ! ray out of depth
+          ray2D( is+1 )%Amp < 0.005 .OR. &                ! ray out of energy
           ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
           ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
         Beam%Nsteps = is + 1
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
         WRITE( PRTFile, * ) &
-            'Warning in TraceRay2D : Insufficient storage for ray trajectory'
+            'WARNING: TraceRay2D: Insufficient storage for ray trajectory, MaxN'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
