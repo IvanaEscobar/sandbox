@@ -556,15 +556,29 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      END IF
 
      ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
-     IF ( ABS( ray2D( is + 1 )%x( 1 ) ) > Beam%Box%r .OR. &
-          ABS( ray2D( is + 1 )%x( 2 ) ) > Beam%Box%z .OR. ray2D( is + 1 )%Amp < 0.005 .OR. &
-          ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
-          ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
-          ! ray2D( is + 1 )%t( 1 ) < 0 ) THEN ! this last test kills off a backward traveling ray
+     ! Rewriting for debugging with gcov purposes:
+     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'
+        EXIT Stepping
+     ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%z'
+        EXIT Stepping
+     ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray lost energy'
+        EXIT Stepping
+     ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped top bound'
+        EXIT Stepping
+     ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped bot bound'
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
-        WRITE( PRTFile, * ) 'Warning in TraceRay2D : Insufficient storage for ray trajectory'
+        WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
