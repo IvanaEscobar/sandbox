@@ -58,7 +58,7 @@ MODULE iHopParams
                                  ATIFile = 41, &    ! optional 2D/3D altimetry
                                  BTYFile = 42, &    ! optional 2D/3D bathymetry
                                  BRCFile = 31, TRCFile = 32, IRCFile = 12, &
-                                 MaxN = 10000
+                                 MaxN = 40000
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 
