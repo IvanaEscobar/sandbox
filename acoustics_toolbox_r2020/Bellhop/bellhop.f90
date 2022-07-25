@@ -274,8 +274,9 @@ SUBROUTINE BellhopCore
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) ialpha, SrcDeclAngle
               FLUSH( PRTFile )
            END IF
-
-           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
+           
+           ! Trace a ray, ray2D structure is completed
+           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   ! Write the ray trajectory to RAYFile
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
@@ -534,7 +535,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         ivanatmp = is
         CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, Top( IsegTop )%kappa, RTop, NTopPTS )
         IF (ivanatmp /= is ) THEN
-            WRITE ( PRTFILE, * ) 'IESCO: TOP Reflect2D DOES increment is', is, ivanatmp
+            WRITE ( PRTFILE, * ) 'IESCO: TOP Reflect2D increments is', is, ivanatmp
         END IF
         ray2D( is + 1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
@@ -555,7 +556,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         ivanatmp = is
         CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, Bot( IsegBot )%kappa, RBot, NBotPTS )
         IF (ivanatmp /= is ) THEN
-            WRITE ( PRTFILE, * ) 'IESCO: BOT Reflect2D DOES increment is', is, ivanatmp
+            WRITE ( PRTFILE, * ) 'IESCO: BOT Reflect2D increments is', is, ivanatmp
         END IF
         ray2D( is + 1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
         CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot, &

@@ -351,8 +351,9 @@ SUBROUTINE BellhopCore
                      ialpha, SrcDeclAngle
               FLUSH( PRTFile )
            END IF
-
-           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
+           
+           ! Trace a ray, update ray2D structure
+           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            ! Write the ray trajectory to RAYFile
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
@@ -456,8 +457,6 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      Bdry%Bot%HS%rho = Bot( IsegBot )%HS%rho
   END IF
 
-  ! Trace the beam (note that Reflect alters the step index, is)
-  is = 0
   CALL Distances2D( ray2D( 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                                   dEndTop,          dEndBot, &
                                   Top( IsegTop )%n, Bot( IsegBot )%n, &
@@ -470,9 +469,11 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      RETURN       ! source must be within the domain
   END IF
 
+  ! Trace the beam (Reflect2D increments the step index, is)
+  is = 0
   Stepping: DO istep = 1, MaxN - 1
-     is  = is + 1
-     is1 = is + 1
+     is  = is + 1 ! old step
+     is1 = is + 1 ! new step forward
 
      CALL Step2D( ray2D( is ), ray2D( is1 ),  &
           Top( IsegTop )%x, Top( IsegTop )%n, &
@@ -502,16 +503,17 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         END IF
      END IF
 
-     ! Reflections
+     ! *** Reflections ***
      ! Tests ray at step is IS inside, and ray at step is+1 IS outside
      ! DistBeg is the distance at step is,   which is saved
      ! DistEnd is the distance at step is+1, which needs to be calculated
 
-     CALL Distances2D( ray2D( is1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
-                       dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n, &
-                       DistEndTop, DistEndBot )
+     CALL Distances2D( ray2D( is1 )%x,  Top( IsegTop )%x, Bot( IsegBot )%x, &
+                                        dEndTop,          dEndBot, &
+                                        Top( IsegTop )%n, Bot( IsegBot )%n, &
+                                        DistEndTop,       DistEndBot )
      
-     ! IESCO22: Did ray cross top boundary? Then reflect
+     ! IESCO22: Did new ray point cross top boundary? Then reflect
      IF ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN 
 
         IF ( atiType == 'C' ) THEN ! curvilinear interpolation
@@ -527,9 +529,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            ToptInt = Top( IsegTop )%t
         END IF
 
-        CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, &
-                        Top( IsegTop )%kappa, RTop, NTopPTS ) !IESCO22 is incremented?
-        ray2D( is+1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
+        CALL Reflect2D( is, Bdry%Top%HS,    'TOP',  ToptInt,    TopnInt, &
+                            Top( IsegTop )%kappa,   RTop,       NTopPTS ) 
 
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, & 
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,&
@@ -551,16 +552,15 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            BottInt = Bot( IsegBot )%t
         END IF
 
-        CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, &
-                        Bot( IsegBot )%kappa, RBot, NBotPTS ) !IESCO22 is incremented?
-        ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
+        CALL Reflect2D( is, Bdry%Bot%HS,    'BOT',  BottInt,    BotnInt, &
+                            Bot( IsegBot )%kappa,   RBot,       NBotPTS ) 
+
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,& 
                           DistEndTop, DistEndBot )
-
      END IF
 
-     ! Ray termination
+     ! *** Ray termination ***
      ! Check if ray left the box, lost its energy, escaped vertical boundaries, 
      ! or exceeded storage limit
      IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r .OR. & ! ray out of range
@@ -608,10 +608,10 @@ END SUBROUTINE Distances2D
 
 SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
-  INTEGER,              INTENT( IN    ) :: Npts
+  INTEGER,              INTENT( IN    ) :: Npts ! unsued if there are no refcoef files
   REAL (KIND=_RL90),    INTENT( IN    ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
-  REAL (KIND=_RL90),    INTENT( IN    ) :: kappa               ! Boundary curvature
-  CHARACTER (LEN=3),    INTENT( IN    ) :: BotTop              ! Flag indicating bottom or top reflection
+  REAL (KIND=_RL90),    INTENT( IN    ) :: kappa ! Boundary curvature, for curvilinear grids
+  CHARACTER (LEN=3),    INTENT( IN    ) :: BotTop              ! bottom or top reflection
   TYPE( HSInfo ),       INTENT( IN    ) :: HS                  ! half-space properties
   TYPE(ReflectionCoef), INTENT( IN    ) :: RefC( NPts )        ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
@@ -628,30 +628,29 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   COMPLEX (KIND=_RL90) :: ch, a, b, d, sb, delta, ddelta ! for beam shift
   TYPE(ReflectionCoef) :: RInt
 
-  is  = is + 1
-  is1 = is + 1
+  is  = is + 1 ! old step
+  is1 = is + 1 ! new step reflected (same x, different basis vectors)
 
-  Tg = DOT_PRODUCT( ray2D( is )%t, tBdry )  ! component of ray tangent, along boundary
-  Th = DOT_PRODUCT( ray2D( is )%t, nBdry )  ! component of ray tangent, normal to boundary
+  Tg = DOT_PRODUCT( ray2D( is )%t, tBdry )  ! ray tan projected along boundary
+  Th = DOT_PRODUCT( ray2D( is )%t, nBdry )  ! ray tan projected normal boundary
 
   ray2D( is1 )%NumTopBnc = ray2D( is )%NumTopBnc
   ray2D( is1 )%NumBotBnc = ray2D( is )%NumBotBnc
   ray2D( is1 )%x         = ray2D( is )%x
-  ray2D( is1 )%t         = ray2D( is )%t - 2.0 * Th * nBdry  ! changing the ray direction
+  ray2D( is1 )%t         = ray2D( is )%t - 2.0 * Th * nBdry ! change ray direction
 
-  ! Calculate the change in curvature
+  ! Calculate change in curvature, kappa
   ! Based on formulas given by Muller, Geoph. J. R.A.S., 79 (1984).
 
   ! Get c
   CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, freq,& 
                     'TAB' )
 
-  ! incident unit ray tangent and normal
+  ! unmodified unit ray tangent and normal
   rayt = c * ray2D( is )%t                              ! unit tangent to ray
   rayn = [ -rayt( 2 ), rayt( 1 ) ]                      ! unit normal  to ray
 
-  ! reflected unit ray tangent and normal (the reflected tangent, normal system
-  ! has a different orientation)
+  ! reflected unit ray tangent and normal
   rayt_tilde = c * ray2D( is1 )%t                       ! unit tangent to ray
   rayn_tilde = -[ -rayt_tilde( 2 ), rayt_tilde( 1 ) ]   ! unit normal  to ray
 
@@ -786,6 +785,15 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
      WRITE( PRTFile, * ) 'HS%BC = ', HS%BC
      CALL ERROUT( 'Reflect2D', 'Unknown boundary condition type' )
   END SELECT
+
+  ! Update top/bottom bounce counter
+  IF (BotTop == 'TOP') THEN
+     ray2D( is+1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
+  ELSE IF ( BotTop == 'BOT' ) THEN
+     ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
+  ELSE
+     CALL ERROUT('Reflect2D', 'no reflection bounce, but in relfect2d somehow')
+  END IF
 
 END SUBROUTINE Reflect2D
 
