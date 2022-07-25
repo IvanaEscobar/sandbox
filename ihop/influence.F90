@@ -283,6 +283,7 @@ CONTAINS
           ir = irTT
        END DO RcvrRanges
 
+       WRITE( PRTFile, * ) "a = ", alpha, "; RadiusMax = ", RadiusMax
        rA = rB
     END DO Stepping
 
