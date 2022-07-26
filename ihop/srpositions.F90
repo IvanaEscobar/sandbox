@@ -165,12 +165,12 @@ CONTAINS
   !********************************************************************!
 
   SUBROUTINE ReadRcvrRanges
-
+    ! IESCO22: assuming receiver positions are equally spaced
     CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km' )
 
     ! calculate range spacing
     Pos%delta_r = 0.0
-    IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr - 1 )
+    IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr-1 )
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
        CALL ERROUT( 'ReadRcvrRanges', &
