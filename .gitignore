@@ -27,6 +27,7 @@ testhere
 .KrakenField
 .Scooter
 *.rts.mat
+acoustics_toolbox_r2020/Bellhop/Makefile
 #BELLHOP output files
 *.arr
 *.prt
