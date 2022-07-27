@@ -7,10 +7,12 @@ MODULE bdrymod
     ! </CONTACT>
 
   ! Loads altimetry (top bdry) and bathymetry (bottom bdry) data
+  ! IEsco22: want to rname this for clarity to readTopBot since it takes user
+  ! input and populates various structures used in the code
 
-  USE monotonicMod, only: monotonic
-  USE ihop_fatalError,   only: ERROUT
-  USE iHopParams,   only: PRTFile, ATIFile, BTYFile
+  USE monotonicMod,     only: monotonic
+  USE ihop_fatalError,  only: ERROUT
+  USE iHopParams,       only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
   PRIVATE
@@ -397,7 +399,7 @@ CONTAINS
     IF ( IsegTopT( 1 ) > 0 .AND. IsegTopT( 1 ) < NatiPts ) THEN  
        IsegTop = IsegTopT( 1 )
        ! segment limits in range
-       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop + 1 )%x( 1 ) ]   
+       rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop+1 )%x( 1 ) ]   
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )

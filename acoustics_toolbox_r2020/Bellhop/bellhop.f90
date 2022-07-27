@@ -274,8 +274,9 @@ SUBROUTINE BellhopCore
               WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) ialpha, SrcDeclAngle
               FLUSH( PRTFile )
            END IF
-
-           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   ! Trace a ray
+           
+           ! Trace a ray, ray2D structure is completed
+           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   ! Write the ray trajectory to RAYFile
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
@@ -428,7 +429,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   REAL     (KIND=8), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   REAL     (KIND=8), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
-  INTEGER           :: is, is1                    ! index for a step along the ray
+  INTEGER           :: is, is1, ivanatmp                  ! index for a step along the ray
   REAL     (KIND=8) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL     (KIND=8) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
   REAL     (KIND=8) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
@@ -531,7 +532,11 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            ToptInt = Top( IsegTop )%t
         END IF
 
+        ivanatmp = is
         CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, Top( IsegTop )%kappa, RTop, NTopPTS )
+        IF (ivanatmp /= is ) THEN
+            WRITE ( PRTFILE, * ) 'IESCO: TOP Reflect2D increments is', is, ivanatmp
+        END IF
         ray2D( is + 1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
         CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
@@ -548,7 +553,11 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            BottInt = Bot( IsegBot )%t
         END IF
 
+        ivanatmp = is
         CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, Bot( IsegBot )%kappa, RBot, NBotPTS )
+        IF (ivanatmp /= is ) THEN
+            WRITE ( PRTFILE, * ) 'IESCO: BOT Reflect2D increments is', is, ivanatmp
+        END IF
         ray2D( is + 1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
         CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot, &
              Top( IsegTop )%n, Bot( IsegBot )%n, DistEndTop, DistEndBot )
@@ -556,15 +565,29 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      END IF
 
      ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
-     IF ( ABS( ray2D( is + 1 )%x( 1 ) ) > Beam%Box%r .OR. &
-          ABS( ray2D( is + 1 )%x( 2 ) ) > Beam%Box%z .OR. ray2D( is + 1 )%Amp < 0.005 .OR. &
-          ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
-          ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
-          ! ray2D( is + 1 )%t( 1 ) < 0 ) THEN ! this last test kills off a backward traveling ray
+     ! Rewriting for debugging with gcov purposes:
+     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'
+        EXIT Stepping
+     ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%z'
+        EXIT Stepping
+     ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray lost energy'
+        EXIT Stepping
+     ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped top bound'
+        EXIT Stepping
+     ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped bot bound'
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
-        WRITE( PRTFile, * ) 'Warning in TraceRay2D : Insufficient storage for ray trajectory'
+        WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
@@ -774,5 +797,3 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 END SUBROUTINE Reflect2D
 
 END PROGRAM BELLHOP
-
-

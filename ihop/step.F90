@@ -52,8 +52,8 @@ CONTAINS
                       'TAB' )
 
     csq0      = c0 * c0
-    cnn0_csq0 = crr0 * ray0%t( 2 )**2 - 2.0 * crz0 * ray0%t( 1 ) * ray0%t( 2 )& 
-              + czz0 * ray0%t( 1 )**2
+    cnn0_csq0 = crr0*ray0%t( 2 )**2 - 2.0*crz0*ray0%t( 1 )*ray0%t( 2 ) & 
+              + czz0*ray0%t( 1 )**2 !IESCO22: chain rule map n deriv to r,z
     iSegz0    = iSegz     ! make note of current layer
     iSegr0    = iSegr
 
@@ -68,17 +68,17 @@ CONTAINS
     ray1%x = ray0%x + halfh * urayt0
     ray1%t = ray0%t - halfh * gradc0 / csq0
     ray1%p = ray0%p - halfh * cnn0_csq0 * ray0%q
-    ray1%q = ray0%q + halfh * c0        * ray0%p
+    ray1%q = ray0%q + halfh * c0        * ray0%p !IESCO22: q /= 0 for 'G' beam
 
     ! *** Phase 2 (update step size, and Polygon march forward) 
 
     CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, freq,& 
                       'TAB' )
     csq1      = c1 * c1
-    cnn1_csq1 = crr1 * ray1%t( 2 )**2 - 2.0 * crz1 * ray1%t( 1 ) * ray1%t( 2 )&
-              + czz1 * ray1%t( 1 )**2
+    cnn1_csq1 = crr1*ray1%t( 2 )**2 - 2.0*crz1*ray1%t( 1 )*ray1%t( 2 ) &
+              + czz1*ray1%t( 1 )**2
 
-    ! The Munk test case with a horizontally launched ray caused problems.
+    ! BUG: The Munk test case with a horizontally launched ray caused problems.
     ! The ray vertexes on an interface and can ping-pong around that interface.
     ! Have to be careful in that case about big changes to the stepsize (that 
     ! invalidate the leap-frog scheme) in phase II.
@@ -109,8 +109,7 @@ CONTAINS
     ray2%NumTopBnc = ray0%NumTopBnc
     ray2%NumBotBnc = ray0%NumBotBnc
 
-    ! If we crossed an interface, apply jump condition
-
+    ! If we crossed an interface, apply linear jump condition
     CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, freq,&
                       'TAB' )
     ray2%c = c2
@@ -125,16 +124,15 @@ CONTAINS
        IF ( iSegz /= iSegz0 ) THEN         ! crossing in depth
           ! RM is tan( alpha ) where alpha is the angle of incidence
           RM = +ray2%t( 1 ) / ray2%t( 2 )  
-       ELSE                                ! crossing in range
+       ELSE ! iSegr /= iSegr0              ! crossing in range
           ! RM is tan( alpha ) where alpha is the angle of incidence
           RM = -ray2%t( 2 ) / ray2%t( 1 )  
        END IF
 
-       RN     = RM * ( 2 * cnjump - RM * csjump ) / c2
-       ray2%p = ray2%p - ray2%q * RN
+       RN     = RM * ( 2*cnjump - RM*csjump ) / c2
+       ray2%p = ray2%p - ray2%q*RN
 
     END IF
-! EscoI22: close ray 1 structure?
   END SUBROUTINE Step2D
 
   ! **********************************************************************!
@@ -164,10 +162,10 @@ CONTAINS
     ! interface crossing in depth
     h1 = HUGE( h1 ) ! Largest _RL90 number available
     IF ( ABS( urayt( 2 ) ) > EPSILON( h1 ) ) THEN
-       IF      ( SSP%z( iSegz0     ) > x(  2 ) ) THEN
-          h1 = ( SSP%z( iSegz0     ) - x0( 2 ) ) / urayt( 2 )
-       ELSE IF ( SSP%z( iSegz0 + 1 ) < x(  2 ) ) THEN
-          h1 = ( SSP%z( iSegz0 + 1 ) - x0( 2 ) ) / urayt( 2 )
+       IF      ( SSP%z( iSegz0   ) > x(  2 ) ) THEN
+          h1 = ( SSP%z( iSegz0   ) - x0( 2 ) ) / urayt( 2 )
+       ELSE IF ( SSP%z( iSegz0+1 ) < x(  2 ) ) THEN
+          h1 = ( SSP%z( iSegz0+1 ) - x0( 2 ) ) / urayt( 2 )
        END IF
     END IF
 
@@ -191,9 +189,9 @@ CONTAINS
     rSeg( 1 ) = MAX( rTopSeg( 1 ), rBotSeg( 1 ) )
     rSeg( 2 ) = MIN( rTopSeg( 2 ), rBotSeg( 2 ) )
 
-    IF ( SSP%Type == 'Q' ) THEN
-       rSeg( 1 ) = MAX( rSeg( 1 ), SSP%Seg%r( iSegr0     ) )
-       rSeg( 2 ) = MIN( rSeg( 2 ), SSP%Seg%r( iSegr0 + 1 ) )
+    IF ( SSP%Type == 'Q' ) THEN ! Quad: 2D range-dependent SSP
+       rSeg( 1 ) = MAX( rSeg( 1 ), SSP%Seg%r( iSegr0   ) )
+       rSeg( 2 ) = MIN( rSeg( 2 ), SSP%Seg%r( iSegr0+1 ) )
     END IF
 
     ! interface crossing in range

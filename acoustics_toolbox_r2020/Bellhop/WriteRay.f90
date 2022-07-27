@@ -13,7 +13,41 @@ MODULE WriteRay
   INTEGER, PRIVATE :: is, N2, iSkip
 
 CONTAINS
+  ! **********************************************************************!
+  SUBROUTINE WriteQ2D( alpha0, Nsteps1 )
 
+    ! The 2D version is for ray traces in (r,z) coordinates
+
+    INTEGER,       INTENT( IN ) :: Nsteps1
+    REAL (KIND=8), INTENT( IN ) :: alpha0   ! take-off angle of this ray
+
+    ! compression
+
+    N2    = 1
+    iSkip = MAX( Nsteps1 / MaxNRayPoints, 1 )
+
+    Stepping: DO is = 2, Nsteps1
+       ! ensure that we always write ray points near bdry reflections (works only for flat bdry)
+       IF ( MIN( Bdry%Bot%HS%Depth - ray2D( is )%x( 2 ),  ray2D( is )%x( 2 ) - Bdry%Top%HS%Depth ) < 0.2 .OR. &
+            MOD( is, iSkip ) == 0 .OR. is == Nsteps1 ) THEN
+          N2 = N2 + 1
+          ray2D( N2 )%x = ray2D( is )%x
+       END IF
+    END DO Stepping
+
+    ! write to Q file
+
+    WRITE( QFile, * ) alpha0
+    WRITE( QFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
+
+    DO is = 1, N2
+       WRITE( QFile, * ) ray2D( is )%q
+    END DO
+
+  END SUBROUTINE WriteQ2D
+
+  ! **********************************************************************!
+  
   SUBROUTINE WriteRay2D( alpha0, Nsteps1 )
 
     ! The 2D version is for ray traces in (r,z) coordinates

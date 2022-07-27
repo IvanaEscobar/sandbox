@@ -32,7 +32,8 @@ MODULE srPositions
 
   TYPE Position
      ! NOTE: use ReadVector subroutine to see if there are more than 1 source
-     INTEGER              :: NSx = 1, NSy = 1, NSz, NRz, NRr, Ntheta    ! number of x, y, z, r, theta coordinates
+     INTEGER              ::    NSx = 1, NSy = 1, Ntheta=1,  & ! 3D source coord
+                                NSz, NRz, NRr   ! 2D source z, r, coord
      INTEGER, ALLOCATABLE :: iSz( : ), iRz( : ) ! indices for interpolation of source and receiver weights
      REAL (KIND=_RL90), ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : ), & ! Source coord
                                        Rr( : ), Rz( : ), & ! receiver coord
@@ -164,12 +165,12 @@ CONTAINS
   !********************************************************************!
 
   SUBROUTINE ReadRcvrRanges
-
+    ! IESCO22: assuming receiver positions are equally spaced
     CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km' )
 
     ! calculate range spacing
     Pos%delta_r = 0.0
-    IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr - 1 )
+    IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr-1 )
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
        CALL ERROUT( 'ReadRcvrRanges', &

@@ -566,6 +566,16 @@ CONTAINS
           WRITE( RAYFile, * ) '''rz'''
        END IF
 
+       OPEN ( FILE = TRIM( FileRoot ) // '.q', UNIT = QFile, FORM = 'FORMATTED' )
+       WRITE( QFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( QFile, * ) freq
+       WRITE( QFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( QFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( QFile, * ) Bdry%Top%HS%Depth
+       WRITE( QFile, * ) Bdry%Bot%HS%Depth
+
+       WRITE( QFile, * ) '''rz'''
+
     CASE ( 'A' )        ! arrival file in ascii format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, FORM = 'FORMATTED' )
 
