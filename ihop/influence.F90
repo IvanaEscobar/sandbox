@@ -172,7 +172,7 @@ CONTAINS
     REAL (KIND=_RL90)    :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), &
                             x_rcvr( 2, NRz_per_range ), rLen, RadiusMax, &
                             zMin, zMax, dqds
-    COMPLEX (KIND=_RL90) :: dtaud
+    COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
     SrcDeclAngle = RadDeg * alpha          ! take-off angle in degrees
@@ -261,12 +261,14 @@ CONTAINS
                    ! hat function: 1 on center, 0 on edge
                    W        = ( RadiusMax - n ) / RadiusMax   
                    Amp      = Amp * W
-                   phaseInt = ray2D( iS-1 )%Phase + phase
                    IF (      q <= 0.0d0 .AND. qOld > 0.0d0 &
-                        .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) &
+                        .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) THEN
                     phaseInt = phase + pi / 2.   ! phase shifts at caustics
                     ! IESCO22: shouldn't this be = phaseInt + pi/2
-
+                   ELSE
+                    phaseInt = ray2D( iS-1 )%Phase + phase
+                   END IF
+                   
                    CALL ApplyContribution( U( iz, ir ) )
                 END IF
              END DO RcvrDepths

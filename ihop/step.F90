@@ -60,8 +60,9 @@ CONTAINS
     h = Beam%deltas       ! initially set the step h, to the basic one, deltas
     urayt0 = c0 * ray0%t  ! unit tangent
 
+    ! reduce h to land on boundary
     CALL ReduceStep2D( ray0%x, urayt0, iSegz0, iSegr0, Topx, Topn, Botx, &
-                       Botn, h ) ! reduce h to land on boundary
+                       Botn, h ) 
     halfh = 0.5 * h   ! first step of the modified polygon method is a half step
 
     ! Euler march forward
@@ -186,12 +187,12 @@ CONTAINS
     END IF
 
     ! top or bottom segment crossing in range
-    rSeg( 1 ) = MAX( rTopSeg( 1 ), rBotSeg( 1 ) )
-    rSeg( 2 ) = MIN( rTopSeg( 2 ), rBotSeg( 2 ) )
-
     IF ( SSP%Type == 'Q' ) THEN ! Quad: 2D range-dependent SSP
        rSeg( 1 ) = MAX( rSeg( 1 ), SSP%Seg%r( iSegr0   ) )
        rSeg( 2 ) = MIN( rSeg( 2 ), SSP%Seg%r( iSegr0+1 ) )
+    ELSE
+       rSeg( 1 ) = MAX( rTopSeg( 1 ), rBotSeg( 1 ) )
+       rSeg( 2 ) = MIN( rTopSeg( 2 ), rBotSeg( 2 ) )
     END IF
 
     ! interface crossing in range

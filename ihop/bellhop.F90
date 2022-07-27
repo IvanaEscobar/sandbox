@@ -123,8 +123,7 @@ SUBROUTINE IHOP_INIT
      Angles%alpha  = ( 180. / Angles%Nalpha ) * &
                      [ ( jj, jj = 1, Angles%Nalpha ) ] - 90.
 
-     ! *** altimetry ***
-
+     ! *** Altimetry ***
      ALLOCATE( Top( 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
                                     'Insufficient memory for altimetry data'  )
@@ -134,7 +133,6 @@ SUBROUTINE IHOP_INIT
      CALL ComputeBdryTangentNormal( Top, 'Top' )
 
      ! *** Bathymetry ***
-
      ALLOCATE( Bot( 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
                                     'Insufficient memory for bathymetry data'  )
@@ -220,7 +218,7 @@ SUBROUTINE BellhopCore
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
   ELSE
-      CALL ERROUT( 'BELLHOP CORE', 'remember Nalpha>1, else add iSingle_alpha
+      CALL ERROUT( 'BELLHOP CORE', 'Required: Nalpha>1, else add iSingle_alpha
       (see angleMod)' )
   END IF
 
@@ -425,13 +423,13 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
-  ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! IC unit vector
+  ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! IESCO22: slowness vector
   ! second component of qv is not used in geometric beam tracing
   ! set I.C. to 0 in hopes of saving run time
-  IF ( Beam%RunType( 2:2 ) == 'G' ) THEN
-      ray2D( 1 )%q = [ 0.0, 0.0 ]
+  IF ( Beam%RunType( 2:2 ) == 'G' ) THEN ! IESCO22: geometric hat in Cartesian
+      ray2D( 1 )%q = [ 0.0, 0.0 ]        ! IESCO22: ray centered coords
   ELSE
-      ray2D( 1 )%q = [ 0.0, 1.0 ]   ! IC unit vector
+      ray2D( 1 )%q = [ 0.0, 1.0 ]   ! IESCO22: ray centered coords 
   END IF
   ray2D( 1 )%tau       = 0.0
   ray2D( 1 )%Amp       = Amp0
@@ -654,12 +652,12 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   rayt_tilde = c * ray2D( is1 )%t                       ! unit tangent to ray
   rayn_tilde = -[ -rayt_tilde( 2 ), rayt_tilde( 1 ) ]   ! unit normal  to ray
 
-  RN = 2 * kappa / c ** 2 / Th    ! boundary curvature correction
-
   ! get the jumps (this could be simplified, e.g. jump in rayt is 
   ! roughly 2 * Th * nbdry
   cnjump = -DOT_PRODUCT( gradc, rayn_tilde - rayn  )
   csjump = -DOT_PRODUCT( gradc, rayt_tilde - rayt )
+
+  RN = 2 * kappa / c ** 2 / Th    ! boundary curvature correction
 
   IF ( BotTop == 'TOP' ) THEN
      ! cnjump changes sign because the (t,n) system of the top boundary has a 
