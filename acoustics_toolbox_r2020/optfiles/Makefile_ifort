@@ -11,7 +11,7 @@ F90FLAGS=${FFLAGS}
 
 # ______________________________________________________________________________
 
-EXECUTABLES = bellhop.exe 
+EXECUTABLES = bell
 
 MISC_OBJECTS 	= 	FatalError.o 		AttenMod.o 		beampattern.o \
 					MathConstants.o 	monotonicMod.o 	pchipMod.o \
@@ -121,7 +121,7 @@ sourceMod.o sourcemod.mod: sourceMod.f90
 ##############################
 ### from bellhop directory ###
 ##############################
-bellhop.exe: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
+bell: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
 	$(FC) -o $@ $(FFLAGS) $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS) $(BELLHOP_LIBS)
 
 angleMod.o anglemod.mod: angleMod.f90
