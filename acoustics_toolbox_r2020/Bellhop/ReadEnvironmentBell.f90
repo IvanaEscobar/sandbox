@@ -132,7 +132,9 @@ CONTAINS
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
        Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
 
-       IF ( Beam%deltas == 0.0 ) Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   ! Automatic step size selection
+       ! Automatic step size selection
+       IF ( Beam%deltas == 0.0 ) Beam%deltas = &
+           ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
        ! WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) freq
 
        WRITE( PRTFile, * )
@@ -143,10 +145,19 @@ CONTAINS
        WRITE( PRTFile, fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' ) Beam%Box%z
     ELSE
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%z, Beam%Box%r
+       WRITE( PRTFile, * )
+       IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
+           Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+           WRITE( PRTFile, &
+                  fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatic step)'' )' ) & 
+                Beam%deltas
+       ELSE
+            WRITE( PRTFile, &
+                   fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
+                 Beam%deltas
+       END IF
+       WRITE( PRTFile, * )
 
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) Beam%deltas
-       WRITE( PRTFile, * )
        WRITE( PRTFile, fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) Beam%Box%z
        WRITE( PRTFile, fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) Beam%Box%r
 

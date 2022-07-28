@@ -441,10 +441,9 @@ END SUBROUTINE EvaluateSSP2D
        RETURN
 
     ELSE
-
        ! *** Section to return SSP info ***
 
-       ! check depth-layer contains x( 2 ) in [ SSP%z( iSegz ), SSP%z( iSegz + 1 ) ]
+       ! find depth-layer where x(2) in ( SSP%z( iSegz ), SSP%z( iSegz+1 ) )
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
@@ -455,7 +454,7 @@ END SUBROUTINE EvaluateSSP2D
        END IF
 
        ! Check that x is inside the box where the sound speed is defined
-       IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN ! .OR. &
+       IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
           CALL ERROUT( 'sspMod: Quad', 'ray is outside the box where the soundspeed is defined' )

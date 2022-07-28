@@ -250,7 +250,6 @@ SUBROUTINE BellhopCore
      ENDIF
 
      ! Trace successive beams
-
      DeclinationAngle: DO ialpha = 1, Angles%Nalpha
         SrcDeclAngle = RadDeg * Angles%alpha( ialpha )          ! take-off declination angle in degrees
 
@@ -275,7 +274,7 @@ SUBROUTINE BellhopCore
               FLUSH( PRTFile )
            END IF
            
-           ! Trace a ray, ray2D structure is completed
+           ! Trace a ray, ray2D
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   ! Write the ray trajectory to RAYFile
@@ -429,7 +428,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   REAL     (KIND=8), INTENT( IN ) :: xs( 2 )      ! x-y coordinate of the source
   REAL     (KIND=8), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
-  INTEGER           :: is, is1, ivanatmp                  ! index for a step along the ray
+  INTEGER           :: is, is1                  ! index for a step along the ray
   REAL     (KIND=8) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL     (KIND=8) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
   REAL     (KIND=8) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot ! Distances from ray beginning, end to top and bottom
@@ -532,11 +531,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            ToptInt = Top( IsegTop )%t
         END IF
 
-        ivanatmp = is
         CALL Reflect2D( is, Bdry%Top%HS, 'TOP', ToptInt, TopnInt, Top( IsegTop )%kappa, RTop, NTopPTS )
-        IF (ivanatmp /= is ) THEN
-            WRITE ( PRTFILE, * ) 'IESCO: TOP Reflect2D increments is', is, ivanatmp
-        END IF
         ray2D( is + 1 )%NumTopBnc = ray2D( is )%NumTopBnc + 1
 
         CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot,  &
@@ -553,11 +548,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
            BottInt = Bot( IsegBot )%t
         END IF
 
-        ivanatmp = is
         CALL Reflect2D( is, Bdry%Bot%HS, 'BOT', BottInt, BotnInt, Bot( IsegBot )%kappa, RBot, NBotPTS )
-        IF (ivanatmp /= is ) THEN
-            WRITE ( PRTFILE, * ) 'IESCO: BOT Reflect2D increments is', is, ivanatmp
-        END IF
         ray2D( is + 1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
         CALL Distances2D( ray2D( is + 1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, dEndTop,    dEndBot, &
              Top( IsegTop )%n, Bot( IsegBot )%n, DistEndTop, DistEndBot )
