@@ -47,7 +47,7 @@ CONTAINS
     REAL (KIND=_RL90)    :: nA, nB, zr, L, dq( Beam%Nsteps - 1 )
     REAL (KIND=_RL90)    :: znV( Beam%Nsteps ), rnV( Beam%Nsteps ), &
                             RcvrDeclAngleV ( Beam%Nsteps )
-    COMPLEX (KIND=_RL90) :: dtau( Beam%Nsteps - 1 )
+    COMPLEX (KIND=_RL90) :: dtau( Beam%Nsteps-1 )
 
     !!! need to add logic related to NRz_per_range
 
@@ -177,11 +177,8 @@ CONTAINS
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
     SrcDeclAngle = RadDeg * alpha          ! take-off angle in degrees
     phase        = 0.0
-    qOld         = ray2D( 1 )%q( 1 )       ! used to track KMAH index
+    qOld         = ray2D( 1 )%q( 1 )       ! old KMAH index
     rA           = ray2D( 1 )%x( 1 )       ! range at start of ray, typically 0
-
-    ! what if never satistified?
-    ! what if there is a single receiver (ir = 0 possible)
 
     ! find index of first receiver to the right of rA
     irT = MINLOC( Pos%Rr( 1 : Pos%NRr ), MASK = Pos%Rr( 1 : Pos%NRr ) > rA )   
@@ -254,6 +251,7 @@ CONTAINS
                 RadiusMax = ABS( q / q0 )                                   
 
                 IF ( n < RadiusMax ) THEN
+                   WRITE( PRTFile, * ) "a = ", RadDeg * alpha, "; RadiusMax = ", RadiusMax
                    ! interpolated delay
                    delay    = ray2D( iS-1 )%tau + s*dtauds              
                    Amp      = Ratio1 * SQRT( ray2D( iS )%c / ABS( q ) ) &
@@ -287,7 +285,6 @@ CONTAINS
           ir = irTT
        END DO RcvrRanges
 
-       WRITE( PRTFile, * ) "a = ", RadDeg * alpha, "; RadiusMax = ", RadiusMax
        rA = rB
     END DO Stepping
 
@@ -440,7 +437,7 @@ CONTAINS
   
   SUBROUTINE ApplyContribution( U )
     COMPLEX, INTENT( INOUT ) :: U
-    
+
     SELECT CASE( Beam%RunType( 1 : 1 ) )
     CASE ( 'E' )                ! eigenrays
        CALL WriteRay2D( SrcDeclAngle, iS )

@@ -13,7 +13,7 @@ MODULE iHopMod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE iHopParams,   only: MaxN ! 10000
+  USE iHopParams,   only: MaxN ! 100 000
   IMPLICIT NONE
   PRIVATE
 

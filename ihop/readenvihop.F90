@@ -22,8 +22,8 @@ MODULE readEnviHop
 ! public interfaces
 !=======================================================================
 
-  public ReadEnvironment, ReadTopOpt, ReadRunType, TopBot, OpenOutputFiles,
-  WriteHeader
+  public    ReadEnvironment, ReadTopOpt, ReadRunType, TopBot, OpenOutputFiles, &
+            WriteSHDHeader
   
 !=======================================================================
 

@@ -1,27 +1,3 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!                                                                   !!
-!!                   GNU General Public License                      !!
-!!                                                                   !!
-!! This file is part of the Flexible Modeling System (FMS).          !!
-!!                                                                   !!
-!! FMS is free software; you can redistribute it and/or modify       !!
-!! it and are expected to follow the terms of the GNU General Public !!
-!! License as published by the Free Software Foundation.             !!
-!!                                                                   !!
-!! FMS is distributed in the hope that it will be useful,            !!
-!! but WITHOUT ANY WARRANTY; without even the implied warranty of    !!
-!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     !!
-!! GNU General Public License for more details.                      !!
-!!                                                                   !!
-!! You should have received a copy of the GNU General Public License !!
-!! along with FMS; if not, write to:                                 !!
-!!          Free Software Foundation, Inc.                           !!
-!!          59 Temple Place, Suite 330                               !!
-!!          Boston, MA  02111-1307  USA                              !!
-!! or see:                                                           !!
-!!          http://www.gnu.org/licenses/gpl.txt                      !!
-!!                                                                   !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
@@ -58,7 +34,8 @@ MODULE iHopParams
                                  ATIFile = 41, &    ! optional 2D/3D altimetry
                                  BTYFile = 42, &    ! optional 2D/3D bathymetry
                                  BRCFile = 31, TRCFile = 32, IRCFile = 12, &
-                                 MaxN = 40000
+                                 SBPFile = 50, &
+                                 MaxN = 100000
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
 

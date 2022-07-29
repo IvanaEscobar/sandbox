@@ -53,16 +53,18 @@ MODULE BELLHOP
 CONTAINS
 SUBROUTINE IHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
+  REAL                 :: Tstart, Tstop
   INTEGER              :: jj 
 ! added locally previously read in from unknown mod ... IEsco2022
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
+
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
   ! HARDCODING FILE TO FORCE nesba eigenray run
   !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  FileRoot = 'nesba-tm4' ! IEsco HARDCODED
+  FileRoot = 'MunkB_eig' ! IEsco22: HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
@@ -166,7 +168,7 @@ SUBROUTINE IHOP_INIT
      SBPFlag = Beam%RunType( 3:3 )
      CALL ReadPat( FileRoot, PRTFile )
      ! 3d angle data: unmodified and unused in 2d code; dummy bearing angles
-     IF ( ThreeD == .FALSE. ) THEN
+     IF ( ThreeD .eqv. .FALSE. ) THEN
         ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
         Pos%theta( 1 ) = 0.
     END IF
@@ -205,7 +207,6 @@ SUBROUTINE BellhopCore
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, &
                           NalphaOpt, iSeg
-  REAL                 :: Tstart, Tstop
   REAL    (KIND=_RL90) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
@@ -218,8 +219,7 @@ SUBROUTINE BellhopCore
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
   ELSE
-      CALL ERROUT( 'BELLHOP CORE', 'Required: Nalpha>1, else add iSingle_alpha
-      (see angleMod)' )
+      CALL ERROUT( 'BELLHOP CORE', 'Required: Nalpha>1, else add iSingle_alpha (see angleMod)' )
   END IF
 
   ! convert range-dependent geoacoustic parameters from user to program units
@@ -309,7 +309,7 @@ SUBROUTINE BellhopCore
         NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) &
                              - Angles%alpha( 1 ) ) / DalphaOpt )
         IF ( Angles%Nalpha < NalphaOpt ) THEN
-           WRITE( PRTFile, * ) 'Warning in BELLHOP : Too few beams'
+           WRITE( PRTFile, * ) 'Warning BELLHOP : Too few beams'
            WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
         ENDIF
      ENDIF
@@ -558,19 +558,30 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
                           DistEndTop, DistEndBot )
      END IF
 
-     ! *** Ray termination ***
-     ! Check if ray left the box, lost its energy, escaped vertical boundaries, 
-     ! or exceeded storage limit
-     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r .OR. & ! ray out of range
-          ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z .OR. & ! ray out of depth
-          ray2D( is+1 )%Amp < 0.005 .OR. &                ! ray out of energy
-          ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) .OR. &
-          ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) ) THEN
+     ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
+     ! Rewriting for debugging with gcov purposes:
+     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'
+        EXIT Stepping
+     ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%z'
+        EXIT Stepping
+     ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray lost energy'
+        EXIT Stepping
+     ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped top bound'
+        EXIT Stepping
+     ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped bot bound'
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
-        WRITE( PRTFile, * ) &
-            'WARNING: TraceRay2D: Insufficient storage for ray trajectory, MaxN'
+        WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
