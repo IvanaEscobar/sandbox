@@ -42,7 +42,7 @@ MODULE BELLHOP
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
   USE attenMod,     only:   CRCI
-  USE beamPattern
+  USE beamPattern   ! Iesco22 f90mkdpened add a ^M character...
   USE writeRay,     only:   WriteRay2D
 
   IMPLICIT NONE
@@ -64,7 +64,7 @@ SUBROUTINE IHOP_INIT
 
   ! HARDCODING FILE TO FORCE nesba eigenray run
   !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  FileRoot = 'MunkB_eig' ! IEsco22: HARDCODED
+  FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
