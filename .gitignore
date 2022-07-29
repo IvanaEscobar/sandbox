@@ -28,6 +28,7 @@ testhere
 .Scooter
 *.rts.mat
 acoustics_toolbox_r2020/Bellhop/Makefile
+bell
 #BELLHOP output files
 *.arr
 *.prt

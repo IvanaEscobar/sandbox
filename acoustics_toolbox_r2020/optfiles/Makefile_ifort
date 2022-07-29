@@ -11,7 +11,7 @@ F90FLAGS=${FFLAGS}
 
 # ______________________________________________________________________________
 
-EXECUTABLES = bellhop.exe 
+EXECUTABLES = bell
 
 MISC_OBJECTS 	= 	FatalError.o 		AttenMod.o 		beampattern.o \
 					MathConstants.o 	monotonicMod.o 	pchipMod.o \
@@ -50,7 +50,8 @@ clean:
 	#(cd ../tests;  make -k -i clean)
 	-rm -f *.o *.mod *.exe *_genmod.f90
 
-cleanall: clean
+CLEAN: clean
+	find . -name '*.gcno' -exec rm -r {} +
 
 # Declare implicit rules (for make utilities with missing or broken build rules)
 
@@ -73,10 +74,10 @@ cleanall: clean
 AttenMod.o: AttenMod.f90 MathConstants.mod
 	$(FC) -c $(FFLAGS) $<
 
-beampattern.o beampattern.mod: beampattern.f90 fatalerror.mod
-	$(FC) -c $(FFLAGS) $<
-
 FatalError.o fatalerror.mod: FatalError.f90
+
+beampattern.o beampattern.mod: beampattern.f90 FatalError.o
+	$(FC) -c $(FFLAGS) $<
 
 MathConstants.o mathconstants.mod: MathConstants.f90
 	$(FC) -c $(FFLAGS) $<
@@ -121,10 +122,10 @@ sourceMod.o sourcemod.mod: sourceMod.f90
 ##############################
 ### from bellhop directory ###
 ##############################
-bellhop.exe: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
+bell: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
 	$(FC) -o $@ $(FFLAGS) $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS) $(BELLHOP_LIBS)
 
-angleMod.o anglemod.mod: angleMod.f90
+angleMod.o anglemod.mod: angleMod.f90 sourcereceiverpositions.mod
 	$(FC) -c $(FFLAGS) $< 
 
 ArrMod.o arrmod.mod: ArrMod.f90
@@ -136,19 +137,19 @@ bdryMod.o bdrymod.mod: bdryMod.f90
 bellhopMod.o bellhopmod.mod: bellhopMod.f90
 	$(FC) -c $(FFLAGS) $< 
 
-influence.o influence.mod: influence.f90
+influence.o influence.mod: influence.f90 sourcereceiverpositions.mod sspmod.mod writeray.mod
 	$(FC) -c $(FFLAGS) $< 
 
-ReadEnvironmentBell.o readenvironmentbell.mod: ReadEnvironmentBell.f90
+ReadEnvironmentBell.o readenvironmentbell.mod: ReadEnvironmentBell.f90 sspmod.mod
 	$(FC) -c $(FFLAGS) $< 
 
-sspMod.o sspmod.mod: sspMod.f90
+sspMod.o sspmod.mod: sspMod.f90 fatalerror.mod pchipmod.mod AttenMod.o
 	$(FC) -c $(FFLAGS) $< 
 
-Step.o step.mod: Step.f90
+Step.o step.mod: Step.f90 sspmod.mod
 	$(FC) -c $(FFLAGS) $<
 
-WriteRay.o writeray.mod: WriteRay.f90
+WriteRay.o writeray.mod: WriteRay.f90 sspmod.mod
 	$(FC) -c $(FFLAGS) $<
 
 bellhop.o:  arrmod.mod 				anglemod.mod	bdrymod.mod \

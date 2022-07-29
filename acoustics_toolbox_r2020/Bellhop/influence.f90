@@ -476,6 +476,7 @@ CONTAINS
                 RadiusMax = ABS( q / q0 )                                   ! beam radius
 
                 IF ( n < RadiusMax ) THEN
+                   WRITE( PRTFile, * ) "a = ", RadDeg * alpha, "; RadiusMax = ", RadiusMax
                    delay    = ray2D( iS - 1 )%tau + s * dtauds              ! interpolated delay
                    const    = Ratio1 * SQRT( ray2D( iS )%c / ABS( q ) ) * ray2D( iS )%Amp
                    W        = ( RadiusMax - n ) / RadiusMax   ! hat function: 1 on center, 0 on edge
@@ -501,7 +502,6 @@ CONTAINS
           ir = irTT
        END DO RcvrRanges
 
-       WRITE( PRTFile, * ) "a: ", alpha, "RadiusMax = ", RadiusMax
        rA = rB
     END DO Stepping
 
@@ -631,7 +631,7 @@ CONTAINS
   ! **********************************************************************!
   
   SUBROUTINE ApplyContribution( U )
-    COMPLEX, INTENT( INOUT ) :: U 
+    COMPLEX, INTENT( INOUT ) :: U
 
     SELECT CASE( Beam%RunType( 1 : 1 ) )
     CASE ( 'E' )                ! eigenrays

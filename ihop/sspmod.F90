@@ -30,7 +30,7 @@ MODULE sspMod
 !=======================================================================
 
   !SAVE
-  INTEGER, PARAMETER     :: MaxSSP = 100001
+  INTEGER, PARAMETER     :: MaxSSP = 20001
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
   INTEGER,           PRIVATE :: iz
   REAL (KIND=_RL90), PRIVATE :: Depth, W
@@ -339,7 +339,8 @@ CONTAINS
 
   SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
 
-    ! Bilinear quadrilatteral interpolation of SSP data in 2D
+    ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
+    ! IEsco22: Assuming an SSPFile is required. Missing defensive check for SSPFile
 
     REAL (KIND=_RL90), INTENT( IN  ) :: freq
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
@@ -368,9 +369,10 @@ CONTAINS
           CALL ERROUT( 'SSPMOD: Quad', 'You must have a least two profiles in your 2D SSP field'  )
        END IF
 
-       ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts - 1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
+       ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts-1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
        IF ( AllocateStatus /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP'  )
 
+       ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
        READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Profile ranges (km):'
@@ -383,18 +385,17 @@ CONTAINS
        WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
        DO iz2 = 1, SSP%NPts
           READ(  SSPFile, * ) SSP%cMat( iz2, : )
-          ! WRITE( PRTFile, FMT="( 'iSegz depth = ', F10.2, ' m' )"  ) SSP%z( iz2 )
-          ! WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%cMat( iz2, : )
           WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz2 ), SSP%cMat( iz2, : )
        END DO
 
        CLOSE( SSPFile )
 
        ! calculate cz
-       DO iSegt = 1, SSP%Nr
+       DO irT = 1, SSP%Nr
           DO iz2 = 2, SSP%NPts
-             delta_z = ( SSP%z( iz2 ) - SSP%z( iz2 - 1 ) )
-             SSP%czMat( iz2 - 1, iSegt ) = ( SSP%cMat( iz2, iSegt ) - SSP%cMat( iz2 - 1, iSegt ) ) / delta_z
+             delta_z = ( SSP%z( iz2 ) - SSP%z( iz2-1 ) )
+             SSP%czMat( iz2-1, irT ) = ( SSP%cMat( iz2  , irT ) - &
+                                         SSP%cMat( iz2-1, irT ) ) / delta_z
           END DO
        END DO
 
@@ -415,14 +416,14 @@ CONTAINS
           END DO
        END IF
 
-       ! Check if x is inside the range of box where the sound speed is defined
+       ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
           CALL ERROUT( 'SSPMOD: Quad', 'ray is outside the box where the soundspeed is defined' )
        END IF
 
-       ! find range-layer where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
+       ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
        IF ( x( 1 ) < SSP%Seg%r( iSegr ) .OR. x( 1 ) >= SSP%Seg%r( iSegr + 1 ) ) THEN
           DO irT = 2, SSP%Nr   ! Search for bracketting segment ranges
              IF ( x( 1 ) < SSP%Seg%r( irT ) ) THEN
@@ -455,9 +456,7 @@ CONTAINS
 
        ! interpolate the attenuation !!!! SSP in ENVFile needs to match first column of SSPFile
        s2    = s2 / delta_z   ! normalize depth layer
-       cimag = AIMAG( ( 1.0D0-s2 )*SSP%c( Isegz )  + s2*SSP%c( Isegz+1 ) )   ! volume attenuation is taken from the single c(z) profile
-       ! vertical linear interpolation for density 
-       rho = ( 1.0D0-s2 )*SSP%rho( iSegz ) + s2*SSP%rho( iSegz+1 )
+       cimag = AIMAG( ( 1.0D0-s2 )*SSP%c( Isegz ) + s2*SSP%c( Isegz+1 ) )   ! volume attenuation is taken from the single c(z) profile
 
        cz  = ( 1.0D0-s1 )*cz1 + s1*cz2 ! cz @ x
 
@@ -467,6 +466,10 @@ CONTAINS
        gradc = [ cr, cz ]
        crr   = 0.0D0
        czz   = 0.0D0
+
+       ! linear interpolation for density
+       W   = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
+       rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
 
     !IESCO22: for thesis, czz=crr=0, and rho=1 at all times
@@ -521,12 +524,12 @@ CONTAINS
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
-    WRITE( PRTFile, &
-        "( '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
-       
+    WRITE( PRTFile, "( '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
+    WRITE( PRTFile, "( '     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)', / )" )
+
     SSP%NPts = 1
 
-    DO iz = 1, MaxSSP !NOTE: hard coded in this file to 100001
+    DO iz = 1, MaxSSP !NOTE: hard coded
 
        READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
