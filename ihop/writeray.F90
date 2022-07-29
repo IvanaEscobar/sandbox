@@ -13,7 +13,7 @@ MODULE writeRay
   ! During an eigenray calculation, subsets of the full ray may be passed
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
-  USE iHopMod       ! IESCO22: end of line bug in f90mkdepend 
+  USE iHopMod
   USE iHopParams,   only: RAYFile
   USE sspMod,       only: Bdry
 

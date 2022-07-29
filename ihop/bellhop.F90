@@ -42,7 +42,7 @@ MODULE BELLHOP
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
   USE attenMod,     only:   CRCI
-  USE beamPattern   ! Iesco22 f90mkdpened add a ^M character...
+  USE beamPattern 
   USE writeRay,     only:   WriteRay2D
 
   IMPLICIT NONE
@@ -559,7 +559,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      END IF
 
      ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
-     ! Rewriting for debugging with gcov purposes:
+     ! IESCO22: Rewriting for debugging with gcov
      IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'

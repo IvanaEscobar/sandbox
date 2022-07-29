@@ -10,7 +10,7 @@ MODULE readEnviHop
 
   USE iHopParams,   only: pi, PRTFile, ENVFile, SSPFile, RAYFile, ARRFile, SHDFile
                               
-  USE iHopMod       ! IESCO22: adding comment to squash bug in f90mkdpened
+  USE iHopMod
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
   USE ihop_fatalError,   only: ERROUT

@@ -6,7 +6,7 @@ MODULE step
     !   Ivana Escobar
     ! </CONTACT>
 
-    USE iHopMod       ! IESCO22: end of line bug in f90mkdepend
+  USE iHopMod
   USE iHopParams,   only: RAYFile
   USE sspMod,       only: EvaluateSSP, SSP, iSegz, iSegr
 
