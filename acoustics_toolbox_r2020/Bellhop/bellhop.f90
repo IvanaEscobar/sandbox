@@ -227,6 +227,9 @@ SUBROUTINE BellhopCore
 
   WRITE( PRTFile, * )
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !         begin solve         !
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SourceDepth: DO is = 1, Pos%NSz
      xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate
 
@@ -257,8 +260,8 @@ SUBROUTINE BellhopCore
 
            IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) < SrcDeclAngle )  ! index of ray angle in beam pattern
            IBP    = IBPvec( 1 )
-           IBP    = MAX( IBP, 1 )               ! don't go before beginning of table
-           IBP    = MIN( IBP, NSBPPts - 1 )     ! don't go past end of table
+           IBP    = MAX( IBP, 1 )           ! don't go before beginning of table
+           IBP    = MIN( IBP, NSBPPts - 1 ) ! don't go past end of table
 
            ! linear interpolation to get amplitude
            s    = ( SrcDeclAngle  - SrcBmPat( IBP, 1 ) ) / ( SrcBmPat( IBP + 1, 1 ) - SrcBmPat( IBP, 1 ) )
@@ -279,7 +282,7 @@ SUBROUTINE BellhopCore
 
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   ! Write the ray trajectory to RAYFile
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
-           ELSE                                       ! Compute the contribution to the field
+           ELSE ! Compute the contribution to the field
 
               epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, Angles%alpha( ialpha ), &
                    Angles%Dalpha, Beam%rLoop, Beam%epsMultiplier ) ! 'optimal' beam constant
