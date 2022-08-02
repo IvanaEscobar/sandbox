@@ -51,12 +51,12 @@ MODULE bdrymod
                           t( 2 ), &     ! segment tangent
                           n( 2 )        ! segment outward
      REAL (KIND=_RL90) :: Len, Kappa    ! length and curvature of a segement
-     REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
-                          Dss           ! derivative along tangent
-     TYPE( HSInfo2 )   :: HS
      ! For the curvilinear grid option
      REAL (KIND=_RL90) :: Nodet( 2 ), & ! tangent at the node
                           Noden( 2 )    ! normal at the node 
+     REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
+                          Dss           ! derivative along tangent
+     TYPE( HSInfo2 )   :: HS
   END TYPE
 
   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
@@ -199,7 +199,7 @@ CONTAINS
 
        READ(  BTYFile, * ) NbtyPts
        WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
-       
+
        ! we'll be extending the bathymetry to infinity on both sides
        NbtyPts = NbtyPts + 2  
        ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
@@ -247,13 +247,14 @@ CONTAINS
                  'Bathymetry drops below lowest point in the sound speed profile' )
           END IF
  
-       END DO btypt
+       END DO btyPt
 
        CLOSE( BTYFile )
 
        Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
+       WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
        ALLOCATE( Bot( 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
                                     'Insufficient memory for bathymetry data'  )
@@ -316,7 +317,6 @@ CONTAINS
     BoundaryPt: DO ii = 1, NPts - 1
        Bdry( ii )%t   = Bdry( ii + 1 )%x      - Bdry( ii )%x
        Bdry( ii )%Dx  = Bdry( ii )%t( 2 ) / Bdry( ii )%t( 1 )   ! 1st derivative
-       ! write( *, * ) 'Dx, t', Bdry( ii )%Dx, Bdry( ii )%x, 1 / ( Bdry( ii )%x( 2 ) / 500 )
 
        ! normalize the tangent vector
        Bdry( ii )%Len = NORM2( Bdry( ii )%t )
@@ -359,22 +359,16 @@ CONTAINS
        ! compute curvature in each segment
        ALLOCATE( phi( NPts ), Stat = IAllocStat )
        ! phi is the angle at each node
-       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )   
+       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )
 
        DO ii = 1, NPts - 1
           ! this is curvature = dphi/ds
-          Bdry( ii )%kappa = ( phi( ii+1 ) - phi( ii ) ) / Bdry( ii )%Len 
+          Bdry( ii )%kappa = ( phi( ii+1 ) - phi( ii ) ) / Bdry( ii )%Len
           ! second derivative
           Bdry( ii )%Dxx   = ( Bdry( ii+1 )%Dx     - Bdry( ii )%Dx     ) / &   
                              ( Bdry( ii+1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
           ! derivative in direction of tangent
           Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 )**3   
-          !write( *, * ) 'kappa, Dss, Dxx', Bdry( ii )%kappa, Bdry( ii )%Dss, &
-               ! Bdry( ii )%Dxx, &
-               ! 1 / ( ( 8 / 1000 ** 2 ) * ABS( Bdry( ii )%x( 2 ) ) ** 3 ), &
-               ! Bdry( ii )%x( 2 ) &
-               !  -1 / ( 4 * ( Bdry( ii )%x( 2 ) ) ** 3 / 1000000 ), &
-               ! Bdry( ii )%x( 2 )
 
           Bdry( ii )%kappa = Bdry( ii )%Dss   !over-ride kappa !!!!!
        END DO
@@ -394,7 +388,7 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN ) :: r
 
     IsegTopT = MAXLOC( Top( : )%x( 1 ), Top( : )%x( 1 ) < r )
-    
+
     ! IsegTop MUST LIE IN [ 1, NatiPts-1 ]
     IF ( IsegTopT( 1 ) > 0 .AND. IsegTopT( 1 ) < NatiPts ) THEN  
        IsegTop = IsegTopT( 1 )
@@ -420,10 +414,10 @@ CONTAINS
 
     IsegBotT = MAXLOC( Bot( : )%x( 1 ), Bot( : )%x( 1 ) < r )
     ! IsegBot MUST LIE IN [ 1, NbtyPts-1 ]
-    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN  
+    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN
        IsegBot = IsegBotT( 1 )   
        ! segment limits in range
-       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]  
+       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
