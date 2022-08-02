@@ -56,7 +56,7 @@ CLEAN: clean
 # Declare implicit rules (for make utilities with missing or broken build rules)
 
 .SUFFIXES:
-.SUFFIXES: .a .o .mod .f .f90
+.SUFFIXES: .a .o .mod .f90
 
 .f.o:
 	$(FC) -c $(FFLAGS) $< 
@@ -72,40 +72,40 @@ CLEAN: clean
 ###########################
 ### from misc directory ###
 ###########################
-AttenMod.o: AttenMod.f90 MathConstants.mod
+FatalError.o: FatalError.f90
+
+AttenMod.o: AttenMod.f90 MathConstants.o FatalError.o
 	$(FC) -c $(FFLAGS) $<
 
-FatalError.o fatalerror.mod: FatalError.f90
-
-beampattern.o beampattern.mod: beampattern.f90 FatalError.o
+beampattern.o: beampattern.f90 FatalError.o
 	$(FC) -c $(FFLAGS) $<
 
-MathConstants.o mathconstants.mod: MathConstants.f90
+MathConstants.o: MathConstants.f90
 	$(FC) -c $(FFLAGS) $<
 
-monotonicMod.o monotonicmod.mod: monotonicMod.f90
+monotonicMod.o: monotonicMod.f90
 	$(FC) -c $(FFLAGS) $<
 
-pchipMod.o pchipmod.mod: pchipMod.f90
+pchipMod.o: pchipMod.f90 splinec.o
 	$(FC) -c $(FFLAGS) $<
 
-PolyMod.o polymod.mod: PolyMod.f90
+PolyMod.o: PolyMod.f90 
 	$(FC) -c $(FFLAGS) $<
 
-RefCoef.o refcoef.mod: RefCoef.f90 polymod.mod
+RefCoef.o : RefCoef.f90 PolyMod.o FatalError.o
 	$(FC) -c $(FFLAGS) $<
 
-RWSHDFile.o: RWSHDFile.f90 sourcereceiverpositions.mod
+RWSHDFile.o: RWSHDFile.f90 SourceReceiverPositions.o
 
-SortMod.o sortmod.mod: SortMod.f90
+SortMod.o: SortMod.f90
 	$(FC) -c $(FFLAGS) $<
 
-SourceReceiverPositions.o sourcereceiverpositions.mod: SourceReceiverPositions.f90 monotonicmod.mod sortmod.mod subtabulate.mod
+SourceReceiverPositions.o: SourceReceiverPositions.f90 monotonicMod.o SortMod.o subtabulate.o FatalError.o
 	$(FC) -c $(FFLAGS) $<
 
 splinec.o: splinec.f90
 
-subtabulate.o subtabulate.mod: subtabulate.f90
+subtabulate.o: subtabulate.f90
 	$(FC) -c $(FFLAGS) $<
 
 ############################
@@ -117,7 +117,7 @@ cfft.o: cfft.f90
 hilbert.o: hilbert.f90
 preenv.o: preenv.f90
 
-sourceMod.o sourcemod.mod: sourceMod.f90
+sourceMod.o: sourceMod.f90 FatalError.o
 	$(FC) -c $(FFLAGS) $<
 
 ##############################
@@ -126,34 +126,35 @@ sourceMod.o sourcemod.mod: sourceMod.f90
 bell: $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS)
 	$(FC) -o $@ $(FFLAGS) $(MISC_OBJECTS) $(TSLIB_OBJECTS) $(BELLHOP_OBJECTS) $(BELLHOP_LIBS)
 
-angleMod.o anglemod.mod: angleMod.f90 sourcereceiverpositions.mod
+angleMod.o : angleMod.f90 SourceReceiverPositions.o SortMod.o subtabulate.o MathConstants.o FatalError.o
 	$(FC) -c $(FFLAGS) $< 
 
-ArrMod.o arrmod.mod: ArrMod.f90
+ArrMod.o: ArrMod.f90 MathConstants.o
 	$(FC) -c $(FFLAGS) $< 
 
-bdryMod.o bdrymod.mod: bdryMod.f90
+bdryMod.o: bdryMod.f90 MathConstants.o FatalError.o monotonicMod.o
 	$(FC) -c $(FFLAGS) $< 
 
-bellhopMod.o bellhopmod.mod: bellhopMod.f90
+bellhopMod.o: bellhopMod.f90 MathConstants.o
 	$(FC) -c $(FFLAGS) $< 
 
-influence.o influence.mod: influence.f90 sourcereceiverpositions.mod sspmod.mod writeray.mod
+influence.o: influence.f90 SourceReceiverPositions.o sspMod.o WriteRay.o MathConstants.o ArrMod.o bellhopMod.o
 	$(FC) -c $(FFLAGS) $< 
 
-ReadEnvironmentBell.o readenvironmentbell.mod: ReadEnvironmentBell.f90 sspmod.mod
+ReadEnvironmentBell.o: ReadEnvironmentBell.f90 sspMod.o AttenMod.o SourceReceiverPositions.o angleMod.o FatalError.o MathConstants.o bellhopMod.o
 	$(FC) -c $(FFLAGS) $< 
 
-sspMod.o sspmod.mod: sspMod.f90 fatalerror.mod pchipmod.mod AttenMod.o
+sspMod.o: sspMod.f90 FatalError.o pchipMod.o AttenMod.o MathConstants.o splinec.o
 	$(FC) -c $(FFLAGS) $< 
 
-Step.o step.mod: Step.f90 sspmod.mod
+Step.o: Step.f90 sspMod.o MathConstants.o bellhopMod.o bdryMod.o
 	$(FC) -c $(FFLAGS) $<
 
-WriteRay.o writeray.mod: WriteRay.f90 sspmod.mod
+WriteRay.o: WriteRay.f90 sspMod.o bellhopMod.o MathConstants.o
 	$(FC) -c $(FFLAGS) $<
 
-bellhop.o:  arrmod.mod 				anglemod.mod	bdrymod.mod \
-			readenvironmentbell.mod bellhopmod.mod 	sspmod.mod \
-			writeray.mod 			influence.mod   step.mod \
+bellhop.o:  RefCoef.o AttenMod.o SourceReceiverPositions.o beampattern.o \
+			FatalError.o MathConstants.o ArrMod.o angleMod.o bdryMod.o \
+			ReadEnvironmentBell.o bellhopMod.o 	sspMod.o \
+			WriteRay.o 			influence.o   Step.o \
 			bellhop.f90

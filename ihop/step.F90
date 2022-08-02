@@ -52,7 +52,7 @@ CONTAINS
                       'TAB' )
 
     csq0      = c0 * c0
-    cnn0_csq0 = crr0*ray0%t( 2 )**2 - 2.0*crz0*ray0%t( 1 )*ray0%t( 2 ) & 
+    cnn0_csq0 = crr0*ray0%t( 2 )**2 - 2.0*crz0*ray0%t( 1 )*ray0%t( 2 ) &
               + czz0*ray0%t( 1 )**2 !IESCO22: chain rule map n deriv to r,z
     iSegz0    = iSegz     ! make note of current layer
     iSegr0    = iSegr
@@ -101,10 +101,9 @@ CONTAINS
     ray2%t   = ray0%t   - hw0 * gradc0 / csq0       - hw1 * gradc1 / csq1
     ray2%p   = ray0%p   - hw0 * cnn0_csq0 * ray0%q  - hw1 * cnn1_csq1 * ray1%q
     ray2%q   = ray0%q   + hw0 * c0        * ray0%p  + hw1 * c1        * ray1%p
-
-
     ray2%tau = ray0%tau + hw0 / CMPLX( c0, cimag0, KIND=_RL90 ) &
                         + hw1 / CMPLX( c1, cimag1, KIND=_RL90 )
+
     ray2%Amp       = ray0%Amp
     ray2%Phase     = ray0%Phase
     ray2%NumTopBnc = ray0%NumTopBnc
@@ -124,10 +123,10 @@ CONTAINS
 
        IF ( iSegz /= iSegz0 ) THEN         ! crossing in depth
           ! RM is tan( alpha ) where alpha is the angle of incidence
-          RM = +ray2%t( 1 ) / ray2%t( 2 )  
+          RM = +ray2%t( 1 ) / ray2%t( 2 )
        ELSE ! iSegr /= iSegr0              ! crossing in range
           ! RM is tan( alpha ) where alpha is the angle of incidence
-          RM = -ray2%t( 2 ) / ray2%t( 1 )  
+          RM = -ray2%t( 2 ) / ray2%t( 1 )
        END IF
 
        RN     = RM * ( 2*cnjump - RM*csjump ) / c2
@@ -149,8 +148,9 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN    ) :: x0( 2 ), urayt( 2 )   ! ray coordinate and tangent
     REAL (KIND=_RL90), INTENT( IN    ) :: Topx( 2 ), Topn( 2 ), Botx( 2 ), Botn( 2 ) ! Top, bottom coordinate and normal
     REAL (KIND=_RL90), INTENT( INOUT ) :: h ! reduced step size 
-    REAL (KIND=_RL90)                  :: x( 2 ), d( 2 ), d0( 2 ), h1, h2, &
-                                          h3, h4, rSeg( 2 )
+    REAL (KIND=_RL90)                  :: hInt, hTop, hBot, hSeg, &
+                                          hBoxr, hBoxz ! trial step sizes
+    REAL (KIND=_RL90)                  :: x( 2 ), d( 2 ), d0( 2 ), rSeg( 2 )
 
     ! Detect interface or boundary crossing and reduce step, if necessary, to 
     ! land on that crossing.
@@ -158,57 +158,64 @@ CONTAINS
     ! and that multiple events can occur (crossing interface, top, and bottom 
     ! in a single step).
 
-    x = x0 + h * urayt ! take initial Euler step
+    x = x0 + h * urayt ! take a trial Euler step
 
     ! interface crossing in depth
-    h1 = HUGE( h1 ) ! Largest _RL90 number available
-    IF ( ABS( urayt( 2 ) ) > EPSILON( h1 ) ) THEN
-       IF      ( SSP%z( iSegz0   ) > x(  2 ) ) THEN
-          h1 = ( SSP%z( iSegz0   ) - x0( 2 ) ) / urayt( 2 )
-       ELSE IF ( SSP%z( iSegz0+1 ) < x(  2 ) ) THEN
-          h1 = ( SSP%z( iSegz0+1 ) - x0( 2 ) ) / urayt( 2 )
+    hInt = huge( hInt ) ! Largest _RL90 number available
+    IF ( ABS( urayt( 2 ) ) > EPSILON( hInt ) ) THEN
+       IF        ( SSP%z( iSegz0   ) > x(  2 ) ) THEN
+          hInt = ( SSP%z( iSegz0   ) - x0( 2 ) ) / urayt( 2 )
+       ELSE IF   ( SSP%z( iSegz0+1 ) < x(  2 ) ) THEN
+          hInt = ( SSP%z( iSegz0+1 ) - x0( 2 ) ) / urayt( 2 )
        END IF
     END IF
 
     ! top crossing
-    h2 = HUGE( h2 )
-    d  = x - Topx              ! vector from top to ray
-    IF ( DOT_PRODUCT( Topn, d ) > EPSILON( h2 ) ) THEN
-       d0  = x0 - Topx         ! vector from top to ray origin
-       h2 = -DOT_PRODUCT( d0, Topn ) / DOT_PRODUCT( urayt, Topn )
+    hTop = huge( hTop )
+    d = x - Topx             ! vector from top to ray
+    IF ( DOT_PRODUCT( Topn, d ) > EPSILON( hTop ) ) THEN
+       d0 = x0 - Topx         ! vector from top    node to ray origin
+       hTop = -DOT_PRODUCT( d0, Topn ) / DOT_PRODUCT( urayt, Topn )
     END IF
 
     ! bottom crossing
-    h3 = HUGE( h3 )
-    d  = x - Botx              ! vector from bottom to ray
-    IF ( DOT_PRODUCT( Botn, d ) > EPSILON( h3 ) ) THEN
-       d0  = x0 - Botx         ! vector from bottom to ray origin
-       h3 = -DOT_PRODUCT( d0, Botn ) / DOT_PRODUCT( urayt, Botn )
+    hBot = huge( hBot )
+    d = x - Botx             ! vector from bottom to ray
+    IF ( DOT_PRODUCT( Botn, d ) > EPSILON( hBot ) ) THEN
+       d0 = x0 - Botx         ! vector from bottom node to ray origin
+       hBot = -DOT_PRODUCT( d0, Botn ) / DOT_PRODUCT( urayt, Botn )
     END IF
 
     ! top or bottom segment crossing in range
+    rSeg( 1 ) = MAX( rTopSeg( 1 ), rBotSeg( 1 ) )
+    rSeg( 2 ) = MIN( rTopSeg( 2 ), rBotSeg( 2 ) )
+
     IF ( SSP%Type == 'Q' ) THEN ! Quad: 2D range-dependent SSP
-       rSeg( 1 ) = MAX( rSeg( 1 ), SSP%Seg%r( iSegr0   ) )
-       rSeg( 2 ) = MIN( rSeg( 2 ), SSP%Seg%r( iSegr0+1 ) )
-    ELSE
-       rSeg( 1 ) = MAX( rTopSeg( 1 ), rBotSeg( 1 ) )
-       rSeg( 2 ) = MIN( rTopSeg( 2 ), rBotSeg( 2 ) )
+       rSeg( 1 ) = MAX( rSeg( 1 ), SSP%Seg%r( iSegr0     ) )
+       rSeg( 2 ) = MIN( rSeg( 2 ), SSP%Seg%r( iSegr0 + 1 ) )
     END IF
 
     ! interface crossing in range
-    h4 = HUGE( h4 )
-    IF ( ABS( urayt( 1 ) )  > EPSILON( h4 ) ) THEN
-       IF       ( x(  1 ) < rSeg( 1 ) ) THEN
-          h4 = -( x0( 1 ) - rSeg( 1 ) ) / urayt( 1 )
-       ELSE IF  ( x(  1 ) > rSeg( 2 ) ) THEN
-          h4 = -( x0( 1 ) - rSeg( 2 ) ) / urayt( 1 )
+    hSeg = huge( hSeg )
+    IF ( ABS( urayt( 1 ) )  > EPSILON( hSeg ) ) THEN
+       IF         ( x(  1 ) < rSeg( 1 ) ) THEN
+          hSeg = -( x0( 1 ) - rSeg( 1 ) ) / urayt( 1 )
+       ELSE IF    ( x(  1 ) > rSeg( 2 ) ) THEN
+          hSeg = -( x0( 1 ) - rSeg( 2 ) ) / urayt( 1 )
        END IF
     END IF
 
-    h = MIN( h, h1, h2, h3, h4 )           ! shortest distance to a crossing
-    IF ( h < 1.0d-4 * Beam%deltas ) THEN   ! is step too small, going nowhere
-       h = 1.0d-5 * Beam%deltas            ! make sure we make some motion
-       iSmallStepCtr = iSmallStepCtr + 1   ! count no. of sequential small steps
+    ! ray mask using a box centered at ( 0, 0 )
+    hBoxr    = huge( hBoxr )
+    hBoxz    = huge( hBoxz )
+    
+    IF ( ABS( x( 1 ) ) > Beam%Box%r ) hBoxr = ( Beam%Box%r - ABS( x0( 1 ) ) ) / ABS( urayt( 1 ) )
+    IF ( ABS( x( 2 ) ) > Beam%Box%z ) hBoxz = ( Beam%Box%z - ABS( x0( 2 ) ) ) / ABS( urayt( 2 ) )
+    
+    h = MIN( h, hInt, hTop, hBot, hSeg, hBoxr, hBoxz )  ! take limit set by shortest distance to a crossing
+    IF ( h < 1.0d-4 * Beam%deltas ) THEN   ! is it taking an infinitesimal step?
+       h = 1.0d-4 * Beam%deltas            ! make sure we make some motion
+       iSmallStepCtr = iSmallStepCtr + 1   ! keep a count of the number of sequential small steps
     ELSE
        iSmallStepCtr = 0   ! didn't do a small step so reset the counter
     END IF

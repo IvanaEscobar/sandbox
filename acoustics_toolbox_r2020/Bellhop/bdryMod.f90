@@ -35,7 +35,6 @@ MODULE bdrymod
   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
 
 CONTAINS
-
   SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, PRTFile )
 
     ! Reads in the top altimetry
@@ -88,8 +87,8 @@ CONTAINS
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x
              END IF
           CASE ( 'L' )
-             READ(  ATIFile, * )                   Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, Top( ii )%HS%rho, &
-                                                                Top( ii )%HS%alphaI, Top( ii )%HS%betaI
+             READ(  ATIFile, * ) Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, Top( ii )%HS%rho, &
+                                 Top( ii )%HS%alphaI, Top( ii )%HS%betaI
              IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   ! echo some values
                 WRITE( PRTFile, FMT = "(7G11.3)" ) Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, Top( ii )%HS%rho, &
                                                                 Top( ii )%HS%alphaI, Top( ii )%HS%betaI
@@ -139,7 +138,7 @@ CONTAINS
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
 
-       OPEN( UNIT = BTYFile,   FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
+       OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOsTAT /= 0 ) THEN
           WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
           CALL ERROUT( 'ReadBTY', 'Unable to open bathymetry file' )
@@ -185,8 +184,8 @@ CONTAINS
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( ii )%x
              END IF
           CASE ( 'L' )       ! long format
-             READ(  BTYFile, * )                   Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
-                                                                Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+             READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
+                                              Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   ! echo some values
                 WRITE( PRTFile, FMT="( F10.2, F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
                    Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
@@ -290,7 +289,7 @@ CONTAINS
        DO ii = 2, NPts - 1
           sss = Bdry( ii - 1 )%Len / ( Bdry( ii - 1 )%Len + Bdry( ii )%Len )
           sss = 0.5
-          Bdry( ii )%Nodet = ( 1.0 - sss ) * Bdry( ii - 1 )%t + sss * Bdry( ii )%t
+          Bdry( ii )%Nodet = ( 1.0 - sss ) * Bdry( ii-1 )%t + sss * Bdry( ii )%t
        END DO
 
        Bdry( 1    )%Nodet = [ 1.0, 0.0 ]   ! tangent left-end  node
@@ -307,13 +306,17 @@ CONTAINS
 
        ! compute curvature in each segment
        ALLOCATE( phi( NPts ), Stat = IAllocStat )
-       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )   ! this is the angle at each node
+       ! this is the angle at each node
+       phi = atan2( Bdry( : )%Nodet( 2 ), Bdry( : )%Nodet( 1 ) )
 
        DO ii = 1, NPts - 1
-          Bdry( ii )%kappa = ( phi( ii + 1 ) - phi( ii ) ) / Bdry( ii )%Len ! this is curvature = dphi/ds
-          Bdry( ii )%Dxx   = ( Bdry( ii + 1 )%Dx     - Bdry( ii )%Dx     ) / &   ! second derivative
-                             ( Bdry( ii + 1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
-          Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 ) ** 3   ! derivative in direction of tangent
+          ! this is curvature = dphi/ds
+          Bdry( ii )%kappa = ( phi( ii+1 ) - phi( ii ) ) / Bdry( ii )%Len
+          ! second derivative
+          Bdry( ii )%Dxx   = ( Bdry( ii+1 )%Dx     - Bdry( ii )%Dx     ) / &   
+                             ( Bdry( ii+1 )%x( 1 ) - Bdry( ii )%x( 1 ) )
+          ! derivative in direction of tangent
+          Bdry( ii )%Dss   = Bdry( ii )%Dxx * Bdry( ii )%t( 1 )**3   
 
           Bdry( ii )%kappa = Bdry( ii )%Dss   !over-ride kappa !!!!!
        END DO
@@ -358,10 +361,11 @@ CONTAINS
     REAL (KIND=8), INTENT( IN ) :: r
 
     IsegBotT = MAXLOC( Bot( : )%x( 1 ), Bot( : )%x( 1 ) < r )
-
-    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN  ! IsegBot MUST LIE IN [ 1, NbtyPts-1 ]
+    ! IsegBot MUST LIE IN [ 1, NbtyPts-1 ]
+    IF ( IsegBotT( 1 ) > 0 .AND. IsegBotT( 1 ) < NbtyPts ) THEN
        IsegBot = IsegBotT( 1 )   
-       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]   ! segment limits in range
+       ! segment limits in range
+       rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]
     ELSE
        WRITE( PRTFile, * ) 'r = ', r
        WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
@@ -372,5 +376,3 @@ CONTAINS
   END SUBROUTINE GetBotSeg
 
 END MODULE bdrymod
-
-

@@ -1,8 +1,8 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE BELLHOP
-  ! Written as a module to be used in bellhop*.F parts of the MITgcm package
+PROGRAM BELLHOP
+  ! Written as a module to be used in ihop_*.F parts of the MITgcm package
   ! BELLHOP Beam tracing for ocean acoustics
 
   ! Copyright (C) 2009 Michael B. Porter
@@ -48,13 +48,10 @@ MODULE BELLHOP
   IMPLICIT NONE
   ! PRIVATE
   
-  INTEGER              :: iostat, iAllocStat  
-
-CONTAINS
-SUBROUTINE IHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
-  REAL                 :: Tstart, Tstop
+  INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 
+  REAL                 :: Tstart, Tstop
 ! added locally previously read in from unknown mod ... IEsco2022
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
@@ -62,13 +59,17 @@ SUBROUTINE IHOP_INIT
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
+  CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
   ! HARDCODING FILE TO FORCE nesba eigenray run
-  !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
+  !FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
         STATUS = 'UNKNOWN', IOSTAT = iostat )
+  IF ( iostat /= 0 ) THEN
+      WRITE(*,*) 'bellhop: do not recognize FileRoot, ', TRIM( FileRoot )
+      CALL ERROUT('BELLHOP INIT','Unable to recognize env file')
+  END IF
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
 
@@ -167,11 +168,14 @@ SUBROUTINE IHOP_INIT
      ! Source Beam Pattern: OPTIONAL, default is omni source pattern
      SBPFlag = Beam%RunType( 3:3 )
      CALL ReadPat( FileRoot, PRTFile )
+     Pos%Ntheta = 1
+     ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
+     Pos%theta( 1 ) = 0.
      ! 3d angle data: unmodified and unused in 2d code; dummy bearing angles
-     IF ( ThreeD .eqv. .FALSE. ) THEN
-        ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
-        Pos%theta( 1 ) = 0.
-    END IF
+     !IF ( ThreeD .eqv. .FALSE. ) THEN
+     !   ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
+     !   Pos%theta( 1 ) = 0.
+     !END IF
   END IF
 
   ! open all output files
@@ -196,8 +200,8 @@ SUBROUTINE IHOP_INIT
   END SELECT
 
   CLOSE( PRTFile )
-END SUBROUTINE IHOP_INIT
 
+  CONTAINS
 ! **********************************************************************!
 SUBROUTINE BellhopCore
 
@@ -318,7 +322,7 @@ SUBROUTINE BellhopCore
      ! Trace successive beams
      DeclinationAngle: DO ialpha = 1, Angles%Nalpha
         ! take-off declination angle in degrees
-        SrcDeclAngle = RadDeg * Angles%alpha( ialpha ) 
+        SrcDeclAngle = RadDeg * Angles%alpha( ialpha )
 
         ! Single ray run? then don't visit code below
         IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN
@@ -359,16 +363,16 @@ SUBROUTINE BellhopCore
            ELSE ! Compute the contribution to the field
               SELECT CASE ( Beam%Type( 1 : 1 ) )
               CASE ( 'g' )
-                 CALL InfluenceGeoHatRayCen( U, Angles%alpha( ialpha ), &
-                                             Angles%Dalpha )
+                 CALL InfluenceGeoHatRayCen(    U, Angles%alpha( ialpha ), &
+                                                Angles%Dalpha )
               CASE ( 'S' )
                  CALL InfluenceSGB( U, Angles%alpha( ialpha ), Angles%Dalpha )
               CASE ( 'B' )
                  CALL InfluenceGeoGaussianCart( U, Angles%alpha( ialpha ), &
                                                 Angles%Dalpha )
              CASE DEFAULT !IEsco22: thesis is in default behavior
-                 CALL InfluenceGeoHatCart( U, Angles%alpha( ialpha ), &
-                                           Angles%Dalpha )
+                 CALL InfluenceGeoHatCart(  U, Angles%alpha( ialpha ), &
+                                            Angles%Dalpha )
               END SELECT
 
            END IF
@@ -510,7 +514,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
                                         dEndTop,          dEndBot, &
                                         Top( IsegTop )%n, Bot( IsegBot )%n, &
                                         DistEndTop,       DistEndBot )
-     
+
      ! IESCO22: Did new ray point cross top boundary? Then reflect
      IF ( DistBegTop > 0.0d0 .AND. DistEndTop <= 0.0d0 ) THEN 
 
@@ -617,12 +621,12 @@ END SUBROUTINE Distances2D
 
 SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
-  INTEGER,              INTENT( IN    ) :: Npts ! unsued if there are no refcoef files
-  REAL (KIND=_RL90),    INTENT( IN    ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
-  REAL (KIND=_RL90),    INTENT( IN    ) :: kappa ! Boundary curvature, for curvilinear grids
-  CHARACTER (LEN=3),    INTENT( IN    ) :: BotTop              ! bottom or top reflection
-  TYPE( HSInfo ),       INTENT( IN    ) :: HS                  ! half-space properties
-  TYPE(ReflectionCoef), INTENT( IN    ) :: RefC( NPts )        ! reflection coefficient
+  INTEGER,              INTENT( IN ) :: Npts ! unsued if there are no refcoef files
+  REAL (KIND=_RL90),    INTENT( IN ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
+  REAL (KIND=_RL90),    INTENT( IN ) :: kappa ! Boundary curvature, for curvilinear grids
+  CHARACTER (LEN=3),    INTENT( IN ) :: BotTop              ! bottom or top reflection
+  TYPE( HSInfo ),       INTENT( IN ) :: HS                  ! half-space properties
+  TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts )        ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
   INTEGER              :: is1
   REAL (KIND=_RL90)    :: c, cimag, gradc( 2 ), crr, crz, czz, &
@@ -667,13 +671,12 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ! roughly 2 * Th * nbdry
   cnjump = -DOT_PRODUCT( gradc, rayn_tilde - rayn  )
   csjump = -DOT_PRODUCT( gradc, rayt_tilde - rayt )
-
   RN = 2 * kappa / c ** 2 / Th    ! boundary curvature correction
 
   IF ( BotTop == 'TOP' ) THEN
      ! cnjump changes sign because the (t,n) system of the top boundary has a 
      ! different sense to the bottom boundary
-     cnjump = -cnjump  
+     cnjump = -cnjump
      RN     = -RN
   END IF
 
@@ -735,10 +738,10 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         f   = kzP
         g   = HS%rho
      ENDIF
-     
+
      ! complex reflection coef.
-     Refl =  - ( rho*f - i * kz*g ) / ( rho*f + i * kz*g )   
-     
+     Refl =  - ( rho*f - i * kz*g ) / ( rho*f + i*kz*g )   
+
      IF ( ABS( Refl ) < 1.0E-5 ) THEN   ! kill a ray that has lost its energy in reflection
         ray2D( is1 )%Amp   = 0.0
         ray2D( is1 )%Phase = ray2D( is )%Phase
@@ -806,4 +809,4 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
 END SUBROUTINE Reflect2D
 
-END MODULE BELLHOP
+END PROGRAM BELLHOP
