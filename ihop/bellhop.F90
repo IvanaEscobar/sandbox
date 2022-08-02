@@ -60,9 +60,9 @@ SUBROUTINE IHOP_INIT
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
-  CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
+  !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
   ! HARDCODING FILE TO FORCE nesba eigenray run
-  !FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
+  FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
 
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
@@ -210,6 +210,7 @@ SUBROUTINE BellhopCore
   USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
 
+  INTEGER              :: iAllocStat  
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, &
                           NalphaOpt, iSeg
