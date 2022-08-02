@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-PROGRAM BELLHOP
+MODULE BELLHOP
   ! Written as a module to be used in ihop_*.F parts of the MITgcm package
   ! BELLHOP Beam tracing for ocean acoustics
 
@@ -46,8 +46,9 @@ PROGRAM BELLHOP
   USE writeRay,     only:   WriteRay2D
 
   IMPLICIT NONE
-  ! PRIVATE
   
+CONTAINS
+SUBROUTINE IHOP_INIT
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 
@@ -201,7 +202,8 @@ PROGRAM BELLHOP
 
   CLOSE( PRTFile )
 
-  CONTAINS
+END SUBROUTINE IHOP_INIT
+
 ! **********************************************************************!
 SUBROUTINE BellhopCore
 
@@ -809,4 +811,4 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
 END SUBROUTINE Reflect2D
 
-END PROGRAM BELLHOP
+END MODULE BELLHOP
