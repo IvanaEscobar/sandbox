@@ -7,6 +7,10 @@ MODULE ReadEnvironmentBell
   USE sspmod
   USE AttenMod
   USE FatalError
+  USE anglemod
+  USE SourceReceiverPositions
+  USE bdryMod
+  USE RWSHDFile
 
   IMPLICIT NONE
 
@@ -16,8 +20,8 @@ CONTAINS
     ! Routine to read in and echo all the input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
-    USE anglemod
-    USE SourceReceiverPositions
+    !USE anglemod
+    !USE SourceReceiverPositions
 
     REAL      (KIND=8), PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
@@ -360,7 +364,7 @@ CONTAINS
 
     ! Read the RunType variable and write expalnations to the print file
 
-    USE SourceReceiverPositions
+    !USE SourceReceiverPositions
 
     CHARACTER (LEN= 7), INTENT( OUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
@@ -551,10 +555,10 @@ CONTAINS
   SUBROUTINE OpenOutputFiles( FileRoot, ThreeD )
     ! Write appropriate header information
 
-    USE SourceReceiverPositions
-    USE angleMod
-    USE bdryMod
-    USE RWSHDFile
+    !USE SourceReceiverPositions
+    !USE angleMod
+    !USE bdryMod
+    !USE RWSHDFile
 
     LOGICAL,            INTENT( IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot

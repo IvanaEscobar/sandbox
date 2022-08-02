@@ -23,14 +23,14 @@ MODULE SourceReceiverPositions
      REAL,    ALLOCATABLE :: theta( : )                         ! Receiver bearings
   END TYPE Position
 
-  TYPE ( Position ) :: Pos   ! structure containing source and receiver positions
+  TYPE ( Position ) :: Pos ! structure containing source and receiver positions
 
 CONTAINS
-
   SUBROUTINE ReadfreqVec( freq0, BroadbandOption )
 
     ! Optionally reads a vector of source frequencies for a broadband run
-    ! If the broadband option is not selected, then the input freq (a scalar) is stored in the frequency vector
+    ! If the broadband option is not selected, then the input freq (a scalar) 
+    ! is stored in the frequency vector
 
     REAL (KIND=8), INTENT( IN ) :: freq0             ! Nominal or carrier frequency
     CHARACTER,     INTENT( IN ) :: BroadbandOption*( 1 )
@@ -91,10 +91,10 @@ CONTAINS
   SUBROUTINE ReadSzRz( zMin, zMax )
 
     ! Reads source and receiver z-coordinates (depths)
-    ! zMin and zMax are limits for those depths; sources and receivers are shifted to be within those limits
+    ! zMin and zMax are limits for those depths; sources and receivers are 
+    ! shifted to be within those limits
 
     REAL,    INTENT( IN ) :: zMin, zMax
-    !LOGICAL               :: monotonic
 
     CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm' )
     CALL ReadVector( Pos%NRz, Pos%Rz, 'Receiver depths, Rz', 'm' )
@@ -128,14 +128,6 @@ CONTAINS
        WHERE( Pos%Rz > zMax ) Pos%Rz = zMax
        WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too near the bottom bdry has been moved up'
     END IF
-
-!!$    IF ( .NOT. monotonic( Pos%sz, Pos%NSz ) ) THEN
-!!$       CALL ERROUT( 'SzRzRMod', 'Source depths are not monotonically increasing' )
-!!$    END IF 
-!!$ 
-!!$    IF ( .NOT. monotonic( Pos%rz, Pos%NRz ) ) THEN
-!!$       CALL ERROUT( 'SzRzRMod', 'Receiver depths are not monotonically increasing' )
-!!$    END IF 
 
     RETURN
   END SUBROUTINE ReadSzRz

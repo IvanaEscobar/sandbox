@@ -1,3 +1,4 @@
+!#define _RL90 8
 !C CPP options file for IHOP
 !C Use this file for selecting options within package "Ihop"
 
