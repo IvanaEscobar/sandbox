@@ -43,6 +43,10 @@ PROGRAM BELLHOP
   CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
   ! Open the print file
   OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', STATUS = 'UNKNOWN', IOSTAT = iostat )
+  IF ( iostat /= 0 ) THEN
+      WRITE(*,*) 'bellhop: do not recognize FileRoot, ', TRIM( FileRoot )
+      CALL ERROUT('BELLHOP INIT','Unable to recognize env file')
+  END IF
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
 
