@@ -3,5 +3,9 @@ from .utils import (
         degMinSec2decimal,
         wgs84Distance
         )
+from .unesco import (
+        ssp
+        )
 
-__all__ = ['utils']
+__all__ = [ 'utils',
+            'unesco']
