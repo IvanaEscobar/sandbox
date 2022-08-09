@@ -74,22 +74,9 @@ C       Firstly, write 3-D fields as consecutive records,
 C     record number < 0 : a hack not to write meta files now:
         j = j + 1
         CALL WRITE_REC_3D_RL( fn, fp, Nr,
-     &                        myPa_StatScal1, -j, myIter, myThid )
-        IF (j.LE.listDim) wrFldList(j) = 'myPaSta1'
+     &                        ihop_ssp, -j, myIter, myThid )
+        IF (j.LE.listDim) wrFldList(j) = 'ihop_ssp'
 
-        j = j + 1
-        CALL WRITE_REC_3D_RL( fn, fp, Nr,
-     &                        myPa_StatScal2, -j, myIter, myThid )
-        IF (j.LE.listDim) wrFldList(j) = 'myPaSta2'
-
-        j = j + 1
-        CALL WRITE_REC_3D_RL( fn, fp, Nr,
-     &                        myPa_StatVelU, -j, myIter, myThid )
-        IF (j.LE.listDim) wrFldList(j) = 'myPaStaU'
-        j = j + 1
-        CALL WRITE_REC_3D_RL( fn, fp, Nr,
-     &                        myPa_StatVelV, -j, myIter, myThid )
-        IF (j.LE.listDim) wrFldList(j) = 'myPaStaV'
 #endif /* IHOP_3D_STATE */
 
 C-    switch to 2-D fields:

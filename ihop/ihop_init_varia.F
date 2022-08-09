@@ -38,10 +38,7 @@ C     3-dim.
          DO j=1-Oly,sNy+OLy
           DO i=1-Olx,sNx+Olx
 #ifdef IHOP_3D_STATE
-           myPa_StatScal1(i,j,k,bi,bj) = 0. _d 0
-           myPa_StatScal2(i,j,k,bi,bj) = 0. _d 0
-           myPa_StatVelU (i,j,k,bi,bj) = 0. _d 0
-           myPa_StatVelV (i,j,k,bi,bj) = 0. _d 0
+           ihop_ssp(i,j,k,bi,bj) = 0. _d 0
 #endif /* IHOP_3D_STATE */
           ENDDO
          ENDDO

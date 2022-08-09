@@ -27,13 +27,9 @@ C     IHOP_bellOn       :: true if bellhop driver needs to run
 
 #ifdef IHOP_3D_STATE
 C     IHOP 3-dim. fields
-      _RL myPa_StatScal1(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
-      _RL myPa_StatScal2(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
-      _RL myPa_StatVelU(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
-      _RL myPa_StatVelV(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
+      _RL ihop_ssp(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
       COMMON /IHOP_STATE_3D/
-     &    myPa_StatScal1, myPa_StatScal2,
-     &    myPa_StatVelU,  myPa_StatVelV
+     &    ihop_ssp 
 #endif /* IHOP_3D_STATE */
 #ifdef IHOP_2D_STATE
 C     IHOP 2-dim. fields
