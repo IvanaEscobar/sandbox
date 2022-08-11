@@ -34,15 +34,15 @@ C     === Local variables ===
 
 C--   Initialize arrays in common blocks :
 C     3-dim.
+#ifdef IHOP_3D_STATE
         DO k=1,Nr
          DO j=1-Oly,sNy+OLy
           DO i=1-Olx,sNx+Olx
-#ifdef IHOP_3D_STATE
            ihop_ssp(i,j,k,bi,bj) = 0. _d 0
-#endif /* IHOP_3D_STATE */
           ENDDO
          ENDDO
         ENDDO
+#endif /* IHOP_3D_STATE */
 
 C     2-dim.
 #ifdef IHOP_2D_STATE

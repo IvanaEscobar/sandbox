@@ -42,13 +42,14 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
 c     IF ( useDiagnotics ) THEN
 
+#ifdef IHOP_3D_STATE
         diagName  = 'ihop_ssp'
-        diagTitle = 'Scalar sound speed for package IHOP'
+        diagTitle = 'Sound speed from package IHOP'
         diagUnits = 'm/s             '
         diagCode  = 'SMR     MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
+#endif /* IHOP_3D_STATE */
 c     ENDIF
 
 #endif /* ALLOW_DIAGNOSTICS */
