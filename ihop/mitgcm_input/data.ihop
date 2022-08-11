@@ -1,0 +1,4 @@
+# IHOP package parameters:
+ &IHOP_PARM01 
+    IHOP_bellOn=.TRUE.,
+ &

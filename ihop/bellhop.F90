@@ -49,6 +49,10 @@ MODULE BELLHOP
   
 CONTAINS
 SUBROUTINE IHOP_INIT ( myThid )
+!     !INPUT/OUTPUT PARAMETERS:
+!     == Routine Arguments ==
+!     myThid :: Thread number for this instance of the routine.
+  INTEGER myThid
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 
