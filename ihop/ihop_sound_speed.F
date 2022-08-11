@@ -1,0 +1,149 @@
+#include "PACKAGES_CONFIG.h"
+#include "CPP_OPTIONS.h"
+#include "IHOP_OPTIONS.h"
+
+CBOP
+C     !ROUTINE: DIAGS_SOUND_SPEED
+C     !INTERFACE:
+      SUBROUTINE DIAGS_SOUND_SPEED(
+     I                       myThid )
+C     !DESCRIPTION: \bv
+C     *==========================================================*
+C     | S/R DIAGS_SOUND_SPEED
+C     | o Diagnose speed of sound in seawater
+C     |   from the algorithm by Chen and Millera (1977).
+C     |   This is NOT the sound-speed that can be derived from
+C     |   the equation of state (EOS). It is independent of
+C     |   the model setup specific EOS.
+C     |
+C     | o Reference:
+C     | C. Chen and F. J. Millero, "Speed of sound in seawater at 
+C     | high pressures,"
+C     | J. Acoust. Soc. Am. 672.5, 1129-1135 (1977).
+C     *==========================================================*
+C     \ev
+C     !USES:
+      IMPLICIT NONE
+C     == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "GRID.h"
+#include "SURFACE.h"
+#include "DYNVARS.h"
+#include "EOS.h"
+#include "IHOP.h"
+
+C     !INPUT/OUTPUT PARAMETERS:
+C     == Routine Arguments ==
+C     myThid :: Thread number for this instance of the routine.
+      INTEGER myThid
+
+#ifdef ALLOW_IHOP 
+C     !FUNCTIONS:
+      _RL SW_TEMP
+      EXTERNAL SW_TEMP
+#ifdef ALLOW_DIAGNOSTICS
+      LOGICAL  DIAGNOSTICS_IS_ON
+      EXTERNAL DIAGNOSTICS_IS_ON
+#endif /* ALLOW_DIAGNOSTICS */
+
+C     !LOCAL VARIABLES:
+C     == Local variables ==
+      INTEGER bi,bj
+      INTEGER i,j,k
+      _RL c0,ct,cs,cp,cstp
+      _RL pres,sal,temp
+      LOGICAL calc_soundSpeed
+CEOP
+
+C      calc_soundSpeed = .FALSE.
+
+C--   switch on this flag if Sound-Speed needed in any cost fct
+c#ifdef ALLOW_CSOUND_COST
+      calc_soundSpeed = .TRUE.
+c#endif
+
+#ifdef ALLOW_DIAGNOSTICS
+      IF ( useDiagnostics ) THEN
+        calc_soundSpeed = calc_soundSpeed
+     &               .OR. DIAGNOSTICS_IS_ON( 'ihop_ssp', myThid )
+      ENDIF
+#endif /* ALLOW_DIAGNOSTICS */
+
+      IF ( calc_soundSpeed ) THEN
+       c0   = 1402.388 _d 0
+       cw   = 0. _d 0
+       a    = 0. _d 0
+       b    = 0. _d 0
+       d    = 0. _d 0
+       pres = 0. _d 0
+       sal  = 0. _d 0
+       temp = 0. _d 0
+       DO bj=myByLo(myThid),myByHi(myThid)
+        DO bi=myBxLo(myThid),myBxHi(myThid)
+         DO k=1,Nr
+          DO j=1,sNy
+           DO i=1,sNx
+            ihop_ssp(i,j,k,bi,bj) = 0.0 _d 0
+           ENDDO
+          ENDDO
+         ENDDO
+         DO k=1,Nr
+          DO j=1,sNy
+           DO i=1,sNx
+            IF ( maskC(i,j,k,bi,bj).EQ.oneRS ) THEN
+C pressure in dbar (for SW_TEMP)
+             pres = rhoConst*( totPhiHyd(i,j,k,bi,bj)
+     &               - rC(k)*gravity )*SItodBar
+             temp = SW_TEMP( SALT(i,j,k,bi,bj),
+     &                 THETA(i,j,k,bi,bj), pres, zeroRL )
+             sal  = SALT(i,j,k,bi,bj)
+C convert pressure to bar for Chen and Millero algorithm
+             presres = presres/(1. _d 1)
+             cw   = c0                      + 5.0383 _d 0*temp      +
+     &              -5.81090 _d -2*temp**2  + 3.3432 _d -4*temp**3  + 
+     &              -1.47797 _d -6*temp**4  + 3.1419 _d -9*temp**5  +
+     &              (1.53563 _d -1          + 6.8999 _d -4*temp     +
+     &               -8.1829 _d -6*temp**2  + 1.3632 _d -7*temp**3  +
+     &               -6.1260 _d -10 *temp**4)*pres                  + 
+     &              (3.1260 _d -5           - 1.7111 _d -6*temp     +
+     &               2.5986 _d -8*temp**2   - 2.5353 _d -10*temp**3 +
+     &               1.0415 _d -12*temp**4)*pres**2                 +
+     &              (-9.7729 _d -9          + 3.8513 _d -10*temp    +  
+     &               -2.3654 _d -12*temp**2)*pres**3
+             a    = 1.389                   - 1.262 _d -2*temp      + 
+     &              7.166 _d -5*temp**2     + 2.008 _d -6*temp**3   +
+     &              -3.21 _d -8*temp**4                             +
+     &              (9.4742 _d -5           - 1.2583 _d -5*temp     +
+     &               -6.4928 _d -8*temp**2  + 1.0515 _d -8*temp**3  +
+     &               -2.0142 _d -10*temp**4)*pres                   +
+     &              (-3.9064 _d -7          + 9.1061 _d -9*temp     +
+     &               -1.6009 _d -10*temp**2                         + 
+     &               7.994 _d -12*temp**3)*pres**2                  +
+     &              (1.100 _d -10           + 6.651 _d -12*temp     +
+     &               -3.391 _d -13*temp**2)*pres**3
+             b    = -1.922 _d -2            - 4.42 _d -5*temp       + 
+     &              (7.3637 _d -5           + 1.7950 _d -7*temp)*pres
+             d    = 1.727 _d -3             - 7.9836 _d -6*pres 
+             ihop_ssp(i,j,k,bi,bj) = cw + a*sal + b*sal**(3/2.)     +
+     &                               d*sal**2
+            ENDIF
+           ENDDO
+          ENDDO
+         ENDDO
+        ENDDO
+       ENDDO
+#ifdef ALLOW_DIAGNOSTICS
+       IF ( useDiagnostics ) THEN
+        CALL DIAGNOSTICS_FILL(ihop_ssp,'ihop_ssp',0,Nr,0,1,1,myThid)
+       ENDIF
+#endif /* ALLOW_DIAGNOSTICS */
+
+C-    end-if calc_soundSpeed
+      ENDIF
+
+#endif /* ALLOW_IHOP */ 
+
+      RETURN
+      END
