@@ -42,74 +42,12 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
 c     IF ( useDiagnotics ) THEN
 
-        diagName  = 'MYPaSta1'
-        diagTitle = 'Scalar state variable 1 for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'SM      MR      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-        diagName  = 'MYPaSta2'
-        diagTitle = 'Scalar state variable 2 for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'SM      MR      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-C        diagName  = 'MYPaStaU'
-C        diagTitle = 'uVel-type state variable for package IHOP'
-C        diagUnits = 'unit            '
-C        diagCode  = 'UM      MR      '
-C        diagMate  = diagNum + 2
-C        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'U'
-C        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-C     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
-C
-C        diagName  = 'MYPaStaV'
-C        diagTitle = 'vVel-type state variable for package IHOP'
-C        diagUnits = 'unit            '
-C        diagCode  = 'VM      MR      '
-C        diagMate  = diagNum
-C        IF ( myPa_StaV_Cgrid ) diagCode(2:2) = 'V'
-C        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-C     I   diagName, diagCode, diagUnits, diagTitle, diagMate, myThid )
-
-        diagName  = 'MYPaSur1'
-        diagTitle = 'Surface field 1 for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'SM      L1      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-        diagName  = 'MYPaSur2'
-        diagTitle = 'Surface field 2 for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'SM      L1      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-        diagName  = 'MYPadTdt'
-        diagTitle = ' Pot.Temp. tendency from package IHOP'
-        diagUnits = 'K/s             '
+        diagName  = 'ihop_ssp'
+        diagTitle = 'Scalar sound speed for package IHOP'
+        diagUnits = 'm/s             '
         diagCode  = 'SMR     MR      '
         CALL DIAGNOSTICS_ADDTOLIST( diagNum,
      I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-        diagName  = 'MYPadSdt'
-        diagTitle = ' Salinity  tendency from package IHOP'
-        diagUnits = 'g/kg/s          '
-        diagCode  = 'SMR     MR      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-
-C--     an example of how to set "free levels option" diagnostics
-        diagName  = 'MYPaLev3'
-        diagTitle = '3-levels field for package IHOP'
-        diagUnits = 'unit            '
-        diagCode  = 'SM      MX      '
-        CALL DIAGNOSTICS_ADDTOLIST( diagNum,
-     I          diagName, diagCode, diagUnits, diagTitle, 0, myThid )
-        CALL DIAGNOSTICS_SETKLEV( diagName, 3, myThid )
 
 c     ENDIF
 
