@@ -48,7 +48,7 @@ MODULE BELLHOP
   IMPLICIT NONE
   
 CONTAINS
-SUBROUTINE IHOP_INIT
+SUBROUTINE IHOP_INIT ( myThid )
   LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
   INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 

@@ -3,15 +3,15 @@
 #include "IHOP_OPTIONS.h"
 
 CBOP
-C     !ROUTINE: DIAGS_SOUND_SPEED
+C     !ROUTINE: IHOP_SOUND_SPEED
 C     !INTERFACE:
-      SUBROUTINE DIAGS_SOUND_SPEED(
+      SUBROUTINE IHOP_SOUND_SPEED(
      I                       myThid )
 C     !DESCRIPTION: \bv
 C     *==========================================================*
-C     | S/R DIAGS_SOUND_SPEED
+C     | S/R IHOP_SOUND_SPEED
 C     | o Diagnose speed of sound in seawater
-C     |   from the algorithm by Chen and Millera (1977).
+C     |   from the algorithm by Chen and Millero (1977).
 C     |   This is NOT the sound-speed that can be derived from
 C     |   the equation of state (EOS). It is independent of
 C     |   the model setup specific EOS.
@@ -29,7 +29,7 @@ C     == Global variables ==
 #include "EEPARAMS.h"
 #include "PARAMS.h"
 #include "GRID.h"
-#include "SURFACE.h"
+C#include "SURFACE.h"
 #include "DYNVARS.h"
 #include "EOS.h"
 #include "IHOP.h"
@@ -52,7 +52,7 @@ C     !LOCAL VARIABLES:
 C     == Local variables ==
       INTEGER bi,bj
       INTEGER i,j,k
-      _RL c0,ct,cs,cp,cstp
+      _RL c0,cw,a,b,d
       _RL pres,sal,temp
       LOGICAL calc_soundSpeed
 CEOP
@@ -100,33 +100,33 @@ C pressure in dbar (for SW_TEMP)
      &                 THETA(i,j,k,bi,bj), pres, zeroRL )
              sal  = SALT(i,j,k,bi,bj)
 C convert pressure to bar for Chen and Millero algorithm
-             presres = presres/(1. _d 1)
+             pres = pres/(1. _d 1)
              cw   = c0                      + 5.0383 _d 0*temp      +
      &              -5.81090 _d -2*temp**2  + 3.3432 _d -4*temp**3  + 
      &              -1.47797 _d -6*temp**4  + 3.1419 _d -9*temp**5  +
      &              (1.53563 _d -1          + 6.8999 _d -4*temp     +
      &               -8.1829 _d -6*temp**2  + 1.3632 _d -7*temp**3  +
-     &               -6.1260 _d -10 *temp**4)*pres                  + 
-     &              (3.1260 _d -5           - 1.7111 _d -6*temp     +
-     &               2.5986 _d -8*temp**2   - 2.5353 _d -10*temp**3 +
-     &               1.0415 _d -12*temp**4)*pres**2                 +
+     &               -6.1260 _d -10*temp**4)*pres                   + 
+     &              (3.12600 _d -5          - 1.7111 _d -6*temp     +
+     &               2.59860 _d -8*temp**2  - 2.5353 _d -10*temp**3 +
+     &               1.04150 _d -12*temp**4)*pres**2                +
      &              (-9.7729 _d -9          + 3.8513 _d -10*temp    +  
      &               -2.3654 _d -12*temp**2)*pres**3
-             a    = 1.389                   - 1.262 _d -2*temp      + 
-     &              7.166 _d -5*temp**2     + 2.008 _d -6*temp**3   +
+             a    = 1.389 _d 0              - 1.2620 _d -2*temp     + 
+     &              7.166 _d -5*temp**2     + 2.0080 _d -6*temp**3  +
      &              -3.21 _d -8*temp**4                             +
-     &              (9.4742 _d -5           - 1.2583 _d -5*temp     +
+     &              (9.47420 _d -5          - 1.2583 _d -5*temp     +
      &               -6.4928 _d -8*temp**2  + 1.0515 _d -8*temp**3  +
      &               -2.0142 _d -10*temp**4)*pres                   +
      &              (-3.9064 _d -7          + 9.1061 _d -9*temp     +
      &               -1.6009 _d -10*temp**2                         + 
-     &               7.994 _d -12*temp**3)*pres**2                  +
-     &              (1.100 _d -10           + 6.651 _d -12*temp     +
-     &               -3.391 _d -13*temp**2)*pres**3
-             b    = -1.922 _d -2            - 4.42 _d -5*temp       + 
+     &               7.99400 _d -12*temp**3)*pres**2                +
+     &              (1.10000 _d -10         + 6.6510 _d -12*temp    +
+     &               -3.3910 _d -13*temp**2)*pres**3
+             b    = -1.9220 _d -2           - 4.4200 _d -5*temp     + 
      &              (7.3637 _d -5           + 1.7950 _d -7*temp)*pres
              d    = 1.727 _d -3             - 7.9836 _d -6*pres 
-             ihop_ssp(i,j,k,bi,bj) = cw + a*sal + b*sal**(3/2.)     +
+             ihop_ssp(i,j,k,bi,bj) = cw + a*sal + b*sal**(3./2.)    +
      &                               d*sal**2
             ENDIF
            ENDDO
