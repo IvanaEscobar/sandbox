@@ -4,7 +4,6 @@
 lib*.a
 *.exe
 *.shd
-bin
 weighted*.ipynb
 *.nc
 *.data
