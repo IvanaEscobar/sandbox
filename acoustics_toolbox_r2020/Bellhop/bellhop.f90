@@ -458,7 +458,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   USE Step
 
   REAL     (KIND=8), INTENT( IN ) :: xs( 2 )      ! r-z coordinate of the source
-  REAL     (KIND=8), INTENT( IN ) :: alpha, Amp0  ! initial angle, amplitude
+  REAL     (KIND=8), INTENT( IN ) :: alpha, Amp0  ! initial angle rad, amplitude
   INTEGER           :: is, is1                  ! index for a step along the ray
   REAL     (KIND=8) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL     (KIND=8) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), ToptInt( 2 ), BottInt( 2 )
@@ -598,26 +598,26 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      ! Rewriting for debugging with gcov purposes:
      IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'
+        WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray left Box%r'
         EXIT Stepping
      ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%z'
+        WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray left Box%z'
         EXIT Stepping
      ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray lost energy'
+        WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray lost energy'
         EXIT Stepping
      ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped top bound'
+        WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray escaped top bound'
         EXIT Stepping
      ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped bot bound'
+        WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray escaped bot bound'
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
-        WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
+        WRITE( PRTFile, * ) 'WARNING: TraceRay2D: Insufficient storage for ray trajectory'
         Beam%Nsteps = is
         EXIT Stepping
      END IF
