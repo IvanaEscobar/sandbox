@@ -65,11 +65,12 @@ end
 set( gca, 'YDir', 'Reverse' )   % plot with depth-axis positive down
 
 xlabel( 'Range (m)' )
+units = 'km';
 if ( strcmp( units, 'km' ) )
    xlabel( 'Range (km)' )
 end
 ylabel( 'Depth (m)' )
-title( strcat(rayfil, ': Nalpha = ', num2str(Nalpha)) );
+%title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ...') );
 hold on
 
 % axis limits
@@ -91,7 +92,8 @@ for isz = 1 : Nsz
       NumBotBnc = fscanf( fid, '%i', 1 );
 
       if isempty( nsteps )
-          fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam -1 );
+          fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
+          title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam-1)) );
           break; 
       end
       switch Type
