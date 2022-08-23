@@ -29,11 +29,14 @@ testhere
 acoustics_toolbox_r2020/Bellhop/Makefile
 bell
 bell_july22
-#BELLHOP output files
+# BELLHOP output files
 *.arr
 *.prt
 *.ray
 *.q
+
+# MATLab
+*.fig
 
 # Code Coverage
 *.gcno

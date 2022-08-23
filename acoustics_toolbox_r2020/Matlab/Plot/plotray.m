@@ -91,7 +91,7 @@ for isz = 1 : Nsz
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
-      if isempty( nsteps )
+      if ( isempty( nsteps ) || ibeam == Nalpha )
           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
           title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam-1)) );
           break; 
@@ -122,7 +122,7 @@ for isz = 1 : Nsz
       elseif NumTopBnc >= 1
          plot( r, z, 'g' )	   % hits surface only
       else
-         plot( r, z, 'r' )    % direct path
+         plot( r, z, 'r')    % direct path
       end
       
       % update axis limits
