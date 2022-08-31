@@ -7,6 +7,12 @@ def loadMatFile ( file ):
 def degMinSec2decimal (degree, minutes=0.0, seconds=0.0):
     return degree + minutes/60 + seconds/3600
 
+def lon180to360 (lon):
+    return lon % 360.
+
+def lon360to180 (lon):
+    return (lon+180.) % 360. - 180.
+
 def gcDistance( latA, lonA, latB, lonB ):
 # Great circle distance is the shortest distance between two points on a sphere
 # Using the Vicenty formula for an ellipsoid with equal major and minor axes
@@ -35,3 +41,4 @@ def wgs84Distance( latA, lonA, latB, lonB ):
     lonM = 111412.877*cos( midLat ) - 93.504*cos( 3*midLat )
 
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
+
