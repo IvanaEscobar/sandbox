@@ -4,11 +4,13 @@ from .utils import (
         lon180to360,
         lon360to180,
         gcDistance,
-        wgs84Distance
+        wgs84Distance,
+        gcspace,
         )
 from .unesco import (
-        ssp
+        ssp,
         )
 
 __all__ = [ 'utils',
-            'unesco']
+            'unesco',
+          ]
