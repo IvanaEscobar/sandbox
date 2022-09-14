@@ -14,7 +14,7 @@ def lon180to360 (lon):
 def lon360to180 (lon):
     return (lon+180.) % 360. - 180.
 
-def gcDistance( latA, lonA, latB, lonB ):
+def gcDistance( lonA, latA, lonB, latB ):
 # Great circle distance is the shortest distance between two points on a sphere
 # Using the Vicenty formula for an ellipsoid with equal major and minor axes
 # Lats and lons are in degrees
