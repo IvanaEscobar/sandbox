@@ -13,12 +13,9 @@ MODULE iHopMod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE iHopParams,   only: MaxN ! 100 000
+  USE iHopParams,   only: MaxN ! Default: 100 000
   IMPLICIT NONE
   PRIVATE
-
-  ! Reduce MaxN (= max # of steps along a ray) to reduce storage
-  ! Note space is wasted in NumTopBnc, NumBotBnc ...
 
 ! public interfaces
 !=======================================================================
@@ -53,7 +50,7 @@ MODULE iHopMod
   ! *** ray structure ***
 
   TYPE ray2DPt
-     INTEGER                :: NumTopBnc, NumBotBnc
+     INTEGER                :: NumTopBnc, NumBotBnc, NumTurnPt
      REAL    (KIND=_RL90)   :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
      COMPLEX (KIND=_RL90)   :: tau
   END TYPE ray2DPt

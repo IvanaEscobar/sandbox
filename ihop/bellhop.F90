@@ -356,7 +356,7 @@ SUBROUTINE BellhopCore
 
            ! report progress in PRTFile (skipping some angles)
            IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
-              WRITE( PRTFile, FMT = "( 'Tracing beam ', I7, F10.2 )" ) &
+              WRITE( PRTFile, FMT = "( 'Tracing ray ', I7, F10.2 )" ) &
                      ialpha, SrcDeclAngle
               FLUSH( PRTFile )
            END IF
@@ -423,10 +423,11 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   INTEGER           :: is, is1                   ! indices for ray step
   REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
   REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), &
-                       ToptInt( 2 ), BottInt( 2 )
+                       ToptInt( 2 ), BottInt( 2 ), rayt(2), raytOld(2)
   ! Distances from ray beginning, end to top and bottom
   REAL (KIND=_RL90) :: DistBegTop, DistEndTop, DistBegBot, DistEndBot 
-  REAL (KIND=_RL90) :: sss
+  REAL (KIND=_RL90) :: sss, declAlpha, declAlphaOld
+  LOGICAL           :: RayTurn = .FALSE.
 
   ! Initial conditions (IC)
   iSmallStepCtr = 0
@@ -447,6 +448,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
   ray2D( 1 )%Phase     = 0.0
   ray2D( 1 )%NumTopBnc = 0
   ray2D( 1 )%NumBotBnc = 0
+  ray2D( 1 )%NumTurnPt = 0
 
   ! IESCO22: update IsegTop, rTopSeg and IsegBot, rBotSeg in bdrymod.f90
   CALL GetTopSeg( xs(1) )   ! identify alimetry   segment above the source
@@ -487,6 +489,21 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      CALL Step2D( ray2D( is ), ray2D( is1 ),  &
           Top( IsegTop )%x, Top( IsegTop )%n, &
           Bot( IsegBot )%x, Bot( IsegBot )%n )
+
+     ! IESCO22: turning point check
+     IF ( is > 1 ) THEN
+        rayt    = ray2D(is1)%x - ray2D(is)%x
+        raytOld = ray2D(is)%x  - ray2D(is-1)%x
+        declAlpha    = ATAN2( rayt(2), rayt(1) ) 
+        declAlphaOld = ATAN2( raytOld(2), raytOld(1) ) 
+        RayTurn = ( declAlpha <= 0.0d0 .AND. declAlphaOld > 0.0d0 .OR. &
+                    declAlpha >= 0.0d0 .AND. declAlphaOld < 0.0d0 )
+        IF ( RayTurn) THEN
+           ray2D( is1 )%NumTurnPt = ray2D( is )%NumTurnPt + 1
+           !WRITE( PRTFile, * ) 'traceray2d: rcvranlge is ',&
+           !                    declAlpha, ' at x = ', ray2D(is1)%x(1)
+        END IF
+     END IF
 
      ! New altimetry segment?
      IF ( ray2D( is1 )%x( 1 ) < rTopSeg( 1 ) .OR. &
@@ -573,23 +590,23 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      ! IESCO22: Rewriting for debugging with gcov
      IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%r'
+        WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%r'
         EXIT Stepping
      ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray left Box%z'
+        WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%z'
         EXIT Stepping
      ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray lost energy'
+        WRITE( PRTFile, * ) 'TraceRay2D : ray lost energy'
         EXIT Stepping
      ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped top bound'
+        WRITE( PRTFile, * ) 'TraceRay2D : ray escaped top bound'
         EXIT Stepping
      ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
         Beam%Nsteps = is + 1
-        WRITE( PRTFile, * ) 'TraceRay2D : a = ', alpha, '; ray escaped bot bound'
+        WRITE( PRTFile, * ) 'TraceRay2D : ray escaped bot bound'
         EXIT Stepping
      ELSE IF ( is >= MaxN - 3 ) THEN
         WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
@@ -631,9 +648,9 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   INTEGER,              INTENT( IN ) :: Npts ! unsued if there are no refcoef files
   REAL (KIND=_RL90),    INTENT( IN ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
   REAL (KIND=_RL90),    INTENT( IN ) :: kappa ! Boundary curvature, for curvilinear grids
-  CHARACTER (LEN=3),    INTENT( IN ) :: BotTop              ! bottom or top reflection
-  TYPE( HSInfo ),       INTENT( IN ) :: HS                  ! half-space properties
-  TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts )        ! reflection coefficient
+  CHARACTER (LEN=3),    INTENT( IN ) :: BotTop       ! bottom or top reflection
+  TYPE( HSInfo ),       INTENT( IN ) :: HS           ! half-space properties
+  TYPE(ReflectionCoef), INTENT( IN ) :: RefC( NPts ) ! reflection coefficient
   INTEGER,              INTENT( INOUT ) :: is
   INTEGER              :: is1
   REAL (KIND=_RL90)    :: c, cimag, gradc( 2 ), crr, crz, czz, &
