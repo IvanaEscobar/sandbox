@@ -41,7 +41,7 @@ CONTAINS
     ! Geometrically-spreading beams with a hat-shaped beam in ray-centered 
     ! coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle radians
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
     INTEGER              :: irA, irB, II
     REAL (KIND=_RL90)    :: nA, nB, zr, L, dq( Beam%Nsteps - 1 )
@@ -166,7 +166,8 @@ CONTAINS
 
     ! Geometric, hat-shaped beams in Cartesisan coordinates
 
-    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, Dalpha ! take-off angle, angular spacing
+    REAL (KIND=_RL90), INTENT( IN    ) :: alpha, & ! take-off angle, radians
+                                          Dalpha   ! angular spacing
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr ) ! complex pressure field
     INTEGER              :: irT(1), irTT ! irT needs size of 1, see MINLOC
     REAL (KIND=_RL90)    :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), &
@@ -175,7 +176,7 @@ CONTAINS
     COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
-    SrcDeclAngle = RadDeg * alpha          ! take-off angle in degrees
+    SrcDeclAngle = RadDeg * alpha          ! take-off angle, degrees
     phase        = 0.0
     qOld         = ray2D( 1 )%q( 1 )       ! old KMAH index
     rA           = ray2D( 1 )%x( 1 )       ! range at start of ray, typically 0
@@ -251,7 +252,7 @@ CONTAINS
                 RadiusMax = ABS( q / q0 )                                   
 
                 IF ( n < RadiusMax ) THEN
-                   WRITE( PRTFile, * ) "a = ", RadDeg * alpha, "; RadiusMax = ", RadiusMax
+                   WRITE( PRTFile, * ) "influence: Eigenray w/ RadiusMax = ", RadiusMax
                    ! interpolated delay
                    delay    = ray2D( iS-1 )%tau + s*dtauds              
                    Amp      = Ratio1 * SQRT( ray2D( iS )%c / ABS( q ) ) &

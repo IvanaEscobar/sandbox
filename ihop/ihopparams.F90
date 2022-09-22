@@ -37,6 +37,5 @@ MODULE iHopParams
                                  SBPFile = 50, &
                                  MaxN = 100000
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
-  ! Note space is wasted in NumTopBnc, NumBotBnc ...
 
 END MODULE iHopParams
