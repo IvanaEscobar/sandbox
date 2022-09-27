@@ -25,7 +25,7 @@ ARRFIL = [ARRFIL, '.arr'];
 % stem plot for a single receiver
 figure
 Narr = Arr( irr, ird, isd ).Narr;
-%stem( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ), abs( Arr( irr, ird, isd ).A( 1 : Narr ) ) )
+% stem( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ), abs( Arr( irr, ird, isd ).A( 1 : Narr ) ) )
 
 [x, idsort] = sort( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ) );
 C = abs( Arr( irr, ird, isd ).A( 1 : Narr ) ); C = C(idsort);

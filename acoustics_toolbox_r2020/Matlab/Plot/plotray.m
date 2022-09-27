@@ -53,6 +53,7 @@ Type   = Type( nchars( 1 ) + 1 : nchars( 2 ) - 1 );
 %Type  = deblank( Type );  % remove whitespace
 
 % read rays
+figure;
 
 % set up axis lengths for publication
 if ( jkpsflag )
@@ -164,5 +165,5 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-
+set(gcf,"Position", [100, 650, 1750, 420]);
 set(gca, 'FontSize', 20)

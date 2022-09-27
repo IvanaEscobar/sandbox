@@ -10,7 +10,7 @@ from .utils import (
 from .unesco import (
         ssp,
         )
-from .nesba-tm4 import nesbaDist
+from .nesba_tm4 import nesbaDist
 
 __all__ = [ 'utils',
             'unesco',
