@@ -16,7 +16,7 @@ def lon360to180 (lon):
 
 def gcDistance( lonA, latA, lonB, latB ):
 # Great circle distance is the shortest distance between two points on a sphere
-# Using the Vicenty formula for an ellipsoid with equal major and minor axes
+# Using the Vincenty formula for an ellipsoid with equal major and minor axes
 # Lats and lons are in degrees
 # Distance is in meters
     radius = 6371009.0 # [m] mean Earth radius
@@ -44,8 +44,8 @@ def wgs84Distance( latA, lonA, latB, lonB ):
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
 
 def gcspace(start, end, npts=0):
-    # start = [startlong, startlat]
-    # end =   [endlong,   endlat]
+    # start = [startlon, startlat]
+    # end =   [endlon,   endlat]
 
     startlong = start[0]
     startlat  = start[1]
