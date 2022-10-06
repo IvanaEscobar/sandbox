@@ -43,7 +43,7 @@ def wgs84Distance( latA, lonA, latB, lonB ):
 
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
 
-def gcspace(start, end, npts=0):
+def gcspace(start, end, npts=2):
     # start = [startlon, startlat]
     # end =   [endlon,   endlat]
 
@@ -56,10 +56,14 @@ def gcspace(start, end, npts=0):
     g = Geod(ellps='WGS84')
     (az12, az21, dist) = g.inv(startlong, startlat, endlong, endlat)
 
-    if npts==0:
+    interiorpts = npts - 2
+    if interiorpts<0:
+        print("ERROR")
+        break
+    else if interiorpts==0:
         # calculate line string along path with segments <= 1 km
         npts = 1 + int(dist / 1000)
-    lonlats = g.npts(startlong, startlat, endlong, endlat, npts)
+    lonlats = g.npts(startlong, startlat, endlong, endlat, interiorpts)
 
     # npts doesn't include start/end points, so prepend/append them
     lonlats.insert(0, (startlong, startlat))
