@@ -59,8 +59,8 @@ def gcspace(start, end, npts=2):
     interiorpts = npts - 2
     if interiorpts<0:
         print("ERROR")
-        break
-    else if interiorpts==0:
+        return None 
+    elif interiorpts==0:
         # calculate line string along path with segments <= 1 km
         npts = 1 + int(dist / 1000)
     lonlats = g.npts(startlong, startlat, endlong, endlat, interiorpts)
