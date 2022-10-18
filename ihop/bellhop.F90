@@ -666,7 +666,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   TYPE(ReflectionCoef) :: RInt
 
   is  = is + 1 ! old step
-  is1 = is + 1 ! new step reflected (same x, different basis vectors)
+  is1 = is + 1 ! new step reflected (same x, updated basis vectors)
 
   Tg = DOT_PRODUCT( ray2D( is )%t, tBdry )  ! ray tan projected along boundary
   Th = DOT_PRODUCT( ray2D( is )%t, nBdry )  ! ray tan projected normal boundary
