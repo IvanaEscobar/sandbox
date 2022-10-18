@@ -71,7 +71,6 @@ if ( strcmp( units, 'km' ) )
    xlabel( 'Range (km)' )
 end
 ylabel( 'Depth (m)' )
-%title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ...') );
 hold on
 
 % axis limits
@@ -95,7 +94,7 @@ for isz = 1 : Nsz
       if ( isempty( nsteps ) || ibeam == Nalpha )
           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
           title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam-1)) );
-          break; 
+%           break; 
       end
       switch Type
          case 'rz'
