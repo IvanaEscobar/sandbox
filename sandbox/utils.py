@@ -30,7 +30,7 @@ def gcDistance( lonA, latA, lonB, latB ):
 
     return radius * arctan( sqrt(numer) / denom )
 
-def wgs84Distance( latA, lonA, latB, lonB ):
+def wgs84Distance( lonA, latA, lonB, latB ):
 # For the WGS84 spheroid up to 3 terms in lat and 2 terms in lon
 # Lats and lons are in degrees
 # Distance is in meters
