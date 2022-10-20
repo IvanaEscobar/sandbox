@@ -15,3 +15,8 @@ at  = [-degMinSec2decimal(70,53.1670), degMinSec2decimal(39,57.1500) ]
 nesbaDist = wgs84Distance(at[0],  at[1],
                          tm4[0], tm4[1]) / 1000.
 
+#             'name': [XC:lon,    YC:lat,   color]
+gcm_coords = {'nw': [-75.531,   41.753, "k"], \
+              'ne': [-69.906,   41.753, "k"], \
+              'se': [-69.906,   37.750, "k"], \
+              'sw': [-75.531,   37.750, "k"]    }

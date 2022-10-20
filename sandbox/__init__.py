@@ -16,6 +16,7 @@ from .nesba import (
         nesba_coords,
         tm4,
         at,
+        gcm_coords,
         )
 
 __all__ = [ 'utils',
