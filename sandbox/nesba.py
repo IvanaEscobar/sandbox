@@ -12,8 +12,8 @@ at  = [-degMinSec2decimal(70,53.1670), degMinSec2decimal(39,57.1500) ]
 # tm3, tm2, sm1 are ESTIMATED until further notice from WHOI
 nesba_coords = {'tm4': [tm4[0],  tm4[1], 'm'], \
                 'at' : [at[0],   at[1],  'r'], \
-                'tm3': [-70.901, 39.848, 'yellow'],\
-                'tm2': [-71.173, 40.037, 'yellow'],\
+                'tm2': [-70.674, 39.949, 'yellow'],\
+                'tm3': [-71.018, 40.037, 'yellow'],\
                 'sm1': [-70.851, 40.087, 'yellow']}
 
 # South track range: at to tm4
