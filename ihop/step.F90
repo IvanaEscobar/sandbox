@@ -140,7 +140,7 @@ CONTAINS
   SUBROUTINE ReduceStep2D( x0, urayt, iSegz0, iSegr0, Topx, Topn, Botx, Botn, h )
 
     ! calculate a reduced step size, h, that lands on any points where the 
-    ! environment changes
+    ! environment leaves water
 
     USE bdrymod, only: rTopSeg, rBotSeg, iSmallStepCtr
 
