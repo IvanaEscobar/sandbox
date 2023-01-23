@@ -35,11 +35,13 @@ CONTAINS
     iSegr0    = iSegr
 
     h = Beam%deltas       ! initially set the step h, to the basic one, deltas
+    ray0%step = h !IESCO22
     urayt0 = c0 * ray0%t  ! unit tangent
 
     ! reduce h to land on boundary
     CALL ReduceStep2D( ray0%x, urayt0, iSegz0, iSegr0, Topx, Topn, Botx, &
         Botn, h )
+    ray1%step = h !IESCO22
     halfh = 0.5 * h   ! first step of the modified polygon method is a half step
 
     ! Euler march forward
@@ -63,6 +65,7 @@ CONTAINS
     urayt1 = c1 * ray1%t   ! unit tangent
 
     CALL ReduceStep2D( ray0%x, urayt1, iSegz0, iSegr0, Topx, Topn, Botx, Botn, h ) ! reduce h to land on boundary
+    ray2%step = h !IESCO22
 
     ! use blend of f' based on proportion of a full step used.
     w1  = h / ( 2.0d0 * halfh )

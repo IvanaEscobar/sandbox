@@ -35,6 +35,7 @@ MODULE bellhopMod
      INTEGER          :: NumTopBnc, NumBotBnc
      REAL    (KIND=8) :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
      COMPLEX (KIND=8) :: tau
+     REAL    (KIND=8) :: step
   END TYPE ray2DPt
   TYPE( ray2DPt )     :: ray2D( MaxN )
 

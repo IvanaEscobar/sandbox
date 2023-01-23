@@ -41,7 +41,8 @@ CONTAINS
     WRITE( QFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
 
     DO is = 1, N2
-       WRITE( QFile, * ) ray2D( is )%q
+       WRITE( QFile, * ) ray2D( is )%x, ray2D( is )%step
+       !WRITE ( QFile, * ) ray2D( is )%q
     END DO
 
   END SUBROUTINE WriteQ2D

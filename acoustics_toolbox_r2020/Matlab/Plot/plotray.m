@@ -14,7 +14,6 @@ global units jkpsflag
 if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
    rayfil = [ rayfil '.ray' ]; % append extension
 end
-
 % plots a BELLHOP ray file
 
 fid = fopen( rayfil, 'r' );   % open the file
