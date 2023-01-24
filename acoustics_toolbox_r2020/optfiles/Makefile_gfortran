@@ -11,20 +11,20 @@ FFLAGS+= -frecursive
 FFLAGS+= -fconvert=big-endian -Wunused -Wuninitialized -ftree-vectorize
 F90FLAGS=${FFLAGS}
 
-ifeq (${FC}, gfortran)
-	# Code Coverage with gcov and lcov
-	FFLAGS+= --coverage
-	F90FLAGS+= --coverage
-
-	## On Mac
-	#LCOV=/usr/local/bin/lcov
-	#LCOV_DIR=${PWD}/coverage
-	#GCOV=/usr/local/bin/gcov-11
-	# On Sverdrup
-	LCOV=/usr/bin/lcov
-	LCOV_DIR=${PWD}/coverage
-	GCOV=/usr/bin/gcov
-endif
+#ifeq (${FC}, gfortran)
+#	# Code Coverage with gcov and lcov
+#	FFLAGS+= --coverage
+#	F90FLAGS+= --coverage
+#
+#	## On Mac
+#	#LCOV=/usr/local/bin/lcov
+#	#LCOV_DIR=${PWD}/coverage
+#	#GCOV=/usr/local/bin/gcov-11
+#	# On Sverdrup
+#	LCOV=/usr/bin/lcov
+#	LCOV_DIR=${PWD}/coverage
+#	GCOV=/usr/bin/gcov
+#endif
 
 # ______________________________________________________________________________
 
