@@ -370,6 +370,10 @@ SUBROUTINE BellhopCore
      CLOSE( ARRFile )
   CASE ( 'R', 'E' )           ! ray trace
      CLOSE( RAYFile )
+     CLOSE( QFile )
+     CLOSE( QQFile )
+     CLOSE( PFile )
+     CLOSE( STPFile )
   END SELECT
 
   CLOSE( PRTFile )

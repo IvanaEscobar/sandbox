@@ -12,7 +12,7 @@ MODULE Influence
   IMPLICIT NONE
   INTEGER,          PRIVATE :: iz, ir, iS
   REAL    (KIND=8), PRIVATE :: Ratio1 = 1.0D0   ! scale factor for a line source
-  REAL    (KIND=8), PRIVATE :: W, s, n, Amp, phase, const, phaseInt, q0, q, qold, RcvrDeclAngle, rA, rB
+  REAL    (KIND=8), PRIVATE :: W, s, n, Amp, phase, const, phaseInt, q0, q, qOld, RcvrDeclAngle, rA, rB
   COMPLEX (KIND=8), PRIVATE :: delay
 
 CONTAINS
@@ -440,7 +440,7 @@ CONTAINS
 
        q  = ray2D( iS - 1 )%q( 1 )
        IF ( q <= 0.0d0 .AND. qOld > 0.0d0 .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) phase = phase + pi / 2.   ! phase shifts at caustics
-       qold = q
+       qOld = q
 
        RadiusMax = MAX( ABS( ray2D( iS - 1 )%q( 1 ) ), ABS( ray2D( iS )%q( 1 ) ) ) / q0 / ABS( rayt( 1 ) ) ! beam radius projected onto vertical line
 
