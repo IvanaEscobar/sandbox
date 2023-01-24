@@ -83,6 +83,7 @@ zmax = -1e9;
 for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
       alpha0    = fscanf( fid, '%f', 1 );
+
       fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
       
@@ -114,14 +115,17 @@ for isz = 1 : Nsz
          r = r / 1000;   % convert to km
       end
       
-      if NumTopBnc >= 1 && NumBotBnc >= 1
-         plot( r, z, 'k' )    % hits both boundaries
-      elseif NumBotBnc >= 1
-         plot( r, z, 'b' )	   % hits bottom only
-      elseif NumTopBnc >= 1
-         plot( r, z, 'g' )	   % hits surface only
-      else
-         plot( r, z, 'r')    % direct path
+      if (alpha0 == -15 || alpha0 == 9)
+          if NumTopBnc >= 1 && NumBotBnc >= 1
+             plot( r, z, 'k' )    % hits both boundaries
+          elseif NumBotBnc >= 1
+             plot( r, z, 'b' )	   % hits bottom only
+          elseif NumTopBnc >= 1
+             plot( r, z, 'g' )	   % hits surface only
+          else
+             yyaxis left
+             plot( r, z, 'r')    % direct path
+          end
       end
       
       % update axis limits

@@ -165,4 +165,4 @@ if ( jkpsflag )
 end
 set(gcf,"Position", [100, 650, 1750, 420]);
 set(gca, 'FontSize', 20)
-saveas(gcf, strcat(rayfil, '.png'))
+% saveas(gcf, strcat(rayfil, '.png'))
