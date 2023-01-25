@@ -3,7 +3,8 @@ MODULE bellhopMod
   USE MathConstants
   INTEGER, PARAMETER :: ENVFile = 5, PRTFile = 6, RAYFile = 21, &
                         SHDFile = 25, ARRFile = 36, SSPFile = 40, &
-                        MaxN = 100000, QFile = 99
+                        MaxN = 100000, QFile = 99, QQFile=98, PFile=97, &
+                        STPFile=96
 
   ! Reduce MaxN (= max # of steps along a ray) to reduce storage
   ! Note space is wasted in NumTopBnc, NumBotBnc ...
@@ -35,6 +36,7 @@ MODULE bellhopMod
      INTEGER          :: NumTopBnc, NumBotBnc
      REAL    (KIND=8) :: x( 2 ), t( 2 ), p( 2 ), q( 2 ), c, Amp, Phase
      COMPLEX (KIND=8) :: tau
+     REAL    (KIND=8) :: step
   END TYPE ray2DPt
   TYPE( ray2DPt )     :: ray2D( MaxN )
 

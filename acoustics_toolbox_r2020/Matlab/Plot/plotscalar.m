@@ -1,9 +1,9 @@
-function varargout = plotray( rayfil )
+function varargout = plotscalar( rayfil )
 
 % Plot the RAYfil produced by Bellhop or Bellhop3D
-% usage: plotray( rayfil )
+% usage: plotscalar( rayfil )
 % where rayfil is the ray file (extension is optional)
-% e.g. plotray( 'foofoo' )
+% e.g. plotscalar( 'foofoo' )
 %
 % for BELLHOP3D files, rays in (x,y,z) are converted to (r,z) coordinates
 %
@@ -11,10 +11,10 @@ function varargout = plotray( rayfil )
 
 global units jkpsflag
 
-if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
-   rayfil = [ rayfil '.ray' ]; % append extension
-end
-% plots a BELLHOP ray file
+%if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
+%   rayfil = [ rayfil '.ray' ]; % append extension
+%end
+% plots a BELLHOP scalar file
 
 fid = fopen( rayfil, 'r' );   % open the file
 if ( fid == -1 )
@@ -83,17 +83,17 @@ zmax = -1e9;
 for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
       alpha0    = fscanf( fid, '%f', 1 );
-      %fprintf('Angle is %d\n', alpha0);
+      fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
-      %fprintf('nsteps is %i\n', nsteps);
       
+
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
       if ( isempty( nsteps ) || ibeam == Nalpha )
           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
           title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
-          break; 
+           break; 
       end
       switch Type
          case 'rz'
@@ -115,13 +115,13 @@ for isz = 1 : Nsz
       end
       
       if NumTopBnc >= 1 && NumBotBnc >= 1
-         plot( r, z, 'k-' )    % hits both boundaries
+         plot( r, z, 'k' )    % hits both boundaries
       elseif NumBotBnc >= 1
-         plot( r, z, 'b-' )	   % hits bottom only
+         plot( r, z, 'b' )	   % hits bottom only
       elseif NumTopBnc >= 1
-         plot( r, z, 'g-' )	   % hits surface only
+         plot( r, z, 'g' )	   % hits surface only
       else
-         plot( r, z, 'r-')    % direct path
+         plot( r, z, 'r')    % direct path
       end
       
       % update axis limits
@@ -163,5 +163,6 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-set(gcf,"Position", [10, 10, 1500, 650]);
+set(gcf,"Position", [100, 650, 1750, 420]);
 set(gca, 'FontSize', 20)
+% saveas(gcf, strcat(rayfil, '.png'))

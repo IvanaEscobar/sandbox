@@ -305,6 +305,7 @@ SUBROUTINE BellhopCore
            ! Write the ray trajectory to RAYFile
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
+              CALL WriteQ2D( SrcDeclAngle, Beam%Nsteps ) ! IESCO22: tmp step
            ELSE ! Compute the contribution to the field
 
               epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, Angles%alpha( ialpha ), &
@@ -369,6 +370,10 @@ SUBROUTINE BellhopCore
      CLOSE( ARRFile )
   CASE ( 'R', 'E' )           ! ray trace
      CLOSE( RAYFile )
+     CLOSE( QFile )
+     CLOSE( QQFile )
+     CLOSE( PFile )
+     CLOSE( STPFile )
   END SELECT
 
   CLOSE( PRTFile )

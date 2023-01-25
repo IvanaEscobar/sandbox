@@ -39,9 +39,19 @@ CONTAINS
 
     WRITE( QFile, * ) alpha0
     WRITE( QFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
+    WRITE( QQFile, * ) alpha0
+    WRITE( QQFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
+    WRITE( PFile, * ) alpha0
+    WRITE( PFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
+    WRITE( STPFile, * ) alpha0
+    WRITE( STPFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
 
     DO is = 1, N2
-       WRITE( QFile, * ) ray2D( is )%q
+       WRITE( QFile, * ) ray2D( is )%x(1), ray2D( is )%q(1)
+       WRITE( QQFile, * ) ray2D( is )%x(1), ray2D( is )%q(2)
+       WRITE( PFile, * ) ray2D( is )%x(1), ray2D( is )%p(1)
+       WRITE( STPFile, * ) ray2D( is )%x(1), ray2D( is )%step
+       !WRITE ( QFile, * ) ray2D( is )%q
     END DO
 
   END SUBROUTINE WriteQ2D

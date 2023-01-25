@@ -581,7 +581,7 @@ CONTAINS
           WRITE( RAYFile, * ) '''rz'''
        END IF
 
-       OPEN ( FILE = TRIM( FileRoot ) // '.q', UNIT = QFile, FORM = 'FORMATTED' )
+       OPEN ( FILE = TRIM( FileRoot ) // '.q1', UNIT = QFile, FORM = 'FORMATTED' )
        WRITE( QFile, * ) '''', Title( 1 : 50 ), ''''
        WRITE( QFile, * ) freq
        WRITE( QFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
@@ -590,6 +590,37 @@ CONTAINS
        WRITE( QFile, * ) Bdry%Bot%HS%Depth
 
        WRITE( QFile, * ) '''rz'''
+
+       OPEN ( FILE = TRIM( FileRoot ) // '.q2', UNIT = QQFile, FORM = 'FORMATTED' )
+       WRITE( QQFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( QQFile, * ) freq
+       WRITE( QQFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( QQFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( QQFile, * ) Bdry%Top%HS%Depth
+       WRITE( QQFile, * ) Bdry%Bot%HS%Depth
+
+       WRITE( QQFile, * ) '''rz'''
+
+       OPEN ( FILE = TRIM( FileRoot ) // '.p', UNIT = PFile, FORM = 'FORMATTED' )
+       WRITE( PFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( PFile, * ) freq
+       WRITE( PFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( PFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( PFile, * ) Bdry%Top%HS%Depth
+       WRITE( PFile, * ) Bdry%Bot%HS%Depth
+
+       WRITE( PFile, * ) '''rz'''
+
+       OPEN ( FILE = TRIM( FileRoot ) // '.step', UNIT = STPFile, FORM = 'FORMATTED' )
+       WRITE( STPFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( STPFile, * ) freq
+       WRITE( STPFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( STPFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( STPFile, * ) Bdry%Top%HS%Depth
+       WRITE( STPFile, * ) Bdry%Bot%HS%Depth
+
+       WRITE( STPFile, * ) '''rz'''
+
 
     CASE ( 'A' )        ! arrival file in ascii format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, FORM = 'FORMATTED' )
