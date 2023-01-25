@@ -38,6 +38,7 @@ bell_july22
 *.q2
 *.p
 *.step
+*.eig
 
 # MATLab
 *.fig

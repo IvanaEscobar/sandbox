@@ -59,12 +59,10 @@ Nbeta  = NBeamAngles( 2 );
 nchars = strfind( TITLE, '''' );   % find quotes
 TITLE  = [ TITLE( nchars( 1 ) + 1 : nchars( 2 ) - 1 ) blanks( 7 - ( nchars( 2 ) - nchars( 1 ) ) ) ];
 TITLE  = erase(TITLE, "BELLHOP-");
-
 TITLE  = deblank( TITLE );  % remove whitespace
 
 nchars = strfind( Type, '''' );   % find quotes
 Type   = Type( nchars( 1 ) + 1 : nchars( 2 ) - 1 );
-%Type  = deblank( Type );  % remove whitespace
 
 % read rays
 figure;
@@ -105,7 +103,7 @@ for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
       alphaOld = alpha0;
       alpha0    = fscanf( fid, '%f', 1 );
-      fprintf('Angle is %d\n', alpha0);
+      %fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
       
       NumTopBnc = fscanf( fid, '%i', 1 );
@@ -125,7 +123,7 @@ for isz = 1 : Nsz
         
       %find delta alpha
       if ibeam == 2
-          dalpha = alphaOld - alpha0;
+          dalpha = abs(alphaOld - alpha0);
       end
     
       switch Type
@@ -242,14 +240,14 @@ if ( jkpsflag )
 end
 %set(gcf,"Position", [100, 650, 1750, 420]);
 %presentation figure
-set(gcf, "Position", [10,10, 650,750]);
+set(gcf, "Position", [10,10, 1500,650]);
 set(gca, 'FontSize', 20)
 
 % set axis colors to black and blue
 ax = gca;
 ax.YAxis(1).Color = 'k';
-ax.YAxis(2).Color = '#4DBEEE';
+ax.YAxis(2).Color = 'k';
 ax.YAxis(2).Direction = 'reverse';
 
 %savefig
-saveas(gcf, strcat(filroot, '.png'))
+saveas(gcf, [filroot '.png'])
