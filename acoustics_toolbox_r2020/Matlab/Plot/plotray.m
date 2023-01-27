@@ -1,4 +1,4 @@
-function varargout = plotray( rayfil )
+function varargout = plotray( rayfil, titleStr, savefig )
 
 % Plot the RAYfil produced by Bellhop or Bellhop3D
 % usage: plotray( rayfil )
@@ -79,9 +79,13 @@ rmax = -1e9;
 zmin = +1e9;
 zmax = -1e9;
 
+dalpha = 100;
+alpha0 = 200;
+
 % this could be changed to a forever loop
 for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
+      alphaOld = alpha0;
       alpha0    = fscanf( fid, '%f', 1 );
       %fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
@@ -90,11 +94,17 @@ for isz = 1 : Nsz
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
-      if ( isempty( nsteps ) || ibeam == Nalpha )
-          fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
-          title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
-          break; 
+%       if ( isempty( nsteps ) || ibeam == Nalpha )
+%           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
+%           title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
+%           break; 
+%       end
+
+      %find delta alpha
+      if ibeam == 2
+          dalpha = abs(alphaOld - alpha0);
       end
+
       switch Type
          case 'rz'
             ray = fscanf( fid, '%f', [2 nsteps] );
@@ -114,14 +124,19 @@ for isz = 1 : Nsz
          r = r / 1000;   % convert to km
       end
       
+      if ~(mod(ibeam,10)==0)
+          continue;
+      end
+
       if NumTopBnc >= 1 && NumBotBnc >= 1
-         plot( r, z, 'k-' )    % hits both boundaries
+         ll = plot( r, z, 'k-' );    % hits both boundaries
+         ll.Color(4) = 0.5;
       elseif NumBotBnc >= 1
          plot( r, z, 'b-' )	   % hits bottom only
       elseif NumTopBnc >= 1
          plot( r, z, 'g-' )	   % hits surface only
       else
-         plot( r, z, 'r-')    % direct path
+         plot( r, z, 'r-' )    % direct path
       end
       
       % update axis limits
@@ -147,6 +162,8 @@ end % next source depth
 fclose( fid );
 
 drawnow
+
+title(titleStr);
 hold off
 zoom on
 
@@ -163,5 +180,9 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-set(gcf,"Position", [10, 10, 1500, 650]);
+set(gcf,"Position", [10, 10, 1600, 650]);
 set(gca, 'FontSize', 20)
+
+if savefig
+    saveas(gcf, [rayfil '_ray-demo.png'])
+end

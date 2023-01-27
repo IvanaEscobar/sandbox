@@ -1,4 +1,4 @@
-function varargout = plotvarANDray( filroot, vartail, alphaArr )
+function varargout = plotvarANDray( filroot, vartail, alphaArr, savefig )
 
 % Plot the RAYfil produced by Bellhop or Bellhop3D
 % usage: plotvarANDray( filroot, 'q', [-15, 9] )
@@ -250,4 +250,6 @@ ax.YAxis(2).Color = 'k';
 ax.YAxis(2).Direction = 'reverse';
 
 %savefig
-saveas(gcf, [filroot '.png'])
+if savefig
+    saveas(gcf, [filroot '.png'])
+end
