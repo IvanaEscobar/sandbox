@@ -3,7 +3,7 @@ function varargout = plotvarANDray( filroot, vartail, alphaArr, savefig )
 % Plot the RAYfil produced by Bellhop or Bellhop3D
 % usage: plotvarANDray( filroot, 'q', [-15, 9] )
 % where rayfil is the ray file (extension is optional)
-% e.g. plotscalar( 'foofoo', 'endtype', array )
+% e.g. plotscalar( 'foofoo', 'endtype', array, true )
 %
 % for BELLHOP3D files, rays in (x,y,z) are converted to (r,z) coordinates
 %

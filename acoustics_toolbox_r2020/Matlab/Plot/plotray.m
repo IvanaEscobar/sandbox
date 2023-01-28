@@ -22,6 +22,7 @@ if ( fid == -1 )
    error( 'No ray file exists; you must run BELLHOP first (with ray ouput selected)' );
 end
 
+
 % read header stuff
 
 TITLE       = fgetl(  fid );
@@ -45,11 +46,11 @@ Nbeta  = NBeamAngles( 2 );
 % Extract letters between the quotes
 nchars = strfind( TITLE, '''' );   % find quotes
 TITLE  = [ TITLE( nchars( 1 ) + 1 : nchars( 2 ) - 1 ) blanks( 7 - ( nchars( 2 ) - nchars( 1 ) ) ) ];
+TITLE  = erase(TITLE, "BELLHOP-");
 TITLE  = deblank( TITLE );  % remove whitespace
 
 nchars = strfind( Type, '''' );   % find quotes
 Type   = Type( nchars( 1 ) + 1 : nchars( 2 ) - 1 );
-%Type  = deblank( Type );  % remove whitespace
 
 % read rays
 figure;
