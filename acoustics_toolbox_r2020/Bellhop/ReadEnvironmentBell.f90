@@ -621,6 +621,27 @@ CONTAINS
 
        WRITE( STPFile, * ) '''rz'''
 
+       OPEN ( FILE = TRIM( FileRoot ) // '.tau', UNIT = TAUFile, FORM = 'FORMATTED' )
+       WRITE( TAUFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( TAUFile, * ) freq
+       WRITE( TAUFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( TAUFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( TAUFile, * ) Bdry%Top%HS%Depth
+       WRITE( TAUFile, * ) Bdry%Bot%HS%Depth
+
+       WRITE( TAUFile, * ) '''rz'''
+
+       IF (Beam%RunType( 1 : 1 ) == 'E') THEN
+          OPEN ( FILE = TRIM( FileRoot ) // '.delay', UNIT = LAYFile, FORM = 'FORMATTED' )
+          WRITE( LAYFile, * ) '''', Title( 1 : 50 ), ''''
+          WRITE( LAYFile, * ) freq
+          WRITE( LAYFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+          WRITE( LAYFile, * ) Angles%Nalpha, Angles%Nbeta
+          WRITE( LAYFile, * ) Bdry%Top%HS%Depth
+          WRITE( LAYFile, * ) Bdry%Bot%HS%Depth
+
+          WRITE( LAYFile, * ) '''rz'''
+       END IF
 
     CASE ( 'A' )        ! arrival file in ascii format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, FORM = 'FORMATTED' )

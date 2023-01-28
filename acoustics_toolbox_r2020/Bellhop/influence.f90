@@ -637,7 +637,7 @@ CONTAINS
     SELECT CASE( Beam%RunType( 1 : 1 ) )
     CASE ( 'E' )                ! eigenrays
        CALL WriteRay2D( SrcDeclAngle, iS )
-       CALL WriteQ2D( SrcDeclAngle, iS )
+       CALL WriteQ2D( SrcDeclAngle, iS, real(delay) )
     CASE ( 'A', 'a' )           ! arrivals
        CALL AddArr( omega, iz, ir, Amp, phaseInt, delay, SrcDeclAngle, RcvrDeclAngle, ray2D( iS )%NumTopBnc, ray2D( iS )%NumBotBnc )
     CASE ( 'C' )                ! coherent TL

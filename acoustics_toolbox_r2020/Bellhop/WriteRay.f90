@@ -14,12 +14,13 @@ MODULE WriteRay
 
 CONTAINS
   ! **********************************************************************!
-  SUBROUTINE WriteQ2D( alpha0, Nsteps1 )
+  SUBROUTINE WriteQ2D( alpha0, Nsteps1, delay )
 
     ! The 2D version is for ray traces in (r,z) coordinates
 
     INTEGER,       INTENT( IN ) :: Nsteps1
     REAL (KIND=8), INTENT( IN ) :: alpha0   ! take-off angle of this ray
+    REAL (KIND=8), INTENT(IN):: delay
 
     ! compression
 
@@ -45,14 +46,20 @@ CONTAINS
     WRITE( PFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
     WRITE( STPFile, * ) alpha0
     WRITE( STPFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
+    WRITE( TAUFile, * ) alpha0
+    WRITE( TAUFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc
 
     DO is = 1, N2
-       WRITE( QFile, * ) ray2D( is )%x(1), ray2D( is )%q(1)
-       WRITE( QQFile, * ) ray2D( is )%x(1), ray2D( is )%q(2)
-       WRITE( PFile, * ) ray2D( is )%x(1), ray2D( is )%p(1)
+       WRITE( QFile,   * ) ray2D( is )%x(1), ray2D( is )%q(1)
+       WRITE( QQFile,  * ) ray2D( is )%x(1), ray2D( is )%q(2)
+       WRITE( PFile,   * ) ray2D( is )%x(1), ray2D( is )%p(1)
        WRITE( STPFile, * ) ray2D( is )%x(1), ray2D( is )%step
-       !WRITE ( QFile, * ) ray2D( is )%q
+       WRITE( TAUFile, * ) ray2D( is )%x(1), real(ray2D( is )%tau)
     END DO
+
+    IF (delay .NE. 9999) THEN
+        WRITE( LAYFile, * ) alpha0, ray2D( Nsteps1 )%NumTopBnc, ray2D( Nsteps1 )%NumBotBnc, delay
+    END IF
 
   END SUBROUTINE WriteQ2D
 
