@@ -1,4 +1,4 @@
-function plotssp( envfil )
+function plotssp( envfil, savefig )
 % plotssp.m
 % Plots the sound speed profile
 % useage:
@@ -8,13 +8,13 @@ function plotssp( envfil )
 
 % read in the environmental file
 
-[ ~, ~, SSP, Bdry, ~, ~, ~, ~, fid ] = read_env( envfil, 'BELLHOP' );
+[ TITLE, ~, SSP, Bdry, ~, ~, ~, ~, fid ] = read_env( envfil, 'BELLHOP' );
 
 SSPType = Bdry.Top.Opt( 1 : 1 );
 
 fclose( fid );
 
-%figure
+figure
 hold on
 
 for medium = 1 : SSP.NMedia
@@ -41,8 +41,8 @@ for medium = 1 : SSP.NMedia
    end
    
    plot( real( SSP.raw( medium ).alphaR ), SSP.raw( medium ).z, 'ko' );
-   hh = plot( c_eval, z_eval, 'b-' );
-   set( hh, 'LineWidth', 2 );
+   hh = plot( c_eval, z_eval, 'k-' );
+   set( hh, 'LineWidth', 3 );
    
    % plot the shear wave speed (if any non-zero values were supplied)
    
@@ -71,5 +71,11 @@ set( gca, 'YDir', 'Reverse' )   % because view messes up the zoom feature
 
 xlabel( 'Sound Speed (m/s)' )
 ylabel( 'Depth (m)' )
+title(TITLE);
 
+set(gcf,"Position", [10, 10, 1200, 1200]);
 set(gca, 'FontSize', 20)
+
+if savefig
+    saveas(gcf, [envfil '-ssp.png'])
+end
