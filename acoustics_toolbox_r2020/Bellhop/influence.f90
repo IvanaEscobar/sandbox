@@ -514,7 +514,7 @@ CONTAINS
     ! Geometric, Gaussian beams in Cartesian coordintes
 
     INTEGER,       PARAMETER       :: BeamWindow = 4               ! beam window: kills beams outside e**(-0.5 * ibwin**2 )
-    REAL (KIND=8), INTENT( IN    ) :: alpha, dalpha                ! take-off angle, angular spacing
+    REAL (KIND=8), INTENT( IN    ) :: alpha, Dalpha                ! take-off angle, angular spacing
     COMPLEX,       INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field
     INTEGER          :: irT( 1 ), irTT
     REAL    (KIND=8) :: x_ray( 2 ), rayt( 2 ), rayn( 2 ), x_rcvr( 2 ), rLen, RadiusMax, zMin, zMax, sigma, lambda, A, dqds
@@ -559,9 +559,9 @@ CONTAINS
 
        q  = ray2D( iS - 1 )%q( 1 )
        IF ( q <= 0.0 .AND. qOld > 0.0 .OR. q >= 0.0 .AND. qOld < 0.0 ) phase = phase + pi / 2.   ! phase shifts at caustics
-       qold = q
+       qOld = q
 
-       ! calculate beam width
+       ! calculate beam width at step start
        lambda    = ray2D( iS - 1 )%c / freq
        sigma     = MAX( ABS( ray2D( iS - 1 )%q( 1 ) ), ABS( ray2D( iS )%q( 1 ) ) ) / q0 / ABS( rayt( 1 ) ) ! beam radius projected onto vertical line
        sigma     = MAX( sigma, MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), pi * lambda ) )
@@ -594,8 +594,9 @@ CONTAINS
                 q      = ray2D( iS - 1 )%q( 1 ) + s * dqds                ! interpolated amplitude
                 sigma  = ABS( q / q0 )                                    ! beam radius
                 sigma  = MAX( sigma, MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), pi * lambda ) )  ! min pi * lambda, unless near
+                RadiusMax = BeamWindow * sigma
 
-                IF ( n < BeamWindow * sigma ) THEN   ! Within beam window?
+                IF ( n < RadiusMax ) THEN   ! Within beam window?
                    A        = ABS( q0 / q )
                    delay    = ray2D( iS - 1 )%tau + s * dtauds     ! interpolated delay
                    const    = Ratio1 * SQRT( ray2D( iS )%c / ABS( q ) ) * ray2D( iS )%Amp
