@@ -175,8 +175,8 @@ end % next source depth
 fclose( fid ); fclose( fid1 );
 
 title( [TITLE ': ' info]);
-lgd = legend('Location','east');
-%lgd.FontSize = 16;
+lgd = legend('Location','west','NumColumns',2);
+lgd.FontSize = 10;
 lgdTitle = get(lgd, 'Title');
 set(lgdTitle, 'String', "\alpha = ");
 hold off

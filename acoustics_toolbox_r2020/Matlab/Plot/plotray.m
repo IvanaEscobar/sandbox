@@ -95,11 +95,11 @@ for isz = 1 : Nsz
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
-%       if ( isempty( nsteps ) || ibeam == Nalpha )
-%           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
-%           title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
-%           break; 
-%       end
+      if ( isempty( nsteps ) && ibeam < Nalpha )
+          fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
+          %title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
+          break; 
+      end
 
       %find delta alpha
       if ibeam == 2
@@ -125,9 +125,10 @@ for isz = 1 : Nsz
          r = r / 1000;   % convert to km
       end
       
-      if ~(mod(ibeam,10)==0)
-          continue;
-      end
+%       % UNCOMMENT if you want to skip rays to draw
+%       if ~(mod(ibeam,10)==0)
+%           continue;
+%       end
 
       if NumTopBnc >= 1 && NumBotBnc >= 1
          ll = plot( r, z, 'k-' );    % hits both boundaries
@@ -165,6 +166,10 @@ fclose( fid );
 drawnow
 
 title(titleStr);
+% %% Custom for nesba-tm4
+% plot(11.7255, 300, 'o', 'MarkerSize',15, 'MarkerFaceColor', '#4DBEEE');
+% text(8.8, 725, ['\alpha \in [ -30 30]^\circ, \Delta\alpha = 0.1'], 'FontSize', 18 );
+%%
 hold off
 zoom on
 
@@ -185,5 +190,5 @@ set(gcf,"Position", [10, 10, 1600, 650]);
 set(gca, 'FontSize', 20)
 
 if savefig
-    saveas(gcf, [rayfil '_ray-demo.png'])
+    saveas(gcf, [rayfil '_31eig.png'])
 end

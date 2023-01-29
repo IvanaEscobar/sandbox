@@ -23,7 +23,6 @@ end
 
 
 % read header stuff
-
 TITLE       = fgetl(  fid );
 FREQ        = fscanf( fid, '%f', 1 );
 Nsxyz       = fscanf( fid, '%f', 3 );
