@@ -1,9 +1,9 @@
-function varargout = plotscalar( rayfil )
+function varargout = plotvar( filroot, vartail, savefig )
 
-% Plot the RAYfil produced by Bellhop or Bellhop3D
-% usage: plotscalar( rayfil )
+% Plot the VARfile produced by Bellhop or Bellhop3D
+% usage: plotvar( filroot, vartail, savefig )
 % where rayfil is the ray file (extension is optional)
-% e.g. plotscalar( 'foofoo' )
+% e.g. plotscalar( 'foofoo', 'endtype', true )
 %
 % for BELLHOP3D files, rays in (x,y,z) are converted to (r,z) coordinates
 %
@@ -11,19 +11,18 @@ function varargout = plotscalar( rayfil )
 
 global units jkpsflag
 
-%if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
-%   rayfil = [ rayfil '.ray' ]; % append extension
-%end
-% plots a BELLHOP scalar file
-
-fid = fopen( rayfil, 'r' );   % open the file
-if ( fid == -1 )
-   disp( rayfil );
-   error( 'No ray file exists; you must run BELLHOP first (with ray ouput selected)' );
+if ( strcmp( filroot, 'VARFIL' ) == 0 && ~contains( filroot, vartail ) )
+  varfil = [ filroot '.' vartail ]; % append extension
 end
 
-% read header stuff
+fid = fopen( varfil, 'r' );   % open the file
+if ( fid == -1 )
+   disp( varfil );
+   error( 'No var file exists; you must run BELLHOP first (with var ouput selected)' );
+end
 
+
+% read header stuff
 TITLE       = fgetl(  fid );
 FREQ        = fscanf( fid, '%f', 1 );
 Nsxyz       = fscanf( fid, '%f', 3 );
@@ -45,11 +44,11 @@ Nbeta  = NBeamAngles( 2 );
 % Extract letters between the quotes
 nchars = strfind( TITLE, '''' );   % find quotes
 TITLE  = [ TITLE( nchars( 1 ) + 1 : nchars( 2 ) - 1 ) blanks( 7 - ( nchars( 2 ) - nchars( 1 ) ) ) ];
+TITLE  = erase(TITLE, "BELLHOP-");
 TITLE  = deblank( TITLE );  % remove whitespace
 
 nchars = strfind( Type, '''' );   % find quotes
 Type   = Type( nchars( 1 ) + 1 : nchars( 2 ) - 1 );
-%Type  = deblank( Type );  % remove whitespace
 
 % read rays
 figure;
@@ -69,45 +68,55 @@ units = 'km';
 if ( strcmp( units, 'km' ) )
    xlabel( 'Range (km)' )
 end
-ylabel( 'Depth (m)' )
+ylabel( vartail )
 hold on
 
 % axis limits
 rmin = +1e9;
 rmax = -1e9;
 
-zmin = +1e9;
-zmax = -1e9;
+vmin = +1e9;
+vmax = -1e9;
+
+dalpha = 100;
+alpha0 = 200;
 
 % this could be changed to a forever loop
 for isz = 1 : Nsz
    for ibeam = 1 : Nalpha
+      alphaOld = alpha0;
       alpha0    = fscanf( fid, '%f', 1 );
       fprintf('Angle is %d\n', alpha0);
       nsteps    = fscanf( fid, '%i', 1 );
       
-
       NumTopBnc = fscanf( fid, '%i', 1 );
       NumBotBnc = fscanf( fid, '%i', 1 );
 
+      %print intermediate info
       if ( isempty( nsteps ) || ibeam == Nalpha )
           fprintf('Eigenray: # of rays <= Nalpha\nRay Count: %d\n', ibeam-1 );
-          title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
-           break; 
+          %title( strcat('No. of rays = ', num2str(Nalpha), '; No. of eigenrays = ', num2str(ibeam)) );
+          break; 
       end
+
+      %find delta alpha
+      if ibeam == 2
+          dalpha = abs(alphaOld - alpha0);
+      end
+
       switch Type
          case 'rz'
             ray = fscanf( fid, '%f', [2 nsteps] );
             
             r = ray( 1, : );
-            z = ray( 2, : );
+            v = ray( 2, : );
          case 'xyz'
             ray = fscanf( fid, '%f', [3 nsteps] );
             
             xs = ray( 1, 1 );
             ys = ray( 2, 1 );
             r = sqrt( ( ray( 1, : ) - xs ).^2 + ( ray( 2, : ) - ys ).^2 );
-            z = ray( 3, : );
+            v = ray( 3, : );
       end
       
       if ( strcmp( units, 'km' ) )
@@ -115,25 +124,25 @@ for isz = 1 : Nsz
       end
       
       if NumTopBnc >= 1 && NumBotBnc >= 1
-         plot( r, z, 'k' )    % hits both boundaries
+         plot( r, v, 'k-' )    % hits both boundaries
       elseif NumBotBnc >= 1
-         plot( r, z, 'b' )	   % hits bottom only
+         plot( r, v, 'b-' )	   % hits bottom only
       elseif NumTopBnc >= 1
-         plot( r, z, 'g' )	   % hits surface only
+         plot( r, v, 'g-' )	   % hits surface only
       else
-         plot( r, z, 'r')    % direct path
+         plot( r, v, 'r-')    % direct path
       end
       
       % update axis limits
       rmin = min( [ r rmin ] );
       rmax = max( [ r rmax ] );
 
-      zmin = min( [ z zmin ] );
-      zmax = max( [ z zmax ] );
-      if ( zmin == zmax ) % horizontal ray causes axis scaling problem
-         zmax = zmin + 1;
+      vmin = min( [ v vmin ] );
+      vmax = max( [ v vmax ] );
+      if ( vmin == vmax ) % horizontal ray causes axis scaling problem
+         vmax = vmin + 1;
       end
-      axis( [ rmin, rmax, zmin, zmax ] )
+      axis( [ rmin, rmax, vmin, vmax ] )
       
       % flush graphics buffer every 10th ray
       % (does not work for an eigenray run because Nalpha is number of rays
@@ -147,6 +156,7 @@ end % next source depth
 fclose( fid );
 
 drawnow
+title( [TITLE ': \Delta\alpha = ' num2str(dalpha)] );
 hold off
 zoom on
 
@@ -163,6 +173,10 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-set(gcf,"Position", [100, 650, 1750, 420]);
+set(gcf,"Position", [10, 10, 1500, 620]);
 set(gca, 'FontSize', 20)
-% saveas(gcf, strcat(rayfil, '.png'))
+
+%savefig
+if savefig
+    saveas(gcf, [filroot '-' vartail '.png'])
+end

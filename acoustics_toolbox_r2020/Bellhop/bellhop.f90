@@ -36,6 +36,7 @@ PROGRAM BELLHOP
   INTEGER              :: jj
   CHARACTER ( LEN=2  ) :: AttenUnit
   CHARACTER ( LEN=80 ) :: FileRoot
+  REAL (KIND=8) :: delayTMP = 9999.
 
   ! get the file root for naming all input and output files
   ! should add some checks here ...
@@ -305,7 +306,7 @@ SUBROUTINE BellhopCore
            ! Write the ray trajectory to RAYFile
            IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
-              CALL WriteQ2D( SrcDeclAngle, Beam%Nsteps ) ! IESCO22: tmp step
+              CALL WriteQ2D( SrcDeclAngle, Beam%Nsteps, delayTMP ) ! IESCO22: tmp step
            ELSE ! Compute the contribution to the field
 
               epsilon = PickEpsilon( Beam%Type( 1 : 2 ), omega, c, gradc, Angles%alpha( ialpha ), &
@@ -374,6 +375,8 @@ SUBROUTINE BellhopCore
      CLOSE( QQFile )
      CLOSE( PFile )
      CLOSE( STPFile )
+     CLOSE( TAUFile )
+     CLOSE( LAYFile )
   END SELECT
 
   CLOSE( PRTFile )

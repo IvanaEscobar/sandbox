@@ -39,6 +39,8 @@ bell_july22
 *.p
 *.step
 *.eig
+*.tau
+*.delay
 
 # MATLab
 *.fig
