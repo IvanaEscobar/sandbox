@@ -12,7 +12,7 @@ function varargout = plotray( rayfil, titleStr, savefig )
 global units jkpsflag
 
 if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
-   rayfil = [ rayfil '.eig' ]; % append extension
+   rayfil = [ rayfil '.ray' ]; % append extension
 end
 % plots a BELLHOP ray file
 
