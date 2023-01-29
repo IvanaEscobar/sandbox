@@ -75,7 +75,7 @@ if ( jkpsflag )
   %set( gcf, 'PaperPosition', [ 3 3 19.0 10.0 ] )
 end
 
-xlabel( 'Arrival time, \tau (s)' )
+xlabel( 'Travel time (s)' )
 ylabel( 'Launch angle, \alpha (deg)' )
 hold on
 
@@ -166,7 +166,6 @@ for isz = 1 : Nsz
          ll = scatter( v, alpha0, ...
              sz, 'MarkerFaceColor', 'r');    % direct path 
       end
-      %ll.MarkerFaceAlpha = 0.5;
       ll.MarkerEdgeAlpha = 0.5;
       ll.DisplayName = num2str(alpha0);
    end	% next beam
@@ -175,25 +174,26 @@ end % next source depth
 fclose( fid ); fclose( fid1 );
 
 title( [TITLE ': ' info]);
-lgd = legend('Location','west','NumColumns',2);
-lgd.FontSize = 10;
-lgdTitle = get(lgd, 'Title');
-set(lgdTitle, 'String', "\alpha = ");
+xlim([7 10])
+% lgd = legend('Location','west','NumColumns',3);
+% lgd.FontSize = 8;
+% lgdTitle = get(lgd, 'Title');
+% set(lgdTitle, 'String', "\alpha = ");
 hold off
 
 % fixed size for publications
 if ( jkpsflag )
   set( gca, 'Units', 'centimeters' )
   set( gca, 'Position', [ 2 2 14.0  7.0 ] )
-  set(gcf, 'PaperPositionMode', 'auto');
+  set( gcf, 'PaperPositionMode', 'auto' );
   
   set( gcf, 'Units', 'centimeters' )
   set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-set(gcf,"Position", [10, 10, 1200, 1000]);
+set(gcf,"Position", [10, 10, 600, 500]);
 set(gca, 'FontSize', 20)
 
 %savefig
 if savefig
-   saveas(gcf, [filroot '-tau+delay.png'])
+   saveas(gcf, [filroot '_tau+delay.png'])
 end

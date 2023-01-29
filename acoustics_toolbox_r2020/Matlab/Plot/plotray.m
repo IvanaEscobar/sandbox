@@ -12,7 +12,7 @@ function varargout = plotray( rayfil, titleStr, savefig )
 global units jkpsflag
 
 if ( strcmp( rayfil, 'RAYFIL' ) == 0 && ~contains( rayfil, '.ray' ) )
-   rayfil = [ rayfil '.ray' ]; % append extension
+   rayfil = [ rayfil '.eig' ]; % append extension
 end
 % plots a BELLHOP ray file
 
@@ -166,9 +166,9 @@ fclose( fid );
 drawnow
 
 title(titleStr);
-% %% Custom for nesba-tm4
-% plot(11.7255, 300, 'o', 'MarkerSize',15, 'MarkerFaceColor', '#4DBEEE');
-% text(8.8, 725, ['\alpha \in [ -30 30]^\circ, \Delta\alpha = 0.1'], 'FontSize', 18 );
+%% Custom for nesba-tm4
+plot(11.7255, 300, 'o', 'MarkerSize',15, 'MarkerFaceColor', '#4DBEEE');
+text(8, 725, ['\alpha \in [ -30 30]^\circ, \Delta\alpha = 0.1'], 'FontSize', 18 );
 %%
 hold off
 zoom on
@@ -186,7 +186,7 @@ if ( jkpsflag )
    set( gcf, 'Units', 'centimeters' )
    set( gcf, 'Position', [ 3 15 19.0 10.0 ] )
 end
-set(gcf,"Position", [10, 10, 1600, 650]);
+set(gcf,"Position", [10, 10, 1200, 500]);
 set(gca, 'FontSize', 20)
 
 if savefig

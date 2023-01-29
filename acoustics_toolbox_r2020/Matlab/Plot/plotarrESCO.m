@@ -28,14 +28,15 @@ Narr = Arr( irr, ird, isd ).Narr;
 % stem( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ), abs( Arr( irr, ird, isd ).A( 1 : Narr ) ) )
 
 [x, idsort] = sort( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ) );
-C = abs( 20*log10(Arr( irr, ird, isd ).A( 1 : Narr )) ); C = C(idsort);
+C = -20*log10(abs(Arr( irr, ird, isd ).A( 1 : Narr ))); C = C(idsort);
 imagesc(x, 1, C);
 c = colorbar;
 c.Label.String = "Amplitude [dB]";
 yticks([]);
 
 %% to match BD22 
-%xlim([7.8 8.82]);
+xlim([7.8 8.82]);
+clim([90 130]);
 
 set(gcf,"Position", [100, 650, 1750, 420]);
 
