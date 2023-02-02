@@ -28,24 +28,25 @@ Narr = Arr( irr, ird, isd ).Narr;
 % stem( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ), abs( Arr( irr, ird, isd ).A( 1 : Narr ) ) )
 
 [x, idsort] = sort( real( Arr( irr, ird, isd ).delay( 1 : Narr ) ) );
-C = -20*log10(abs(Arr( irr, ird, isd ).A( 1 : Narr ))); C = C(idsort);
+C = -20*log10(abs(Arr( irr, ird, isd ).C( 1 : Narr ))); C = C(idsort);
 imagesc(x, 1, C);
-c = colorbar;
+colormap jet;
+c = colorbar();
 c.Label.String = "Amplitude [dB]";
 yticks([]);
 
 %% to match BD22 
-xlim([7.8 8.82]);
-clim([90 130]);
+%xlim([7.8 8.82]);
+%clim([90 130]);
 
-set(gcf,"Position", [100, 650, 1750, 420]);
+%set(gcf,"Position", [100, 650, 1750, 420]);
 
-xlabel( 'Time (s)' )
-%ylabel( 'Amplitude' )
+xlabel( 'Travel time [s]' )
 title( [ 'Src_z  = ', num2str( Pos.s.z( isd ) ), ...
    ' m    Rcvr_z = ', num2str( Pos.r.z( ird ) ), ...
-   ' m    Rcvr_r = ', num2str( Pos.r.r( irr ) ), ...
    ' m    Narr   = ', num2str( Narr ) ] )
+
+set(gcf,"Position", [10, 10, 600, 500]);
 set(gca, 'FontSize', 20)
 
 

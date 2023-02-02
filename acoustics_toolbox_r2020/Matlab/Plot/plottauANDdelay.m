@@ -75,8 +75,8 @@ if ( jkpsflag )
   %set( gcf, 'PaperPosition', [ 3 3 19.0 10.0 ] )
 end
 
-xlabel( 'Travel time (s)' )
-ylabel( 'Launch angle, \alpha (deg)' )
+xlabel( 'Travel time [s]' )
+ylabel( 'Launch angle, \alpha [deg]' )
 hold on
 
 % angle init
@@ -128,7 +128,7 @@ for isz = 1 : Nsz
          ll = scatter( v(nsteps-1), alpha0, ...
              sz, 'MarkerFaceColor', 'r' );    % direct path 
       end
-      ll.MarkerFaceAlpha = 0.5;
+      ll.MarkerFaceAlpha = 0.1;
       ll.MarkerEdgeAlpha = 0.0;
       ll.HandleVisibility = 'off';
    end	% next beam
@@ -152,7 +152,7 @@ for isz = 1 : Nsz
           break;
       end
 
-      sz=55;
+      sz=65;
       if NumTopBnc >= 1 && NumBotBnc >= 1
          ll = scatter( v, alpha0, ...
              sz, 'MarkerFaceColor', 'k');    % hits both boundaries
