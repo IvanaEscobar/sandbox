@@ -28,8 +28,8 @@ gcm_coords_0 = {'nw': [-75.531,   41.753, "k"], \
 
 gcm_coords = {'nw': [-74.5935,   41.7530, "k"], \
               'ne': [-69.8023,   41.7530, "k"], \
-              'se': [-69.8023,   39.2762, "k"], \
-              'sw': [-74.5935,   39.2762, "k"]    }
+              'se': [-69.8023,   39.2585, "k"], \
+              'sw': [-74.5935,   39.2585, "k"]    }
 ## Using KDtree searching to take llc4320 face 10 and find global indices of 
 ## gcm_coords.
 ##from scipy.spatial import cKDTree
