@@ -8,6 +8,9 @@ def loadMatFile ( file ):
 def degMinSec2decimal (degree, minutes=0.0, seconds=0.0):
     return degree + minutes/60 + seconds/3600
 
+def meter2deg (m):
+    return m / 6371009. * 180 / pi
+
 def lon180to360 (lon):
     return lon % 360.
 
