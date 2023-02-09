@@ -9,11 +9,12 @@ from .utils import (
         gcDistance,
         wgs84Distance,
         gcspace,
+        utm2wgs,
         )
 from .unesco import (
         ssp,
         )
-from .nesba import (
+from .nesb import (
         nesbaDist,
         CTD_coords,
         nesba_coords,
