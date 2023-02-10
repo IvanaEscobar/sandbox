@@ -18,9 +18,11 @@ from .nesb import (
         nesbaDist,
         CTD_coords,
         nesba_coords,
-        tm4,
-        at,
         gcm_coords,
+        dataDir,
+        regionGRID,
+        globalGRID,
+        dsBathy,
         )
 
 __all__ = [ 'utils',

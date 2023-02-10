@@ -1,3 +1,4 @@
+import os
 from .utils import degMinSec2decimal, wgs84Distance
 
 #             'name': [XC:lon,    YC:lat,   color]
@@ -30,33 +31,29 @@ gcm_coords = {'nw': [-74.5935,   41.7530, "k"], \
               'ne': [-69.8023,   41.7530, "k"], \
               'se': [-69.8023,   39.2585, "k"], \
               'sw': [-74.5935,   39.2585, "k"]    }
-## Using KDtree searching to take llc4320 face 10 and find global indices of 
-## gcm_coords.
-##from scipy.spatial import cKDTree
-##Tile10 = np.stack([ llc4320.XC.values.flatten(), \
-##                    llc4320.YC.values.flatten() ]).T
-##
-##J=[]; I=[]
-##for key in sb.gcm_coords:
-##    _, ii = cKDTree(Tile10).query([ sb.gcm_coords[key][0],\
-##                                    sb.gcm_coords[key][1] ], k=1)
-##    print(Tile10[ii])            
-##    ids = np.unravel_index(ii, llc4320.XC.shape)
-##
-##    J.append( ids[1] )
-##    I.append( ids[2] )
-##                                
-##print('\tnw,   ne,   se,   sw')
-##print("J = ", J,'\nI = ',I) 
-##
-##def renumberLocalIndex (ds):
-##    idxDict = {"i":"I", "j":"J", "i_g":"I_g", "j_g":"J_g"}
-##            
-##    for key in idxDict:
-##        ds[idxDict[key]] = xr.DataArray(ds[key].values, dims=[key],
-##                                        attrs={'long_name':'Global llc index'})
-##        ds[key] = np.arange(len(ds[key]))
-##    return ds
-##nesbaGRID = llc4320.isel(j=slice(min(J), max(J)), i=slice(min(I), max(I)), \
-##                         j_g=slice(min(J),max(J)), i_g=slice(min(I),max(I)))
-##renumberLocalIndex(nesbaGRID)
+
+# Standard directories
+# Retrieve user information
+user=os.environ.get("USER")     #ivana
+host=os.environ.get("HOSTNAME") #sverdrup.oden.utexas.edu
+
+# Machine specific paths
+scr2Dir = '/scratch2/ivana'
+dataDir = f'{scr2Dir}/data'
+
+# Set directory paths
+# 1) global GRID at high resolution
+# 2) regional GRID at high resolution
+globalGRID=f'{scr2Dir}/grids/llc4320'
+regionGRID=f'{scr2Dir}/grids/nesb'
+
+# 3) parent directories
+#        output from a run where we extract the parent obcs
+obcsGRID=f'{scr2Dir}/grids/aste270/GRID'
+obcsData=f'{scr2Dir}/data/aste270/.........'
+
+# 4) regional binaries directory
+#        where .bin files go (in Sverdrup this is in a $scratch subdirectory)
+#        bathymetry
+#        obcs
+dsBathy=f'{scr2Dir}/data/nesb/bathymetry.nc'
