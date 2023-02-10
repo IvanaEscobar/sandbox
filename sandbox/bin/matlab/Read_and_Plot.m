@@ -34,7 +34,7 @@ for ii=1:size(xx,1)
 end
 
 % bathy
-figure;pcolor(Lon,Lat,t)
+figure;pcolor(Lon,Lat,t')
 shading flat
 % caxis([-4000 00])
 caxis([-400 -200])

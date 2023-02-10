@@ -1,6 +1,6 @@
 from scipy.io import loadmat
 from numpy import abs, cos, sqrt, arctan, sin, arccos, pi, tan,\
-                  vectorize, exp, zeros, array
+                  vectorize, exp, zeros, array, reshape
 from pyproj import Geod
 
 def loadMatFile ( file ):
@@ -110,13 +110,21 @@ def utm2wgs(x, y, utmzone):
     # Source: DMA Technical Manual 8358.2, Fairfax, VA
 
     #input check
-    n = len(x)
-    if n != len(y) or n != len(utmzone) or len(y) != len(utmzone):
+    arrShape = x.shape
+    if x.ndim==2 or y.ndim==2 or utmzone.ndim==2:
+        x = x.flatten()
+        y = y.flatten()
+        utmzone = utmzone.flatten()
+
+    n = x.size
+    if n <= 1:
+        raise TypeError('provide an array for all inputs')
+    if n != y.size or n != utmzone.size or y.size != utmzone.size:
         raise IndexError('Inputs must be equal lengths')
 
     lenutm = vectorize(len)
     if any(lenutm(utmzone) !=3):
-        raise ValueError('utmzone must contain strings with  3 characters only')
+        raise ValueError('utmzone must contain strings with 3 characters only')
 
     ## init output and fixed parameters
     lons = zeros(n)
@@ -171,4 +179,6 @@ def utm2wgs(x, y, utmzone):
         lats[i]  = lat*180/pi
         lons[i]  = zone*6. - 183. + Delta*180/pi
 
+    lons = reshape(lons, arrShape)
+    lats = reshape(lats, arrShape)
     return lons, lats
