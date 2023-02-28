@@ -1,3 +1,6 @@
+#from . import ooi-pioneer
+#from . import mitprof
+
 from .utils import (
         loadMatFile,
         degMinSec2decimal,
@@ -6,17 +9,20 @@ from .utils import (
         gcDistance,
         wgs84Distance,
         gcspace,
+        utm2wgs,
         )
 from .unesco import (
         ssp,
         )
-from .nesba import (
+from .nesb import (
         nesbaDist,
         CTD_coords,
         nesba_coords,
-        tm4,
-        at,
         gcm_coords,
+        dataDir,
+        regionGRID,
+        globalGRID,
+        dsBathy,
         )
 
 __all__ = [ 'utils',

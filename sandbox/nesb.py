@@ -1,3 +1,4 @@
+import os
 from .utils import degMinSec2decimal, wgs84Distance
 
 #             'name': [XC:lon,    YC:lat,   color]
@@ -21,7 +22,38 @@ nesbaDist = wgs84Distance(at[0],  at[1],
                          tm4[0], tm4[1]) / 1000.
 
 #             'name': [XC:lon,    YC:lat,   color]
-gcm_coords = {'nw': [-75.531,   41.753, "k"], \
+gcm_coords_0 = {'nw': [-75.531,   41.753, "k"], \
               'ne': [-69.906,   41.753, "k"], \
               'se': [-69.906,   37.750, "k"], \
               'sw': [-75.531,   37.750, "k"]    }
+
+gcm_coords = {'nw': [-74.5935,   41.7530, "k"], \
+              'ne': [-69.8023,   41.7530, "k"], \
+              'se': [-69.8023,   39.2585, "k"], \
+              'sw': [-74.5935,   39.2585, "k"]    }
+
+# Standard directories
+# Retrieve user information
+user=os.environ.get("USER")     #ivana
+host=os.environ.get("HOSTNAME") #sverdrup.oden.utexas.edu
+
+# Machine specific paths
+scr2Dir = '/scratch2/ivana'
+dataDir = f'{scr2Dir}/data'
+
+# Set directory paths
+# 1) global GRID at high resolution
+# 2) regional GRID at high resolution
+globalGRID=f'{scr2Dir}/grids/llc4320'
+regionGRID=f'{scr2Dir}/grids/nesb'
+
+# 3) parent directories
+#        output from a run where we extract the parent obcs
+obcsGRID=f'{scr2Dir}/grids/aste270/GRID'
+obcsData=f'{scr2Dir}/data/aste270/.........'
+
+# 4) regional binaries directory
+#        where .bin files go (in Sverdrup this is in a $scratch subdirectory)
+#        bathymetry
+#        obcs
+dsBathy=f'{scr2Dir}/data/nesb/bathymetry.nc'
