@@ -588,15 +588,19 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
      ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
      ! IESCO22: Rewriting for debugging with gcov
-     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
+     IF ( ray2D( is+1 )%x( 1 ) > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%r'
         EXIT Stepping
-     ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
+     ELSE IF ( ray2D( is+1 )%x( 1 ) < 0 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : ray left Box r=0'
+        EXIT Stepping
+     ELSE IF ( ray2D( is+1 )%x( 2 ) > Beam%Box%z ) THEN 
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%z'
         EXIT Stepping
-     ELSE IF ( ray2D( is+1 )%Amp < 0.005 ) THEN
+     ELSE IF ( ABS( ray2D( is+1 )%Amp ) < 0.005 ) THEN
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D : ray lost energy'
         EXIT Stepping

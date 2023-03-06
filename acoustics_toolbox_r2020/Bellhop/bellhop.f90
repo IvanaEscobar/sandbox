@@ -523,6 +523,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      is  = is + 1
      is1 = is + 1
 
+     WRITE (PRTFile, *) "Step: ", istep, ",   x: ", ray2D(is)%x(1)
      CALL Step2D( ray2D( is ), ray2D( is1 ),  &
           Top( IsegTop )%x, Top( IsegTop )%n, &
           Bot( IsegBot )%x, Bot( IsegBot )%n )
@@ -604,11 +605,15 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
      ! Has the ray left the box, lost its energy, escaped the boundaries, or exceeded storage limit?
      ! Rewriting for debugging with gcov purposes:
-     IF ( ABS( ray2D( is+1 )%x( 1 ) ) > Beam%Box%r ) THEN
+     IF ( ray2D( is+1 )%x( 1 )  > Beam%Box%r ) THEN
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray left Box%r'
         EXIT Stepping
-     ELSE IF ( ABS( ray2D( is+1 )%x( 2 ) ) > Beam%Box%z ) THEN 
+     ELSE IF ( ray2D( is+1 )%x( 1 ) < 0 ) THEN
+        Beam%Nsteps = is + 1
+        WRITE( PRTFile, * ) 'TraceRay2D : ray behind source range is negative'
+        EXIT Stepping
+     ELSE IF ( ray2D( is+1 )%x( 2 )  > Beam%Box%z ) THEN 
         Beam%Nsteps = is + 1
         WRITE( PRTFile, * ) 'TraceRay2D: a = ', alpha*RadDeg, '; ray left Box%z'
         EXIT Stepping
