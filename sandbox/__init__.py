@@ -8,7 +8,7 @@ from .utils import (
         lon360to180,
         gcDistance,
         wgs84Distance,
-        gcspace,
+        wgs84space,
         utm2wgs,
         )
 from .unesco import (

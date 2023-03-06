@@ -47,38 +47,30 @@ def wgs84Distance( lonA, latA, lonB, latB ):
 
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
 
-def gcspace(start, end, npts=2):
+def wgs84space(start, end, npts=2):
     # start = [startlon, startlat]
     # end =   [endlon,   endlat]
+    g = Geod(ellps='WGS84')
 
-    startlong = start[0]
-    startlat  = start[1]
-    endlong   = end[0]
-    endlat    = end[1]
+    startlon = start[0]
+    startlat = start[1]
+    endlon   = end[0]
+    endlat   = end[1]
+
+    inpts = npts - 2
+    if inpts<=0:
+        raise ValueError('Not enough points in the line')
 
     # calculate distance between points
-    g = Geod(ellps='WGS84')
-    (az12, az21, dist) = g.inv(startlong, startlat, endlong, endlat)
-
-    interiorpts = npts - 2
-    if interiorpts<0:
-        print("ERROR")
-        return None 
-    elif interiorpts==0:
-        # calculate line string along path with segments <= 1 km
-        npts = 1 + int(dist / 1000)
-    lonlats = g.npts(startlong, startlat, endlong, endlat, interiorpts)
+    r = g.inv_intermediate(startlon, startlat, endlon, endlat, inpts)
 
     # npts doesn't include start/end points, so prepend/append them
-    lonlats.insert(0, (startlong, startlat))
-    lonlats.append((endlong, endlat))
+    r.lons.insert(0, startlon)
+    r.lats.insert(0, startlat)
+    r.lons.append(endlon)
+    r.lats.append(endlat)
 
-    lons=[]; lats=[]
-    for (lon, lat) in lonlats:
-        lons.append(lon)
-        lats.append(lat)
-                                
-    return [lons, lats]
+    return r 
 
 def utm2wgs(x, y, utmzone):    
     # Converts arrays of UTM coordinates into Lon/Lat arrays.
