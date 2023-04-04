@@ -18,6 +18,7 @@ build*/
 input/
 results/
 testhere
+hello
 
 # BELLHOP
 *.arr
