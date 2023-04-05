@@ -4,7 +4,7 @@ cd Bellhop
 
 if [[ "$HOST" == "sverdrup"* ]] ; then
     ln -s ../optfiles/Makefile_ifort Makefile
-elif [[ "$USER" == "ivanaescobar" ]] ; then
+elif [[ "$OSTYPE" == "darwin22.0" ]] ; then
     ln -s ../optfiles/Makefile_gfortran Makefile
 fi
 
