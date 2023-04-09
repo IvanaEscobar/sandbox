@@ -77,7 +77,7 @@ CONTAINS
     ! NPts, Sigma not used in BELLHOP
     READ(  ENVFile, * ) NPts, Sigma, Bdry%Bot%HS%Depth
     WRITE( PRTFile, * )
-    WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
+    WRITE( PRTFile, FMT = "( ' Depth at source = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
 
     IF ( Bdry%Top%HS%Opt( 1 : 1 ) == 'A' ) THEN
        WRITE( PRTFile, * ) 'Analytic SSP option'

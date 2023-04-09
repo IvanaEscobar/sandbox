@@ -523,7 +523,6 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
      is  = is + 1
      is1 = is + 1
 
-     WRITE (PRTFile, *) "Step: ", istep, ",   x: ", ray2D(is)%x(1)
      CALL Step2D( ray2D( is ), ray2D( is1 ),  &
           Top( IsegTop )%x, Top( IsegTop )%n, &
           Bot( IsegBot )%x, Bot( IsegBot )%n )
