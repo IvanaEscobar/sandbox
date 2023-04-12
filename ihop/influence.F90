@@ -443,26 +443,26 @@ CONTAINS
     CASE ( 'E' )                ! eigenrays
        CALL WriteRay2D( SrcDeclAngle, iS )
     CASE ( 'A', 'a' )           ! arrivals
-       CALL AddArr( omega, iz, ir, Amp, phaseInt, delay, SrcDeclAngle, &
+       CALL AddArr( afreq, iz, ir, Amp, phaseInt, delay, SrcDeclAngle, &
                     RcvrDeclAngle, ray2D( iS )%NumTopBnc, &
                     ray2D( iS )%NumBotBnc )
     CASE ( 'C' )                ! coherent TL
-       U = U + CMPLX( Amp * EXP( -i * ( omega * delay - phaseInt ) ) )
+       U = U + CMPLX( Amp * EXP( -i * ( afreq * delay - phaseInt ) ) )
     CASE ( 'S', 'I' )                ! incoherent/semicoherent TL
        IF ( Beam%Type( 1:1 ) == 'B' ) THEN   ! Gaussian beam
           U = U + SNGL( SQRT( 2. * pi ) &
-                  * ( Amp * EXP( AIMAG( omega * delay ) ) )**2 )
+                  * ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        ELSE
           U = U + SNGL( &
-                    ( Amp * EXP( AIMAG( omega * delay ) ) )**2 )
+                    ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        END IF
     CASE DEFAULT                ! incoherent/semicoherent TL
        IF ( Beam%Type( 1:1 ) == 'B' ) THEN   ! Gaussian beam
           U = U + SNGL( SQRT( 2. * pi ) &
-                  * ( Amp * EXP( AIMAG( omega * delay ) ) )**2 )
+                  * ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        ELSE
           U = U + SNGL( &
-                    ( Amp * EXP( AIMAG( omega * delay ) ) )**2 )
+                    ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        END IF
     END SELECT
 
@@ -533,7 +533,7 @@ CONTAINS
                 delay  = tau + rayt( 2 ) * deltaz
                 contri = Ratio1 * CN * ray2D( iS )%Amp &
                        * EXP( -A * thet**2 &
-                              - i*( omega*delay - ray2D( iS )%Phase - phase ) )&
+                              - i*( afreq*delay - ray2D( iS )%Phase - phase ) )&
                        / SQRT( SX1 )
                 U( iz, ir ) = U( iz, ir ) + CMPLX( contri )
              END SELECT

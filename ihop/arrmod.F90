@@ -33,7 +33,7 @@ MODULE arrmod
   TYPE(Arrival), ALLOCATABLE :: Arr( :, :, : ), Arr3D( :, :, :, : )
 
 CONTAINS
-  SUBROUTINE AddArr( omega, iz, ir, Amp, Phase, delay, SrcDeclAngle, &
+  SUBROUTINE AddArr( afreq, iz, ir, Amp, Phase, delay, SrcDeclAngle, &
                      RcvrDeclAngle, NumTopBnc, NumBotBnc )
 
     ! ADDs the amplitude and delay for an ARRival into a matrix of same.
@@ -42,7 +42,7 @@ CONTAINS
     ! arrivals with essentially the same phase are grouped into one
     REAL,      PARAMETER               :: PhaseTol = 0.05 
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, iz, ir
-    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, &
+    REAL    (KIND=_RL90), INTENT( IN ) :: afreq, Amp, Phase, SrcDeclAngle, &
                                           RcvrDeclAngle
     COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL              :: NewRay
@@ -59,7 +59,7 @@ CONTAINS
     ! direct paths are not joined)
 
     IF ( Nt >= 1 ) THEN
-       IF ( omega * ABS( delay - Arr( iz, ir, Nt )%delay ) < PhaseTol .AND. &
+       IF ( afreq * ABS( delay - Arr( iz, ir, Nt )%delay ) < PhaseTol .AND. &
            ABS( Arr( iz, ir, Nt )%phase - Phase ) < PhaseTol ) NewRay = .FALSE.
     END IF
 

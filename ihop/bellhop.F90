@@ -24,21 +24,9 @@ MODULE BELLHOP
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
   ! Systems Center
 
-!   !USES:
-    IMPLICIT NONE
   
-!   == Global variables ==
-#include "SIZE.h"
-#include "GRID.h"
-#include "EEPARAMS.h"
-#include "PARAMS.h"
-#include "IHOP.h"
-#ifdef ALLOW_CTRL
-# include "CTRL_FIELDS.h"
-#endif
-
   USE iHopMod       ! Added to get title, freq, Beam
-  USE iHopParams,   only:   pi, i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
+  USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
                             OpenOutputFiles
@@ -59,6 +47,17 @@ MODULE BELLHOP
   USE beamPattern 
   USE writeRay,     only:   WriteRay2D
 
+!   !USES:
+  IMPLICIT NONE
+!   == Global variables ==
+#include "SIZE.h"
+#include "GRID.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+#ifdef ALLOW_CTRL
+# include "CTRL_FIELDS.h"
+#endif
 
 CONTAINS
 SUBROUTINE IHOP_INIT ( myThid )
@@ -230,7 +229,7 @@ SUBROUTINE BellhopCore
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
 
-  omega = 2.0 * pi * freq
+  afreq = 2.0 * PI * freq
 
   Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
@@ -358,7 +357,7 @@ SUBROUTINE BellhopCore
 
            ! Lloyd mirror pattern for semi-coherent option
            IF ( Beam%RunType( 1 : 1 ) == 'S' ) &
-              Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( omega / c * xs( 2 ) &
+              Amp0 = Amp0 * SQRT( 2.0 ) * ABS( SIN( afreq / c * xs( 2 ) &
                      * SIN( Angles%alpha( ialpha ) ) ) )
            !!IESCO22: end BEAM stuff !!
 
@@ -739,7 +738,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
      ray2D( is1 )%Phase = ray2D( is )%Phase
   CASE ( 'V' )                 ! vacuum
      ray2D( is1 )%Amp   = ray2D( is )%Amp
-     ray2D( is1 )%Phase = ray2D( is )%Phase + pi
+     ray2D( is1 )%Phase = ray2D( is )%Phase + PI
   CASE ( 'F' )                 ! file
      RInt%theta = RadDeg * ABS( ATAN2( Th, Tg ) )           ! angle of incidence (relative to normal to bathymetry)
      IF ( RInt%theta > 90 ) RInt%theta = 180. - RInt%theta  ! reflection coefficient is symmetric about 90 degrees
@@ -747,15 +746,15 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
      ray2D( is1 )%Amp   = ray2D( is )%Amp * RInt%R
      ray2D( is1 )%Phase = ray2D( is )%Phase + RInt%phi
   CASE ( 'A', 'G' )     ! half-space
-     kx = omega * Tg    ! wavenumber in direction parallel      to bathymetry
-     kz = omega * Th    ! wavenumber in direction perpendicular to bathymetry
+     kx = afreq * Tg    ! wavenumber in direction parallel      to bathymetry
+     kz = afreq * Th    ! wavenumber in direction perpendicular to bathymetry
 
      ! notation below is a bit mis-leading
      ! kzS, kzP is really what I called gamma in other codes, and differs by a 
      ! factor of +/- i
      IF ( REAL( HS%cS ) > 0.0 ) THEN
-        kzS2 = kx**2 - ( omega / HS%cS )**2
-        kzP2 = kx**2 - ( omega / HS%cP )**2
+        kzS2 = kx**2 - ( afreq / HS%cS )**2
+        kzP2 = kx**2 - ( afreq / HS%cP )**2
         kzS  = SQRT( kzS2 )
         kzP  = SQRT( kzP2 )
         mu   = HS%rho * HS%cS**2
@@ -763,10 +762,10 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
         y2 = ( ( kzS2 + kx**2 )**2 - 4.0D0 * kzS * kzP * kx**2 ) * mu
         y4 = kzP * ( kx**2 - kzS2 )
 
-        f = omega**2 * y4
+        f = afreq**2 * y4
         g = y2
      ELSE
-        kzP = SQRT( kx**2 - ( omega / HS%cP )**2 )
+        kzP = SQRT( kx**2 - ( afreq / HS%cP )**2 )
 
         ! Intel and GFortran compilers return different branches of the SQRT 
         ! for negative reals
@@ -790,7 +789,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
            ch = ray2D( is )%c / conjg( HS%cP )
            co = ray2D( is )%t( 1 ) * ray2D( is )%c
            si = ray2D( is )%t( 2 ) * ray2D( is )%c
-           ck = omega / ray2D( is )%c
+           ck = afreq / ray2D( is )%c
 
            a   = 2 * HS%rho * ( 1 - ch * ch )
            b   = co * co - ch * ch

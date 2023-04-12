@@ -67,10 +67,10 @@ CONTAINS
 
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
-    REAL    (KIND=_RL90)            :: f2, omega, alphaT, Thorp, a, FG
+    REAL    (KIND=_RL90)            :: f2, afreq, alphaT, Thorp, a, FG
     COMPLEX (KIND=_RL90)            :: CRCI
 
-    omega = 2.0 * pi * freq
+    afreq = 2.0 * pi * freq
 
     !  Convert to Nepers/m 
     alphaT = 0.0
@@ -94,9 +94,9 @@ CONTAINS
        !        FAC = SQRT( SQRT( freq / 50.0 ) )
        !        IF ( c /= 0.0 ) alphaT = FAC * alpha * freq / ( 8.6858896D0*c )
     CASE ( 'Q' )   ! Quality factor
-       IF ( c * alpha /= 0.0 ) alphaT = omega / ( 2.0 * c * alpha )
+       IF ( c * alpha /= 0.0 ) alphaT = afreq / ( 2.0 * c * alpha )
     CASE ( 'L' )   ! loss parameter
-       IF ( c /= 0.0         ) alphaT = alpha * omega / c
+       IF ( c /= 0.0         ) alphaT = alpha * afreq / c
     END SELECT
 
     ! added volume attenuation
@@ -131,7 +131,7 @@ CONTAINS
     END SELECT
 
     ! Convert Nepers/m to equivalent imaginary sound speed 
-    alphaT = alphaT * c * c / omega
+    alphaT = alphaT * c * c / afreq
     CRCI   = CMPLX( c, alphaT, KIND=_RL90 )
 
     IF ( alphaT > c ) THEN
