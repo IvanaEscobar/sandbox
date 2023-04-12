@@ -1,5 +1,6 @@
 #include "IHOP_OPTIONS.h"
 !BOP
+! !ROUTINE: BELLHOP
 ! !INTERFACE:
 MODULE BELLHOP
   ! Written as a module to be used in ihop_*.F parts of the MITgcm package
@@ -22,7 +23,20 @@ MODULE BELLHOP
 
   ! First version (1983) originally developed with Homer Bucker, Naval Ocean 
   ! Systems Center
+
+!   !USES:
+    IMPLICIT NONE
   
+!   == Global variables ==
+#include "SIZE.h"
+#include "GRID.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+#ifdef ALLOW_CTRL
+# include "CTRL_FIELDS.h"
+#endif
+
   USE iHopMod       ! Added to get title, freq, Beam
   USE iHopParams,   only:   pi, i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, MaxN
@@ -45,8 +59,7 @@ MODULE BELLHOP
   USE beamPattern 
   USE writeRay,     only:   WriteRay2D
 
-  IMPLICIT NONE
-  
+
 CONTAINS
 SUBROUTINE IHOP_INIT ( myThid )
 !     !INPUT/OUTPUT PARAMETERS:
@@ -59,20 +72,15 @@ SUBROUTINE IHOP_INIT ( myThid )
   REAL                 :: Tstart, Tstop
 ! added locally previously read in from unknown mod ... IEsco2022
   CHARACTER ( LEN=2  ) :: AttenUnit
-  CHARACTER ( LEN=80 ) :: FileRoot
 
   ! get the file root for naming all input and output files
   ! should add some checks here ...
 
-  !CALL GET_COMMAND_ARGUMENT( 1, FileRoot )
-  ! HARDCODING FILE TO FORCE nesba eigenray run
-  FileRoot = 'nesba-tm4' ! IEsco22: HARDCODED
-
   ! Open the print file
-  OPEN( UNIT = PRTFile, FILE = TRIM( FileRoot ) // '.prt', &
+  OPEN( UNIT = PRTFile, FILE = TRIM( IHOP_fileroot ) // '.prt', &
         STATUS = 'UNKNOWN', IOSTAT = iostat )
   IF ( iostat /= 0 ) THEN
-      WRITE(*,*) 'bellhop: do not recognize FileRoot, ', TRIM( FileRoot )
+      WRITE(*,*) 'bellhop: do not recognize IHOP_fileroot, ', TRIM( IHOP_fileroot )
       CALL ERROUT('BELLHOP INIT','Unable to recognize env file')
   END IF
 
@@ -162,17 +170,17 @@ SUBROUTINE IHOP_INIT ( myThid )
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
      ! Read .env file: REQUIRED
-     CALL ReadEnvironment(  FileRoot, ThreeD )
+     CALL ReadEnvironment(  IHOP_fileroot, ThreeD )
      ! AlTImetry: OPTIONAL, default is no ATIFile
-     CALL ReadATI( FileRoot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
+     CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
      ! BaThYmetry: OPTIONAL, default is no BTYFile
-     CALL ReadBTY( FileRoot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, PRTFile )
+     CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, PRTFile )
      ! (top and bottom): OPTIONAL
-     CALL ReadReflectionCoefficient( FileRoot, Bdry%Bot%HS%Opt( 1:1 ), &
+     CALL ReadReflectionCoefficient( IHOP_fileroot, Bdry%Bot%HS%Opt( 1:1 ), &
                                      Bdry%Top%HS%Opt( 2:2 ), PRTFile ) 
      ! Source Beam Pattern: OPTIONAL, default is omni source pattern
      SBPFlag = Beam%RunType( 3:3 )
-     CALL ReadPat( FileRoot, PRTFile )
+     CALL ReadPat( IHOP_fileroot, PRTFile )
      Pos%Ntheta = 1
      ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
      Pos%theta( 1 ) = 0.
@@ -184,7 +192,7 @@ SUBROUTINE IHOP_INIT ( myThid )
   END IF
 
   ! open all output files
-  CALL OpenOutputFiles( FileRoot, ThreeD )
+  CALL OpenOutputFiles( IHOP_fileroot, ThreeD )
 
   ! Run Bellhop solver
   CALL CPU_TIME( Tstart )

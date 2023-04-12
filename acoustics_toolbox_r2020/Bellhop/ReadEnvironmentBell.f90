@@ -32,7 +32,7 @@ CONTAINS
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
-    WRITE( PRTFile, * ) 'BELLHOP/BELLHOP3D'
+    WRITE( PRTFile, * ) 'BELLHOP'
     WRITE( PRTFile, * )
 
     ! Open the environmental file
