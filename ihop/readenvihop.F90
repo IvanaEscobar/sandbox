@@ -11,7 +11,7 @@ MODULE readEnviHop
   USE iHopParams,   only: PRTFile, ENVFile, SSPFile, RAYFile, &
                           ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
-  USE iHopMod
+  USE iHopMod,      only: freq, Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
   USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
