@@ -1,4 +1,5 @@
 #include "IHOP_OPTIONS.h"
+
 !BOP
 ! !INTERFACE:
 MODULE attenMod
@@ -11,7 +12,14 @@ MODULE attenMod
   ! Includes a formula for volume attenuation
 
   USE ihop_fatalError,   only: ERROUT
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -63,14 +71,12 @@ CONTAINS
     ! c     real      part of sound speed
     ! alpha imaginary part of sound speed
 
-    USE iHopParams,    only: pi
-
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
     REAL    (KIND=_RL90)            :: f2, afreq, alphaT, Thorp, a, FG
     COMPLEX (KIND=_RL90)            :: CRCI
 
-    afreq = 2.0 * pi * freq
+    afreq = 2.0 * PI * freq
 
     !  Convert to Nepers/m 
     alphaT = 0.0

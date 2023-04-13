@@ -1,5 +1,5 @@
 # IHOP package parameters:
  &IHOP_PARM01 
     IHOP_bellOn=.TRUE.,
-    IHOP_fileroot='tm4-at_nesba25',
+    IHOP_fileroot='tm4-at_nesb25',
  &

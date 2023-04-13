@@ -10,16 +10,16 @@ C !DESCRIPTION:
 C Calculate ray travel times, tau
 
 C !FORTRAN90 USE MODULES: ===============================================
-      use bellhop
+      USE bellhop
 
       IMPLICIT NONE
-#include "SIZE.h"
-#include "EEPARAMS.h"
-!#include "PARAMS.h"
-#include "GRID.h"
+C#include "SIZE.h"
+C#include "EEPARAMS.h"
+C#include "PARAMS.h"
+C#include "GRID.h"
 #include "SURFACE.h"
 #include "FFIELDS.h"
-#include "IHOP.h"
+C#include "IHOP.h"
 
 C !INPUT PARAMETERS: ===================================================
 C  myTime   :: Current time in simulation

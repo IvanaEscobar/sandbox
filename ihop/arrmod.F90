@@ -6,10 +6,16 @@ MODULE arrmod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: pi, RadDeg, ARRFile
+  USE iHopParams,   only: RadDeg, ARRFile
 
-  ! Variables for arrival information
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -122,7 +128,7 @@ CONTAINS
     DO iz = 1, Nrz
        DO ir = 1, Nr
           IF ( SourceType == 'X' ) THEN   ! line source
-             factor =  4.0 * SQRT( pi )
+             factor =  4.0 * SQRT( PI )
           ELSE                            ! point source: default
              IF ( r ( ir ) == 0 ) THEN
                 factor = 1e5                   ! avoid /0 at origin
@@ -170,7 +176,7 @@ CONTAINS
     DO iz = 1, Nrz
        DO ir = 1, Nr
           IF ( SourceType == 'X' ) THEN   ! line source
-             factor = 4.0 * SQRT( pi )
+             factor = 4.0 * SQRT( PI )
           ELSE                            ! point source
              IF ( r ( ir ) == 0 ) THEN
                 factor = 1e5                   ! avoid /0 at origin

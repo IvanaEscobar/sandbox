@@ -9,9 +9,10 @@ MODULE refCoef
   ! reflection coefficient data
 
   USE ihop_fatalError,   only: ERROUT
-  USE iHopParams,   only: BRCFile, TRCFile, IRCFile, pi, DegRad
+  USE iHopParams,   only: BRCFile, TRCFile, IRCFile, DegRad
 
-  IMPLICIT NONE
+! ! USES
+  implicit none
   PRIVATE
 
 ! public interfaces

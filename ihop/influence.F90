@@ -11,14 +11,21 @@ MODULE influence
   ! mbp 12/2018, based on much older subroutines
 
   USE iHopMod       ! added to get BeamStructure: Beam
-  USE iHopParams,   only: pi, i, RadDeg, PRTFile, MaxN
+  USE iHopParams,   only: i, RadDeg, PRTFile, MaxN
   USE srPositions,  only: Pos
 ! sspMod used to construct image beams in the Cerveny style beam routines
   USE SSPMod,       only: EvaluateSSP, Bdry 
   USE arrMod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
   USE writeRay,     only: WriteRay2D
 
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -122,7 +129,7 @@ CONTAINS
           ! if phase shifts at caustics
           IF (     q <= 0.0d0 .AND. qOld > 0.0d0    &
               .OR. q >= 0.0d0 .AND. qOld < 0.0d0 )  &
-              phase = phase + pi/2.  
+              phase = phase + PI/2.  
           qOld = q
 
           RcvrDeclAngle = RcvrDeclAngleV( iS )
@@ -147,7 +154,7 @@ CONTAINS
                 !!! this should be precomputed
                 IF (     q <= 0.0d0 .AND. qOld > 0.0d0      &
                     .OR. q >= 0.0d0 .AND. qOld < 0.0d0 )    &
-                    phaseInt = phase + pi/2.   ! phase shifts at caustics
+                    phaseInt = phase + PI/2.   ! phase shifts at caustics
 
                 CALL ApplyContribution( U( iz, ir ) )
              END IF
@@ -210,7 +217,7 @@ CONTAINS
 
        !IESCO22: q only changes signs on direct paths, no top/bot bounces
        IF ( q <= 0.0d0 .AND. qOld > 0.0d0 .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) &
-           phase = phase + pi / 2.   ! phase shifts at caustics
+           phase = phase + PI / 2.   ! phase shifts at caustics
        qOld = q
        
        ! Radius calc from beam radius projected onto vertical line
@@ -262,8 +269,8 @@ CONTAINS
                    Amp      = Amp * W
                    IF (      q <= 0.0d0 .AND. qOld > 0.0d0 &
                         .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) THEN
-                    phaseInt = phase + pi / 2.   ! phase shifts at caustics
-                    ! IESCO22: shouldn't this be = phaseInt + pi/2
+                    phaseInt = phase + PI / 2.   ! phase shifts at caustics
+                    ! IESCO22: shouldn't this be = phaseInt + PI/2
                    ELSE
                     phaseInt = ray2D( iS-1 )%Phase + phase
                    END IF
@@ -322,11 +329,11 @@ CONTAINS
     ! if ray is left-traveling, get the first receiver to the left of rA
     IF ( ray2D( 1 )%t( 1 ) < 0.0d0 .AND. ir > 1 ) ir = ir - 1  
 
-    ! sqrt( 2 * pi ) represents a sum of Gaussians in free space
+    ! sqrt( 2 * PI ) represents a sum of Gaussians in free space
     IF ( Beam%RunType( 4 : 4 ) == 'R' ) THEN
-       Ratio1 = SQRT( ABS( COS( alpha ) ) ) / SQRT( 2. * pi )   ! point source
+       Ratio1 = SQRT( ABS( COS( alpha ) ) ) / SQRT( 2. * PI )   ! point source
     ELSE
-       Ratio1 = 1 / SQRT( 2. * pi )                             ! line  source
+       Ratio1 = 1 / SQRT( 2. * PI )                             ! line  source
     END IF
 
     Stepping: DO iS = 2, Beam%Nsteps
@@ -351,7 +358,7 @@ CONTAINS
        q  = ray2D( iS - 1 )%q( 1 )
        IF ( q <= 0.0 .AND. qOld > 0.0 &
             .OR. q >= 0.0 .AND. qOld < 0.0 ) &
-        phase = phase + pi / 2.   ! phase shifts at caustics
+        phase = phase + PI / 2.   ! phase shifts at caustics
        qold = q
 
        ! calculate beam width
@@ -359,7 +366,7 @@ CONTAINS
        sigma     = MAX( ABS( ray2D( iS-1 )%q( 1 ) ), ABS( ray2D( iS )%q( 1 ) ) )&
            / q0 / ABS( rayt( 1 ) ) ! beam radius projected onto vertical line
        sigma     = MAX( sigma, &
-                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), pi * lambda ) )
+                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), PI * lambda ) )
        RadiusMax = BeamWindow * sigma
 
        ! depth limits of beam
@@ -395,7 +402,7 @@ CONTAINS
                 ! beam radius
                 sigma  = ABS( q / q0 )                                    
                 sigma  = MAX( sigma, &
-                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), pi * lambda ) ) 
+                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), PI * lambda ) ) 
 
                 IF ( n < BeamWindow * sigma ) THEN   ! Within beam window?
                    A        = ABS( q0 / q )
@@ -408,7 +415,7 @@ CONTAINS
                    phaseInt = ray2D( iS )%Phase + phase
                    IF ( q <= 0.0d0 .AND. qOld > 0.0d0 &
                         .OR. q >= 0.0d0 .AND. qOld < 0.0d0 ) &
-                    phaseInt = phase + pi / 2.  ! phase shifts at caustics
+                    phaseInt = phase + PI / 2.  ! phase shifts at caustics
 
                    CALL ApplyContribution( U( iz, ir ) )
                 END IF
@@ -450,7 +457,7 @@ CONTAINS
        U = U + CMPLX( Amp * EXP( -i * ( afreq * delay - phaseInt ) ) )
     CASE ( 'S', 'I' )                ! incoherent/semicoherent TL
        IF ( Beam%Type( 1:1 ) == 'B' ) THEN   ! Gaussian beam
-          U = U + SNGL( SQRT( 2. * pi ) &
+          U = U + SNGL( SQRT( 2. * PI ) &
                   * ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        ELSE
           U = U + SNGL( &
@@ -458,7 +465,7 @@ CONTAINS
        END IF
     CASE DEFAULT                ! incoherent/semicoherent TL
        IF ( Beam%Type( 1:1 ) == 'B' ) THEN   ! Gaussian beam
-          U = U + SNGL( SQRT( 2. * pi ) &
+          U = U + SNGL( SQRT( 2. * PI ) &
                   * ( Amp * EXP( AIMAG( afreq * delay ) ) )**2 )
        ELSE
           U = U + SNGL( &
@@ -485,7 +492,7 @@ CONTAINS
     qOld   = 1.0
     BETA   = 0.98  ! Beam Factor
     A      = -4.0 * LOG( BETA ) / Dalpha**2
-    CN     = Dalpha * SQRT( A / pi )
+    CN     = Dalpha * SQRT( A / PI )
     rA     = ray2D( 1 )%x( 1 )
     ir     = 1
 
@@ -497,7 +504,7 @@ CONTAINS
        q  = ray2D( iS - 1 )%q( 1 )
        IF ( q < 0.0d0 .AND. qOld >= 0.0d0 &
             .OR. q > 0.0d0 .AND. qOld <= 0.0d0 ) &
-        phase = phase + pi / 2.
+        phase = phase + PI / 2.
        qold = q
 
        RcvrRanges: DO WHILE ( ABS( rB - rA ) > 1.0D3 * SPACING( rA ) &
@@ -514,7 +521,7 @@ CONTAINS
 
           IF ( q < 0.0d0 .AND. qOld >= 0.0d0 &
                .OR. q > 0.0d0 .AND. qOld <= 0.0d0 ) &
-            phase = phase + pi / 2. ! phase shifts at caustics
+            phase = phase + PI / 2. ! phase shifts at caustics
 
           RcvrDepths: DO iz = 1, NRz_per_range
              deltaz =  Pos%Rz( iz ) - x( 2 )   ! ray to rcvr distance
@@ -579,7 +586,7 @@ CONTAINS
     ! scale and/or incorporate cylindrical spreading
     Ranges: DO ir = 1, Nr
        IF ( RunType( 4 : 4 ) == 'X' ) THEN   ! line source
-          factor = -4.0 * SQRT( pi ) * const
+          factor = -4.0 * SQRT( PI ) * const
        ELSE                                  ! point source
           IF ( r ( ir ) == 0 ) THEN
              factor = 0.0D0         ! avoid /0 at origin, return pressure = 0
