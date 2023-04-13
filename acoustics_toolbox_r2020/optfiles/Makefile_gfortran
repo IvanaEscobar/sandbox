@@ -6,7 +6,7 @@ export FFLAGS= -march=native -Bstatic -Waliasing -Wampersand -Wsurprising -Wintr
 FFLAGS+= -frecursive
 
 # MITgcm on Mac:
-#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftre    e-vectorize
+#FFLAGS+= -fconvert=big-endian -fallow-argument-mismatch -Wunused -Wuninitialized -ftree-vectorize
 # MITgcm on Sverdrup
 FFLAGS+= -fconvert=big-endian -Wunused -Wuninitialized -ftree-vectorize
 F90FLAGS=${FFLAGS}
