@@ -663,6 +663,20 @@ CONTAINS
           WRITE( ARRFile, * ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
        END IF
 
+       OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
+              FORM = 'FORMATTED' )
+       WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( RAYFile, * ) freq
+       WRITE( RAYFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( RAYFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( RAYFile, * ) Bdry%Top%HS%Depth
+       WRITE( RAYFile, * ) Bdry%Bot%HS%Depth
+
+       IF ( ThreeD ) THEN
+          WRITE( RAYFile, * ) '''xyz'''
+       ELSE
+          WRITE( RAYFile, * ) '''rz'''
+       END IF
     CASE ( 'a' )        ! arrival file in binary format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
               FORM = 'UNFORMATTED' )

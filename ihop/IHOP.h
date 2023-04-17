@@ -28,7 +28,7 @@
 !C-- COMMON /IHOP_PARAMS_C/ IHOP Character-type parameters
 !C   IHOP_fileroot :: File name for reading in an environment
 
-      CHARACTER*(MAX_LEN_FNAM) IHOP_fileroot
+      CHARACTER*(100) IHOP_fileroot
 
       COMMON /IHOP_PARAMS_C/                                                                                                             &
      &      IHOP_fileroot

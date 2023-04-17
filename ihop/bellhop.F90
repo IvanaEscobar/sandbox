@@ -372,7 +372,7 @@ SUBROUTINE BellhopCore
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            ! Write the ray trajectory to RAYFile
-           IF ( Beam%RunType( 1 : 1 ) == 'R' ) THEN   
+           IF ( Beam%RunType(1:1) == 'R' .OR. Beam%RunType(1:1) == 'A') THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
            ELSE ! Compute the contribution to the field
               SELECT CASE ( Beam%Type( 1 : 1 ) )
