@@ -1,11 +1,17 @@
-!#define _RL90 8
-!C CPP options file for IHOP
-!C Use this file for selecting options within package "Ihop"
-
 #ifndef IHOP_OPTIONS_H
 #define IHOP_OPTIONS_H
 #include "PACKAGES_CONFIG.h"
 #include "CPP_OPTIONS.h"
+
+!BOP
+! !ROUTINE: IHOP_OPTINOS.h
+! !INTERFACE:
+! #include "IHOP_OPTIONS.h"
+
+! !DESCRIPTION:
+! CPP options file for IHOP package:
+! Use this file for selecting options within package "ihop"
+!EOP
 
 #ifdef ALLOW_IHOP
 !C Place CPP define/undef flag here

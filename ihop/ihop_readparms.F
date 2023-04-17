@@ -32,7 +32,8 @@ C     iUnit      :: Work variable for IO unit number
       INTEGER iUnit
 
       NAMELIST /IHOP_PARM01/
-     &      IHOP_bellOn
+     &      IHOP_bellOn,
+     &      IHOP_fileroot
 C     &      IHOP_MNC
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
@@ -51,6 +52,7 @@ C     print a (weak) warning if data.ihop is found
 
 C--   Default values for IHOP
       IHOP_bellOn   =.TRUE.
+      IHOP_fileroot = ' '
 
 C     Open and read data.ihop file
       WRITE(msgBuf,'(A)') 'IHOP_READPARMS: opening data.ihop'

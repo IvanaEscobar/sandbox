@@ -6,10 +6,16 @@ MODULE arrmod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: pi, RadDeg, ARRFile
+  USE iHopParams,   only: RadDeg, ARRFile
 
-  ! Variables for arrival information
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -33,7 +39,7 @@ MODULE arrmod
   TYPE(Arrival), ALLOCATABLE :: Arr( :, :, : ), Arr3D( :, :, :, : )
 
 CONTAINS
-  SUBROUTINE AddArr( omega, iz, ir, Amp, Phase, delay, SrcDeclAngle, &
+  SUBROUTINE AddArr( afreq, iz, ir, Amp, Phase, delay, SrcDeclAngle, &
                      RcvrDeclAngle, NumTopBnc, NumBotBnc )
 
     ! ADDs the amplitude and delay for an ARRival into a matrix of same.
@@ -42,7 +48,7 @@ CONTAINS
     ! arrivals with essentially the same phase are grouped into one
     REAL,      PARAMETER               :: PhaseTol = 0.05 
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, iz, ir
-    REAL    (KIND=_RL90), INTENT( IN ) :: omega, Amp, Phase, SrcDeclAngle, &
+    REAL    (KIND=_RL90), INTENT( IN ) :: afreq, Amp, Phase, SrcDeclAngle, &
                                           RcvrDeclAngle
     COMPLEX (KIND=_RL90), INTENT( IN ) :: delay
     LOGICAL              :: NewRay
@@ -59,7 +65,7 @@ CONTAINS
     ! direct paths are not joined)
 
     IF ( Nt >= 1 ) THEN
-       IF ( omega * ABS( delay - Arr( iz, ir, Nt )%delay ) < PhaseTol .AND. &
+       IF ( afreq * ABS( delay - Arr( iz, ir, Nt )%delay ) < PhaseTol .AND. &
            ABS( Arr( iz, ir, Nt )%phase - Phase ) < PhaseTol ) NewRay = .FALSE.
     END IF
 
@@ -122,7 +128,7 @@ CONTAINS
     DO iz = 1, Nrz
        DO ir = 1, Nr
           IF ( SourceType == 'X' ) THEN   ! line source
-             factor =  4.0 * SQRT( pi )
+             factor =  4.0 * SQRT( PI )
           ELSE                            ! point source: default
              IF ( r ( ir ) == 0 ) THEN
                 factor = 1e5                   ! avoid /0 at origin
@@ -170,7 +176,7 @@ CONTAINS
     DO iz = 1, Nrz
        DO ir = 1, Nr
           IF ( SourceType == 'X' ) THEN   ! line source
-             factor = 4.0 * SQRT( pi )
+             factor = 4.0 * SQRT( PI )
           ELSE                            ! point source
              IF ( r ( ir ) == 0 ) THEN
                 factor = 1e5                   ! avoid /0 at origin

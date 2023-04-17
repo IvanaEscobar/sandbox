@@ -8,15 +8,22 @@ MODULE readEnviHop
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE iHopParams,   only: pi, PRTFile, ENVFile, SSPFile, RAYFile, &
+  USE iHopParams,   only: PRTFile, ENVFile, SSPFile, RAYFile, &
                           ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
-  USE iHopMod
+  USE iHopMod,      only: freq, Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
   USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"i
+
   PRIVATE
 
 ! public interfaces
@@ -583,7 +590,7 @@ CONTAINS
        ! the term vr / 1000 converts vr to units of m per ms 
        alphaR = vr * 1500.0
        ! loss parameter Sect. IV., Eq. (4) of handbook
-       alphaI = alpha2_f * ( vr / 1000 ) * 1500.0 * log( 10.0 ) / ( 40.0 * pi )
+       alphaI = alpha2_f * ( vr / 1000 ) * 1500.0 * log( 10.0 ) / ( 40.0 * PI )
 
        HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, 'L ', betaPowerLaw, ft )
        HS%cs  = 0.0

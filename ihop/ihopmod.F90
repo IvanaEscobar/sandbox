@@ -20,14 +20,14 @@ MODULE iHopMod
 ! public interfaces
 !=======================================================================
 
-    public Nrz_per_range, iStep, freq, omega, SrcDeclAngle, Title, &
+    public Nrz_per_range, iStep, freq, afreq, SrcDeclAngle, Title, &
            BeamStructure, Beam, &
            ray2D, ray2DPt
 
 !=======================================================================
 
   INTEGER            :: Nrz_per_range, iStep
-  REAL (KIND=_RL90)  :: freq, omega, SrcDeclAngle, SrcAzimAngle
+  REAL (KIND=_RL90)  :: freq, afreq, SrcDeclAngle, SrcAzimAngle
   CHARACTER (LEN=80) :: Title
 
   ! *** Beam structure ***

@@ -8,7 +8,7 @@ C !INTERFACE:
       SUBROUTINE IHOP_CHECK( myThid )
 
 C     !DESCRIPTION:
-C     Check dependances with other packages
+C     Check consistency with model configuration
 
 C     !USES:
       IMPLICIT NONE
@@ -26,12 +26,19 @@ CEOP
 C     !LOCAL VARIABLES:
 C     msgBuf   :: Informational/error message buffer
       CHARACTER*(MAX_LEN_MBUF) msgBuf
+      INTEGER errCount
+CEOP
 
       _BEGIN_MASTER(myThid)
 
        WRITE(msgBuf,'(A)') 'IHOP_CHECK: #define IHOP'
        CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                     SQUEEZE_RIGHT , 1)
+
+C- print out some key parameters :
+       CALL WRITE_0D_C( IHOP_fileroot, 0, INDEX_NONE,
+     &  'IHOP_fileroot=',
+     &  ' /* Name of file root */')
 
       _END_MASTER(myThid)
 

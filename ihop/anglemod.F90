@@ -6,13 +6,20 @@ MODULE angleMod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: pi, DegRad, ENVFile, PRTFile
+  USE iHopParams,   only: DegRad, ENVFile, PRTFile
   USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE srPositions,  only: Pos, Number_to_Echo
   USE sortMod,      only: Sort
 
-  IMPLICIT NONE
+! ! USES
+  implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -62,7 +69,7 @@ CONTAINS
           ! check which Depth is used here, in case where there is a variable 
           ! bathymetry
           d_theta_recommended = ATAN( Depth / ( 10.0 * Pos%Rr( Pos%NRr ) ) )
-          Angles%Nalpha = MAX( INT( pi / d_theta_recommended ), Angles%Nalpha )
+          Angles%Nalpha = MAX( INT( PI / d_theta_recommended ), Angles%Nalpha )
        END IF
     END IF
 

@@ -15,12 +15,17 @@ MODULE iHopParams
 !
 ! </DESCRIPTION>
 
-  ! SAVE
+! ! USES
   implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP.h"
+
   private
 
-   REAL (KIND=_RL90), PUBLIC, PARAMETER :: pi = 3.1415926535898D0, &
-                                           RadDeg = 180.0D0 / pi, &
+   REAL (KIND=_RL90), PUBLIC, PARAMETER :: RadDeg = 180.0D0 / pi, &
                                            DegRad = pi / 180.0D0, &
                                            zero = 0.0
    COMPLEX (KIND=_RL90), PUBLIC, PARAMETER :: i = ( 0.0D0, 1.0D0 )

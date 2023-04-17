@@ -6,7 +6,7 @@ export FFLAGS= -g -fPIC -W0 -WB -O3 -funroll-loops
 
 # MITgcm on Sverdrup
 FFLAGS+= -convert big_endian -align -traceback -ftz -fp-model precise \
-		 -assume byterecl -xCORE-AVX2 -ip
+		 -assume byterecl -xCORE-AVX2 -ip -no-wrap-margin
 F90FLAGS=${FFLAGS}
 
 # ______________________________________________________________________________

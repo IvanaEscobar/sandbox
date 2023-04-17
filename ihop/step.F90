@@ -6,7 +6,7 @@ MODULE step
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopMod
+  USE iHopMod,      only: freq, Beam, ray2DPt
   USE iHopParams,   only: RAYFile
   USE sspMod,       only: EvaluateSSP, SSP, iSegz, iSegr
 
