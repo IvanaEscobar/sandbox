@@ -14,20 +14,20 @@
 !EOP
 
 #ifdef ALLOW_IHOP
-!C Place CPP define/undef flag here
+! Place CPP define/undef flag here
 
-!C to reduce memory storage, disable unused array with those CPP flags :
+! to reduce memory storage, disable unused array with those CPP flags :
 #define IHOP_3D_STATE
 #define IHOP_2D_STATE
 #define IHOP_TENDENCY
 
-#undef IHOP_SPECIAL_COMPILE_OPTION1
+#undef IHOP_MULTIPLE_SOURCES
 
-#define IHOP_SPECIAL_COMPILE_OPTION2
+#undef IHOP_MULTIPLE_RECEIVERS
 
 #endif /* ALLOW_IHOP */
 #endif /* IHOP_OPTIONS_H */
 
-!CEH3 ;;; Local Variables: ***
-!CEH3 ;;; mode:fortran ***
-!CEH3 ;;; End: ***
+!EH3 ;;; Local Variables: ***
+!EH3 ;;; mode:fortran ***
+!EH3 ;;; End: ***
