@@ -30,18 +30,18 @@
 !-- COMMON /IHOP_PARAMS_C/ IHOP Character-type parameters:
 !   IHOP_fileroot   :: File name for reading in an environment
 !   IHOP_title      :: Title name for writing into output files 
-!   IHOP_sspopt     :: SSP interpolation, top boundary type
+!   IHOP_topopt     :: SSP interpolation, top boundary type
 !   IHOP_botopt     :: bottom boundary type
 !   IHOP_runopt     :: run type (R/E/A)
 
       CHARACTER*(100) IHOP_fileroot
       CHARACTER*(100) IHOP_title
-      CHARACTER*(3) IHOP_sspopt
+      CHARACTER*(6) IHOP_topopt
       CHARACTER*(2) IHOP_botopt
       CHARACTER*(1) IHOP_runopt
 
       COMMON /IHOP_PARAMS_C/                                                                                                             &
-     &      IHOP_fileroot, IHOP_title, IHOP_sspopt, IHOP_botopt, IHOP_runopt
+     &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt
 
 !-- COMMON /IHOP_PARAMS_I/ IHOP Integer-type parameters:
 !   IHOP_nrays  :: No. of rays to propagate
@@ -57,21 +57,27 @@
      &      IHOP_nrays
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
-!   IHOP_freq   :: frequency (Hz)
-!   IHOP_depth  :: depth of bottom (m)
-!   IHOP_bcsound:: bottom sound speed (m/s) 
-!   IHOP_brho   :: bottom density (kg/m^3)
-!   IHOP_sd     :: source depth (m)
-!   IHOP_rd     :: receiver depth (m)
-!   IHOP_rr     :: receiver ranges (km)
-!   IHOP_alpha  :: bearing launch angles (degrees)
-!   IHOP_step   :: step length (m)
-!   IHOP_zbox   :: acoustic domain depth (m)
-!   IHOP_rbox   :: acoustic domain range (km)
+!   IHOP_freq           :: frequency (Hz)
+!   IHOP_depth          :: depth of bottom (m)
+!   IHOP_bcsound        :: bottom sound speed (m/s) 
+!   IHOP_bcsoundshear   :: shear bottom sound speed (m/s) 
+!   IHOP_bcsoundI       :: IMAG bottom sound speed (m/s) 
+!   IHOP_bcsoundshearI  :: IMAG shear bottom sound speed (m/s) 
+!   IHOP_brho           :: bottom density (kg/m^3)
+!   IHOP_sd             :: source depth (m)
+!   IHOP_rd             :: receiver depth (m)
+!   IHOP_rr             :: receiver ranges (km)
+!   IHOP_alpha          :: bearing launch angles (degrees)
+!   IHOP_step           :: step length (m)
+!   IHOP_zbox           :: acoustic domain depth (m)
+!   IHOP_rbox           :: acoustic domain range (km)
 
       _RL IHOP_freq
       _RL IHOP_depth
       _RL IHOP_bcsound
+      _RL IHOP_bcsoundshear 
+      _RL IHOP_bcsoundI
+      _RL IHOP_bcsoundshearI 
       _RL IHOP_brho
 #ifdef IHOP_MULTIPLE_SOURCES
       _RL IHOP_sd (1:nsd)
@@ -91,7 +97,8 @@
       _RL IHOP_rbox
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
-     &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_brho, IHOP_sd, IHOP_rd,                                                           &
+     &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
+     &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
      &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox
 
 

@@ -14,7 +14,17 @@ MODULE srPositions
   USE sortMod,      only: Sort
   USE iHopParams,   only: ENVFile, PRTFile
 
+! ! USES
   IMPLICIT NONE
+!  == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
+#include "IHOP_SIZE.h"
+#endif
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -97,7 +107,7 @@ CONTAINS
 
     LOGICAL, INTENT( IN ) :: ThreeD   ! flag indicating whether this is a 3D run
 
-    IF ( ThreeD ) THEN
+    IF ( ThreeD ) THEN ! IEsco23: NOT supported in ihop
        CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km' )
        CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km' )
     ELSE
@@ -180,7 +190,7 @@ CONTAINS
   !********************************************************************!
 
   SUBROUTINE ReadRcvrBearings   ! for 3D bellhop
-
+! IEsco23: NOT SUPPORTED IN ihop
     CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
         'degrees' )
 
@@ -212,10 +222,10 @@ CONTAINS
     ! Description is something like 'receiver ranges'
     ! Units       is something like 'km'
  
-    INTEGER,                        INTENT( OUT ) :: Nx
-    REAL (KIND=_RL90), ALLOCATABLE, INTENT( OUT ) :: x( : )
-    CHARACTER,                      INTENT( IN  ) :: Description*( * ), &
-                                                     Units*( * )
+    INTEGER,                        INTENT( IN ) :: Nx
+    REAL (KIND=_RL90), ALLOCATABLE, INTENT( INOUT ) :: x( : )
+    CHARACTER,                      INTENT( IN ) :: Description*( * ), &
+                                                    Units*( * )
     INTEGER :: ix
    
     WRITE( PRTFile, * )
@@ -223,7 +233,7 @@ CONTAINS
                         '________________________'
     WRITE( PRTFile, * )
 
-    READ(  ENVFile, * ) Nx
+    READ(  ENVFile, * )
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
     IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &

@@ -11,7 +11,7 @@ MODULE readEnviHop
   USE iHopParams,   only: PRTFile, ENVFile, SSPFile, RAYFile, &
                           ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
-  USE iHopMod,      only: freq, Title, Beam
+  USE iHopMod,      only: Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
   USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
@@ -22,7 +22,10 @@ MODULE readEnviHop
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#include "IHOP.h"i
+#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
+#include "IHOP_SIZE.h"
+#endif
+#include "IHOP.h"
 
   PRIVATE
 
@@ -47,10 +50,10 @@ CONTAINS
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
-    INTEGER            :: NPts, NMedia, iostat
+    INTEGER            :: NMedia, iostat
     REAL               :: ZMin, ZMax
     REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, &
-                          NOTUSED, Depth
+                          Depth
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
@@ -68,23 +71,26 @@ CONTAINS
 
     ! Prepend model name to title
     IF ( ThreeD ) THEN
-       Title( 1 : 11 ) = 'BELLHOP3D- '
-       READ(  ENVFile, * ) Title( 12 : 80 )
+       Title( 1 :11 ) = 'BELLHOP3D- '
+       Title( 12:80 ) = IHOP_title
+       READ(  ENVFile, * ) 
     ELSE
-       Title( 1 :  9 ) = 'BELLHOP- '
-       READ(  ENVFile, * ) Title( 10 : 80 )
+       Title( 1 : 9 ) = 'BELLHOP- '
+       Title( 10:80 ) = IHOP_title
+       READ(  ENVFile, * ) 
     END IF
 
     WRITE( PRTFile, * ) Title
 
-    READ(  ENVFile, *    ) freq
-    WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) freq
+    READ(  ENVFile, *    ) 
+    WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 
     READ(  ENVFile, * ) NMedia
     WRITE( PRTFile, * ) 'Dummy parameter NMedia = ', NMedia
     IF ( NMedia /= 1 ) CALL ERROUT( 'READENV', &
          'Only one medium or layer is allowed in BELLHOP; sediment layers must be handled using a reflection coefficient' )
 
+    Bdry%Top%HS%Opt = IHOP_topopt
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
 
     ! *** Top BC ***
@@ -92,12 +98,12 @@ CONTAINS
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
         "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
 
-    CALL TopBot( freq, AttenUnit, Bdry%Top%HS )
+    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS )
 
     ! ****** Read in ocean SSP data ******
 
-    ! NPts and NOTUSED not used by BELLHOP
-    READ(  ENVFile, * ) NPts, NOTUSED, Bdry%Bot%HS%Depth
+    READ(  ENVFile, * ) 
+    Bdry%bot%HS%Depth = IHOP_depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
@@ -110,7 +116,7 @@ CONTAINS
        SSP%z( 2 ) = Bdry%Bot%HS%Depth
     ELSE
        x = [ 0.0D0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
-       CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, freq, 'INI' )
+       CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI' )
     ENDIF
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from 
@@ -118,22 +124,22 @@ CONTAINS
 
     ! *** Bottom BC ***
     ! bottom depth should perhaps be set the same way?
-    Bdry%Bot%HS%Opt = '  '   ! initialize to blanks
-    READ(  ENVFile, * ) Bdry%Bot%HS%Opt, NOTUSED
+    Bdry%Bot%HS%Opt = '  '   ! initialize to 2 blanks
+    READ(  ENVFile, * ) 
+    Bdry%Bot%HS%Opt = IHOP_botopt 
     WRITE( PRTFile, * )
-    !WRITE( PRTFile, FMT = "(33X, '( RMS roughness = ', G10.3, ' )' )" ) NOTUSED
     WRITE( PRTFile, * ) 'Bottom options: ', Bdry%Bot%HS%Opt
 
     SELECT CASE ( Bdry%Bot%HS%Opt( 2 : 2 ) )
     CASE ( '~', '*' )
        WRITE( PRTFile, * ) '    Bathymetry file selected'
-    CASE( '-', '_', ' ' )
+    CASE( ' ' )
     CASE DEFAULT
        CALL ERROUT( 'READENV', 'Unknown bottom option letter in second position' )
     END SELECT
 
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
-    CALL TopBot( freq, AttenUnit, Bdry%Bot%HS )
+    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS )
 
     ! *** source and receiver locations ***
 
@@ -141,15 +147,22 @@ CONTAINS
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
 
+    Pos%NSz = IHOP_nsd
+    Pos%NRz = IHOP_nrd
+!    Pos%Sz(1:1)  = IHOP_sd
+!    Pos%Rz(1:1)  = IHOP_rd
+
+    WRITE (PRTFile, *) "ESCOBAR DEBUG"
+    WRITE (PRTFile, *) Pos%Sz, Pos%Rz
     CALL ReadSzRz( ZMin, ZMax )
     CALL ReadRcvrRanges
     IF ( ThreeD ) CALL ReadRcvrBearings
-    CALL ReadfreqVec( freq,  Bdry%Top%HS%Opt( 6:6 ) )
+    CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ) )
     CALL ReadRunType( Beam%RunType, PlotType )
 
     Depth = Zmax - Zmin   ! water depth
-    CALL ReadRayElevationAngles( freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
-    IF ( ThreeD ) CALL ReadRayBearingAngles( freq, Bdry%Top%HS%Opt, Beam%RunType )
+    CALL ReadRayElevationAngles( IHOP_freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
+    IF ( ThreeD ) CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType )
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) '___________________________________________________', &
@@ -165,7 +178,7 @@ CONTAINS
        ! Automatic step size selection
        IF ( Beam%deltas == 0.0 ) Beam%deltas = &
            ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
-       ! WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) freq
+       ! WRITE( PRTFile, '('' IHOP_frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 
        WRITE( PRTFile, * )
        WRITE( PRTFile, & 
@@ -295,7 +308,8 @@ CONTAINS
     INTEGER            :: iostat
 
     TopOpt = '      '   ! initialize to 6 blank spaces
-    READ(  ENVFile, * ) TopOpt
+    TopOpt = IHOP_topopt
+    READ(  ENVFile, * ) 
     WRITE( PRTFile, * )
 
     SSP%Type  = TopOpt( 1 : 1 )
@@ -316,14 +330,6 @@ CONTAINS
        WRITE( PRTFile, * ) '    Spline approximation to SSP'
     CASE ( 'Q' )
        WRITE( PRTFile, * ) '    Quad approximation to SSP'
-       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, &
-           FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
-       IF ( IOSTAT /= 0 ) THEN   ! successful open?
-          WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
-          CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
-       END IF
-    CASE ( 'H' )
-       WRITE( PRTFile, * ) '    Hexahedral approximation to SSP'
        OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, &
            FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
        IF ( IOSTAT /= 0 ) THEN   ! successful open?
@@ -533,8 +539,14 @@ CONTAINS
 
     SELECT CASE ( HS%BC )
     CASE ( 'A' )                  ! *** Half-space properties ***
-       zTemp = 0.0
-       READ(  ENVFile, *    ) zTemp, alphaR, betaR, rhoR, alphaI, betaI
+       READ(  ENVFile, *    ) 
+       ! IEsco23: MISSING IF BOTTOM BC CHECK
+       zTemp    = IHOP_depth
+       alphaR   = IHOP_bcsound
+       betaR    = IHOP_bcsoundshear
+       rhoR     = IHOP_brho
+       alphaI   = IHOP_bcsoundI
+       betaI    = IHOP_bcsoundshearI
        WRITE( PRTFile, FMT = "( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
             zTemp, alphaR, betaR, rhoR, alphaI, betaI
        ! dummy parameters for a layer with a general power law for attenuation
@@ -621,7 +633,7 @@ CONTAINS
        OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
               FORM = 'FORMATTED' )
        WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
-       WRITE( RAYFile, * ) freq
+       WRITE( RAYFile, * ) IHOP_freq
        WRITE( RAYFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
        WRITE( RAYFile, * ) Angles%Nalpha, Angles%Nbeta
        WRITE( RAYFile, * ) Bdry%Top%HS%Depth
@@ -643,7 +655,7 @@ CONTAINS
           WRITE( ARRFile, * ) '''2D'''
        END IF
 
-       WRITE( ARRFile, * ) freq
+       WRITE( ARRFile, * ) IHOP_freq
 
        ! write source locations
 
@@ -666,7 +678,7 @@ CONTAINS
        OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
               FORM = 'FORMATTED' )
        WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
-       WRITE( RAYFile, * ) freq
+       WRITE( RAYFile, * ) IHOP_freq
        WRITE( RAYFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
        WRITE( RAYFile, * ) Angles%Nalpha, Angles%Nbeta
        WRITE( RAYFile, * ) Bdry%Top%HS%Depth
@@ -687,7 +699,7 @@ CONTAINS
           WRITE( ARRFile ) '''2D'''
        END IF
 
-       WRITE( ARRFile    ) SNGL( freq )
+       WRITE( ARRFile    ) SNGL( IHOP_freq )
 
        ! write source locations
 
@@ -721,7 +733,7 @@ CONTAINS
           PlotType = 'rectilin  '
        END SELECT
 
-       CALL WriteSHDHeader( TRIM( FileRoot ) // '.shd', Title, REAL( freq ), &
+       CALL WriteSHDHeader( TRIM( FileRoot ) // '.shd', Title, REAL( IHOP_freq ), &
                          atten, PlotType )
     END SELECT
 
