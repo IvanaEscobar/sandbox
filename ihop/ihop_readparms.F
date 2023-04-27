@@ -106,9 +106,10 @@ C     Check paramters of IHOP_PARM01
        STOP 'ABNORMAL END: S/R IHOP READPARMS'
       ENDIF
       IF ( IHOP_title.EQ.'ihop' ) THEN
-       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_title" ',
-     &  'Using default title name'  
-       CALL PRINT_ERROR( msgBuf, myThid )
+       WRITE(msgBuf, '(2A)') '**WARNING** IHOP_READPARMS: "IHOP_title"',
+     &  ' using default title name'  
+       CALL PRINT_MESSAGE( msgBuf, errorMessageUnit,
+     &                     SQUEEZE_RIGHT, myThid )
       ENDIF
 
       _END_MASTER(myThid)
