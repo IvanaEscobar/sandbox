@@ -25,7 +25,7 @@ MODULE BELLHOP
   ! Systems Center
 
   
-  USE iHopMod       ! Added to get title, freq, Beam
+  USE iHopMod       ! Added to get Title, Beam
   USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
@@ -54,6 +54,9 @@ MODULE BELLHOP
 #include "GRID.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
+#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
+#include "IHOP_SIZE.h"
+#endif
 #include "IHOP.h"
 #ifdef ALLOW_CTRL
 # include "CTRL_FIELDS.h"
@@ -88,7 +91,7 @@ SUBROUTINE IHOP_INIT ( myThid )
   IF ( Inline ) THEN
      ! NPts, Sigma not used by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'
-     freq  = 250
+     IHOP_freq  = 250
      ! NMedia variable is not used by BELLHOP
 
      ! *** Boundary information (type of boundary condition and, if a 
@@ -100,9 +103,9 @@ SUBROUTINE IHOP_INIT ( myThid )
      Bdry%Bot%HS%Depth = 100
      Bdry%Bot%HS%Opt   = 'A_'
      Bdry%Bot%HS%BC    = 'A'
-     Bdry%Bot%HS%cp    = CRCI( 1D20, 1590D0,    0.5D0, freq, freq, AttenUnit, &
+     Bdry%Bot%HS%cp    = CRCI( 1D20, 1590D0,    0.5D0, IHOP_freq, IHOP_freq, AttenUnit, &
                                betaPowerLaw, fT )   ! compressional wave speed
-     Bdry%Bot%HS%cs    = CRCI( 1D20,    0D0,      0D0, freq, freq, AttenUnit, &
+     Bdry%Bot%HS%cs    = CRCI( 1D20,    0D0,      0D0, IHOP_freq, IHOP_freq, AttenUnit, &
                                betaPowerLaw, fT )   ! shear wave speed
      Bdry%Bot%HS%rho   = 1.2                        ! density
 
@@ -229,7 +232,7 @@ SUBROUTINE BellhopCore
                           c, cimag, gradc( 2 ), crr, crz, czz, rho
   COMPLEX, ALLOCATABLE :: U( :, : )
 
-  afreq = 2.0 * PI * freq
+  afreq = 2.0 * PI * IHOP_freq
 
   Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
@@ -245,10 +248,10 @@ SUBROUTINE BellhopCore
   IF ( atiType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NatiPts
         Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, &
-                                  Top( iSeg )%HS%alphaI, freq, freq, 'W ', &
+                                  Top( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, 'W ', &
                                   betaPowerLaw, ft ) ! compressional wave speed
         Top( iSeg )%HS%cs = CRCI( 1D20, Top( iSeg )%HS%betaR,  &
-                                  Top( iSeg )%HS%betaI,  freq, freq, 'W ', &
+                                  Top( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, 'W ', &
                                   betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
@@ -256,10 +259,10 @@ SUBROUTINE BellhopCore
   IF ( btyType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NbtyPts
         Bot( iSeg )%HS%cp = CRCI( 1D20, Bot( iSeg )%HS%alphaR, &
-                                  Bot( iSeg )%HS%alphaI, freq, freq, 'W ', &
+                                  Bot( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, 'W ', &
                                   betaPowerLaw, ft ) ! compressional wave speed
         Bot( iSeg )%HS%cs = CRCI( 1D20, Bot( iSeg )%HS%betaR,  &
-                                  Bot( iSeg )%HS%betaI,  freq, freq, 'W ', &
+                                  Bot( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, 'W ', &
                                   betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
@@ -317,13 +320,13 @@ SUBROUTINE BellhopCore
         NArr = 0
      END SELECT
 
-     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
+     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB' )
 
      !!IESCO22: BEAM stuff !!
-     RadMax = 5 * c / freq  ! 5 wavelength max radius IEsco22: unused
+     RadMax = 5 * c / IHOP_freq  ! 5 wavelength max radius IEsco22: unused
      IF ( Beam%RunType( 1 : 1 ) == 'C' ) THEN ! for Coherent TL Run
      ! Are there enough rays?
-        DalphaOpt = SQRT( c / ( 6.0 * freq * Pos%Rr( Pos%NRr ) ) )
+        DalphaOpt = SQRT( c / ( 6.0 * IHOP_freq * Pos%Rr( Pos%NRr ) ) )
         NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) &
                              - Angles%alpha( 1 ) ) / DalphaOpt )
         IF ( Angles%Nalpha < NalphaOpt ) THEN
@@ -398,7 +401,7 @@ SUBROUTINE BellhopCore
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' )   ! TL calculation
         CALL ScalePressure( Angles%Dalpha, ray2D( 1 )%c, Pos%Rr, U, &
-                            NRz_per_range, Pos%NRr, Beam%RunType, freq )
+                            NRz_per_range, Pos%NRr, Beam%RunType, IHOP_freq )
         IRec = 10 + NRz_per_range * ( is - 1 )
         RcvrDepth: DO Irz1 = 1, NRz_per_range
            IRec = IRec + 1
@@ -438,7 +441,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Initial conditions (IC)
   iSmallStepCtr = 0
-  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, freq, 'TAB' )
+  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB' )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
@@ -691,7 +694,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
   ! Based on formulas given by Muller, Geoph. J. R.A.S., 79 (1984).
 
   ! Get c
-  CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, freq,& 
+  CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq,& 
                     'TAB' )
 
   ! unmodified unit ray tangent and normal

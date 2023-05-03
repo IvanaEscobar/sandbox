@@ -6,11 +6,25 @@ MODULE step
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopMod,      only: freq, Beam, ray2DPt
+  USE iHopMod,      only: Beam, ray2DPt
   USE iHopParams,   only: RAYFile
   USE sspMod,       only: EvaluateSSP, SSP, iSegz, iSegr
 
+! !USES:
   IMPLICIT NONE
+!   == Global variables ==
+#include "SIZE.h"
+#include "GRID.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
+#include "IHOP_SIZE.h"
+#endif
+#include "IHOP.h"
+#ifdef ALLOW_CTRL
+# include "CTRL_FIELDS.h"
+#endif
+
   PRIVATE
 
 ! public interfaces
@@ -48,7 +62,7 @@ CONTAINS
 
     ! *** Phase 1 (an Euler step)
 
-    CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, freq,&
+    CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, IHOP_freq,&
                       'TAB' )
 
     csq0      = c0 * c0
@@ -73,7 +87,7 @@ CONTAINS
 
     ! *** Phase 2 (update step size, and Polygon march forward) 
 
-    CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, freq,& 
+    CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, IHOP_freq,& 
                       'TAB' )
     csq1      = c1 * c1
     cnn1_csq1 = crr1*ray1%t( 2 )**2 - 2.0*crz1*ray1%t( 1 )*ray1%t( 2 ) &
@@ -110,7 +124,7 @@ CONTAINS
     ray2%NumBotBnc = ray0%NumBotBnc
 
     ! If we crossed an interface, apply linear jump condition
-    CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, freq,&
+    CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, IHOP_freq,&
                       'TAB' )
     ray2%c = c2
 

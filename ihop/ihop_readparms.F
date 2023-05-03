@@ -15,6 +15,7 @@ C     !USES:
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 #ifdef ALLOW_MNC
 #include "MNC_PARAMS.h"
@@ -32,9 +33,36 @@ C     iUnit      :: Work variable for IO unit number
       INTEGER iUnit
 
       NAMELIST /IHOP_PARM01/
-     &      IHOP_bellOn,
-     &      IHOP_fileroot
-C     &      IHOP_MNC
+     &      IHOP_fileroot,
+     &      IHOP_title,
+     &      IHOP_MNC
+
+      NAMELIST /IHOP_PARM02/
+     &      IHOP_topopt,
+     &      IHOP_botopt,
+     &      IHOP_runopt,
+#ifdef IHOP_MULTIPLE_SOURCES
+     &      IHOP_nsd,
+#endif
+#ifdef IHOP_MULTIPLE_RECEIVERS
+     &      IHOP_nrd,
+     &      IHOP_nrr,
+#endif
+     &      IHOP_nrays,
+     &      IHOP_freq,
+     &      IHOP_depth,
+     &      IHOP_bcsound,
+     &      IHOP_bcsoundshear,
+     &      IHOP_brho,
+     &      IHOP_bcsoundI,
+     &      IHOP_bcsoundshearI,
+     &      IHOP_sd,
+     &      IHOP_rd,
+     &      IHOP_rr,
+     &      IHOP_alpha,
+     &      IHOP_step,
+     &      IHOP_zbox,
+     &      IHOP_rbox
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
@@ -50,14 +78,17 @@ C     print a (weak) warning if data.ihop is found
 
       _BEGIN_MASTER(myThid)
 
-C--   Default values for IHOP
-      IHOP_bellOn   =.TRUE.
-      IHOP_fileroot = ' '
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C--   Default values for IHOP_PARM01
+      IHOP_fileroot = ''
+      IHOP_title    = 'ihop'
+      IHOP_MNC      = .false.
 
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C     Open and read data.ihop file
       WRITE(msgBuf,'(A)') 'IHOP_READPARMS: opening data.ihop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
-     &                    SQUEEZE_RIGHT , myThid)
+     &                    SQUEEZE_RIGHT , myThid )
       CALL OPEN_COPY_DATA_FILE(
      I                     'data.ihop', 'IHOP_READPARMS',
      O                     iUnit,
@@ -66,10 +97,123 @@ C     Open and read data.ihop file
 C     Read parameters from open data file
       READ(UNIT=iUnit,NML=IHOP_PARM01)
       WRITE(msgBuf,'(A)')
-     &    'IHOP_READPARMS: finished reading data.ihop'
+     &    'IHOP_READPARMS: finished reading IHOP_PARM01 in data.ihop'
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
-     &    SQUEEZE_RIGHT , 1)
+     &                    SQUEEZE_RIGHT, myThid )
 
+C     Check paramters of IHOP_PARM01
+      IF ( IHOP_fileroot.EQ.'' ) THEN
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_fileroot" ',
+     &  'Provide fileroot for ihop package'  
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+      IF ( IHOP_title.EQ.'ihop' ) THEN
+       WRITE(msgBuf, '(2A)') '**WARNING** IHOP_READPARMS: "IHOP_title"',
+     &  ' using default title name'  
+       CALL PRINT_MESSAGE( msgBuf, errorMessageUnit,
+     &                     SQUEEZE_RIGHT, myThid )
+      ENDIF
+
+      _END_MASTER(myThid)
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+      _BEGIN_MASTER(myThid)
+C--   Default values for IHOP_PARM02
+      IHOP_topopt   = '      '
+      IHOP_botopt   = '  '
+      IHOP_runopt   = ' '
+      IHOP_nsd      = 1
+      IHOP_nrd      = 1
+      IHOP_nrr      = 1
+      IHOP_nrays    = 1
+      IHOP_freq     = 0. _d 0
+      IHOP_depth    = 0. _d 0
+      IHOP_bcsound  = 0. _d 0
+      IHOP_brho     = 0. _d 0
+      IHOP_sd       = 0. _d 0
+      IHOP_rd       = 0. _d 0
+      IHOP_rr       = 0. _d 0
+      IHOP_alpha    = 0. _d 0
+      IHOP_step     = 0. _d 0
+      IHOP_zbox     = 0. _d 0
+      IHOP_rbox     = 0. _d 0
+      IHOP_bcsoundI         = 0. _d 0
+      IHOP_bcsoundshearI    = 0. _d 0
+      IHOP_bcsoundshear     = 0. _d 0
+
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C     Read parameters from open data file
+      READ(UNIT=iUnit,NML=IHOP_PARM02)
+      WRITE(msgBuf,'(A)')
+     &    'IHOP_READPARMS: finished reading IHOP_PARM02 in data.ihop'
+      CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
+     &                    SQUEEZE_RIGHT, myThid )
+
+C     Check paramters of IHOP_PARM02
+      IF ( IHOP_topopt(1:1) .NE. 'N' .AND.
+     &     IHOP_topopt(1:1) .NE. 'C' .AND.
+     &     IHOP_topopt(1:1) .NE. 'P' .AND.
+     &     IHOP_topopt(1:1) .NE. 'S' .AND.
+     &     IHOP_topopt(1:1) .NE. 'Q' .AND.
+     &     IHOP_topopt(1:1) .NE. 'A'      ) THEN
+
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_topopt(1:1)" ',
+     &  'unknown option for SSP approximation' 
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+
+      IF ( IHOP_topopt(2:2) .NE. 'V' .AND.
+     &     IHOP_topopt(2:2) .NE. 'R' .AND.
+     &     IHOP_topopt(2:2) .NE. 'A' .AND.
+     &     IHOP_topopt(2:2) .NE. 'G' .AND.
+     &     IHOP_topopt(2:2) .NE. 'F' .AND.
+     &     IHOP_topopt(2:2) .NE. 'W' .AND.
+     &     IHOP_topopt(2:2) .NE. 'P'      ) THEN
+
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_topopt(2:2)" ',
+     &  'unknown top boundary condition type' 
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+
+      IF ( IHOP_topopt(3:3) .NE. 'N' .AND.
+     &     IHOP_topopt(3:3) .NE. 'F' .AND.
+     &     IHOP_topopt(3:3) .NE. 'M' .AND.
+     &     IHOP_topopt(3:3) .NE. 'W' .AND.
+     &     IHOP_topopt(3:3) .NE. 'Q' .AND.
+     &     IHOP_topopt(3:3) .NE. 'L'      ) THEN
+
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_topopt(3:3)" ',
+     &  'unknown attenuation units'
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+
+      IF ( IHOP_botopt(1:1) .NE. 'V' .AND.
+     &     IHOP_botopt(1:1) .NE. 'R' .AND.
+     &     IHOP_botopt(1:1) .NE. 'A' .AND.
+     &     IHOP_botopt(1:1) .NE. 'G' .AND.
+     &     IHOP_botopt(1:1) .NE. 'F' .AND.
+     &     IHOP_botopt(1:1) .NE. 'W' .AND.
+     &     IHOP_botopt(1:1) .NE. 'P'      ) THEN
+
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_botopt(1:1)" ',
+     &  'unknown bottom boundary condition type' 
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+
+      IF ( IHOP_botopt(2:2) .NE. ' ' .AND.
+     &     IHOP_botopt(2:2) .NE. '*' .AND.
+     &     IHOP_botopt(2:2) .NE. '~'      ) THEN
+
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_botopt(2:2)" ',
+     &  'either select or deselect bathymetry file' 
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C     Close the open data file
 #ifdef SINGLE_DISK_IO
       CLOSE(iUnit)

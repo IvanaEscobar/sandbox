@@ -111,7 +111,7 @@ CONTAINS
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       CALL ERROUT( 'EvaluateSSP', 'Invalid profile option' )
+       CALL ERROUT( 'EvaluateSSP', 'Invalid SSP profile option' )
     END SELECT
 
   END SUBROUTINE EvaluateSSP
@@ -520,7 +520,7 @@ CONTAINS
 
     USE attenMod, only: CRCI
 
-    REAL (KIND=_RL90), INTENT(IN) :: freq, Depth
+    REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'

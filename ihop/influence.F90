@@ -10,11 +10,11 @@ MODULE influence
   ! complex pressure
   ! mbp 12/2018, based on much older subroutines
 
-  USE iHopMod       ! added to get BeamStructure: Beam
+  USE iHopMod,      only: Beam, ray2D, SrcDeclAngle, NRz_per_range, afreq
   USE iHopParams,   only: i, RadDeg, PRTFile, MaxN
   USE srPositions,  only: Pos
 ! sspMod used to construct image beams in the Cerveny style beam routines
-  USE SSPMod,       only: EvaluateSSP, Bdry 
+  USE SSPMod,       only: Bdry 
   USE arrMod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
   USE writeRay,     only: WriteRay2D
 
@@ -362,11 +362,11 @@ CONTAINS
        qold = q
 
        ! calculate beam width
-       lambda    = ray2D( iS - 1 )%c / freq
+       lambda    = ray2D( iS - 1 )%c / IHOP_freq
        sigma     = MAX( ABS( ray2D( iS-1 )%q( 1 ) ), ABS( ray2D( iS )%q( 1 ) ) )&
            / q0 / ABS( rayt( 1 ) ) ! beam radius projected onto vertical line
        sigma     = MAX( sigma, &
-                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), PI * lambda ) )
+                    MIN( 0.2 * IHOP_freq * REAL( ray2D( iS )%tau ), PI * lambda ) )
        RadiusMax = BeamWindow * sigma
 
        ! depth limits of beam
@@ -402,7 +402,7 @@ CONTAINS
                 ! beam radius
                 sigma  = ABS( q / q0 )                                    
                 sigma  = MAX( sigma, &
-                    MIN( 0.2 * freq * REAL( ray2D( iS )%tau ), PI * lambda ) ) 
+                    MIN( 0.2 * IHOP_freq * REAL( ray2D( iS )%tau ), PI * lambda ) ) 
 
                 IF ( n < BeamWindow * sigma ) THEN   ! Within beam window?
                    A        = ABS( q0 / q )
