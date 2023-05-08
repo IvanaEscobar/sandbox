@@ -18,6 +18,7 @@ MODULE angleMod
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 
   PRIVATE

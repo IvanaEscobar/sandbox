@@ -32,6 +32,7 @@ C     == Global variables ==
 C#include "SURFACE.h"
 #include "DYNVARS.h"
 #include "EOS.h"
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 
 C     !INPUT/OUTPUT PARAMETERS:

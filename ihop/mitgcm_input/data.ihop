@@ -7,7 +7,7 @@
  &
 
  &IHOP_PARM02
- IHOP_freq=551.0,
+ IHOP_freq=550.0,
  IHOP_topopt='QVF',
  IHOP_depth=1000.0,
  
@@ -15,13 +15,13 @@
  IHOP_bcsound=1650.0,
  IHOP_brho=1.80,
 
- IHOP_sd=73.1,
- IHOP_rd=300.1,
+ IHOP_sd=73.0,
+ IHOP_rd=300.0,
  IHOP_rr=11.724318,
 
  IHOP_runopt='A',
  IHOP_nrays=601,
- IHOP_alpha=-30.0 30.0,
+ IHOP_alpha=-30.0, 30.0,
  IHOP_step=10.0,
  
  IHOP_zbox=950.0,

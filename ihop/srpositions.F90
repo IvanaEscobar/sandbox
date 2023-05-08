@@ -20,9 +20,7 @@ MODULE srPositions
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
 #include "IHOP_SIZE.h"
-#endif
 #include "IHOP.h"
 
   PRIVATE
@@ -223,7 +221,7 @@ CONTAINS
     ! Units       is something like 'km'
  
     INTEGER,                        INTENT( IN ) :: Nx
-    REAL (KIND=_RL90), ALLOCATABLE, INTENT( INOUT ) :: x( : )
+    REAL (KIND=_RL90), INTENT( INOUT ) :: x( : )
     CHARACTER,                      INTENT( IN ) :: Description*( * ), &
                                                     Units*( * )
     INTEGER :: ix
@@ -234,22 +232,30 @@ CONTAINS
     WRITE( PRTFile, * )
 
     READ(  ENVFile, * )
+
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
     IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
                                 'must be positive'  )
 
-    IF ( ALLOCATED( x ) ) DEALLOCATE( x )
-    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
-                                        Description )
+    !IF ( .NOT. ALLOCATED( x ) ) THEN 
+    !    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
+    !    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
+    !                                        Description )
+    !END IF
 
+    WRITE (PRTFile, *) 'ESCOBAR: ', x
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
-    x( 3 ) = -999.9
-    READ( ENVFile, * ) x( 1 : Nx )
+    !x( 3 ) = -999.9
+    WRITE (PRTFile, *) 'ESCOBAR: ', x
+    !READ( ENVFile, * ) x( 1 : Nx )
+    READ( ENVFile, * )
+    WRITE (PRTFile, *) 'ESCOBAR: ', x
 
     CALL SubTab( x, Nx )
+    WRITE (PRTFile, *) 'ESCOBAR: ', x
     CALL Sort(   x, Nx )
+    WRITE (PRTFile, *) 'ESCOBAR: ', x
 
     WRITE( PRTFile, "( 5G14.6 )" ) ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
     IF ( Nx > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', x( Nx )

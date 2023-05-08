@@ -19,6 +19,7 @@ C#include "PARAMS.h"
 C#include "GRID.h"
 #include "SURFACE.h"
 #include "FFIELDS.h"
+C#include "IHOP_SIZE.h"
 C#include "IHOP.h"
 
 C !INPUT PARAMETERS: ===================================================

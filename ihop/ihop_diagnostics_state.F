@@ -15,6 +15,7 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "PARAMS.h"
 #ifdef ALLOW_IHOP
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 #endif
 

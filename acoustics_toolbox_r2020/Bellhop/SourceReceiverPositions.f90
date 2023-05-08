@@ -198,12 +198,18 @@ CONTAINS
     ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // Description )
 
+    WRITE(PRTFile, *) 'ESCOBAR: ', x
+
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
     x( 3 ) = -999.9
+    WRITE(PRTFile, *) 'ESCOBAR: ', x
     READ( ENVFile, * ) x( 1 : Nx )
 
+    WRITE(PRTFile, *) 'ESCOBAR: ', x
     CALL SubTab( x, Nx )
+    WRITE(PRTFile, *) 'ESCOBAR: ', x
     CALL Sort(   x, Nx )
+    WRITE(PRTFile, *) 'ESCOBAR: ', x
 
     WRITE( PRTFile, "( 5G14.6 )" ) ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
     IF ( Nx > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', x( Nx )

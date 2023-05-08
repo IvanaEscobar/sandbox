@@ -22,9 +22,7 @@ MODULE readEnviHop
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
 #include "IHOP_SIZE.h"
-#endif
 #include "IHOP.h"
 
   PRIVATE
@@ -50,7 +48,7 @@ CONTAINS
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
-    INTEGER            :: NMedia, iostat
+    INTEGER            :: NMedia, iostat, i
     REAL               :: ZMin, ZMax
     REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, &
                           Depth
@@ -149,13 +147,19 @@ CONTAINS
 
     Pos%NSz = IHOP_nsd
     Pos%NRz = IHOP_nrd
-!    Pos%Sz(1:1)  = IHOP_sd
-!    Pos%Rz(1:1)  = IHOP_rd
-
-    WRITE (PRTFile, *) "ESCOBAR DEBUG"
-    WRITE (PRTFile, *) Pos%Sz, Pos%Rz
+    IF ( ALLOCATED(Pos%Sz) ) DEALLOCATE(Pos%Sz)
+    ALLOCATE( Pos%Sz(MAX(3, Pos%NSz)) )
+    Pos%Sz(3) = -999.9
+    DO i=1,Pos%Nsz
+        Pos%Sz(i)  = IHOP_sd(i)
+    ENDDO
+    Pos%Rz  = IHOP_rd
     CALL ReadSzRz( ZMin, ZMax )
+
+    Pos%NRr = IHOP_nrr
+    Pos%Rr  = IHOP_rr
     CALL ReadRcvrRanges
+
     IF ( ThreeD ) CALL ReadRcvrBearings
     CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ) )
     CALL ReadRunType( Beam%RunType, PlotType )
@@ -826,6 +830,24 @@ CONTAINS
     ! Write the field to disk
 
     INTEGER, INTENT( IN )    :: NRz, NRr      ! # of receiver depths, ranges
+    COMPLEX, INTENT( IN )    :: P( NRz, NRr ) ! Pressure field
+    INTEGER, INTENT( INOUT ) :: iRec          ! last record read
+    INTEGER                  :: iRz
+
+    DO iRz = 1, NRz
+       iRec = iRec + 1
+       WRITE( SHDFile, REC = iRec ) P( iRz, : )
+    END DO
+
+  END SUBROUTINE WriteSHDField
+
+  !**********************************************************************!
+
+  SUBROUTINE AllocateSR( Nx, x_out, x_in )
+
+    ! Allocate and populate Pos structure from data.ihop
+
+    INTEGER, INTENT( IN )    :: Nx      ! # of receiver depths, ranges
     COMPLEX, INTENT( IN )    :: P( NRz, NRr ) ! Pressure field
     INTEGER, INTENT( INOUT ) :: iRec          ! last record read
     INTEGER                  :: iRz

@@ -15,6 +15,7 @@ C     !USES:
 #include "EEPARAMS.h"
 #include "SIZE.h"
 #include "PARAMS.h"
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 
 C     !INPUT/OUTPUT PARAMETERS:

@@ -79,18 +79,9 @@
       _RL IHOP_bcsoundI
       _RL IHOP_bcsoundshearI 
       _RL IHOP_brho
-#ifdef IHOP_MULTIPLE_SOURCES
-      _RL IHOP_sd (1:nsd)
-#else
-      _RL IHOP_sd
-#endif
-#ifdef IHOP_MULTIPLE_RECEIVERS
-      _RL IHOP_rd (1:nrd)
-      _RL IHOP_rr (1:nrr)
-#else
-      _RL IHOP_rd
-      _RL IHOP_rr
-#endif
+      _RL IHOP_sd (nsd)
+      _RL IHOP_rd (nrd)
+      _RL IHOP_rr (nrr)
       _RL IHOP_alpha (2)
       _RL IHOP_step
       _RL IHOP_zbox
