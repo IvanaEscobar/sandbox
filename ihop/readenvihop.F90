@@ -843,21 +843,20 @@ CONTAINS
 
   !**********************************************************************!
 
-  SUBROUTINE AllocateSR( Nx, x_out, x_in )
+  !SUBROUTINE AllocateSR( Nx, x_out, x_in )
 
-    ! Allocate and populate Pos structure from data.ihop
+  !  ! Allocate and populate Pos structure from data.ihop
 
-    INTEGER, INTENT( IN )    :: Nx      ! # of receiver depths, ranges
-    COMPLEX, INTENT( IN )    :: P( NRz, NRr ) ! Pressure field
-    INTEGER, INTENT( INOUT ) :: iRec          ! last record read
-    INTEGER                  :: iRz
+  !  INTEGER, INTENT( IN )    :: Nx      ! # of receiver depths, ranges
+  !  INTEGER, INTENT( INOUT ) :: iRec          ! last record read
+  !  INTEGER                  :: iRz
 
-    DO iRz = 1, NRz
-       iRec = iRec + 1
-       WRITE( SHDFile, REC = iRec ) P( iRz, : )
-    END DO
+  !  DO iRz = 1, NRz
+  !     iRec = iRec + 1
+  !     WRITE( SHDFile, REC = iRec ) P( iRz, : )
+  !  END DO
 
-  END SUBROUTINE WriteSHDField
+  !END SUBROUTINE AllocateSR
 
   !**********************************************************************!
 

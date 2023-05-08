@@ -47,7 +47,7 @@ CONTAINS
     ! Extra logic included to keep only the strongest arrivals.
     
     ! arrivals with essentially the same phase are grouped into one
-    REAL,      PARAMETER               :: PhaseTol = 0.05 
+    REAL,   PARAMETER                  :: PhaseTol = 0.05 
     INTEGER,              INTENT( IN ) :: NumTopBnc, NumBotBnc, iz, ir
     REAL    (KIND=_RL90), INTENT( IN ) :: afreq, Amp, Phase, SrcDeclAngle, &
                                           RcvrDeclAngle
