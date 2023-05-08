@@ -92,7 +92,7 @@ CONTAINS
     ! ASCII output file
 
     INTEGER,           INTENT( IN ) :: Nrd, Nr
-    REAL,              INTENT( IN ) :: r( Nr )
+    REAL(KIND=8),              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
 
@@ -138,7 +138,7 @@ CONTAINS
     ! Binary output file
 
     INTEGER,           INTENT( IN ) :: Nrd, Nr
-    REAL,              INTENT( IN ) :: r( Nr )
+    REAL(KIND=8),              INTENT( IN ) :: r( Nr )
     CHARACTER (LEN=1), INTENT( IN ) :: SourceType
     INTEGER           :: ir, id, iArr
 
