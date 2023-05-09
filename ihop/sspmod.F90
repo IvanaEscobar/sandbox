@@ -16,7 +16,7 @@ MODULE sspMod
 
   USE ihop_fatalError,   only: ERROUT
   USE splinec,      only: cspline, splineall
-  USE iHopParams,   only: PRTFile, ENVFile, SSPFile
+  USE iHopParams,   only: PRTFile, SSPFile
 
   IMPLICIT NONE
   PRIVATE
@@ -129,6 +129,8 @@ CONTAINS
                                         rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
+       ! *** Task 'INI' for initialization ***
+
        Depth = x( 2 )
        CALL ReadSSP( Depth, freq )
               
@@ -179,6 +181,8 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho ! sound speed and its derivatives
     
     IF ( Task == 'INI' ) THEN   ! read in SSP data
+       ! *** Task 'INI' for initialization ***
+
        Depth     = x( 2 )
        CALL ReadSSP( Depth, freq )
     ELSE                        ! return SSP info
@@ -223,6 +227,7 @@ CONTAINS
     COMPLEX (KIND=_RL90) :: c_cmplx
 
     IF ( Task == 'INI' ) THEN   ! read in SSP data
+       ! *** Task 'INI' for initialization ***
 
        Depth = x( 2 )
        CALL ReadSSP( Depth, freq )
@@ -287,9 +292,8 @@ CONTAINS
     COMPLEX  (KIND=_RL90)   :: c_cmplx, cz_cmplx, czz_cmplx
     
     IF ( Task == 'INI' ) THEN
-
-       ! *** Task 'INIT' for initialization ***
-
+       ! *** Task 'INI' for initialization ***
+       
        Depth     = x( 2 )
        CALL ReadSSP( Depth, freq )
 
@@ -531,7 +535,7 @@ CONTAINS
 
     DO iz = 1, MaxSSP !NOTE: hard coded
 
-       READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
+       !READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
            SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 

@@ -12,7 +12,7 @@ MODULE srPositions
   USE subTabulate,  only: SubTab
   USE monotonicMod, only: monotonic
   USE sortMod,      only: Sort
-  USE iHopParams,   only: ENVFile, PRTFile
+  USE iHopParams,   only: PRTFile
 
 ! ! USES
   IMPLICIT NONE
@@ -64,7 +64,7 @@ CONTAINS
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
-       READ( ENVFile, * ) Nfreq
+       !READ( ENVFile, * ) Nfreq
        WRITE( PRTFile, * ) '________________________________________________', &
                            '__________________________'
        WRITE( PRTFile, * )
@@ -82,7 +82,7 @@ CONTAINS
     IF ( BroadbandOption == 'B' ) THEN
        WRITE( PRTFile, * ) 'Frequencies (Hz)'
        freqVec( 3 ) = -999.9
-       READ(  ENVFile, * ) freqVec( 1 : Nfreq )
+       !READ(  ENVFile, * ) freqVec( 1 : Nfreq )
        CALL SubTab( freqVec, Nfreq )
 
        WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
@@ -230,9 +230,6 @@ CONTAINS
     WRITE( PRTFile, * ) '__________________________________________________', &
                         '________________________'
     WRITE( PRTFile, * )
-
-    READ(  ENVFile, * )
-
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
     IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
@@ -245,8 +242,6 @@ CONTAINS
     !END IF
 
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
-    !x( 3 ) = -999.9
-    READ( ENVFile, * )
 
     CALL SubTab( x, Nx )
     CALL Sort(   x, Nx )

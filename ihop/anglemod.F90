@@ -6,7 +6,7 @@ MODULE angleMod
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: DegRad, ENVFile, PRTFile
+  USE iHopParams,   only: DegRad, PRTFile
   USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE srPositions,  only: Pos, Number_to_Echo
@@ -51,10 +51,9 @@ CONTAINS
     REAL (KIND=_RL90)   :: d_theta_recommended
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN ! option to trace a single beam
-       READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha 
+       !READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha 
     ELSE
        Angles%Nalpha = IHOP_nalpha
-       READ( ENVFile, * ) !Angles%Nalpha
     END IF
 
     IF ( Angles%Nalpha == 0 ) THEN   ! automatically estimate Nalpha to use
@@ -81,7 +80,6 @@ CONTAINS
 
     Angles%alpha(1:2) = IHOP_alpha
     IF ( Angles%Nalpha > 2 ) Angles%alpha( 3 ) = -999.9
-    READ( ENVFile, * ) !Angles%alpha
 
     CALL SubTab( Angles%alpha, Angles%Nalpha )
     CALL Sort(   Angles%alpha, Angles%Nalpha )
@@ -128,9 +126,9 @@ CONTAINS
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
        ! option to trace a single beam
-       READ( ENVFile, * ) Angles%Nbeta, Angles%iSingle_beta 
+       !READ( ENVFile, * ) Angles%Nbeta, Angles%iSingle_beta 
     ELSE
-       READ( ENVFile, * ) Angles%Nbeta
+       !READ( ENVFile, * ) Angles%Nbeta
     END IF
 
     IF ( Angles%Nbeta == 0 ) THEN   ! automatically estimate Nbeta to use
@@ -147,7 +145,7 @@ CONTAINS
                         'Insufficient memory to store beam angles'  )
 
     IF ( Angles%Nbeta > 2 ) Angles%beta( 3 ) = -999.9
-    READ( ENVFile, * ) Angles%beta
+    !READ( ENVFile, * ) Angles%beta
 
     CALL SubTab( Angles%beta, Angles%Nbeta )
     CALL Sort(   Angles%beta, Angles%Nbeta )

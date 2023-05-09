@@ -8,7 +8,7 @@ MODULE readEnviHop
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE iHopParams,   only: PRTFile, ENVFile, SSPFile, RAYFile, &
+  USE iHopParams,   only: PRTFile, SSPFile, RAYFile, &
                           ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
   USE iHopMod,      only: Title, Beam
@@ -59,34 +59,27 @@ CONTAINS
     WRITE( PRTFile, * )
 
     ! Open the environmental file
-    OPEN( UNIT = ENVFile, FILE = TRIM( FileRoot ) // '.env', STATUS = 'OLD', &
-          IOSTAT = iostat, ACTION = 'READ' )
-    IF ( IOSTAT /= 0 ) THEN   ! successful open?
-       WRITE( PRTFile, * ) 'ENVFile = ', TRIM( FileRoot ) // '.env'
-       CALL ERROUT( 'READENV', &
-                    'Unable to open the environmental file' )
-    END IF
+    !OPEN( UNIT = ENVFile, FILE = TRIM( FileRoot ) // '.env', STATUS = 'OLD', &
+    !      IOSTAT = iostat, ACTION = 'READ' )
+    !IF ( IOSTAT /= 0 ) THEN   ! successful open?
+    !   WRITE( PRTFile, * ) 'ENVFile = ', TRIM( FileRoot ) // '.env'
+    !   CALL ERROUT( 'READENV', &
+    !                'Unable to open the environmental file' )
+    !END IF
 
     ! Prepend model name to title
     IF ( ThreeD ) THEN
+       CALL ERROUT( 'READENV', &
+                    '3D not supported in ihop' )
        Title( 1 :11 ) = 'BELLHOP3D- '
        Title( 12:80 ) = IHOP_title
-       READ(  ENVFile, * ) 
     ELSE
        Title( 1 : 9 ) = 'BELLHOP- '
        Title( 10:80 ) = IHOP_title
-       READ(  ENVFile, * ) 
     END IF
 
     WRITE( PRTFile, * ) Title
-
-    READ(  ENVFile, *    ) 
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
-
-    READ(  ENVFile, * ) NMedia
-    WRITE( PRTFile, * ) 'Dummy parameter NMedia = ', NMedia
-    IF ( NMedia /= 1 ) CALL ERROUT( 'READENV', &
-         'Only one medium or layer is allowed in BELLHOP; sediment layers must be handled using a reflection coefficient' )
 
     Bdry%Top%HS%Opt = IHOP_topopt
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
@@ -100,7 +93,6 @@ CONTAINS
 
     ! ****** Read in ocean SSP data ******
 
-    READ(  ENVFile, * ) 
     Bdry%bot%HS%Depth = IHOP_depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
@@ -122,8 +114,6 @@ CONTAINS
 
     ! *** Bottom BC ***
     ! bottom depth should perhaps be set the same way?
-    Bdry%Bot%HS%Opt = '  '   ! initialize to 2 blanks
-    READ(  ENVFile, * ) 
     Bdry%Bot%HS%Opt = IHOP_botopt 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Bottom options: ', Bdry%Bot%HS%Opt
@@ -175,7 +165,7 @@ CONTAINS
     IF ( ThreeD ) THEN
        CALL ERROUT( 'Readenvihop', &
                      '3D rays not supported in ihop') 
-       READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
+       !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
        Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
 
@@ -202,7 +192,6 @@ CONTAINS
        Beam%deltas = IHOP_step
        Beam%Box%z  = IHOP_zbox
        Beam%Box%r  = IHOP_rbox
-       READ(  ENVFile, * ) !Beam%deltas, Beam%Box%z, Beam%Box%r
        WRITE( PRTFile, * )
        IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
            Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
@@ -268,7 +257,7 @@ CONTAINS
        CASE ( 'G', 'g' , '^', 'B', 'b', 'S' )   
 ! Cerveny Gaussian Beams; read extra lines to specify the beam options
        CASE ( 'R', 'C' )   
-          READ(  ENVFile, * ) Beam%Type( 2 : 3 ), Beam%epsMultiplier, Beam%rLoop
+          !READ(  ENVFile, * ) Beam%Type( 2 : 3 ), Beam%epsMultiplier, Beam%rLoop
           WRITE( PRTFile, * )
           WRITE( PRTFile, * )
           WRITE( PRTFile, * ) 'Type of beam = ', Beam%Type( 1 : 1 )
@@ -288,7 +277,7 @@ CONTAINS
           WRITE( PRTFile, * ) 'Range for choosing beam width', Beam%rLoop
 
           ! Images, windows
-          READ(  ENVFile, * ) Beam%Nimage, Beam%iBeamWindow, Beam%Component
+          !READ(  ENVFile, * ) Beam%Nimage, Beam%iBeamWindow, Beam%Component
           WRITE( PRTFile, * )
           WRITE( PRTFile, * ) 'Number of images, Nimage  = ', Beam%Nimage
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
@@ -300,8 +289,6 @@ CONTAINS
     END IF
 
     WRITE( PRTFile, * )
-    CLOSE( ENVFile )
-
   END SUBROUTINE ReadEnvironment
 
   !**********************************************************************!
@@ -314,9 +301,7 @@ CONTAINS
     CHARACTER (LEN=80), INTENT( IN  ) :: FileRoot
     INTEGER            :: iostat
 
-    TopOpt = '      '   ! initialize to 6 blank spaces
     TopOpt = IHOP_topopt
-    READ(  ENVFile, * ) 
     WRITE( PRTFile, * )
 
     SSP%Type  = TopOpt( 1 : 1 )
@@ -375,18 +360,18 @@ CONTAINS
        WRITE( PRTFile, * ) '    THORP volume attenuation added'
     CASE ( 'F' )
        WRITE( PRTFile, * ) '    Francois-Garrison volume attenuation added'
-       READ(  ENVFile, * ) T, Salinity, pH, z_bar
+       !READ(  ENVFile, * ) T, Salinity, pH, z_bar
        WRITE( PRTFile, &
               "( ' T = ', G11.4, 'degrees   S = ', G11.4, ' psu   pH = ', G11.4, ' z_bar = ', G11.4, ' m' )" ) &
             T, Salinity, pH, z_bar
     CASE ( 'B' )
        WRITE( PRTFile, * ) '    Biological attenaution'
-       READ( ENVFile, *  ) NBioLayers
+       !READ( ENVFile, *  ) NBioLayers
        WRITE( PRTFile, * ) '      Number of Bio Layers = ', NBioLayers
 
        DO iBio = 1, NBioLayers
-          READ( ENVFile, *  ) bio( iBio )%Z1, bio( iBio )%Z2, bio( iBio )%f0, &
-                              bio( iBio )%Q, bio( iBio )%a0
+          !READ( ENVFile, *  ) bio( iBio )%Z1, bio( iBio )%Z2, bio( iBio )%f0, &
+          !                    bio( iBio )%Q, bio( iBio )%a0
           WRITE( PRTFile, * ) '      Top    of layer = ', bio( iBio )%Z1, ' m'
           WRITE( PRTFile, * ) '      Bottom of layer = ', bio( iBio )%Z2, ' m'
           WRITE( PRTFile, * ) '      Resonance frequency = ', bio( iBio )%f0, &
@@ -428,7 +413,6 @@ CONTAINS
     CHARACTER (LEN= 7), INTENT( INOUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
 
-    READ(  ENVFile, * ) 
     WRITE( PRTFile, * )
 
     SELECT CASE ( RunType( 1 : 1 ) )
@@ -546,7 +530,6 @@ CONTAINS
 
     SELECT CASE ( HS%BC )
     CASE ( 'A' )                  ! *** Half-space properties ***
-       READ(  ENVFile, *    ) 
        ! IEsco23: MISSING IF BOTTOM BC CHECK
        zTemp    = IHOP_depth
        alphaR   = IHOP_bcsound
@@ -573,7 +556,7 @@ CONTAINS
        ! The code is taken from older Matlab and is unnecesarily verbose
        ! vr   is the sound speed ratio
        ! rhor is the density ratio
-       READ(  ENVFile, *    ) zTemp, Mz
+       !READ(  ENVFile, *    ) zTemp, Mz
        WRITE( PRTFile, FMT = "( F10.2, 3X, F10.2 )" ) zTemp, Mz
 
        IF ( Mz >= -1 .AND. Mz < 1 ) THEN
