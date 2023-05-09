@@ -18,9 +18,9 @@ MODULE SourceReceiverPositions
                              NRz = 1, NRr = 1, Ntheta = 1    ! number of x, y, z, r, theta coordinates
      REAL                 :: Delta_r, Delta_theta
      INTEGER, ALLOCATABLE :: iSz( : ), iRz( : )
-     REAL,    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
-     REAL,    ALLOCATABLE :: Rr( : ), Rz( : ), ws( : ), wr( : ) ! Receiver r, z coordinates and weights for interpolation
-     REAL,    ALLOCATABLE :: theta( : )                         ! Receiver bearings
+     REAL(KIND=8),    ALLOCATABLE :: Sx( : ), Sy( : ), Sz( : )          ! Source x, y, z coordinates
+     REAL(KIND=8),    ALLOCATABLE :: Rr( : ), Rz( : ), ws( : ), wr( : ) ! Receiver r, z coordinates and weights for interpolation
+     REAL(KIND=8),    ALLOCATABLE :: theta( : )                         ! Receiver bearings
   END TYPE Position
 
   TYPE ( Position ) :: Pos ! structure containing source and receiver positions
@@ -181,7 +181,7 @@ CONTAINS
     ! Units       is something like 'km'
  
     INTEGER,   INTENT( OUT ) :: Nx
-    REAL,      ALLOCATABLE, INTENT( OUT ) :: x( : )
+    REAL(KIND=8),      ALLOCATABLE, INTENT( OUT ) :: x( : )
     CHARACTER, INTENT( IN  ) :: Description*( * ), Units*( * )
     INTEGER                  :: ix
    

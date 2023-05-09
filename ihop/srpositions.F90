@@ -12,7 +12,7 @@ MODULE srPositions
   USE subTabulate,  only: SubTab
   USE monotonicMod, only: monotonic
   USE sortMod,      only: Sort
-  USE iHopParams,   only: ENVFile, PRTFile
+  USE iHopParams,   only: PRTFile
 
 ! ! USES
   IMPLICIT NONE
@@ -20,9 +20,7 @@ MODULE srPositions
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
 #include "IHOP_SIZE.h"
-#endif
 #include "IHOP.h"
 
   PRIVATE
@@ -66,7 +64,7 @@ CONTAINS
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
-       READ( ENVFile, * ) Nfreq
+       !READ( ENVFile, * ) Nfreq
        WRITE( PRTFile, * ) '________________________________________________', &
                            '__________________________'
        WRITE( PRTFile, * )
@@ -84,7 +82,7 @@ CONTAINS
     IF ( BroadbandOption == 'B' ) THEN
        WRITE( PRTFile, * ) 'Frequencies (Hz)'
        freqVec( 3 ) = -999.9
-       READ(  ENVFile, * ) freqVec( 1 : Nfreq )
+       !READ(  ENVFile, * ) freqVec( 1 : Nfreq )
        CALL SubTab( freqVec, Nfreq )
 
        WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
@@ -223,7 +221,7 @@ CONTAINS
     ! Units       is something like 'km'
  
     INTEGER,                        INTENT( IN ) :: Nx
-    REAL (KIND=_RL90), ALLOCATABLE, INTENT( INOUT ) :: x( : )
+    REAL (KIND=_RL90), INTENT( INOUT ) :: x( : )
     CHARACTER,                      INTENT( IN ) :: Description*( * ), &
                                                     Units*( * )
     INTEGER :: ix
@@ -232,21 +230,18 @@ CONTAINS
     WRITE( PRTFile, * ) '__________________________________________________', &
                         '________________________'
     WRITE( PRTFile, * )
-
-    READ(  ENVFile, * )
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
     IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
                                 'must be positive'  )
 
-    IF ( ALLOCATED( x ) ) DEALLOCATE( x )
-    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
-                                        Description )
+    !IF ( .NOT. ALLOCATED( x ) ) THEN 
+    !    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
+    !    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
+    !                                        Description )
+    !END IF
 
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
-    x( 3 ) = -999.9
-    READ( ENVFile, * ) x( 1 : Nx )
 
     CALL SubTab( x, Nx )
     CALL Sort(   x, Nx )

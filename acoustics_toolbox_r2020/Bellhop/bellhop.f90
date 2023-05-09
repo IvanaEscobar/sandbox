@@ -155,7 +155,7 @@ SUBROUTINE BellhopCore
   INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, NalphaOpt, iSeg
   REAL                 :: Tstart, Tstop
   REAL        (KIND=8) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
-                          c, cimag, gradc( 2 ), crr, crz, czz, rho
+                          c, cimag, gradc( 2 ), crr, crz, czz, rho, zeero
   COMPLEX, ALLOCATABLE :: U( :, : )
   COMPLEX     (KIND=8) :: epsilon
 
@@ -241,8 +241,9 @@ SUBROUTINE BellhopCore
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !         begin solve         !
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  zeero = 0.0
   SourceDepth: DO is = 1, Pos%NSz
-     xs = [ 0.0, Pos%sz( is ) ]   ! source coordinate
+     xs = [ zeero, Pos%sz( is ) ]   ! source coordinate
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' ) ! TL calculation, zero out pressure matrix

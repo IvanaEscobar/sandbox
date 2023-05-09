@@ -762,7 +762,7 @@ CONTAINS
 
     REAL,              PARAMETER       :: pi = 3.14159265
     INTEGER,           INTENT( IN    ) :: NRz, Nr
-    REAL,              INTENT( IN    ) :: r( Nr )         ! ranges
+    REAL(KIND=8),              INTENT( IN    ) :: r( Nr )         ! ranges
     REAL     (KIND=8), INTENT( IN    ) :: Dalpha, freq, c ! angular spacing between rays, source frequency, nominal sound speed
     COMPLEX,           INTENT( INOUT ) :: U( NRz, Nr )    ! Pressure field
     CHARACTER (LEN=5), INTENT( IN    ) :: RunType

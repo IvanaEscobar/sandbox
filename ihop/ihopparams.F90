@@ -21,6 +21,7 @@ MODULE iHopParams
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
+#include "IHOP_SIZE.h"
 #include "IHOP.h"
 
   private
@@ -30,8 +31,7 @@ MODULE iHopParams
                                            zero = 0.0
    COMPLEX (KIND=_RL90), PUBLIC, PARAMETER :: i = ( 0.0D0, 1.0D0 )
 
-   INTEGER, PUBLIC, PARAMETER :: ENVFile = 5, &     ! Input file
-                                 PRTFile = 6, &     ! standard output file
+   INTEGER, PUBLIC, PARAMETER :: PRTFile = 6, &     ! standard output file
                                  RAYFile = 21, &    ! ray paths file
                                  SHDFile = 25, &    ! TL calc output file
                                  ARRFile = 36, &    ! Arrivals calc output file

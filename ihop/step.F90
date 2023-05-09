@@ -17,9 +17,7 @@ MODULE step
 #include "GRID.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
 #include "IHOP_SIZE.h"
-#endif
 #include "IHOP.h"
 #ifdef ALLOW_CTRL
 # include "CTRL_FIELDS.h"

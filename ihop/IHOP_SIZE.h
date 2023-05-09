@@ -28,11 +28,15 @@
 !     =============================
       INTEGER nrd
       INTEGER nrr
-#ifdef IHOP_MULTIPLE_RECEIVERS
+#ifdef IHOP_MULTIPLE_RECEIVER_DEPTHS
       PARAMETER ( nrd=30 )
-      PARAMETER ( nrr=30 )
 #else 
       PARAMETER ( nrd=1 )
+#endif
+
+#ifdef IHOP_MULTIPLE_RECEIVER_RANGES
+      PARAMETER ( nrr=30 )
+#else 
       PARAMETER ( nrr=1 )
 #endif
 

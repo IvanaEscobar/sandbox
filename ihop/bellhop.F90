@@ -54,9 +54,7 @@ MODULE BELLHOP
 #include "GRID.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
-#if defined (IHOP_MULTIPLE_SOURCES) || defined (IHOP_MULTIPLE_RECEIVERS)
 #include "IHOP_SIZE.h"
-#endif
 #include "IHOP.h"
 #ifdef ALLOW_CTRL
 # include "CTRL_FIELDS.h"
@@ -375,9 +373,11 @@ SUBROUTINE BellhopCore
            CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
 
            ! Write the ray trajectory to RAYFile
-           IF ( Beam%RunType(1:1) == 'R' .OR. Beam%RunType(1:1) == 'A') THEN   
+           IF ( Beam%RunType(1:1) == 'R') THEN   
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
            ELSE ! Compute the contribution to the field
+              CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
+              
               SELECT CASE ( Beam%Type( 1 : 1 ) )
               CASE ( 'g' )
                  CALL InfluenceGeoHatRayCen(    U, Angles%alpha( ialpha ), &
@@ -391,8 +391,8 @@ SUBROUTINE BellhopCore
                  CALL InfluenceGeoHatCart(  U, Angles%alpha( ialpha ), &
                                             Angles%Dalpha )
               END SELECT
-
            END IF
+
         END IF
      END DO DeclinationAngle
 
@@ -416,7 +416,6 @@ SUBROUTINE BellhopCore
      END SELECT
 
   END DO SourceDepth
-
 
 END SUBROUTINE BellhopCore
 

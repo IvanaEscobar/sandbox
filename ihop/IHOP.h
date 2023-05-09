@@ -38,15 +38,15 @@
       CHARACTER*(100) IHOP_title
       CHARACTER*(6) IHOP_topopt
       CHARACTER*(2) IHOP_botopt
-      CHARACTER*(1) IHOP_runopt
+      CHARACTER*(7) IHOP_runopt
 
       COMMON /IHOP_PARAMS_C/                                                                                                             &
      &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt
 
 !-- COMMON /IHOP_PARAMS_I/ IHOP Integer-type parameters:
-!   IHOP_nrays  :: No. of rays to propagate
+!   IHOP_nalpha  :: No. of rays to propagate
 
-      INTEGER IHOP_nrays
+      INTEGER IHOP_nalpha
       INTEGER IHOP_nsd
       INTEGER IHOP_nrd
       INTEGER IHOP_nrr
@@ -54,7 +54,7 @@
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
      &      IHOP_nrd, IHOP_nrr,                                                                                                         &
-     &      IHOP_nrays
+     &      IHOP_nalpha
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
 !   IHOP_freq           :: frequency (Hz)
@@ -79,18 +79,9 @@
       _RL IHOP_bcsoundI
       _RL IHOP_bcsoundshearI 
       _RL IHOP_brho
-#ifdef IHOP_MULTIPLE_SOURCES
-      _RL IHOP_sd (1:nsd)
-#else
-      _RL IHOP_sd
-#endif
-#ifdef IHOP_MULTIPLE_RECEIVERS
-      _RL IHOP_rd (1:nrd)
-      _RL IHOP_rr (1:nrr)
-#else
-      _RL IHOP_rd
-      _RL IHOP_rr
-#endif
+      _RL IHOP_sd (nsd)
+      _RL IHOP_rd (nrd)
+      _RL IHOP_rr (nrr)
       _RL IHOP_alpha (2)
       _RL IHOP_step
       _RL IHOP_zbox
