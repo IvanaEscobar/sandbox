@@ -19,6 +19,13 @@ MODULE sspMod
   USE iHopParams,   only: PRTFile, SSPFile
 
   IMPLICIT NONE
+! == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+#include "IHOP_SIZE.h"
+#include "IHOP.h"
+
   PRIVATE
 
 ! public interfaces
@@ -32,6 +39,7 @@ MODULE sspMod
   !SAVE
   INTEGER, PARAMETER     :: MaxSSP = 20001
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
+  INTEGER                :: iostat, iallocstat
   INTEGER,           PRIVATE :: iz
   REAL (KIND=_RL90), PRIVATE :: Depth, W
   REAL (KIND=_RL90)          :: zTemp, betaPowerLaw = 1, fT = 1D20
@@ -235,7 +243,6 @@ CONTAINS
        !                                                               2      3
        ! compute coefficients of std cubic polynomial: c0 + c1*x + c2*x + c3*x
        !
-
        CALL PCHIP( SSP%z, SSP%c, SSP%NPts, SSP%cCoef, SSP%CSWork )
 
     ELSE    ! return SSP info, recall iSegz is initiated to 1
@@ -355,44 +362,10 @@ CONTAINS
     REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
     
     IF ( Task == 'INI' ) THEN
-
-       !  *** read in SSP data ***
-
+       ! *** Task 'INI' for initialization ***
+       
        Depth = x( 2 )
        CALL ReadSSP( Depth, freq )
-
-      ! Read the 2D SSP matrix
-       WRITE( PRTFile, * ) '__________________________________________________________________________'
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Using range-dependent sound speed'
-
-       READ( SSPFile,  * ) SSP%Nr
-       WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
-
-       IF ( SSP%Nr < 2 ) THEN
-          CALL ERROUT( 'SSPMOD: Quad', 'You must have a least two profiles in your 2D SSP field'  )
-       END IF
-
-       ALLOCATE( SSP%cMat( SSP%NPts, SSP%Nr ), SSP%czMat( SSP%NPts-1, SSP%Nr ), SSP%Seg%r( SSP%Nr ), STAT = AllocateStatus )
-       IF ( AllocateStatus /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP'  )
-
-       ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
-       READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Profile ranges (km):'
-       WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1 : SSP%Nr )
-
-       SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
-
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Sound speed matrix:'
-       WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
-       DO iz2 = 1, SSP%NPts
-          READ(  SSPFile, * ) SSP%cMat( iz2, : )
-          WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz2 ), SSP%cMat( iz2, : )
-       END DO
-
-       CLOSE( SSPFile )
 
        ! calculate cz
        DO irT = 1, SSP%Nr
@@ -519,23 +492,79 @@ CONTAINS
 !**********************************************************************!
 
   SUBROUTINE ReadSSP( Depth, freq )
-    ! reads SSP in m/s from .env file and convert to AttenUnit (ie. Nepers/m)
+    ! reads SSP in m/s from .ssp file and convert to AttenUnit (ie. Nepers/m)
     ! Populates SSPStructure: SSP
 
     USE attenMod, only: CRCI
 
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
+    INTEGER :: iz2
+
+    ! OPEN SSPFile to read
+    OPEN ( FILE = TRIM( IHOP_fileroot ) // '.ssp', UNIT = SSPFile, &
+        FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
+    IF ( IOSTAT /= 0 ) THEN   ! successful open?
+       WRITE( PRTFile, * ) 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
+       CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
+    END IF
+
+    ! Write relevant diagnostics
+    WRITE( PRTFile, * ) "Sound Speed Field" 
+    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) 
+
+    READ( SSPFile,  * ) SSP%Nr, SSP%Nz
+    IF (SSP%Nr .GT. 1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
+    IF (SSP%Nr .EQ. 1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
+
+    WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
+    WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
+
+    ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
+              SSP%czMat( SSP%Nz-1, SSP%Nr ), &
+              SSP%Seg%r( SSP%Nr ), &
+              STAT = iallocstat )
+    IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP' )
+
+    ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
+    READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, * ) 'Profile ranges (km):'
+    WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1 : SSP%Nr )
+    SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+
+    READ( SSPFile,  * ) SSP%z( 1 : SSP%Nz )
+#ifdef IHOP_DEBUG
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, * ) 'Profile depths (m):'
+    WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%z( 1 : SSP%Nz )
+#endif
+
+    ! IEsco23: contain read of ssp in this subroutine only 
+    ! IEsco23: change to allocatable memory since we should know Nz
+#ifdef IHOP_DEBUG
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, * ) 'Sound speed matrix:'
+    WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
+#endif
+    DO iz2 = 1, SSP%Nz
+       READ(  SSPFile, * ) SSP%cMat( iz2, : )
+#ifdef IHOP_DEBUG
+       WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz2 ), SSP%cMat( iz2, : )
+#endif
+    END DO
+    CLOSE( SSPFile )
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
     WRITE( PRTFile, "( '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
     WRITE( PRTFile, "( '     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)', / )" )
-
+    
+    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * )
     SSP%NPts = 1
-
-    DO iz = 1, MaxSSP !NOTE: hard coded
-
-       !READ(  ENVFile, *    ) SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
+    DO iz = 1, MaxSSP 
+       alphaR = SSP%cMat( iz, 1 )
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
            SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 

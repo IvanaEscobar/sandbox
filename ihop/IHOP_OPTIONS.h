@@ -15,6 +15,8 @@
 
 #ifdef ALLOW_IHOP
 ! Place CPP define/undef flag here
+#undef IHOP_DEBUG
+#undef IHOP_THREED
 
 ! to reduce memory storage, disable unused array with those CPP flags :
 #define IHOP_3D_STATE

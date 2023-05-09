@@ -310,7 +310,6 @@ CONTAINS
     SSP%AttenUnit = AttenUnit
 
     ! SSP approximation options
-
     SELECT CASE ( SSP%Type )
     CASE ( 'N' )
        WRITE( PRTFile, * ) '    N2-linear approximation to SSP'
@@ -322,12 +321,6 @@ CONTAINS
        WRITE( PRTFile, * ) '    Spline approximation to SSP'
     CASE ( 'Q' )
        WRITE( PRTFile, * ) '    Quad approximation to SSP'
-       OPEN ( FILE = TRIM( FileRoot ) // '.ssp', UNIT = SSPFile, &
-           FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
-       IF ( IOSTAT /= 0 ) THEN   ! successful open?
-          WRITE( PRTFile, * ) 'SSPFile = ', TRIM( FileRoot ) // '.ssp'
-          CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
-       END IF
     CASE ( 'A' )
        WRITE( PRTFile, * ) '    Analytic SSP option'
     CASE DEFAULT
