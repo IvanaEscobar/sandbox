@@ -53,7 +53,8 @@ CONTAINS
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN ! option to trace a single beam
        READ( ENVFile, * ) Angles%Nalpha, Angles%iSingle_alpha 
     ELSE
-       READ( ENVFile, * ) Angles%Nalpha
+       Angles%Nalpha = IHOP_nalpha
+       READ( ENVFile, * ) !Angles%Nalpha
     END IF
 
     IF ( Angles%Nalpha == 0 ) THEN   ! automatically estimate Nalpha to use
@@ -78,8 +79,9 @@ CONTAINS
     IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayElevationAngles', &
                                 'Insufficient memory to store beam angles'  )
 
+    Angles%alpha(1:2) = IHOP_alpha
     IF ( Angles%Nalpha > 2 ) Angles%alpha( 3 ) = -999.9
-    READ( ENVFile, * ) Angles%alpha
+    READ( ENVFile, * ) !Angles%alpha
 
     CALL SubTab( Angles%alpha, Angles%Nalpha )
     CALL Sort(   Angles%alpha, Angles%Nalpha )
@@ -120,6 +122,9 @@ CONTAINS
 
     REAL (KIND=_RL90), INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
+
+    CALL ERROUT( 'ReadRayBearingAngles', &
+                 '3D rays not supported in ihop') 
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
        ! option to trace a single beam

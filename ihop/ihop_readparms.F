@@ -51,7 +51,7 @@ C     iUnit      :: Work variable for IO unit number
 #ifdef IHOP_MULTIPLE_RECEIVER_RANGES
      &      IHOP_nrr,
 #endif
-     &      IHOP_nrays,
+     &      IHOP_nalpha,
      &      IHOP_freq,
      &      IHOP_depth,
      &      IHOP_bcsound,
@@ -128,7 +128,7 @@ C--   Default values for IHOP_PARM02
       IHOP_nsd      = 1
       IHOP_nrd      = 1
       IHOP_nrr      = 1
-      IHOP_nrays    = 1
+      IHOP_nalpha   = 1
       IHOP_freq     = 0. _d 0
       IHOP_depth    = 0. _d 0
       IHOP_bcsound  = 0. _d 0

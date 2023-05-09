@@ -147,21 +147,19 @@ CONTAINS
 
     Pos%NSz = IHOP_nsd
     Pos%NRz = IHOP_nrd
-    IF ( ALLOCATED(Pos%Sz) ) DEALLOCATE(Pos%Sz)
-    ALLOCATE( Pos%Sz(MAX(3, Pos%NSz)) )
-    Pos%Sz(3) = -999.9
-    DO i=1,Pos%Nsz
-        Pos%Sz(i)  = IHOP_sd(i)
-    ENDDO
-    Pos%Rz  = IHOP_rd
+    CALL AllocateSR( Pos%NSz, Pos%Sz, IHOP_sd )
+    CALL AllocateSR( Pos%NRz, Pos%Rz, IHOP_rd )
     CALL ReadSzRz( ZMin, ZMax )
 
     Pos%NRr = IHOP_nrr
-    Pos%Rr  = IHOP_rr
+    CALL AllocateSR( Pos%NRr, Pos%Rr, IHOP_rr )
     CALL ReadRcvrRanges
 
     IF ( ThreeD ) CALL ReadRcvrBearings
     CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ) )
+
+    ! *** run type ***
+    Beam%RunType = IHOP_runopt
     CALL ReadRunType( Beam%RunType, PlotType )
 
     Depth = Zmax - Zmin   ! water depth
@@ -175,6 +173,8 @@ CONTAINS
 
     ! Limits for tracing beams
     IF ( ThreeD ) THEN
+       CALL ERROUT( 'Readenvihop', &
+                     '3D rays not supported in ihop') 
        READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
        Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
        Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
@@ -199,7 +199,10 @@ CONTAINS
               fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
             Beam%Box%z
     ELSE
-       READ(  ENVFile, * ) Beam%deltas, Beam%Box%z, Beam%Box%r
+       Beam%deltas = IHOP_step
+       Beam%Box%z  = IHOP_zbox
+       Beam%Box%r  = IHOP_rbox
+       READ(  ENVFile, * ) !Beam%deltas, Beam%Box%z, Beam%Box%r
        WRITE( PRTFile, * )
        IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
            Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
@@ -422,10 +425,10 @@ CONTAINS
 
     USE srPositions, only: Pos
 
-    CHARACTER (LEN= 7), INTENT( OUT ) :: RunType
+    CHARACTER (LEN= 7), INTENT( INOUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
 
-    READ(  ENVFile, * ) RunType
+    READ(  ENVFile, * ) 
     WRITE( PRTFile, * )
 
     SELECT CASE ( RunType( 1 : 1 ) )
@@ -843,20 +846,24 @@ CONTAINS
 
   !**********************************************************************!
 
-  !SUBROUTINE AllocateSR( Nx, x_out, x_in )
+  SUBROUTINE AllocateSR( Nx, x_out, x_in )
 
-  !  ! Allocate and populate Pos structure from data.ihop
+    ! Allocate and populate Pos structure from data.ihop
 
-  !  INTEGER, INTENT( IN )    :: Nx      ! # of receiver depths, ranges
-  !  INTEGER, INTENT( INOUT ) :: iRec          ! last record read
-  !  INTEGER                  :: iRz
+    INTEGER,          INTENT( IN  ) :: Nx    
+    REAL(KIND=_RL90), INTENT( IN  ) :: x_in(:)
+    REAL(KIND=_RL90), ALLOCATABLE, INTENT( OUT ) :: x_out(:)
+    INTEGER                         :: i
 
-  !  DO iRz = 1, NRz
-  !     iRec = iRec + 1
-  !     WRITE( SHDFile, REC = iRec ) P( iRz, : )
-  !  END DO
+    IF ( ALLOCATED(x_out) ) DEALLOCATE(x_out)
+    ALLOCATE( x_out(MAX(3, Nx)) )
+    x_out(3) = -999.9
 
-  !END SUBROUTINE AllocateSR
+    DO i = 1, Nx
+        x_out(i) = x_in(i)
+    END DO
+
+  END SUBROUTINE AllocateSR
 
   !**********************************************************************!
 
