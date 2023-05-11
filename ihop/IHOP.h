@@ -44,17 +44,22 @@
      &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt
 
 !-- COMMON /IHOP_PARAMS_I/ IHOP Integer-type parameters:
-!   IHOP_nalpha  :: No. of rays to propagate
+!   IHOP_nalpha :: No. of rays to propagate
+!   IHOP_nsd    :: No. of source depths (m)
+!   IHOP_nrd    :: No. of receiver depths (m)
+!   IHOP_nrr    :: No. of receiver ranges (km)
 
       INTEGER IHOP_nalpha
       INTEGER IHOP_nsd
       INTEGER IHOP_nrd
       INTEGER IHOP_nrr
+      INTEGER ihop_yc_index
+      INTEGER ihop_xc_index (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
      &      IHOP_nrd, IHOP_nrr,                                                                                                         &
-     &      IHOP_nalpha
+     &      IHOP_nalpha, ihop_yc_index, ihop_xc_index
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
 !   IHOP_freq           :: frequency (Hz)
@@ -86,11 +91,14 @@
       _RL IHOP_step
       _RL IHOP_zbox
       _RL IHOP_rbox
+      _RL ihop_yc
+      _RL ihop_xc (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
      &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
      &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
-     &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox
+     &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox,                                                                       &
+     &      ihop_yc,ihop_xc
 
 
 

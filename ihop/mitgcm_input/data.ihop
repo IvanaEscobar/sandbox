@@ -27,3 +27,10 @@
  IHOP_zbox=1000.0,
  IHOP_rbox=11.73,
  &
+
+ &IHOP_PARM03
+  ihop_yc_index=27,
+  ihop_xc_index=30,31,32,33,
+  ihop_yc=40.5,
+  ihop_xc=28.5,29.5,30.5,31.5,
+ &

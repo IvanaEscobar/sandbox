@@ -40,4 +40,6 @@
       PARAMETER ( nrr=1 )
 #endif
 
+      INTEGER IHOP_NPTS_RANGE 
+      PARAMETER( IHOP_NPTS_RANGE = 4)
 !---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
