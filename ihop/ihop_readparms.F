@@ -67,6 +67,12 @@ C     iUnit      :: Work variable for IO unit number
      &      IHOP_zbox,
      &      IHOP_rbox
 
+      NAMELIST /IHOP_PARM03/
+     &      ihop_yc_index,
+     &      ihop_xc_index,
+     &      ihop_yc,
+     &      ihop_xc
+
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
       IF ( .NOT.useIHOP ) THEN
@@ -222,7 +228,26 @@ C     Check paramters of IHOP_PARM02
        CALL PRINT_ERROR( msgBuf, myThid )
        STOP 'ABNORMAL END: S/R IHOP_READPARMS'
       ENDIF
+
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C--   Default values for IHOP_PARM03
+      ihop_yc_index = 1
+      ihop_xc_index = 1
+      ihop_yc = 0. _d 0
+      ihop_xc = 0. _d 0
+
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C     Read parameters from open data file
+      READ(UNIT=iUnit,NML=IHOP_PARM03)
+      WRITE(msgBuf,'(A)')
+     &    'IHOP_READPARMS: finished reading IHOP_PARM03 in data.ihop'
+      CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
+     &                    SQUEEZE_RIGHT, myThid )
+
+C     Check paramters of IHOP_PARM03
+
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+
 C     Close the open data file
 #ifdef SINGLE_DISK_IO
       CLOSE(iUnit)
