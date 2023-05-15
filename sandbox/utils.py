@@ -47,7 +47,7 @@ def wgs84Distance( lonA, latA, lonB, latB ):
 
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
 
-def wgs84space(start, end, npts=2):
+def wgs84space(start, end, npts=3):
     # start = [startlon, startlat]
     # end =   [endlon,   endlat]
     g = Geod(ellps='WGS84')

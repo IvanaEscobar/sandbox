@@ -18,4 +18,5 @@
         arr(1:3) = 500
       
         WRITE(*,*) "Array = ", arr
+        WRITE(*,*) "Array size = ", SIZE(arr)
       END PROGRAM  writeArray
