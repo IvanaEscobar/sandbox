@@ -365,7 +365,9 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
        
        Depth = x( 2 )
-       CALL ReadSSP( Depth, freq )
+       IF (useSSPFile .EQ. .TRUE.) THEN
+        CALL ReadSSP( Depth, freq )
+       END IF
 
        ! calculate cz
        DO irT = 1, SSP%Nr

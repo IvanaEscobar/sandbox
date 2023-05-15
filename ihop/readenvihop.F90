@@ -79,10 +79,9 @@ CONTAINS
     WRITE( PRTFile, * ) Title
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 
+    ! *** Top Boundary ***
     Bdry%Top%HS%Opt = IHOP_topopt
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
-
-    ! *** Top BC ***
 
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
         "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
@@ -90,18 +89,18 @@ CONTAINS
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS )
 
     ! *** Ocean SSP ***
-
     Bdry%Bot%HS%Depth = IHOP_depth
+    x = [ 0. _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
+
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
-    x = [ 0.0D0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI' )
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
-    ! *** Bottom BC ***
+    ! *** Bottom Boundary ***
     ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = IHOP_botopt 
     WRITE( PRTFile, * )

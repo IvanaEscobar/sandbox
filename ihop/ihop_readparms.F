@@ -68,6 +68,7 @@ C     iUnit      :: Work variable for IO unit number
      &      IHOP_rbox
 
       NAMELIST /IHOP_PARM03/
+     &      useSSPFile,
      &      ihop_yc_index,
      &      ihop_xc_index,
      &      ihop_yc,
@@ -231,6 +232,7 @@ C     Check paramters of IHOP_PARM02
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C--   Default values for IHOP_PARM03
+      useSSPFile    = .TRUE.
       ihop_yc_index = 1
       ihop_xc_index = 1
       ihop_yc = 0. _d 0
