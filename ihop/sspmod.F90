@@ -143,6 +143,7 @@ CONTAINS
        CALL ReadSSP( Depth, freq )
               
        SSP%n2(  1 : SSP%NPts ) = 1.0 / SSP%c( 1 : SSP%NPts )**2
+       !IEsco23 Test this: SSP%n2(  1 : SSP%Nz ) = 1.0 / SSP%c( 1 : SSP%Nz )**2
 
        ! compute gradient, n2z
        DO iz = 2, SSP%Npts
@@ -153,6 +154,8 @@ CONTAINS
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
+!IEsco23 Test this: 
+!          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
                 iSegz = iz - 1
                 EXIT
@@ -197,6 +200,8 @@ CONTAINS
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
+!IEsco23 Test this: 
+!          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
                 iSegz = iz - 1
                 EXIT
@@ -244,11 +249,15 @@ CONTAINS
        ! compute coefficients of std cubic polynomial: c0 + c1*x + c2*x + c3*x
        !
        CALL PCHIP( SSP%z, SSP%c, SSP%NPts, SSP%cCoef, SSP%CSWork )
+!IEsco23 Test this: 
+!       CALL PCHIP( SSP%z, SSP%c, SSP%Nz, SSP%cCoef, SSP%CSWork )
 
     ELSE    ! return SSP info, recall iSegz is initiated to 1
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
+!IEsco23 Test this: 
+!          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
                 iSegz = iz - 1
                 EXIT
@@ -305,17 +314,23 @@ CONTAINS
        CALL ReadSSP( Depth, freq )
 
        SSP%cSpline( 1, 1 : SSP%NPts ) = SSP%c( 1 : SSP%NPts )
+!IEsco23 Test this: 
+!       SSP%cSpline( 1, 1 : SSP%Nz ) = SSP%c( 1 : SSP%Nz )
        
        ! Compute spline coefs
        iBCBeg = 0
        iBCEnd = 0
        CALL CSpline( SSP%z, SSP%cSpline( 1, 1 ), SSP%NPts, iBCBeg, iBCEnd, SSP%NPts )
+!IEsco23 Test this: 
+!       CALL CSpline( SSP%z, SSP%cSpline( 1, 1 ), SSP%Nz, iBCBeg, iBCEnd, SSP%Nz )
     ELSE
 
        ! *** Section to return SSP info ***
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
           DO iz = 2, SSP%NPts   ! Search for bracketting Depths
+!IEsco23 Test this: 
+!          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
                 iSegz = iz - 1
                 EXIT
@@ -364,22 +379,23 @@ CONTAINS
     IF ( Task == 'INI' ) THEN
        ! *** Task 'INI' for initialization ***
        
-       Depth = x( 2 )
-       IF (useSSPFile .EQ. .TRUE.) THEN
-        CALL ReadSSP( Depth, freq )
-       END IF
+        Depth = x( 2 )
+        IF (useSSPFile .EQ. .TRUE.) THEN
+            CALL ReadSSP( Depth, freq )
+        !ELSE
+        !    CALL ExtractSSP()
+        END IF
 
-       ! calculate cz
-       DO irT = 1, SSP%Nr
-          DO iz2 = 2, SSP%NPts
-             delta_z = ( SSP%z( iz2 ) - SSP%z( iz2-1 ) )
-             SSP%czMat( iz2-1, irT ) = ( SSP%cMat( iz2  , irT ) - &
-                                         SSP%cMat( iz2-1, irT ) ) / delta_z
-          END DO
-       END DO
+        ! calculate cz
+        DO irT = 1, SSP%Nr
+            DO iz2 = 2, SSP%Nz
+                delta_z = ( SSP%z( iz2 ) - SSP%z( iz2-1 ) )
+                SSP%czMat( iz2-1, irT ) = ( SSP%cMat( iz2  , irT ) - &
+                                            SSP%cMat( iz2-1, irT ) ) / delta_z
+            END DO
+        END DO
 
-       SSP%Nz = SSP%NPts
-       RETURN
+        RETURN
 
     ELSE ! Task == 'TAB'
        ! *** Section to return SSP info ***
@@ -387,7 +403,7 @@ CONTAINS
        ! IESCO22: iSegz is the depth index containing x depth
        ! find depth-layer where x(2) in ( SSP%z( iSegz ), SSP%z( iSegz+1 ) )
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
-          DO iz = 2, SSP%NPts   ! Search for bracketting Depths
+          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
              IF ( x( 2 ) < SSP%z( iz ) ) THEN
                 iSegz = iz - 1
                 EXIT
@@ -580,9 +596,9 @@ CONTAINS
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                              SSP%AttenUnit, betaPowerLaw, fT )
-       SSP%rho( iz ) = rhoR !NOTE: set to a default value of 1 in this file
+       SSP%rho( iz ) = rhoR !IEsco22: set to a default value of 1
 
-       ! verify that the depths are monotone increasing
+       ! verify depths are monotone increasing
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
               WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z( iz )
@@ -597,11 +613,10 @@ CONTAINS
 
        ! Did we read the last point?
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
-          SSP%Nz = SSP%NPts
-          IF ( SSP%NPts == 1 ) THEN
-              WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
-              CALL ERROUT( 'ReadSSP', 'The SSP must have at least 2 points' )
-          END IF
+          !IF ( SSP%NPts == 1 ) THEN
+          !    WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
+          !    CALL ERROUT( 'ReadSSP', 'The SSP must have at least 2 points' )
+          !END IF
 
           RETURN
        ENDIF
@@ -614,5 +629,28 @@ CONTAINS
     CALL ERROUT( 'ReadSSP', 'Number of SSP points exceeds limit' )
 
   END SUBROUTINE ReadSSP
+
+    SUBROUTINE ExtractSSP()
+        ! Extracts SSP from MITgcm grid points
+        use attenMod, only: CRCI
+
+        SSP%Nz = Nr
+        SSP%Nr = IHOP_NPTS_RANGE
+
+        ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
+                  SSP%czMat( SSP%Nz-1, SSP%Nr ), &
+                  SSP%Seg%r( SSP%Nr ), &
+                  STAT = iallocstat )
+        IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP' )
+
+        SSP%Seg%r(1:SSP%Nr) = ihop_ranges
+
+        ! set SSP%z from data > delR? where are Depths or Z?
+
+        ! ssp extraction to get SSP%cMat
+
+        ! set vector structured c, rho, and cz for first range point
+
+    END SUBROUTINE ExtractSSP
 
 END MODULE sspMod

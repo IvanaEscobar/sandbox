@@ -72,7 +72,8 @@ C     iUnit      :: Work variable for IO unit number
      &      ihop_yc_index,
      &      ihop_xc_index,
      &      ihop_yc,
-     &      ihop_xc
+     &      ihop_xc,
+     &      ihop_ranges
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
@@ -234,9 +235,12 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C--   Default values for IHOP_PARM03
       useSSPFile    = .TRUE.
       ihop_yc_index = 1
-      ihop_xc_index = 1
-      ihop_yc = 0. _d 0
-      ihop_xc = 0. _d 0
+      ihop_yc       = 0. _d 0
+      DO i=1,IHOP_NPTS_RANGE
+        ihop_xc_index(i)= 1
+        ihop_xc(i)      = 0. _d 0
+        ihop_ranges(i)  = 0. _d 0
+      ENDDO
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C     Read parameters from open data file
