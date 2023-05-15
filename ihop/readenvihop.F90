@@ -8,8 +8,7 @@ MODULE readEnviHop
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE iHopParams,   only: PRTFile, SSPFile, RAYFile, &
-                          ARRFile, SHDFile
+  USE iHopParams,   only: PRTFile, RAYFile, ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
   USE iHopMod,      only: Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&

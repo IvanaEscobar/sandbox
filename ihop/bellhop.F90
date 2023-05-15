@@ -33,7 +33,7 @@ MODULE BELLHOP
   USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
-  USE SSPMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
+  USE sspMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
   USE bdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
                             atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
                             IsegTop, IsegBot, rTopSeg, rBotSeg
