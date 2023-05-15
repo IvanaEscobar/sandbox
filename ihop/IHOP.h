@@ -96,12 +96,13 @@
       _RL IHOP_rbox
       _RL ihop_yc
       _RL ihop_xc (IHOP_NPTS_RANGE) 
+      _RL ihop_ranges (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
      &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
      &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
      &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox,                                                                       &
-     &      ihop_yc,ihop_xc
+     &      ihop_yc,ihop_xc, ihop_ranges
 
 
 
