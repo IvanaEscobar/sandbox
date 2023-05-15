@@ -3,8 +3,8 @@
 ! ------------------------------------------------------
       subroutine print_matrix(n,m,A)
         implicit none
-        integer, intent(in) :: n
-        integer, intent(in) :: m
+        integer, intent(in) :: n ! No. rows
+        integer, intent(in) :: m ! No. cols
         real, intent(in) :: A(n, m)
       
         integer :: i
