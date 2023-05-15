@@ -14,18 +14,21 @@
 !     Package flag
       LOGICAL IHOP_MNC
       LOGICAL IHOP_MDSIO
+
       COMMON /IHOP_PACKAGE/                                                                                                             &
-     &                      IHOP_MNC, IHOP_MDSIO 
+     &                      IHOP_MNC, IHOP_MDSIO
 
 !     IHOP parameters
 !     ===============
 !--   COMMON /IHOP_PARAMS_L/ IHOP logical-type parameters:
-!     IHOP_bellOn       :: true if bellhop driver needs to run (UNUSED)
+!     IHOP_bellOn   :: true if bellhop driver needs to run (UNUSED)
+!     useSSPFile    :: true if *.ssp is used instead MITgcm SSP
 
       LOGICAL IHOP_bellOn
+      LOGICAL useSSPFile
 
       COMMON /IHOP_PARAMS_L/                                                                                                             &
-     &      IHOP_bellOn
+     &      IHOP_bellOn, useSSPFile
 
 !-- COMMON /IHOP_PARAMS_C/ IHOP Character-type parameters:
 !   IHOP_fileroot   :: File name for reading in an environment
