@@ -116,7 +116,7 @@ CONTAINS
     CASE ( 'Q' )
        CALL Quad(     x, c, cimag, gradc, crr, crz, czz, rho, freq, Task )
     CASE ( 'A' )  !  Analytic profile option
-       CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
+       CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
        CALL ERROUT( 'EvaluateSSP', 'Invalid SSP profile option' )
@@ -454,11 +454,19 @@ CONTAINS
 
 !**********************************************************************!
 
-  SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho )
+  SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task )
 
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )
+    CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
     REAL (KIND=_RL90)                :: c0, cr, cz, DxtDz, xt
+
+    IF ( Task == 'INI' ) THEN
+       WRITE( PRTFile, * ) 'Analytic SSP option'
+       SSP%NPts = 2
+       SSP%z(1) = 0.0
+       SSP%z(2) = IHOP_depth
+    END IF
 
     iSegz = 1
     c0    = 1500.0
