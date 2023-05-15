@@ -28,8 +28,7 @@ MODULE BELLHOP
   USE iHopMod       ! Added to get Title, Beam
   USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, MaxN
-  USE readEnviHop,  only:   ReadEnvironment, ReadTopOpt, ReadRunType, TopBot,  &
-                            OpenOutputFiles
+  USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
   USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
@@ -170,7 +169,7 @@ SUBROUTINE IHOP_INIT ( myThid )
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
      ! Read .env file: REQUIRED
-     CALL ReadEnvironment(  IHOP_fileroot, ThreeD )
+     CALL ReadEnvironment( IHOP_fileroot, ThreeD )
      ! AlTImetry: OPTIONAL, default is no ATIFile
      CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
      ! BaThYmetry: OPTIONAL, default is no BTYFile

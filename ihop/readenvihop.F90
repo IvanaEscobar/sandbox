@@ -29,15 +29,14 @@ MODULE readEnviHop
 ! public interfaces
 !=======================================================================
 
-  public    ReadEnvironment, ReadTopOpt, ReadRunType, TopBot, OpenOutputFiles, &
-            WriteSHDHeader
+  public    ReadEnvironment, OpenOutputFiles
   
 !=======================================================================
 
 CONTAINS
   SUBROUTINE ReadEnvironment( FileRoot, ThreeD )
 
-    ! Routine to read in and echo all the input data
+    ! Routine to read in and print input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
     USE angleMod,       only: ReadRayElevationAngles, ReadRayBearingAngles
@@ -90,26 +89,17 @@ CONTAINS
 
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS )
 
-    ! ****** Read in ocean SSP data ******
+    ! *** Ocean SSP ***
 
-    Bdry%bot%HS%Depth = IHOP_depth
+    Bdry%Bot%HS%Depth = IHOP_depth
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
-    IF ( Bdry%Top%HS%Opt( 1 : 1 ) == 'A' ) THEN
-       WRITE( PRTFile, * ) 'Analytic SSP option'
-       ! following is hokey, should be set in Analytic routine
-       SSP%NPts = 2
-       SSP%z( 1 ) = 0.0
-       SSP%z( 2 ) = Bdry%Bot%HS%Depth
-    ELSE
-       x = [ 0.0D0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
-       CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI' )
-    ENDIF
+    x = [ 0.0D0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
+    CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI' )
 
-    Bdry%Top%HS%Depth = SSP%z( 1 )   ! Depth of top boundary is taken from 
-    ! first SSP point
+    Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
     ! *** Bottom BC ***
     ! bottom depth should perhaps be set the same way?
