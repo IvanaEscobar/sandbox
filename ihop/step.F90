@@ -33,12 +33,14 @@ MODULE step
 !=======================================================================
 
 CONTAINS
-  SUBROUTINE Step2D( ray0, ray2, Topx, Topn, Botx, Botn )
+  SUBROUTINE Step2D( ray0, ray2, Topx, Topn, Botx, Botn, myThid )
 
     ! Does a single step along the ray
     ! x denotes the ray coordinate, (r,z)
     ! t denotes the scaled tangent to the ray (previously (rho, zeta))
     ! c * t would be the unit tangent
+
+    INTEGER, INTENT(IN) :: myThid
 
     TYPE( ray2DPt )                   :: ray0, ray1, ray2
     REAL ( KIND=_RL90 ), INTENT( IN ) :: Topx( 2 ), Topn( 2 ), &
@@ -61,7 +63,7 @@ CONTAINS
     ! *** Phase 1 (an Euler step)
 
     CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, IHOP_freq,&
-                      'TAB' )
+                      'TAB', myThid )
 
     csq0      = c0 * c0
     cnn0_csq0 = crr0*ray0%t( 2 )**2 - 2.0*crz0*ray0%t( 1 )*ray0%t( 2 ) &
@@ -86,7 +88,7 @@ CONTAINS
     ! *** Phase 2 (update step size, and Polygon march forward) 
 
     CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, IHOP_freq,& 
-                      'TAB' )
+                      'TAB', myThid  )
     csq1      = c1 * c1
     cnn1_csq1 = crr1*ray1%t( 2 )**2 - 2.0*crz1*ray1%t( 1 )*ray1%t( 2 ) &
               + czz1*ray1%t( 1 )**2
@@ -123,7 +125,7 @@ CONTAINS
 
     ! If we crossed an interface, apply linear jump condition
     CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, IHOP_freq,&
-                      'TAB' )
+                      'TAB', myThid )
     ray2%c = c2
 
     IF ( iSegz /= iSegz0 .OR. iSegr /= iSegr0 ) THEN

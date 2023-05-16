@@ -147,55 +147,55 @@ C-    end-if calc_soundSpeed
       ENDIF
 
 #endif /* ALLOW_IHOP */ 
-!=============================================
-! Option 1: COMPARING LAT LON VALUES DIRECTLY
-!=============================================
-      WRITE(msgBuf, *) 'ESCOBAR option1: '
-      CALL PRINT_ERROR(msgBuf, myThid)
-
-      DO bj=myByLo(myThid),myByHi(myThid)
-       DO bi=myBxLo(myThid),myBxHi(myThid)
-        DO j=1,sNy
-         IF (yC(1,j,bi,bj) .EQ. ihop_yc) THEN
-          DO i=1,sNx
-           DO ii=1,IHOP_NPTS_RANGE
-            IF (xC(i,j,bi,bj) .EQ. ihop_xc(ii)) THEN
-             WRITE(msgBuf, *) 'ESCOBAR: ',
-     &       xC( i,j,bi,bj), yC(i,j,bi,bj)
-             CALL PRINT_ERROR(msgBuf, myThid)
-            ENDIF
-           ENDDO
-          ENDDO
-         ENDIF
-        ENDDO
-       ENDDO
-      ENDDO
-!=============================================
-! END Option 1
-!=============================================
-!=============================================
-! Option 2: COMPARING GLOBAL INDICES
-!=============================================
-      WRITE(msgBuf, *) 'ESCOBAR option2: '
-      CALL PRINT_ERROR(msgBuf, myThid)
-
-      DO bj=myByLo(myThid),myByHi(myThid)
-       DO bi=myBxLo(myThid),myBxHi(myThid)
-        DO j=1,sNy
-         IF (j+sNy*(bj-1) .EQ. ihop_yc_index) THEN
-          DO i=1,sNx
-           DO ii=1,IHOP_NPTS_RANGE
-            IF ( i+sNx*(bi-1) .EQ. ihop_xc_index(ii) ) THEN
-             WRITE(msgBuf, *) 'ESCOBAR: ',
-     &       xC(i,j,bi,bj),yC(i,j,bi,bj)
-             CALL PRINT_ERROR(msgBuf, myThid)
-            ENDIF
-           ENDDO
-          ENDDO
-         ENDIF
-        ENDDO
-       ENDDO
-      ENDDO
+!!=============================================
+!! Option 1: COMPARING LAT LON VALUES DIRECTLY
+!!=============================================
+!      WRITE(msgBuf, *) 'ESCOBAR option1: '
+!      CALL PRINT_ERROR(msgBuf, myThid)
+!
+!      DO bj=myByLo(myThid),myByHi(myThid)
+!       DO bi=myBxLo(myThid),myBxHi(myThid)
+!        DO j=1,sNy
+!         IF (yC(1,j,bi,bj) .EQ. ihop_yc) THEN
+!          DO i=1,sNx
+!           DO ii=1,IHOP_NPTS_RANGE
+!            IF (xC(i,j,bi,bj) .EQ. ihop_xc(ii)) THEN
+!             WRITE(msgBuf, *) 'ESCOBAR: ',
+!     &       xC( i,j,bi,bj), yC(i,j,bi,bj)
+!             CALL PRINT_ERROR(msgBuf, myThid)
+!            ENDIF
+!           ENDDO
+!          ENDDO
+!         ENDIF
+!        ENDDO
+!       ENDDO
+!      ENDDO
+!!=============================================
+!! END Option 1
+!!=============================================
+!!=============================================
+!! Option 2: COMPARING GLOBAL INDICES
+!!=============================================
+!      WRITE(msgBuf, *) 'ESCOBAR option2: '
+!      CALL PRINT_ERROR(msgBuf, myThid)
+!
+!      DO bj=myByLo(myThid),myByHi(myThid)
+!       DO bi=myBxLo(myThid),myBxHi(myThid)
+!        DO j=1,sNy
+!         IF (j+sNy*(bj-1) .EQ. ihop_yc_index) THEN
+!          DO i=1,sNx
+!           DO ii=1,IHOP_NPTS_RANGE
+!            IF ( i+sNx*(bi-1) .EQ. ihop_xc_index(ii) ) THEN
+!             WRITE(msgBuf, *) 'ESCOBAR: ',
+!     &       xC(i,j,bi,bj),yC(i,j,bi,bj), ihop_ssp(i,j,:,bi,bj)
+!             CALL PRINT_ERROR(msgBuf, myThid)
+!            ENDIF
+!           ENDDO
+!          ENDDO
+!         ENDIF
+!        ENDDO
+!       ENDDO
+!      ENDDO
 
       RETURN
       END

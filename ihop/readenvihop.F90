@@ -34,7 +34,7 @@ MODULE readEnviHop
 !=======================================================================
 
 CONTAINS
-  SUBROUTINE ReadEnvironment( FileRoot, ThreeD )
+  SUBROUTINE ReadEnvironment( FileRoot, ThreeD, myThid )
 
     ! Routine to read in and print input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
@@ -42,6 +42,8 @@ CONTAINS
     USE angleMod,       only: ReadRayElevationAngles, ReadRayBearingAngles
     USE srPositions,    only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
                               ReadRcvrBearings, ReadFreqVec
+
+    INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     LOGICAL,            INTENT(IN ) :: ThreeD
@@ -96,7 +98,7 @@ CONTAINS
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
-    CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI' )
+    CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 

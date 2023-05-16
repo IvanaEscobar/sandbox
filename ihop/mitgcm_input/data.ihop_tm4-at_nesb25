@@ -2,14 +2,14 @@
 # IHOP package parameters
 # ***********************
  &IHOP_PARM01 
- IHOP_fileroot='baro',
- IHOP_title='baroclinic_gyre+ihop',
+ IHOP_fileroot='tm4-at_nesb25',
+ IHOP_title='High res bathymetry',
  &
 
  &IHOP_PARM02
  IHOP_freq=550.0,
  IHOP_topopt='QVF',
- IHOP_depth=1800.0,
+ IHOP_depth=1000.0,
  
  IHOP_botopt='A*',
  IHOP_bcsound=1650.0,
@@ -17,19 +17,19 @@
 
  IHOP_sd=73.0,
  IHOP_rd=300.0,
- IHOP_rr=251.1,
+ IHOP_rr=11.724318,
 
  IHOP_runopt='A',
- IHOP_nalpha=6,
+ IHOP_nalpha=601,
  IHOP_alpha=-30.0, 30.0,
  IHOP_step=10.0,
  
- IHOP_zbox=1800.0,
- IHOP_rbox=254.3,
+ IHOP_zbox=1000.0,
+ IHOP_rbox=11.73,
  &
 
  &IHOP_PARM03
- useSSPFile=.FALSE.,
+ useSSPFile=.TRUE.,
 
  ihop_yc_index=27,
  ihop_xc_index=30,31,32,33,
