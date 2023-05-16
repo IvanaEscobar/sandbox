@@ -169,7 +169,7 @@ SUBROUTINE IHOP_INIT ( myThid )
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
      ! Read .env file: REQUIRED
-     CALL ReadEnvironment( IHOP_fileroot, ThreeD )
+     CALL ReadEnvironment( IHOP_fileroot, ThreeD, myThid )
      ! AlTImetry: OPTIONAL, default is no ATIFile
      CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
      ! BaThYmetry: OPTIONAL, default is no BTYFile
@@ -195,7 +195,7 @@ SUBROUTINE IHOP_INIT ( myThid )
 
   ! Run Bellhop solver
   CALL CPU_TIME( Tstart )
-  CALL BellhopCore
+  CALL BellhopCore(myThid)
   CALL CPU_TIME( Tstop )
 
   ! Display run time
@@ -216,10 +216,12 @@ SUBROUTINE IHOP_INIT ( myThid )
 END SUBROUTINE IHOP_INIT
 
 ! **********************************************************************!
-SUBROUTINE BellhopCore
+SUBROUTINE BellhopCore( myThid )
 
   USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
+
+  INTEGER, INTENT(IN) :: myThid
 
   INTEGER              :: iAllocStat  
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
@@ -317,7 +319,7 @@ SUBROUTINE BellhopCore
         NArr = 0
      END SELECT
 
-     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB' )
+     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB', myThid )
 
      !!IESCO22: BEAM stuff !!
      RadMax = 5 * c / IHOP_freq  ! 5 wavelength max radius IEsco22: unused
@@ -369,7 +371,7 @@ SUBROUTINE BellhopCore
            END IF
            
            ! Trace a ray, update ray2D structure
-           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0 )   
+           CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0, myThid )   
 
            ! Write the ray trajectory to RAYFile
            IF ( Beam%RunType(1:1) == 'R') THEN   
@@ -420,12 +422,17 @@ END SUBROUTINE BellhopCore
 
 ! **********************************************************************!
 
-SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
+SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
 
   ! Traces the beam corresponding to a particular take-off angle, alpha [rad]
 
   USE step,     only: Step2D
 
+  ! == Routine Arguments ==
+  ! myThid :: Thread number for this instance of the routine
+  INTEGER, INTENT(IN) :: myThid
+
+  ! == Local Variables ==
   REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! coordinate of source
   REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! init angle, beam amplitude
   INTEGER           :: is, is1                   ! indices for ray step
@@ -439,7 +446,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
   ! Initial conditions (IC)
   iSmallStepCtr = 0
-  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB' )
+  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB', myThid )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
@@ -496,7 +503,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
 
      CALL Step2D( ray2D( is ), ray2D( is1 ),  &
           Top( IsegTop )%x, Top( IsegTop )%n, &
-          Bot( IsegBot )%x, Bot( IsegBot )%n )
+          Bot( IsegBot )%x, Bot( IsegBot )%n, myThid )
 
      ! IESCO22: turning point check
      IF ( is > 1 ) THEN
@@ -564,7 +571,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         END IF
 
         CALL Reflect2D( is, Bdry%Top%HS,    'TOP',  ToptInt,    TopnInt, &
-                            Top( IsegTop )%kappa,   RTop,       NTopPTS ) 
+                            Top( IsegTop )%kappa,   RTop,       NTopPTS, myThid ) 
 
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, & 
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,&
@@ -587,7 +594,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0 )
         END IF
 
         CALL Reflect2D( is, Bdry%Bot%HS,    'BOT',  BottInt,    BotnInt, &
-                            Bot( IsegBot )%kappa,   RBot,       NBotPTS ) 
+                            Bot( IsegBot )%kappa,   RBot,       NBotPTS, myThid ) 
 
         CALL Distances2D( ray2D( is+1 )%x, Top( IsegTop )%x, Bot( IsegBot )%x, &
                           dEndTop, dEndBot, Top( IsegTop )%n, Bot( IsegBot )%n,& 
@@ -655,8 +662,13 @@ END SUBROUTINE Distances2D
 
 ! **********************************************************************!
 
-SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
+SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
 
+  ! == Routine Arguments ==
+  ! myThid :: Thread number for this instance of the routine
+  INTEGER, INTENT(IN) :: myThid
+
+  ! == Local Variables ==
   INTEGER,              INTENT( IN ) :: Npts ! unsued if there are no refcoef files
   REAL (KIND=_RL90),    INTENT( IN ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
   REAL (KIND=_RL90),    INTENT( IN ) :: kappa ! Boundary curvature, for curvilinear grids
@@ -693,7 +705,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts )
 
   ! Get c
   CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq,& 
-                    'TAB' )
+                    'TAB', myThid  )
 
   ! unmodified unit ray tangent and normal
   rayt = c * ray2D( is )%t                              ! unit tangent to ray
