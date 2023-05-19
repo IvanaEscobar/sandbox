@@ -691,8 +691,6 @@ CONTAINS
         ! == Local Variables ==
         INTEGER ii
 
-        WRITE( PRTFile, * ) 'ESCOBAR: in ExtractSSP'
-
         SSP%Nz = Nr
         SSP%Nr = IHOP_NPTS_RANGE
 
@@ -715,12 +713,12 @@ CONTAINS
         !=============================================
         DO bj=myByLo(myThid),myByHi(myThid)
          DO bi=myBxLo(myThid),myBxHi(myThid)
-          DO j=1,sNy
-           IF (yC(1,j,bi,bj) .EQ. ihop_yc) THEN
-            DO i=1,sNx
+          DO i=1,sNx
+           IF (xC(i,1,bi,bj) .EQ. ihop_xc) THEN
+            DO j=1,sNy
              DO ii=1,IHOP_NPTS_RANGE
-              IF (xC(i,j,bi,bj) .EQ. ihop_xc(ii)) THEN
-               WRITE( PRTFile, * ) 'ESCOBAR:', ihop_ssp(i,j,:,bi,bj)
+              IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii)) THEN
+               !WRITE( PRTFile, * ) 'ESCOBAR:', ihop_ssp(i,j,:,bi,bj)
 
                SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
               ENDIF

@@ -31,9 +31,9 @@
  &IHOP_PARM03
  useSSPFile=.FALSE.,
 
- ihop_yc_index=27,
- ihop_xc_index=30,31,32,33,
- ihop_yc=40.5,
- ihop_xc=28.5,29.5,30.5,31.5,
- ihop_ranges=0.0,84.7673,169.5346,254.3019,
+ ihop_xc_index=4,
+ ihop_yc_index=34, 35, 36, 37, 38, 39,
+ ihop_xc=2.5,
+ ihop_yc=47.5,48.5,49.5,50.5,51.5,52.5,
+ ihop_ranges=0.0,111.19031986,222.40005413,333.62911341,444.87738465,556.14473127
  &
