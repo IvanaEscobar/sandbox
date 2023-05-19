@@ -29,6 +29,8 @@ C  myThid   :: my Thread Id number
       _RL     myTime
       INTEGER myIter, myThid
 
+      CHARACTER*(MAX_LEN_MBUF) msgBuf
+
 C !OUTPUT PARAMETERS: ==================================================
 
 C !LOCAL VARIABLES: ====================================================
@@ -59,6 +61,8 @@ C  v3d      :: wind speed, 2nd  component (Y-dir)    [m/s]
 CEOP
 
 #ifdef ALLOW_IHOP
+      WRITE( msgBuf, * ) 'Escobar: my time is:', myTime
+      CALL PRINT_ERROR( msgBuf, myThid )
       CALL IHOP_SOUND_SPEED( myThid )
       CALL IHOP_INIT( myThid )
 #endif /* ALLOW_IHOP */
