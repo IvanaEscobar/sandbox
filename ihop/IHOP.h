@@ -56,8 +56,8 @@
       INTEGER IHOP_nsd
       INTEGER IHOP_nrd
       INTEGER IHOP_nrr
-      INTEGER ihop_yc_index
-      INTEGER ihop_xc_index (IHOP_NPTS_RANGE) 
+      INTEGER ihop_xc_index
+      INTEGER ihop_yc_index (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
@@ -94,8 +94,8 @@
       _RL IHOP_step
       _RL IHOP_zbox
       _RL IHOP_rbox
-      _RL ihop_yc
-      _RL ihop_xc (IHOP_NPTS_RANGE) 
+      _RL ihop_xc
+      _RL ihop_yc (IHOP_NPTS_RANGE) 
       _RL ihop_ranges (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
