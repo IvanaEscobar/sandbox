@@ -1105,8 +1105,11 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
 #endif /* ALLOW_GCHEM */
 
 #ifdef ALLOW_IHOP
-C     if on 2nd timestep
-      IF( myIter .EQ. nIter0+1 ) CALL IHOP_DRIVER(myTime,myIter,myThid)
+      IF (endTime.EQ.3110400000. .AND. myIter.EQ.nIter0+2500000) THEN
+       CALL IHOP_DRIVER(myTime,myIter,myThid)
+      ELSE IF (myIter.EQ.nIter0+25919) THEN
+       CALL IHOP_DRIVER(myTime,myIter,myThid)
+      ENDIF
 #endif /* ALLOW_IHOP */
 
 C--   Do "blocking" sends and receives for tendency "overlap" terms

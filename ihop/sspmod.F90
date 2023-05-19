@@ -711,20 +711,15 @@ CONTAINS
 
         ! ssp extraction to get SSP%cMat
         !=============================================
-        ! IEsco23: Option 2: COMPARING GLOBAL INDICES
+        ! Option 1: COMPARING LAT LON VALUES DIRECTLY
         !=============================================
-        !WRITE(msgBuf, *) 'ESCOBAR option2: '
-        !CALL PRINT_ERROR(msgBuf, myThid)
-        
         DO bj=myByLo(myThid),myByHi(myThid)
          DO bi=myBxLo(myThid),myBxHi(myThid)
           DO j=1,sNy
-           IF (j+sNy*(bj-1) .EQ. ihop_yc_index) THEN
+           IF (yC(1,j,bi,bj) .EQ. ihop_yc) THEN
             DO i=1,sNx
              DO ii=1,IHOP_NPTS_RANGE
-              IF ( i+sNx*(bi-1) .EQ. ihop_xc_index(ii) ) THEN
-               !WRITE(msgBuf, *) 'ESCOBAR: ', xC(i,j,bi,bj),yC(i,j,bi,bj) 
-               !CALL PRINT_ERROR(msgBuf, myThid)
+              IF (xC(i,j,bi,bj) .EQ. ihop_xc(ii)) THEN
                WRITE( PRTFile, * ) 'ESCOBAR:', ihop_ssp(i,j,:,bi,bj)
 
                SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
@@ -735,34 +730,38 @@ CONTAINS
           ENDDO
          ENDDO
         ENDDO
+        !=============================================
+        ! END Option 1
+        !=============================================
 
         ! set vector structured c, rho, and cz for first range point
 
-    ! Write relevant diagnostics
-    WRITE( PRTFile, * ) "Sound Speed Field" 
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
-    WRITE( PRTFile, * ) 
-
-    IF (SSP%Nr .GT. 1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
-    IF (SSP%Nr .EQ. 1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
-
-    WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
-    WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
-
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) 'Profile ranges (km):'
-    WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
-    SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+        ! Write relevant diagnostics
+        WRITE( PRTFile, * ) "Sound Speed Field" 
+        WRITE( PRTFile, * ) '________________________________________________',&
+            '__________________________'
+        WRITE( PRTFile, * ) 
+    
+        IF (SSP%Nr .GT. 1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
+        IF (SSP%Nr .EQ. 1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
+    
+        WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
+        WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
+    
+        WRITE( PRTFile, * )
+        WRITE( PRTFile, * ) 'Profile ranges (km):'
+        WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
+        SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
 #ifdef IHOP_DEBUG
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) 'Sound speed matrix:'
-    WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
+        WRITE( PRTFile, * )
+        WRITE( PRTFile, * ) 'Sound speed matrix:'
+        WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
 #endif
-    DO ii = 1, SSP%Nz
+        DO ii = 1, SSP%Nz
 #ifdef IHOP_DEBUG
-       WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( ii ), SSP%cMat( ii, : )
+           WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( ii ), SSP%cMat( ii, : )
 #endif
-    END DO
+        END DO
 
     END SUBROUTINE ExtractSSP
 
