@@ -1107,7 +1107,9 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
 #ifdef ALLOW_IHOP
       IF (endTime.EQ.3110400000. .AND. myIter.EQ.nIter0+2500000) THEN
        CALL IHOP_DRIVER(myTime,myIter,myThid)
-      ELSE IF (myIter.EQ.nIter0+25919) THEN
+      ELSE IF (endTime.EQ.12000. .AND. myIter.EQ.nIter0+8) THEN
+       CALL IHOP_DRIVER(myTime,myIter,myThid)
+      ELSE IF (myIter.EQ.nIter0+25918) THEN
        CALL IHOP_DRIVER(myTime,myIter,myThid)
       ENDIF
 #endif /* ALLOW_IHOP */
