@@ -696,7 +696,7 @@ CONTAINS
       ! == Local Variables ==
       INTEGER ii
 
-      SSP%Nz = Nr
+      SSP%Nz = Nr ! NOT going through the bathymetry, need to change BTYFile
       SSP%Nr = IHOP_NPTS_RANGE
 
       ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
@@ -706,13 +706,13 @@ CONTAINS
       IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: ExtractSSP', &
                                       'Insufficient memory to store SSP' )
 
-      ! set SSP%Seg%r from data.ihop > ihop_ranges
-      SSP%Seg%r(1:SSP%Nr) = ihop_ranges
+      ! set SSP%Seg%r from data.ihop -> ihop_ranges
+      SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
 
       ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-      SSP%z(1:SSP%Nz) = rkSign*rC(1:SSP%Nz)
+      SSP%z( 1:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
-      ! ssp extraction to get SSP%cMat
+      ! ssp extraction
       !=============================================
       ! Option 1: COMPARING LAT LON VALUES DIRECTLY
       !=============================================
@@ -739,7 +739,7 @@ CONTAINS
       DO iz = 1,SSP%Nz
         alphaR = SSP%cMat( iz, 1 )
         
-        SSP%c(   iz ) = CRCI( SSP%z(iz), alphaR, alphaI, freq, freq, &
+        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                               SSP%AttenUnit, betaPowerLaw, fT )
         SSP%rho( iz ) = rhoR
 
@@ -753,9 +753,8 @@ CONTAINS
 
         IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
                                      ( SSP%z( iz ) - SSP%z( iz-1 ) )
-
-        IF ( ABS( SSP%z( iz )-Depth ) < 100. * EPSILON( 1.0e0 ) ) RETURN
-
+        IF ( ABS( SSP%z( iz )-Depth ) < 100.*EPSILON( 1.0e0 ) ) RETURN
+        
       END DO
 
       ! Write relevant diagnostics
