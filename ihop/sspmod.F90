@@ -427,7 +427,7 @@ CONTAINS
         IF (useSSPFile .EQ. .TRUE.) THEN
             CALL ReadSSP( Depth, freq )
         ELSE
-            CALL ExtractSSP(myThid)
+            CALL ExtractSSP(Depth, freq, myThid)
         END IF
 
         ! calculate cz
@@ -457,9 +457,11 @@ CONTAINS
 
        ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
-          WRITE( PRTFile, * ) 'ray is outside the box where the ocean soundspeed is defined'
+          WRITE( PRTFile, * ) 'ray is outside the box where the ocean ',&
+                              'soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
-          CALL ERROUT( 'SSPMOD: Quad', 'ray is outside the box where the soundspeed is defined' )
+          CALL ERROUT( 'SSPMOD: Quad', &
+              'ray is outside the box where the soundspeed is defined' )
        END IF
 
        ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
@@ -585,7 +587,8 @@ CONTAINS
 
     ! Write relevant diagnostics
     WRITE( PRTFile, * ) "Sound Speed Field" 
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '____________________________________________________',&
+                        '______________________'
     WRITE( PRTFile, * ) 
 
     READ( SSPFile,  * ) SSP%Nr, SSP%Nz
@@ -599,9 +602,9 @@ CONTAINS
               SSP%czMat( SSP%Nz-1, SSP%Nr ), &
               SSP%Seg%r( SSP%Nr ), &
               STAT = iallocstat )
-    IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: Quad', 'Insufficient memory to store SSP' )
+    IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: Quad', &
+                                        'Insufficient memory to store SSP' )
 
-    ! IEsco22: Need defensive checking in case SSP%Nr != number of values in SSPFile
     READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Profile ranges (km):'
@@ -635,7 +638,8 @@ CONTAINS
     WRITE( PRTFile, "( '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
     WRITE( PRTFile, "( '     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)', / )" )
     
-    WRITE( PRTFile, * ) '__________________________________________________________________________'
+    WRITE( PRTFile, * ) '____________________________________________________',&
+                        '______________________'
     WRITE( PRTFile, * )
     SSP%NPts = 1
     DO iz = 1, MaxSSP 
@@ -679,88 +683,108 @@ CONTAINS
 
   END SUBROUTINE ReadSSP
 
-    SUBROUTINE ExtractSSP( myThid )
-        ! Extracts SSP from MITgcm grid points
+  SUBROUTINE ExtractSSP( Depth, freq, myThid )
+      ! Extracts SSP from MITgcm grid points
 
-        use attenMod, only: CRCI
+      use attenMod, only: CRCI
 
-        ! == Routine Arguments ==
-        ! myThid :: Thread number for this instance of the routine
-        INTEGER, INTENT(IN) :: myThid
+      ! == Routine Arguments ==
+      ! myThid :: Thread number for this instance of the routine
+      INTEGER, INTENT(IN) :: myThid
+      REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
 
-        ! == Local Variables ==
-        INTEGER ii
+      ! == Local Variables ==
+      INTEGER ii
 
-        SSP%Nz = Nr
-        SSP%Nr = IHOP_NPTS_RANGE
+      SSP%Nz = Nr
+      SSP%Nr = IHOP_NPTS_RANGE
 
-        ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
-                  SSP%czMat( SSP%Nz-1, SSP%Nr ), &
-                  SSP%Seg%r( SSP%Nr ), &
-                  STAT = iallocstat )
-        IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: ExtractSSP', &
-                                        'Insufficient memory to store SSP' )
+      ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
+                SSP%czMat( SSP%Nz-1, SSP%Nr ), &
+                SSP%Seg%r( SSP%Nr ), &
+                STAT = iallocstat )
+      IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: ExtractSSP', &
+                                      'Insufficient memory to store SSP' )
 
-        ! set SSP%Seg%r from data.ihop > ihop_ranges
-        SSP%Seg%r(1:SSP%Nr) = ihop_ranges
+      ! set SSP%Seg%r from data.ihop > ihop_ranges
+      SSP%Seg%r(1:SSP%Nr) = ihop_ranges
 
-        ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-        SSP%z(1:SSP%Nz) = rkSign*rC(1:SSP%Nz)
+      ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
+      SSP%z(1:SSP%Nz) = rkSign*rC(1:SSP%Nz)
 
-        ! ssp extraction to get SSP%cMat
-        !=============================================
-        ! Option 1: COMPARING LAT LON VALUES DIRECTLY
-        !=============================================
-        DO bj=myByLo(myThid),myByHi(myThid)
-         DO bi=myBxLo(myThid),myBxHi(myThid)
-          DO i=1,sNx
-           IF (xC(i,1,bi,bj) .EQ. ihop_xc) THEN
-            DO j=1,sNy
-             DO ii=1,IHOP_NPTS_RANGE
-              IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii)) THEN
-               !WRITE( PRTFile, * ) 'ESCOBAR:', ihop_ssp(i,j,:,bi,bj)
-
-               SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
-              ENDIF
-             ENDDO
-            ENDDO
-           ENDIF
+      ! ssp extraction to get SSP%cMat
+      !=============================================
+      ! Option 1: COMPARING LAT LON VALUES DIRECTLY
+      !=============================================
+      DO bj=myByLo(myThid),myByHi(myThid)
+       DO bi=myBxLo(myThid),myBxHi(myThid)
+        DO i=1,sNx
+         IF (xC(i,1,bi,bj) .EQ. ihop_xc) THEN
+          DO j=1,sNy
+           DO ii=1,IHOP_NPTS_RANGE
+            IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii)) THEN
+             SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
+            ENDIF
+           ENDDO
           ENDDO
-         ENDDO
+         ENDIF
         ENDDO
-        !=============================================
-        ! END Option 1
-        !=============================================
+       ENDDO
+      ENDDO
+      !=============================================
+      ! END Option 1
+      !=============================================
 
-        ! set vector structured c, rho, and cz for first range point
+      ! set vector structured c, rho, and cz for first range point
+      DO iz = 1,SSP%Nz
+        alphaR = SSP%cMat( iz, 1 )
+        
+        SSP%c(   iz ) = CRCI( SSP%z(iz), alphaR, alphaI, freq, freq, &
+                              SSP%AttenUnit, betaPowerLaw, fT )
+        SSP%rho( iz ) = rhoR
 
-        ! Write relevant diagnostics
-        WRITE( PRTFile, * ) "Sound Speed Field" 
-        WRITE( PRTFile, * ) '________________________________________________',&
-            '__________________________'
-        WRITE( PRTFile, * ) 
-    
-        IF (SSP%Nr .GT. 1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
-        IF (SSP%Nr .EQ. 1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
-    
-        WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
-        WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
-    
-        WRITE( PRTFile, * )
-        WRITE( PRTFile, * ) 'Profile ranges (km):'
-        WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
-        SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+        IF ( iz > 1 ) THEN
+            IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
+                WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z(iz)
+                CALL ERROUT( 'ReadSSP', &
+                    'The depths in the SSP must be monotone increasing' )
+            END IF
+        END IF
+
+        IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
+                                     ( SSP%z( iz ) - SSP%z( iz-1 ) )
+
+        IF ( ABS( SSP%z( iz )-Depth ) < 100. * EPSILON( 1.0e0 ) ) RETURN
+
+      END DO
+
+      ! Write relevant diagnostics
+      WRITE( PRTFile, * ) "Sound Speed Field" 
+      WRITE( PRTFile, * ) '________________________________________________', &
+          '__________________________'
+      WRITE( PRTFile, * ) 
+  
+      IF (SSP%Nr .GT. 1) WRITE( PRTFile,* ) 'Using range-dependent sound speed'
+      IF (SSP%Nr .EQ. 1) WRITE( PRTFile,* ) 'Using range-independent sound speed'
+  
+      WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
+      WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
+  
+      WRITE( PRTFile, * )
+      WRITE( PRTFile, * ) 'Profile ranges (km):'
+      WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
+      SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
 #ifdef IHOP_DEBUG
-        WRITE( PRTFile, * )
-        WRITE( PRTFile, * ) 'Sound speed matrix:'
-        WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
+      WRITE( PRTFile, * )
+      WRITE( PRTFile, * ) 'Sound speed matrix:'
+      WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
 #endif
-        DO ii = 1, SSP%Nz
+      DO ii = 1, SSP%Nz
 #ifdef IHOP_DEBUG
-           WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( ii ), SSP%cMat( ii, : )
+         WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( ii ), SSP%cMat( ii, : )
 #endif
-        END DO
+      END DO
 
-    END SUBROUTINE ExtractSSP
+  END SUBROUTINE ExtractSSP
 
 END MODULE sspMod

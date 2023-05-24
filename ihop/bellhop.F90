@@ -247,22 +247,22 @@ SUBROUTINE BellhopCore( myThid )
   IF ( atiType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NatiPts
         Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, &
-                                  Top( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, 'W ', &
-                                  betaPowerLaw, ft ) ! compressional wave speed
+                                  Top( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, &
+                                  'W ', betaPowerLaw, ft ) ! compressional wave speed
         Top( iSeg )%HS%cs = CRCI( 1D20, Top( iSeg )%HS%betaR,  &
-                                  Top( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, 'W ', &
-                                  betaPowerLaw, ft )   ! shear wave speed
+                                  Top( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, &
+                                  'W ', betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
    
   IF ( btyType( 2:2 ) == 'L' ) THEN
      DO iSeg = 1, NbtyPts
         Bot( iSeg )%HS%cp = CRCI( 1D20, Bot( iSeg )%HS%alphaR, &
-                                  Bot( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, 'W ', &
-                                  betaPowerLaw, ft ) ! compressional wave speed
+                                  Bot( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, &
+                                  'W ', betaPowerLaw, ft ) ! compressional wave speed
         Bot( iSeg )%HS%cs = CRCI( 1D20, Bot( iSeg )%HS%betaR,  &
-                                  Bot( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, 'W ', &
-                                  betaPowerLaw, ft )   ! shear wave speed
+                                  Bot( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, &
+                                  'W ', betaPowerLaw, ft )   ! shear wave speed
      END DO
   END IF
 
@@ -319,7 +319,8 @@ SUBROUTINE BellhopCore( myThid )
         NArr = 0
      END SELECT
 
-     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB', myThid )
+     CALL EvaluateSSP(  xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, &
+                        'TAB', myThid  )
 
      !!IESCO22: BEAM stuff !!
      RadMax = 5 * c / IHOP_freq  ! 5 wavelength max radius IEsco22: unused
@@ -341,7 +342,7 @@ SUBROUTINE BellhopCore( myThid )
         SrcDeclAngle = RadDeg * Angles%alpha( ialpha )
 
         ! Single ray run? then don't visit code below
-        IF ( Angles%iSingle_alpha == 0 .OR. ialpha == Angles%iSingle_alpha ) THEN
+        IF ( Angles%iSingle_alpha==0 .OR. ialpha==Angles%iSingle_alpha ) THEN
 
            !!IESCO22: BEAM stuff !!
            IBPvec = maxloc( SrcBmPat( :, 1 ), mask = SrcBmPat( :, 1 ) &
@@ -446,7 +447,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
 
   ! Initial conditions (IC)
   iSmallStepCtr = 0
-  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'TAB', myThid )
+  CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, &
+                    'TAB', myThid )
   ray2D( 1 )%c         = c              ! sound speed at source [m/s]
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
