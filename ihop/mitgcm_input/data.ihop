@@ -20,12 +20,12 @@
  IHOP_rr=556.0,
 
  IHOP_runopt='A',
- IHOP_nalpha=6,
+ IHOP_nalpha=10,
  IHOP_alpha=-30.0, 30.0,
  IHOP_step=10.0,
  
  IHOP_zbox=1800.0,
- IHOP_rbox=254.3,
+ IHOP_rbox=556.1,
  &
 
  &IHOP_PARM03
