@@ -32,7 +32,7 @@ C     !LOCAL VARIABLES:
 
 #ifdef IHOP_3D_STATE
        CALL DIAGNOSTICS_FILL( ihop_ssp,'ihop_ssp',
-     &                        0, Nr, 0, 1, 1, myThid )
+     &                        0,Nr, 0, 1, 1, myThid )
 #endif /* IHOP_3D_STATE */
       ENDIF
 #endif /* ALLOW_DIAGNOSTICS */

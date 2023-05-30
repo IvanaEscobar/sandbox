@@ -61,8 +61,8 @@ C  v3d      :: wind speed, 2nd  component (Y-dir)    [m/s]
 CEOP
 
 #ifdef ALLOW_IHOP
-C      WRITE( msgBuf, * ) 'Escobar: my time is:', myTime
-C      CALL PRINT_ERROR( msgBuf, myThid )
+      WRITE( msgBuf, * ) 'Escobar: my time is:', myTime
+      CALL PRINT_ERROR( msgBuf, myThid )
       CALL IHOP_SOUND_SPEED( myThid )
       CALL IHOP_INIT( myThid )
 #endif /* ALLOW_IHOP */
