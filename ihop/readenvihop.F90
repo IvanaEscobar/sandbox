@@ -8,7 +8,7 @@ MODULE readEnviHop
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE iHopParams,   only: PRTFile, RAYFile, ARRFile, SHDFile
+  USE iHopParams,   only: PRTFile, RAYFile, DELFile, ARRFile, SHDFile
   USE ihop_fatalError, only: ERROUT
   USE iHopMod,      only: Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
@@ -648,6 +648,7 @@ CONTAINS
           WRITE( ARRFile, * ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
        END IF
 
+       ! IEsco22: add to arrivals output
        OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
               FORM = 'FORMATTED' )
        WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
@@ -661,6 +662,21 @@ CONTAINS
           WRITE( RAYFile, * ) '''xyz'''
        ELSE
           WRITE( RAYFile, * ) '''rz'''
+       END IF
+
+       OPEN ( FILE = TRIM( FileRoot ) // '.delay', UNIT = DELFile, &
+              FORM = 'FORMATTED' )
+       WRITE( DELFile, * ) '''', Title( 1 : 50 ), ''''
+       WRITE( DELFile, * ) IHOP_freq
+       WRITE( DELFile, * ) Pos%NSx, Pos%NSy, Pos%NSz
+       WRITE( DELFile, * ) Angles%Nalpha, Angles%Nbeta
+       WRITE( DELFile, * ) Bdry%Top%HS%Depth
+       WRITE( DELFile, * ) Bdry%Bot%HS%Depth
+
+       IF ( ThreeD ) THEN
+          WRITE( DELFile, * ) '''xyz'''
+       ELSE
+          WRITE( DELFile, * ) '''rz'''
        END IF
     CASE ( 'a' )        ! arrival file in binary format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &

@@ -27,7 +27,7 @@ MODULE BELLHOP
   
   USE iHopMod       ! Added to get Title, Beam
   USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
-                            ARRFile, RAYFile, MaxN
+                            ARRFile, RAYFile, DELFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
   USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
@@ -44,7 +44,7 @@ MODULE BELLHOP
                             ScalePressure
   USE attenMod,     only:   CRCI
   USE beamPattern 
-  USE writeRay,     only:   WriteRay2D
+  USE writeRay,     only:   WriteRay2D, WriteDel2D
 
 !   !USES:
   IMPLICIT NONE
@@ -207,6 +207,8 @@ SUBROUTINE IHOP_INIT ( myThid )
      CLOSE( SHDFile )
   CASE ( 'A', 'a' )           ! arrivals calculation
      CLOSE( ARRFile )
+     CLOSE( RAYFile )
+     CLOSE( DELFile )
   CASE ( 'R', 'E' )           ! ray and eigen ray trace
      CLOSE( RAYFile )
   END SELECT
@@ -379,6 +381,7 @@ SUBROUTINE BellhopCore( myThid )
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
            ELSE ! Compute the contribution to the field
               CALL WriteRay2D( SrcDeclAngle, Beam%Nsteps )
+              CALL WriteDel2D( SrcDeclAngle, Beam%Nsteps )
               
               SELECT CASE ( Beam%Type( 1 : 1 ) )
               CASE ( 'g' )

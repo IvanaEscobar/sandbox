@@ -33,6 +33,7 @@ MODULE iHopParams
 
    INTEGER, PUBLIC, PARAMETER :: PRTFile = 6, &     ! standard output file
                                  RAYFile = 21, &    ! ray paths file
+                                 DELFile = 22, &    ! ray paths file
                                  SHDFile = 25, &    ! TL calc output file
                                  ARRFile = 36, &    ! Arrivals calc output file
                                  SSPFile = 40, &    ! optional 2D/3D SSP file
