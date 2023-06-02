@@ -137,11 +137,6 @@ C convert pressure to bar for Chen and Millero algorithm
          ENDDO
         ENDDO
        ENDDO
-!#ifdef ALLOW_DIAGNOSTICS
-!       IF ( useDiagnostics ) THEN
-!        CALL IHOP_DIAGNOSTICS_FILL(bi,bj,myThid)
-!       ENDIF
-!#endif /* ALLOW_DIAGNOSTICS */
 
 C-    end-if calc_soundSpeed
       ENDIF

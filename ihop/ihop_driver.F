@@ -63,7 +63,6 @@ CEOP
 #ifdef ALLOW_IHOP
       WRITE( msgBuf, * ) 'Escobar: my time is:', myTime
       CALL PRINT_ERROR( msgBuf, myThid )
-      CALL IHOP_SOUND_SPEED( myThid )
       CALL IHOP_INIT( myThid )
 #endif /* ALLOW_IHOP */
 
