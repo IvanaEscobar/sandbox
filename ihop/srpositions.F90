@@ -99,21 +99,17 @@ CONTAINS
 
   !********************************************************************!
 
-  SUBROUTINE ReadSxSy( ThreeD )
+  SUBROUTINE ReadSxSy( )
 
     ! Reads source x-y coordinates
-
-    LOGICAL, INTENT( IN ) :: ThreeD   ! flag indicating whether this is a 3D run
-
-    IF ( ThreeD ) THEN ! IEsco23: NOT supported in ihop
-       CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km' )
-       CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km' )
-    ELSE
-       ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ) )
-       Pos%Sx( 1 ) = 0.
-       Pos%Sy( 1 ) = 0.
-    END IF
-
+#ifdef IHOP_THREED
+    CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km' )
+    CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km' )
+#else /* IHOP_THREED */
+    ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ) )
+    Pos%Sx( 1 ) = 0.
+    Pos%Sy( 1 ) = 0.
+#endif /* IHOP_THREED */
     RETURN
   END SUBROUTINE ReadSxSy
 

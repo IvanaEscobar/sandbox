@@ -65,7 +65,7 @@ SUBROUTINE IHOP_INIT ( myThid )
 !     == Routine Arguments ==
 !     myThid :: Thread number for this instance of the routine.
   INTEGER myThid
-  LOGICAL, PARAMETER   :: ThreeD = .FALSE., Inline = .FALSE.
+  LOGICAL, PARAMETER   :: Inline = .FALSE.
   INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 
   REAL                 :: Tstart, Tstop
@@ -169,7 +169,7 @@ SUBROUTINE IHOP_INIT ( myThid )
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
      ! Read .env file: REQUIRED
-     CALL ReadEnvironment( IHOP_fileroot, ThreeD, myThid )
+     CALL ReadEnvironment( IHOP_fileroot, myThid )
      ! AlTImetry: OPTIONAL, default is no ATIFile
      CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
      ! BaThYmetry: OPTIONAL, default is no BTYFile
@@ -183,15 +183,10 @@ SUBROUTINE IHOP_INIT ( myThid )
      Pos%Ntheta = 1
      ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
      Pos%theta( 1 ) = 0.
-     ! 3d angle data: unmodified and unused in 2d code; dummy bearing angles
-     !IF ( ThreeD .eqv. .FALSE. ) THEN
-     !   ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = iAllocStat )
-     !   Pos%theta( 1 ) = 0.
-     !END IF
   END IF
 
   ! open all output files
-  CALL OpenOutputFiles( IHOP_fileroot, ThreeD )
+  CALL OpenOutputFiles( IHOP_fileroot )
 
   ! Run Bellhop solver
   CALL CPU_TIME( Tstart )

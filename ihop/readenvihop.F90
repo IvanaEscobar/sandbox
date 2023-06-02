@@ -34,7 +34,7 @@ MODULE readEnviHop
 !=======================================================================
 
 CONTAINS
-  SUBROUTINE ReadEnvironment( FileRoot, ThreeD, myThid )
+  SUBROUTINE ReadEnvironment( FileRoot, myThid )
 
     ! Routine to read in and print input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
@@ -46,7 +46,6 @@ CONTAINS
     INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
-    LOGICAL,            INTENT(IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     INTEGER            :: NMedia, iostat, i
     REAL               :: ZMin, ZMax
@@ -58,25 +57,16 @@ CONTAINS
     WRITE( PRTFile, * ) 'BELLHOP/BELLHOP3D'
     WRITE( PRTFile, * )
 
-    ! Open the environmental file
-    !OPEN( UNIT = ENVFile, FILE = TRIM( FileRoot ) // '.env', STATUS = 'OLD', &
-    !      IOSTAT = iostat, ACTION = 'READ' )
-    !IF ( IOSTAT /= 0 ) THEN   ! successful open?
-    !   WRITE( PRTFile, * ) 'ENVFile = ', TRIM( FileRoot ) // '.env'
-    !   CALL ERROUT( 'READENV', &
-    !                'Unable to open the environmental file' )
-    !END IF
-
     ! Prepend model name to title
-    IF ( ThreeD ) THEN
-       CALL ERROUT( 'READENV', &
-                    '3D not supported in ihop' )
-       Title( 1 :11 ) = 'BELLHOP3D- '
-       Title( 12:80 ) = IHOP_title
-    ELSE
-       Title( 1 : 9 ) = 'BELLHOP- '
-       Title( 10:80 ) = IHOP_title
-    END IF
+#ifdef IHOP_THREED
+    CALL ERROUT( 'READENV', &
+                 '3D not supported in ihop' )
+    Title( 1 :11 ) = 'BELLHOP3D- '
+    Title( 12:80 ) = IHOP_title
+#else /* IHOP_THREED */
+    Title( 1 : 9 ) = 'BELLHOP- '
+    Title( 10:80 ) = IHOP_title
+#endif /* IHOP_THREED */
 
     WRITE( PRTFile, * ) Title
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
@@ -121,7 +111,7 @@ CONTAINS
 
     ! *** source and receiver locations ***
 
-    CALL ReadSxSy( ThreeD )     ! Read source/receiver x-y coordinates
+    CALL ReadSxSy ! Read source/receiver x-y coordinates
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
 
@@ -135,7 +125,9 @@ CONTAINS
     CALL AllocateSR( Pos%NRr, Pos%Rr, IHOP_rr )
     CALL ReadRcvrRanges
 
-    IF ( ThreeD ) CALL ReadRcvrBearings
+#ifdef IHOP_THREED
+    CALL ReadRcvrBearings
+#endif /* IHOP_THREED */
     CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ) )
 
     ! *** run type ***
@@ -144,7 +136,9 @@ CONTAINS
 
     Depth = Zmax - Zmin   ! water depth
     CALL ReadRayElevationAngles( IHOP_freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
-    IF ( ThreeD ) CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType )
+#ifdef IHOP_THREED
+    CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType )
+#endif /* IHOP_THREED */
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) '___________________________________________________', &
@@ -152,57 +146,57 @@ CONTAINS
     WRITE( PRTFile, * )
 
     ! Limits for tracing beams
-    IF ( ThreeD ) THEN
-       CALL ERROUT( 'Readenvihop', &
-                     '3D rays not supported in ihop') 
-       !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
-       Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
-       Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
+#ifdef IHOP_THREED
+    CALL ERROUT( 'Readenvihop', &
+                  '3D rays not supported in ihop') 
+    !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
+    Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
+    Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
 
-       ! Automatic step size selection
-       IF ( Beam%deltas == 0.0 ) Beam%deltas = &
-           ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
-       ! WRITE( PRTFile, '('' IHOP_frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
+    ! Automatic step size selection
+    IF ( Beam%deltas == 0.0 ) Beam%deltas = &
+        ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+    ! WRITE( PRTFile, '('' IHOP_frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, & 
-              fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) &
-            Beam%deltas
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, &
-              fmt = '(  '' Maximum ray x-range, Box%x = '', G11.4, '' m'' )' ) &
-            Beam%Box%x
-       WRITE( PRTFile, &
-              fmt = '(  '' Maximum ray y-range, Box%y = '', G11.4, '' m'' )' ) &
-            Beam%Box%y
-       WRITE( PRTFile, &
-              fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
-            Beam%Box%z
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, & 
+           fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) &
+         Beam%deltas
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, &
+           fmt = '(  '' Maximum ray x-range, Box%x = '', G11.4, '' m'' )' ) &
+         Beam%Box%x
+    WRITE( PRTFile, &
+           fmt = '(  '' Maximum ray y-range, Box%y = '', G11.4, '' m'' )' ) &
+         Beam%Box%y
+    WRITE( PRTFile, &
+           fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
+         Beam%Box%z
+#else /* IHOP_THREED */
+    Beam%deltas = IHOP_step
+    Beam%Box%z  = IHOP_zbox
+    Beam%Box%r  = IHOP_rbox
+    WRITE( PRTFile, * )
+    IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
+        Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+        WRITE( PRTFile, &
+               fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatic step)'' )' ) & 
+             Beam%deltas
     ELSE
-       Beam%deltas = IHOP_step
-       Beam%Box%z  = IHOP_zbox
-       Beam%Box%r  = IHOP_rbox
-       WRITE( PRTFile, * )
-       IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
-           Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
-           WRITE( PRTFile, &
-                  fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatic step)'' )' ) & 
-                Beam%deltas
-       ELSE
-            WRITE( PRTFile, &
-                   fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
-                 Beam%deltas
-       END IF
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, &
-              fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) &
-            Beam%Box%z
-       WRITE( PRTFile, &
-              fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) &
-            Beam%Box%r
-
-       Beam%Box%r = 1000.0 * Beam%Box%r   ! convert km to m
+         WRITE( PRTFile, &
+                fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
+              Beam%deltas
     END IF
+    WRITE( PRTFile, * )
+    WRITE( PRTFile, &
+           fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) &
+         Beam%Box%z
+    WRITE( PRTFile, &
+           fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) &
+         Beam%Box%r
+
+    Beam%Box%r = 1000.0 * Beam%Box%r   ! convert km to m
+#endif /* IHOP_THREED */
 
     ! *** Beam characteristics ***
        Beam%Type( 4 : 4 ) = Beam%RunType( 7 : 7 )   ! selects beam shift option
@@ -589,14 +583,13 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE OpenOutputFiles( FileRoot, ThreeD )
+  SUBROUTINE OpenOutputFiles( FileRoot )
     ! Write appropriate header information
 
     USE anglemod,       only: Angles
     USE srPositions,    only: Pos
     !USE bdrymod
 
-    LOGICAL,            INTENT( IN ) :: ThreeD
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     REAL               :: atten
     CHARACTER (LEN=10) :: PlotType
@@ -612,41 +605,39 @@ CONTAINS
        WRITE( RAYFile, * ) Bdry%Top%HS%Depth
        WRITE( RAYFile, * ) Bdry%Bot%HS%Depth
 
-       IF ( ThreeD ) THEN
-          WRITE( RAYFile, * ) '''xyz'''
-       ELSE
-          WRITE( RAYFile, * ) '''rz'''
-       END IF
+#ifdef IHOP_THREED
+       WRITE( RAYFile, * ) '''xyz'''
+#else /* IHOP_THREED */
+       WRITE( RAYFile, * ) '''rz'''
+#endif /* IHOP_THREED */
 
     CASE ( 'A' )        ! arrival file in ascii format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
               FORM = 'FORMATTED' )
 
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile, * ) '''3D'''
-       ELSE
-          WRITE( ARRFile, * ) '''2D'''
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile, * ) '''3D'''
+# else /* IHOP_THREED */
+       WRITE( ARRFile, * ) '''2D'''
+# endif /* IHOP_THREED */
 
        WRITE( ARRFile, * ) IHOP_freq
 
        ! write source locations
-
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile, * ) Pos%NSx,    Pos%Sx(    1 : Pos%NSx )
-          WRITE( ARRFile, * ) Pos%NSy,    Pos%Sy(    1 : Pos%NSy )
-          WRITE( ARRFile, * ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
-       ELSE
-          WRITE( ARRFile, * ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile, * ) Pos%NSx,    Pos%Sx(    1 : Pos%NSx )
+       WRITE( ARRFile, * ) Pos%NSy,    Pos%Sy(    1 : Pos%NSy )
+       WRITE( ARRFile, * ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
+# else /* IHOP_THREED */
+       WRITE( ARRFile, * ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
+# endif /* IHOP_THREED */
 
        ! write receiver locations
-
        WRITE( ARRFile, *    ) Pos%NRz,    Pos%Rz(    1 : Pos%NRz )
        WRITE( ARRFile, *    ) Pos%NRr,    Pos%Rr(    1 : Pos%NRr )
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile, * ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile, * ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
+# endif /* IHOP_THREED */
 
        ! IEsco22: add to arrivals output
        OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
@@ -658,11 +649,11 @@ CONTAINS
        WRITE( RAYFile, * ) Bdry%Top%HS%Depth
        WRITE( RAYFile, * ) Bdry%Bot%HS%Depth
 
-       IF ( ThreeD ) THEN
-          WRITE( RAYFile, * ) '''xyz'''
-       ELSE
-          WRITE( RAYFile, * ) '''rz'''
-       END IF
+# ifdef IHOP_THREED
+       WRITE( RAYFile, * ) '''xyz'''
+# else /* IHOP_THREED */
+       WRITE( RAYFile, * ) '''rz'''
+# endif /* IHOP_THREED */
 
        OPEN ( FILE = TRIM( FileRoot ) // '.delay', UNIT = DELFile, &
               FORM = 'FORMATTED' )
@@ -673,40 +664,38 @@ CONTAINS
        WRITE( DELFile, * ) Bdry%Top%HS%Depth
        WRITE( DELFile, * ) Bdry%Bot%HS%Depth
 
-       IF ( ThreeD ) THEN
-          WRITE( DELFile, * ) '''xyz'''
-       ELSE
-          WRITE( DELFile, * ) '''rz'''
-       END IF
+#ifdef IHOP_THREED
+       WRITE( DELFile, * ) '''xyz'''
+# else /* IHOP_THREED */
+       WRITE( DELFile, * ) '''rz'''
+# endif /* IHOP_THREED */
     CASE ( 'a' )        ! arrival file in binary format
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
               FORM = 'UNFORMATTED' )
 
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile ) '''3D'''
-       ELSE
-          WRITE( ARRFile ) '''2D'''
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile ) '''3D'''
+# else /* IHOP_THREED */
+       WRITE( ARRFile ) '''2D'''
+# endif /* IHOP_THREED */
 
        WRITE( ARRFile    ) SNGL( IHOP_freq )
 
        ! write source locations
-
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile    ) Pos%NSx,    Pos%Sx(    1 : Pos%NSx )
-          WRITE( ARRFile    ) Pos%NSy,    Pos%Sy(    1 : Pos%NSy )
-          WRITE( ARRFile    ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
-       ELSE
-          WRITE( ARRFile    ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile    ) Pos%NSx,    Pos%Sx(    1 : Pos%NSx )
+       WRITE( ARRFile    ) Pos%NSy,    Pos%Sy(    1 : Pos%NSy )
+       WRITE( ARRFile    ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
+# else /* IHOP_THREED */
+       WRITE( ARRFile    ) Pos%NSz,    Pos%Sz(    1 : Pos%NSz )
+# endif /* IHOP_THREED */
 
        ! write receiver locations
-
        WRITE( ARRFile       ) Pos%NRz,    Pos%Rz(    1 : Pos%NRz )
        WRITE( ARRFile       ) Pos%NRr,    Pos%Rr(    1 : Pos%NRr )
-       IF ( ThreeD ) THEN
-          WRITE( ARRFile    ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
-       END IF
+# ifdef IHOP_THREED
+       WRITE( ARRFile    ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
+# endif /* IHOP_THREED */
 
     CASE DEFAULT
        atten = 0.0
