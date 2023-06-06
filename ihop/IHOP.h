@@ -56,13 +56,11 @@
       INTEGER IHOP_nsd
       INTEGER IHOP_nrd
       INTEGER IHOP_nrr
-      INTEGER ihop_xc_index
-      INTEGER ihop_yc_index (IHOP_NPTS_RANGE) 
 
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
      &      IHOP_nrd, IHOP_nrr,                                                                                                         &
-     &      IHOP_nalpha, ihop_yc_index, ihop_xc_index
+     &      IHOP_nalpha
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
 !   IHOP_freq           :: frequency (Hz)
