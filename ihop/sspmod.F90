@@ -685,10 +685,13 @@ CONTAINS
 
        ! Did we read the last point?
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
-          !IF ( SSP%NPts == 1 ) THEN
-          !    WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
-          !    CALL ERROUT( 'ReadSSP', 'The SSP must have at least 2 points' )
-          !END IF
+          IF ( SSP%NPts == 1 ) THEN
+              WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
+              WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', 
+                                    'The SSP must have at least 2 points'
+              CALL PRINT_ERROR( msgBuf, myThid ) 
+              STOP 'ABNORMAL END: S/R ReadSSP'
+          END IF
 
           RETURN
        ENDIF
