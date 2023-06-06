@@ -8,7 +8,6 @@ MODULE srPositions
 
   ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
 
-  USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE monotonicMod, only: monotonic
   USE sortMod,      only: Sort
@@ -29,7 +28,11 @@ MODULE srPositions
 !=======================================================================
 
     public Pos, Number_to_Echo, Nfreq, freqVec, ReadSxSy, ReadSzRz, &
-           ReadRcvrRanges, ReadRcvrBearings, ReadFreqVec
+           ReadRcvrRanges, &
+#ifdef IHOP_THREED
+           ReadRcvrBearings, &
+#endif /* IHOP_THREED */
+           ReadFreqVec
 
 !=======================================================================
 
@@ -51,11 +54,16 @@ MODULE srPositions
   TYPE ( Position ) :: Pos ! structure containing source and receiver positions
 
 CONTAINS
-  SUBROUTINE ReadfreqVec( freq0, BroadbandOption )
+  SUBROUTINE ReadfreqVec( freq0, BroadbandOption, myThid )
 
     ! Optionally reads a vector of source frequencies for a broadband run
     ! If the broadband option is not selected, then the input freq (a scalar) 
     ! is stored in the frequency vector
+    
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
 
     REAL (KIND=_RL90),  INTENT( IN ) :: freq0   ! Source frequency
     CHARACTER,          INTENT( IN ) :: BroadbandOption*( 1 )
@@ -64,20 +72,27 @@ CONTAINS
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
-       !READ( ENVFile, * ) Nfreq
-       WRITE( PRTFile, * ) '________________________________________________', &
-                           '__________________________'
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
-       IF ( Nfreq <= 0 ) CALL ERROUT( 'ReadEnvironment', &
-                                    'Number of frequencies must be positive'  )
+        WRITE( PRTFile, * ) '________________________________________________', &
+                            '__________________________'
+        WRITE( PRTFile, * )
+        WRITE( PRTFile, * )
+        WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
+        IF ( Nfreq <= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+                                 'Number of frequencies must be positive'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadfreqVec'
+        END IF
     END IF
 
     IF ( ALLOCATED( freqVec ) ) DEALLOCATE( freqVec )
     ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadEnvironment', &
-                                        'Too many frequencies'  )
+    IF ( IAllocStat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+                             'Number of frequencies too large'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadfreqVec'
+    END IF
 
     IF ( BroadbandOption == 'B' ) THEN
        WRITE( PRTFile, * ) 'Frequencies (Hz)'
@@ -99,12 +114,19 @@ CONTAINS
 
   !********************************************************************!
 
-  SUBROUTINE ReadSxSy( )
+  SUBROUTINE ReadSxSy( myThid )
 
     ! Reads source x-y coordinates
+    
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    INTEGER, INTENT( IN ) :: myThid
+
 #ifdef IHOP_THREED
-    CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km' )
-    CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km' )
+    CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km', &
+                    myThid )
+    CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km', &
+                    myThid )
 #else /* IHOP_THREED */
     ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ) )
     Pos%Sx( 1 ) = 0.
@@ -115,24 +137,41 @@ CONTAINS
 
   !********************************************************************!
 
-  SUBROUTINE ReadSzRz( zMin, zMax )
+  SUBROUTINE ReadSzRz( zMin, zMax, myThid )
 
     ! Reads source and receiver z-coordinates (depths)
     ! zMin and zMax are limits for those depths; sources and receivers are 
     ! shifted to be within those limits
 
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
+
     REAL,    INTENT( IN ) :: zMin, zMax
 
-    CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm' )
-    CALL ReadVector( Pos%NRz, Pos%Rz, 'Receiver depths, Rz', 'm' )
+    CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm', &
+                    myThid )
+    CALL ReadVector( Pos%NRz, Pos%Rz, 'Receiver depths, Rz', 'm', &
+                    myThid )
 
     IF ( ALLOCATED( Pos%ws ) ) DEALLOCATE( Pos%ws, Pos%iSz )
     ALLOCATE( Pos%ws( Pos%NSz ), Pos%iSz( Pos%NSz ), Stat = IAllocStat )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadSzRz', 'Too many sources'  )
+    IF ( IAllocStat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+                             'Too many sources'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadSzRz'
+    END IF
 
     IF ( ALLOCATED( Pos%wr ) ) DEALLOCATE( Pos%wr, Pos%iRz )
     ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
-    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadSzRz', 'Too many receivers'  )
+    IF ( IAllocStat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+                             'Too many receivers'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadSzRz'
+    END IF
 
     ! *** Check for Sz/Rz in water column ***
 
@@ -165,28 +204,43 @@ CONTAINS
 
   !********************************************************************!
 
-  SUBROUTINE ReadRcvrRanges
+  SUBROUTINE ReadRcvrRanges( myThid )
+
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
+
     ! IESCO22: assuming receiver positions are equally spaced
-    CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km' )
+    CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km', myThid )
 
     ! calculate range spacing
     Pos%delta_r = 0.0
     IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr-1 )
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
-       CALL ERROUT( 'ReadRcvrRanges', &
-           'Receiver ranges are not monotonically increasing' )
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
+                             'Receiver ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadRcvrRanges'
     END IF 
  
     RETURN
   END SUBROUTINE ReadRcvrRanges
 
   !********************************************************************!
+  
+#ifdef IHOP_THREED
+  SUBROUTINE ReadRcvrBearings( myThid )   ! for 3D bellhop
 
-  SUBROUTINE ReadRcvrBearings   ! for 3D bellhop
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
+
 ! IEsco23: NOT SUPPORTED IN ihop
     CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
-        'degrees' )
+        'degrees', myThid )
 
     ! full 360-degree sweep? remove duplicate angle
     IF ( Pos%Ntheta > 1 ) THEN
@@ -201,20 +255,27 @@ CONTAINS
                                            - Pos%theta( Pos%Ntheta - 1 )
 
     IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
-       CALL ERROUT( 'ReadRcvrBearings', &
-           'Receiver bearings are not monotonically increasing' )
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
+                            'Receiver bearings are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadRcvrBearings'
     END IF 
  
     RETURN
   END SUBROUTINE ReadRcvrBearings
-
+#endif /* IHOP_THREED */
   !********************************************************************!
 
-  SUBROUTINE ReadVector( Nx, x, Description, Units )
+  SUBROUTINE ReadVector( Nx, x, Description, Units, myThid )
 
     ! Read a vector x
     ! Description is something like 'receiver ranges'
     ! Units       is something like 'km'
+
+    !     == Routine Arguments ==
+    !     myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
  
     INTEGER,                        INTENT( IN ) :: Nx
     REAL (KIND=_RL90), INTENT( INOUT ) :: x( : )
@@ -228,8 +289,12 @@ CONTAINS
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
-    IF ( Nx <= 0 ) CALL ERROUT( 'ReadVector', 'Number of ' // Description // &
-                                'must be positive'  )
+    IF ( Nx <= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadVector: ', &
+                             'Number of ' // Description // 'must be positive'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadVector'
+    END IF
 
     !IF ( .NOT. ALLOCATED( x ) ) THEN 
     !    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )

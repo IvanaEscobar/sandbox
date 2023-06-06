@@ -3,15 +3,15 @@
 !BOP
 ! !INTERFACE:
 MODULE attenMod
-    ! <CONTACT EMAIL="ivana@utexas.edu">
-    !   Ivana Escobar
-    ! </CONTACT>
+  ! <CONTACT EMAIL="ivana@utexas.edu">
+  !   Ivana Escobar
+  ! </CONTACT>
 
   ! Attenuation module
   ! Routines to convert a sound speed and attenuation in user units to a complex sound speed
   ! Includes a formula for volume attenuation
 
-  USE ihop_fatalError,   only: ERROUT
+  USE iHopParams,       only: PRTFile
 ! ! USES
   implicit none
 !  == Global variables ==
@@ -29,10 +29,7 @@ MODULE attenMod
     public CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
 !=======================================================================
-
-
-
-  INTEGER, PRIVATE, PARAMETER      :: PRTFile = 6
+  
   INTEGER, PARAMETER               :: MaxBioLayers = 200
   INTEGER                          :: iBio, NBioLayers
   ! Francois-Garrison volume attenuation; temperature, salinity, ...
@@ -45,7 +42,7 @@ MODULE attenMod
   TYPE( bioStructure ) :: bio( MaxBioLayers )
 
 CONTAINS
-  FUNCTION CRCI( z, c, alpha, freq, freq0, AttenUnit, beta, fT )
+  FUNCTION CRCI( z, c, alpha, freq, freq0, AttenUnit, beta, fT, myThid )
 
     ! Converts real wave speed and attenuation to a single
     !  complex wave speed (with positive imaginary part)
@@ -72,6 +69,8 @@ CONTAINS
     ! c     real      part of sound speed
     ! alpha imaginary part of sound speed
 
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
     REAL    (KIND=_RL90)            :: f2, afreq, alphaT, Thorp, a, FG
@@ -144,8 +143,11 @@ CONTAINS
     IF ( alphaT > c ) THEN
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI
        WRITE( PRTFile, * ) 'Usually this means you have an attenuation that is way too high'
-       CALL ERROUT( 'AttenMod : CRCI ', &
-                'The complex sound speed has an imaginary part > real part' )
+
+       WRITE(msgBuf,'(2A)') 'ATTENMOD CRCI: The complex sound speed has an ', &
+       'imaginary part > real part'
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R CRCI'
     END IF
 
     RETURN

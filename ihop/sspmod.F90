@@ -14,7 +14,6 @@ MODULE sspMod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE ihop_fatalError,   only: ERROUT
   USE splinec,      only: cspline, splineall
   USE iHopParams,   only: PRTFile, SSPFile
 
@@ -125,27 +124,29 @@ CONTAINS
 
     SELECT CASE ( SSP%Type )
     CASE ( 'N' )  !  N2-linear profile option
-       CALL n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+       CALL n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
     CASE ( 'C' )  !  C-linear profile option
-       CALL cLinear(  x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+       CALL cLinear(  x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
     CASE ( 'P' )  !  monotone PCHIP ACS profile option
-       CALL cPCHIP(   x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+       CALL cPCHIP(   x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
     CASE ( 'S' )  !  Cubic spline profile option
-       CALL cCubic(   x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+       CALL cCubic(   x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
     CASE ( 'Q' )
-       CALL Quad(     x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+       CALL Quad(     x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
     CASE ( 'A' )  !  Analytic profile option
-       CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid  )
+       CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       CALL ERROUT( 'EvaluateSSP', 'Invalid SSP profile option' )
+       WRITE(msgBuf,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R EvaluateSSP'
     END SELECT
 
   END SUBROUTINE EvaluateSSP
   
 !**********************************************************************!
 
-  SUBROUTINE n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+  SUBROUTINE n2Linear( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
 
     ! N2-linear interpolation of SSP data
 
@@ -164,7 +165,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
 
        Depth = x( 2 )
-       CALL ReadSSP( Depth, freq )
+       CALL ReadSSP( Depth, freq, myThid )
               
        SSP%n2(  1 : SSP%NPts ) = 1.0 / SSP%c( 1 : SSP%NPts )**2
        !IEsco23 Test this: SSP%n2(  1 : SSP%Nz ) = 1.0 / SSP%c( 1 : SSP%Nz )**2
@@ -224,7 +225,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
 
        Depth     = x( 2 )
-       CALL ReadSSP( Depth, freq )
+       CALL ReadSSP( Depth, freq, myThid )
     ELSE                        ! return SSP info
 
        IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
@@ -253,7 +254,7 @@ CONTAINS
 
   !**********************************************************************!
 
-  SUBROUTINE cPCHIP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+  SUBROUTINE cPCHIP( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
 
     ! This implements the monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
@@ -277,7 +278,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
 
        Depth = x( 2 )
-       CALL ReadSSP( Depth, freq )
+       CALL ReadSSP( Depth, freq, myThid )
 
        !                                                               2      3
        ! compute coefficients of std cubic polynomial: c0 + c1*x + c2*x + c3*x
@@ -350,7 +351,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
        
        Depth     = x( 2 )
-       CALL ReadSSP( Depth, freq )
+       CALL ReadSSP( Depth, freq, myThid )
 
        SSP%cSpline( 1, 1 : SSP%NPts ) = SSP%c( 1 : SSP%NPts )
 !IEsco23 Test this: 
@@ -402,7 +403,7 @@ CONTAINS
 
   !**********************************************************************!
 
-  SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid  )
+  SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
 
     ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
     ! IEsco22: Assuming an SSPFile is required. Missing defensive check for SSPFile
@@ -425,9 +426,9 @@ CONTAINS
        
         Depth = x( 2 )
         IF (useSSPFile .EQ. .TRUE.) THEN
-            CALL ReadSSP( Depth, freq )
+            CALL ReadSSP( Depth, freq, myThid )
         ELSE
-            CALL ExtractSSP(Depth, freq, myThid)
+            CALL ExtractSSP(Depth, freq, myThid )
         END IF
 
         ! calculate cz
@@ -460,8 +461,10 @@ CONTAINS
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean ',&
                               'soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
-          CALL ERROUT( 'SSPMOD: Quad', &
-              'ray is outside the box where the soundspeed is defined' )
+          WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+                    'ray is outside the box where the soundspeed is defined'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R Quad'
        END IF
 
        ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
@@ -481,8 +484,12 @@ CONTAINS
        ! IESCO22: s2 is distance btwn field point, x(2), and ssp depth @ iSegz
        s2      = x( 2 )           - SSP%z( iSegz )            
        delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
-       IF (delta_z <= 0 .OR. s2 > delta_z) CALL ERROUT('SSPMOD: Quad', &
-           'depth is not monotonically increasing in SSPFile')
+       IF (delta_z <= 0 .OR. s2 > delta_z) THEN
+          WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+                            'depth is not monotonically increasing in SSPFile'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R Quad'
+       END IF
        
        c1 = SSP%cMat( iSegz, iSegr   ) + s2*cz1
        c2 = SSP%cMat( iSegz, iSegr+1 ) + s2*cz2
@@ -518,7 +525,7 @@ CONTAINS
 
 !**********************************************************************!
 
-  SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid  )
+  SUBROUTINE Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid )
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
@@ -568,11 +575,15 @@ CONTAINS
 
 !**********************************************************************!
 
-  SUBROUTINE ReadSSP( Depth, freq )
+  SUBROUTINE ReadSSP( Depth, freq, myThid )
     ! reads SSP in m/s from .ssp file and convert to AttenUnit (ie. Nepers/m)
     ! Populates SSPStructure: SSP
 
     USE attenMod, only: CRCI
+
+    ! == Routine Arguments ==
+    ! myThid :: Thread number for this instance of the routine
+    INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
     INTEGER :: iz2,k
@@ -582,7 +593,9 @@ CONTAINS
         FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
        WRITE( PRTFile, * ) 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unable to open the SSP file' )
+       WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', 'Unable to open the SSP file'
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
     ! Write relevant diagnostics
@@ -602,8 +615,12 @@ CONTAINS
               SSP%czMat( SSP%Nz-1, SSP%Nr ), &
               SSP%Seg%r( SSP%Nr ), &
               STAT = iallocstat )
-    IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: Quad', &
-                                        'Insufficient memory to store SSP' )
+    IF ( iallocstat /= 0 ) THEN
+       WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+                            'Insufficient memory to store SSP'
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R ReadSSP'
+    END IF
 
     READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
     WRITE( PRTFile, * )
@@ -648,15 +665,17 @@ CONTAINS
            SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
-                             SSP%AttenUnit, betaPowerLaw, fT )
+                             SSP%AttenUnit, betaPowerLaw, fT, myThid )
        SSP%rho( iz ) = rhoR !IEsco22: set to a default value of 1
 
        ! verify depths are monotone increasing
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
               WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z( iz )
-              CALL ERROUT( 'ReadSSP', &
-                  'The depths in the SSP must be monotone increasing' )
+              WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+                            'The depths in the SSP must be monotone increasing'
+              CALL PRINT_ERROR( msgBuf, myThid )
+              STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
        END IF
 
@@ -679,7 +698,10 @@ CONTAINS
  
     ! Fall through means too many points in the profile
     WRITE( PRTFile, * ) 'Max. #SSP points: ', MaxSSP
-    CALL ERROUT( 'ReadSSP', 'Number of SSP points exceeds limit' )
+    WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+                         'Number of SSP points exceeds limit'
+    CALL PRINT_ERROR( msgBuf, myThid )
+    STOP 'ABNORMAL END: S/R ReadSSP'
 
   END SUBROUTINE ReadSSP
 
@@ -691,6 +713,7 @@ CONTAINS
       ! == Routine Arguments ==
       ! myThid :: Thread number for this instance of the routine
       INTEGER, INTENT(IN) :: myThid
+
       REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
 
       ! == Local Variables ==
@@ -703,8 +726,12 @@ CONTAINS
                 SSP%czMat( SSP%Nz-1, SSP%Nr ), &
                 SSP%Seg%r( SSP%Nr ), &
                 STAT = iallocstat )
-      IF ( iallocstat /= 0 ) CALL ERROUT( 'SSPMOD: ExtractSSP', &
-                                      'Insufficient memory to store SSP' )
+      IF ( iallocstat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
+                             'Insufficient memory to store SSP'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ExtractSSP'
+      END IF
 
       ! set SSP%Seg%r from data.ihop -> ihop_ranges
       SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
@@ -740,14 +767,16 @@ CONTAINS
         alphaR = SSP%cMat( iz, 1 )
         
         SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
-                              SSP%AttenUnit, betaPowerLaw, fT )
+                              SSP%AttenUnit, betaPowerLaw, fT, myThid )
         SSP%rho( iz ) = rhoR
 
         IF ( iz > 1 ) THEN
             IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
                 WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z(iz)
-                CALL ERROUT( 'ReadSSP', &
-                    'The depths in the SSP must be monotone increasing' )
+                WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
+                            'The depths in the SSP must be monotone increasing'
+                CALL PRINT_ERROR( msgBuf, myThid )
+                STOP 'ABNORMAL END: S/R ExtractSSP'
             END IF
         END IF
 

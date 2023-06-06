@@ -29,7 +29,6 @@ MODULE BELLHOP
   USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
                             ARRFile, RAYFile, DELFile, MaxN
   USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
-  USE ihop_fatalError,   only:   ERROUT
   USE angleMod,     only:   Angles, ialpha
   USE srPositions,  only:   Pos
   USE sspMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
@@ -64,7 +63,9 @@ SUBROUTINE IHOP_INIT ( myThid )
 !     !INPUT/OUTPUT PARAMETERS:
 !     == Routine Arguments ==
 !     myThid :: Thread number for this instance of the routine.
-  INTEGER myThid
+  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+  INTEGER, INTENT( IN ) :: myThid
+
   LOGICAL, PARAMETER   :: Inline = .FALSE.
   INTEGER              :: iostat, iAllocStat  
   INTEGER              :: jj 
@@ -79,8 +80,10 @@ SUBROUTINE IHOP_INIT ( myThid )
   OPEN( UNIT = PRTFile, FILE = TRIM( IHOP_fileroot ) // '.prt', &
         STATUS = 'UNKNOWN', IOSTAT = iostat )
   IF ( iostat /= 0 ) THEN
-      WRITE(*,*) 'bellhop: do not recognize IHOP_fileroot, ', TRIM( IHOP_fileroot )
-      CALL ERROUT('BELLHOP INIT','Unable to recognize env file')
+      WRITE(*,*) 'ihop: IHOP_fileroot not recognized, ', TRIM( IHOP_fileroot )
+      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', 'Unable to recognize env file'
+      CALL PRINT_ERROR( msgBuf, myThid )
+      STOP 'ABNORMAL END: S/R IHOP_INIT'
   END IF
 
   ! Read in or otherwise initialize inline all the variables used by BELLHOP 
@@ -101,9 +104,9 @@ SUBROUTINE IHOP_INIT ( myThid )
      Bdry%Bot%HS%Opt   = 'A_'
      Bdry%Bot%HS%BC    = 'A'
      Bdry%Bot%HS%cp    = CRCI( 1D20, 1590D0,    0.5D0, IHOP_freq, IHOP_freq, AttenUnit, &
-                               betaPowerLaw, fT )   ! compressional wave speed
+                               betaPowerLaw, fT, myThid )   ! compressional wave speed
      Bdry%Bot%HS%cs    = CRCI( 1D20,    0D0,      0D0, IHOP_freq, IHOP_freq, AttenUnit, &
-                               betaPowerLaw, fT )   ! shear wave speed
+                               betaPowerLaw, fT, myThid )   ! shear wave speed
      Bdry%Bot%HS%rho   = 1.2                        ! density
 
      ! *** sound speed in the water column ***
@@ -140,8 +143,12 @@ SUBROUTINE IHOP_INIT ( myThid )
 
      ! *** Altimetry ***
      ALLOCATE( Top( 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
-                                    'Insufficient memory for altimetry data'  )
+     IF ( iAllocStat /= 0 ) THEN
+      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+                           'Insufficient memory for altimetry data'
+      CALL PRINT_ERROR( msgBuf, myThid )
+      STOP 'ABNORMAL END: S/R IHOP_INIT'
+     END IF
      Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
      Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
 
@@ -149,8 +156,12 @@ SUBROUTINE IHOP_INIT ( myThid )
 
      ! *** Bathymetry ***
      ALLOCATE( Bot( 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
-                                    'Insufficient memory for bathymetry data'  )
+     IF ( iAllocStat /= 0 ) THEN
+      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+                           'Insufficient memory for bathymetry data'
+      CALL PRINT_ERROR( msgBuf, myThid )
+      STOP 'ABNORMAL END: S/R IHOP_INIT'
+     END IF
      Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
      Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
 
@@ -162,8 +173,12 @@ SUBROUTINE IHOP_INIT ( myThid )
      ! *** Source Beam Pattern ***
      NSBPPts = 2
      ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', &
-                                         'Insufficient memory'  )
+     IF ( iAllocStat /= 0 ) THEN 
+      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+                           'Insufficient memory for beam pattern'
+      CALL PRINT_ERROR( msgBuf, myThid )
+      STOP 'ABNORMAL END: S/R IHOP_INIT'
+     END IF
      SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
      SrcBmPat( 2, : ) = [  180.0, 0.0 ]
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
@@ -171,15 +186,15 @@ SUBROUTINE IHOP_INIT ( myThid )
      ! Read .env file: REQUIRED
      CALL ReadEnvironment( IHOP_fileroot, myThid )
      ! AlTImetry: OPTIONAL, default is no ATIFile
-     CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, PRTFile )
+     CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, myThid )
      ! BaThYmetry: OPTIONAL, default is no BTYFile
-     CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, PRTFile )
+     CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, myThid )
      ! (top and bottom): OPTIONAL
      CALL ReadReflectionCoefficient( IHOP_fileroot, Bdry%Bot%HS%Opt( 1:1 ), &
                                      Bdry%Top%HS%Opt( 2:2 ), PRTFile ) 
      ! Source Beam Pattern: OPTIONAL, default is omni source pattern
      SBPFlag = Beam%RunType( 3:3 )
-     CALL ReadPat( IHOP_fileroot, PRTFile )
+     CALL ReadPat( IHOP_fileroot, myThid )
      Pos%Ntheta = 1
      ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
      Pos%theta( 1 ) = 0.
@@ -218,7 +233,8 @@ SUBROUTINE BellhopCore( myThid )
   USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
 
-  INTEGER, INTENT(IN) :: myThid
+  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+  INTEGER, INTENT( IN ) :: myThid
 
   INTEGER              :: iAllocStat  
   INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
@@ -236,7 +252,10 @@ SUBROUTINE BellhopCore( myThid )
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
   ELSE
-      CALL ERROUT( 'BELLHOP CORE', 'Required: Nalpha>1, else add iSingle_alpha (see angleMod)' )
+      WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+                    'Required: Nalpha>1, else add iSingle_alpha (see angleMod)'
+      CALL PRINT_ERROR( msgBuf, myThid )
+      STOP 'ABNORMAL END: S/R BellhopCore'
   END IF
 
   ! convert range-dependent geoacoustic parameters from user to program units
@@ -245,10 +264,10 @@ SUBROUTINE BellhopCore( myThid )
      DO iSeg = 1, NatiPts
         Top( iSeg )%HS%cp = CRCI( 1D20, Top( iSeg )%HS%alphaR, &
                                   Top( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, &
-                                  'W ', betaPowerLaw, ft ) ! compressional wave speed
+                                  'W ', betaPowerLaw, ft, myThid ) ! compressional wave speed
         Top( iSeg )%HS%cs = CRCI( 1D20, Top( iSeg )%HS%betaR,  &
                                   Top( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, &
-                                  'W ', betaPowerLaw, ft )   ! shear wave speed
+                                  'W ', betaPowerLaw, ft, myThid )   ! shear wave speed
      END DO
   END IF
    
@@ -256,10 +275,10 @@ SUBROUTINE BellhopCore( myThid )
      DO iSeg = 1, NbtyPts
         Bot( iSeg )%HS%cp = CRCI( 1D20, Bot( iSeg )%HS%alphaR, &
                                   Bot( iSeg )%HS%alphaI, IHOP_freq, IHOP_freq, &
-                                  'W ', betaPowerLaw, ft ) ! compressional wave speed
+                                  'W ', betaPowerLaw, ft, myThid ) ! compressional wave speed
         Bot( iSeg )%HS%cs = CRCI( 1D20, Bot( iSeg )%HS%betaR,  &
                                   Bot( iSeg )%HS%betaI,  IHOP_freq, IHOP_freq, &
-                                  'W ', betaPowerLaw, ft )   ! shear wave speed
+                                  'W ', betaPowerLaw, ft, myThid )   ! shear wave speed
      END DO
   END IF
 
@@ -270,38 +289,45 @@ SUBROUTINE BellhopCore( myThid )
      NRz_per_range = Pos%NRz   ! rectilinear grid
   END SELECT
 
-  SELECT CASE ( Beam%RunType( 1 : 1 ) )
-  ! for a TL calculation, allocate space for the pressure matrix
-  CASE ( 'C', 'S', 'I' )        ! TL calculation
-     ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) &
-          CALL ERROUT( 'BELLHOP CORE', &
-                       'Insufficient memory for TL matrix: reduce Nr * NRz'  )
-  CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
-     ALLOCATE ( U( 1, 1 ), Stat = iAllocStat )   ! open a dummy variable
-  END SELECT
+    SELECT CASE ( Beam%RunType( 1 : 1 ) )
+    ! for a TL calculation, allocate space for the pressure matrix
+    CASE ( 'C', 'S', 'I' )        ! TL calculation
+        ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+        IF ( iAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+                           'Insufficient memory for TL matrix: reduce Nr * NRz'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R BellhopCore'
+        END IF
+    CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
+        ALLOCATE ( U( 1, 1 ), Stat = iAllocStat )   ! open a dummy variable
+    END SELECT
 
-  ! for an arrivals run, allocate space for arrivals matrices
-  SELECT CASE ( Beam%RunType( 1 : 1 ) )
-  CASE ( 'A', 'a' )
-     ! allow space for at least MinNArr arrivals
-     MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
-     WRITE( PRTFile, * )
-     WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
+    ! for an arrivals run, allocate space for arrivals matrices
+    SELECT CASE ( Beam%RunType( 1 : 1 ) )
+    CASE ( 'A', 'a' )
+        ! allow space for at least MinNArr arrivals
+        MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
+        WRITE( PRTFile, * )
+        WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
 
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
-                NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
-     IF ( iAllocStat /= 0 ) CALL ERROUT( 'BELLHOP CORE', &
-          'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage' )
-  CASE DEFAULT
-     MaxNArr = 1
-     ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), &
-                NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
-  END SELECT
+        ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
+                   NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+        IF ( iAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+             'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R BellhopCore'
+        END IF
+    CASE DEFAULT
+        MaxNArr = 1
+        ALLOCATE ( Arr( NRz_per_range, Pos%NRr, 1 ), &
+                   NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
+    END SELECT
 
-  NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
+    NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
 
-  WRITE( PRTFile, * )
+    WRITE( PRTFile, * )
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !         begin solve         !
@@ -466,8 +492,8 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
   ray2D( 1 )%NumTurnPt = 0
 
   ! IESCO22: update IsegTop, rTopSeg and IsegBot, rBotSeg in bdrymod.f90
-  CALL GetTopSeg( xs(1) )   ! identify alimetry   segment above the source
-  CALL GetBotSeg( xs(1) )   ! identify bathymetry segment below the source
+  CALL GetTopSeg( xs(1), myThid )   ! identify alimetry   segment above the source
+  CALL GetBotSeg( xs(1), myThid )   ! identify bathymetry segment below the source
 
   ! IESCO22: 'L' is long format. See BeadBTY s/r in bdrymod.f90. Default is to
   ! calculate cp, cs, and rho instead of reading them in
@@ -523,7 +549,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
      ! New altimetry segment?
      IF ( ray2D( is1 )%x( 1 ) < rTopSeg( 1 ) .OR. &
           ray2D( is1 )%x( 1 ) > rTopSeg( 2 ) ) THEN
-        CALL GetTopSeg( ray2D( is1 )%x( 1 ) )
+        CALL GetTopSeg( ray2D( is1 )%x( 1 ), myThid )
         IF ( atiType( 2 : 2 ) == 'L' ) THEN
            ! ATIFile geoacoustic info from new segment, cp
            Bdry%Top%HS%cp  = Top( IsegTop )%HS%cp   
@@ -535,7 +561,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
      ! New bathymetry segment?
      IF ( ray2D( is1 )%x( 1 ) < rBotSeg( 1 ) .OR. &
           ray2D( is1 )%x( 1 ) > rBotSeg( 2 ) ) THEN
-        CALL GetBotSeg( ray2D( is1 )%x( 1 ) )
+        CALL GetBotSeg( ray2D( is1 )%x( 1 ), myThid )
         IF ( btyType( 2 : 2 ) == 'L' ) THEN
            ! BTYFile geoacoustic info from new segment, cp
            Bdry%Bot%HS%cp  = Bot( IsegBot )%HS%cp   
@@ -666,7 +692,8 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
 
   ! == Routine Arguments ==
   ! myThid :: Thread number for this instance of the routine
-  INTEGER, INTENT(IN) :: myThid
+  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+  INTEGER, INTENT( IN ) :: myThid
 
   ! == Local Variables ==
   INTEGER,              INTENT( IN ) :: Npts ! unsued if there are no refcoef files
@@ -755,7 +782,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
   CASE ( 'F' )                 ! file
      RInt%theta = RadDeg * ABS( ATAN2( Th, Tg ) )           ! angle of incidence (relative to normal to bathymetry)
      IF ( RInt%theta > 90 ) RInt%theta = 180. - RInt%theta  ! reflection coefficient is symmetric about 90 degrees
-     CALL InterpolateReflectionCoefficient( RInt, RefC, Npts, PRTFile )
+     CALL InterpolateReflectionCoefficient( RInt, RefC, Npts )
      ray2D( is1 )%Amp   = ray2D( is )%Amp * RInt%R
      ray2D( is1 )%Phase = ray2D( is )%Phase + RInt%phi
   CASE ( 'A', 'G' )     ! half-space
@@ -841,9 +868,13 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
         endif
 
      ENDIF
+
   CASE DEFAULT
      WRITE( PRTFile, * ) 'HS%BC = ', HS%BC
-     CALL ERROUT( 'Reflect2D', 'Unknown boundary condition type' )
+     WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
+                          'Unknown boundary condition type'
+     CALL PRINT_ERROR( msgBuf, myThid )
+     STOP 'ABNORMAL END: S/R Reflect2D'
   END SELECT
 
   ! Update top/bottom bounce counter
@@ -852,7 +883,10 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
   ELSE IF ( BotTop == 'BOT' ) THEN
      ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
   ELSE
-     CALL ERROUT('Reflect2D', 'no reflection bounce, but in relfect2d somehow')
+     WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
+                          'no reflection bounce, but in relfect2d somehow'
+     CALL PRINT_ERROR( msgBuf, myThid )
+     STOP 'ABNORMAL END: S/R Reflect2D'
   END IF
 
 END SUBROUTINE Reflect2D

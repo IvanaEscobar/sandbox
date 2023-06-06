@@ -8,11 +8,12 @@ MODULE refCoef
 
   ! reflection coefficient data
 
-  USE ihop_fatalError,   only: ERROUT
-  USE iHopParams,   only: BRCFile, TRCFile, IRCFile, DegRad
+  USE iHopParams,   only: PRTFile, BRCFile, TRCFile, IRCFile, DegRad
 
 ! ! USES
   implicit none
+#include "EEPARAMS.h"
+
   PRIVATE
 
 ! public interfaces
@@ -34,11 +35,15 @@ MODULE refCoef
   TYPE(ReflectionCoef), ALLOCATABLE :: RBot( : ), RTop( : )
 
 CONTAINS
-  SUBROUTINE ReadReflectionCoefficient( FileRoot, BotRC, TopRC, PRTFile )
+  SUBROUTINE ReadReflectionCoefficient( FileRoot, BotRC, TopRC, myThid )
 
     ! Optionally read in reflection coefficient for Top or Bottom boundary
 
-    INTEGER,            INTENT( IN ) :: PRTFile     ! prtfile ID
+    ! == Routine Arguments ==
+    ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT(IN) :: myThid
+
     CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC! flag set to 'F' if refl. coef. is to be read from a File
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     INTEGER            :: itheta, ik, IOStat, iAllocStat
@@ -54,8 +59,10 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
-          CALL ERROUT( 'ReadReflectionCoefficient', &
-              'Unable to open Bottom Reflection Coefficient file' )
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                            'Unable to open Bottom Reflection Coefficient file'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
        READ(  BRCFile, * ) NBotPts
@@ -64,10 +71,12 @@ CONTAINS
 
        IF ( ALLOCATED( RBot ) ) DEALLOCATE( RBot )
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-          CALL ERROUT( 'ReadReflectionCoefficient', &
-          'Insufficient memory for bot. refl. coef.: reduce # points'  )
-
+       IF ( IAllocStat /= 0 ) THEN
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                    'Insufficient memory for bot. refl. coef.: reduce # points'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
+       END IF
        READ(  BRCFile, * ) ( RBot( itheta ), itheta = 1, NBotPts )
        CLOSE( BRCFile )
        RBot%phi = DegRad * RBot%phi   ! convert to radians
@@ -87,8 +96,10 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
-          CALL ERROUT( 'ReadReflectionCoefficient', &
-              'Unable to open Top Reflection Coefficient file' )
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                               'Unable to open Top Reflection Coefficient file'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
        READ(  TRCFile, * ) NTopPts
@@ -97,9 +108,12 @@ CONTAINS
 
        IF ( ALLOCATED( RTop ) ) DEALLOCATE( RTop )
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
-       IF ( iAllocStat /= 0 ) &
-          CALL ERROUT( 'ReadReflectionCoefficient', &
-          'Insufficient memory for top refl. coef.: reduce # points'  )
+       IF ( iAllocStat /= 0 ) THEN
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                    'Insufficient memory for top refl. coef.: reduce # points'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
+       END IF
 
        READ(  TRCFile, * ) ( RTop( itheta ), itheta = 1, NTopPts )
        CLOSE( TRCFile )
@@ -114,8 +128,12 @@ CONTAINS
        WRITE( PRTFile, * ) 'Reading precalculated refl. coeff. table'
        OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
-       IF ( IOStat /= 0 ) CALL ERROUT( 'ReadReflectionCoefficient', &
-                        'Unable to open Internal Reflection Coefficient file' )
+       IF ( IOStat /= 0 ) THEN
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                        'Unable to open Internal Reflection Coefficient file'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
+       END IF
 
        READ(  IRCFile, * ) Title2, freq
        READ(  IRCFile, * ) NkTab
@@ -126,8 +144,12 @@ CONTAINS
        IF ( ALLOCATED( xTab ) )  DEALLOCATE( xTab, fTab, gTab, iTab )
        ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), &
                  Stat = iAllocStat )
-       IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadReflectionCoefficient', &
-           'Too many points in reflection coefficient' )
+       IF ( iAllocStat /= 0 ) THEN
+          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+                               'Too many points in reflection coefficient'
+          CALL PRINT_ERROR( msgBuf, myThid )
+          STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
+       END IF
 
        READ( IRCFile, FMT = "( 5G15.7, I5 )" ) ( xTab( ik ), fTab( ik ), &
              gTab( ik ), iTab( ik ), ik = 1, NkTab )
@@ -136,7 +158,7 @@ CONTAINS
 
   END SUBROUTINE ReadReflectionCoefficient
 
-  SUBROUTINE InterpolateReflectionCoefficient( RInt, R, NPts, PRTFile )
+  SUBROUTINE InterpolateReflectionCoefficient( RInt, R, NPts )
 
     ! Given an angle RInt%ThetaInt, returns the magnitude and
     ! phase of the reflection coefficient (RInt%R, RInt%phi).
@@ -146,9 +168,9 @@ CONTAINS
     ! I tried modifying it to allow a complex angle of incidence but
     ! stopped when I realized I needed to fuss with a complex atan2 routine
 
-    INTEGER,              INTENT( IN    ) :: PRTFile, NPts   ! unit number of print file, # pts in refl. coef.
-    TYPE(ReflectionCoef), INTENT( IN    ) :: R( NPts )       ! Reflection coefficient table
-    TYPE(ReflectionCoef), INTENT( INOUT ) :: RInt            ! interpolated value of refl. coef.
+    INTEGER,              INTENT( IN    ) :: NPts       ! # pts in refl. coef.
+    TYPE(ReflectionCoef), INTENT( IN    ) :: R( NPts )  ! Reflection coefficient table
+    TYPE(ReflectionCoef), INTENT( INOUT ) :: RInt       ! interpolated value of refl. coef.
     INTEGER             :: iLeft, iRight, iMid
     REAL (KIND=_RL90)   :: alpha, Thetaintr
 

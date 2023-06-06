@@ -11,10 +11,12 @@ MODULE bdrymod
   ! input and populates various structures used in the code
 
   USE monotonicMod,     only: monotonic
-  USE ihop_fatalError,  only: ERROUT
   USE iHopParams,       only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
+! == Global variables ==
+#include "EEPARAMS.h"
+
   PRIVATE
 
 ! public interfaces
@@ -62,11 +64,12 @@ MODULE bdrymod
   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
 
 CONTAINS
-  SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, PRTFile )
-
+  SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, myThid ) 
     ! Reads in the top altimetry
 
-    INTEGER,            INTENT( IN ) :: PRTFile
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
+
     CHARACTER (LEN= 1), INTENT( IN ) :: TopATI
     REAL (KIND=_RL90),  INTENT( IN ) :: DepthT
     REAL (KIND=_RL90),  ALLOCATABLE  :: phi( : )
@@ -81,10 +84,13 @@ CONTAINS
 
        OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', &
              STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
-       IF ( IOsTAT /= 0 ) THEN
-          WRITE( PRTFile, * ) 'ATIFile = ', TRIM( FileRoot ) // '.ati'
-          CALL ERROUT( 'ReadATI', 'Unable to open altimetry file' )
-       END IF
+        IF ( IOsTAT /= 0 ) THEN
+            WRITE( PRTFile, * ) 'ATIFile = ', TRIM( FileRoot ) // '.ati'
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                'Unable to open altimetry file'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
+        END IF
 
        READ(  ATIFile, * ) atiType
        AltiType: SELECT CASE ( atiType( 1 : 1 ) )
@@ -93,8 +99,10 @@ CONTAINS
        CASE ( 'L' )
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
        CASE DEFAULT
-          CALL ERROUT( 'ReadATI', &
-                       'Unknown option for selecting altimetry interpolation' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                       'Unknown option for selecting altimetry interpolation'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
        END SELECT AltiType
 
        READ(  ATIFile, * ) NatiPts
@@ -103,9 +111,12 @@ CONTAINS
        NatiPts = NatiPts + 2  
 
        ALLOCATE( Top(  NatiPts ), phi( NatiPts ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP:ReadATI', &
-                'Insufficient memory for altimetry data: reduce # ati points' )
+       IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                'Insufficient memory for altimetry data: reduce # ati points'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
+        END IF
 
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
@@ -114,10 +125,10 @@ CONTAINS
 
           SELECT CASE ( atiType( 2 : 2 ) )
           CASE ( 'S', '' )
-             READ(  ATIFile, * ) Top( ii )%x
-             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
-                WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x
-             END IF
+            READ(  ATIFile, * ) Top( ii )%x
+            IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
+                WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x 
+            END IF
           CASE ( 'L' )
              READ(  ATIFile, * ) Top( ii )%x, Top( ii )%HS%alphaR, &
                                  Top( ii )%HS%betaR, Top( ii )%HS%rho, &
@@ -128,13 +139,17 @@ CONTAINS
                     Top( ii )%HS%rho, Top( ii )%HS%alphaI, Top( ii )%HS%betaI
              END IF
           CASE DEFAULT
-             CALL ERROUT( 'ReadATI', &
-                            'Unknown option for selecting altimetry option' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                            'Unknown option for selecting altimetry option'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
           END SELECT
 
           IF ( Top( ii )%x( 2 ) < DepthT ) THEN
-             CALL ERROUT( 'BELLHOP:ReadATI', &
-                 'Altimetry rises above highest point in the sound speed profile' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                'Altimetry rises above highest point in the sound speed profile'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
           END IF
        END DO atiPt
 
@@ -143,29 +158,37 @@ CONTAINS
        Top( : )%x( 1 ) = 1000.0 * Top( : )%x( 1 )   ! Convert ranges in km to m
 
     CASE DEFAULT   ! no altimetry given, use SSP depth for flat top
-       ALLOCATE( Top( 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
-                                    'Insufficient memory for altimetry data'  )
-       Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
-       Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
+        ALLOCATE( Top( 2 ), Stat = IAllocStat )
+        IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                                    'Insufficient memory for altimetry data'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadATI'
+        END IF
+        Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
+        Top( 2 )%x = [  sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
     END SELECT
 
     CALL ComputeBdryTangentNormal( Top, 'Top' )
 
     IF ( .NOT. monotonic( Top%x( 1 ), NAtiPts ) ) THEN
-       CALL ERROUT( 'BELLHOP:ReadATI', &
-                        'Altimetry ranges are not monotonically increasing' )
+        WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
+                        'Altimetry ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadATI'
     END IF 
  
   END SUBROUTINE ReadATI
 
   ! **********************************************************************!
 
-  SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, PRTFile )
+  SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
 
     ! Reads in the bottom bathymetry
 
-    INTEGER,            INTENT( IN ) :: PRTFile
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
+
     CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
     REAL (KIND=_RL90),  INTENT( IN ) :: DepthB
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
@@ -179,9 +202,12 @@ CONTAINS
 
        OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
              IOSTAT = IOStat, ACTION = 'READ' )
-       IF ( IOsTAT /= 0 ) THEN
-          WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
-          CALL ERROUT( 'ReadBTY', 'Unable to open bathymetry file' )
+        IF ( IOsTAT /= 0 ) THEN
+            WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                                 'Unable to open bathymetry file'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
        END IF
  
        READ( BTYFile, * ) btyType
@@ -192,21 +218,26 @@ CONTAINS
        CASE ( 'L' )
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
        CASE DEFAULT
-          CALL ERROUT( 'ReadBTY', &
-                    'Unknown option for selecting bathymetry interpolation' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                    'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyType
 
 
        READ(  BTYFile, * ) NbtyPts
        WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
 
-       ! we'll be extending the bathymetry to infinity on both sides
-       NbtyPts = NbtyPts + 2  
-       ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP:ReadBTY', &
-                'Insufficient memory for bathymetry data: reduce # bty points' )
-
+        ! we'll be extending the bathymetry to infinity on both sides
+        NbtyPts = NbtyPts + 2  
+        ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
+        IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                'Insufficient memory for bathymetry data: reduce # bty points'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
+        END IF
+        
        WRITE( PRTFile, * )
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
        CASE ( 'S', '' )
@@ -216,8 +247,10 @@ CONTAINS
           WRITE( PRTFile, * ) 'Long format (bathymetry and geoacoustics)'
           WRITE( PRTFile, "( ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI', / )" )
        CASE DEFAULT
-          CALL ERROUT( 'ReadBTY', &
-                    'Unknown option for selecting bathymetry interpolation' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                    'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyTypeB
 
        btyPt: DO ii = 2, NbtyPts - 1
@@ -238,13 +271,17 @@ CONTAINS
                    Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
              END IF
           CASE DEFAULT
-             CALL ERROUT( 'ReadBTY', &
-                            'Unknown option for selecting bathymetry option' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                    'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
           END SELECT
 
           IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
-             CALL ERROUT( 'BELLHOP:ReadBTY', &
-                 'Bathymetry drops below lowest point in the sound speed profile' )
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                'Bathymetry drops below lowest point in the sound speed profile'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
           END IF
  
        END DO btyPt
@@ -254,19 +291,25 @@ CONTAINS
        Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
-       WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
-       ALLOCATE( Bot( 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP', &
-                                    'Insufficient memory for bathymetry data'  )
-       Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
-       Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
+        WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
+        ALLOCATE( Bot( 2 ), Stat = IAllocStat )
+        IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                                 'Insufficient memory for bathymetry data'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBTY'
+        END IF
+        Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
+        Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
     END SELECT
 
     CALL ComputeBdryTangentNormal( Bot, 'Bot' )
 
     IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
-       CALL ERROUT( 'BELLHOP:ReadBTY', &
-                        'Bathymetry ranges are not monotonically increasing' )
+        WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+                    'Bathymetry ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadBTY'
     END IF 
 
   END SUBROUTINE ReadBTY
@@ -380,9 +423,12 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE GetTopSeg( r )
+  SUBROUTINE GetTopSeg( r, myThid )
 
     ! Get the Top segment info (index and range interval) for range, r
+
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
 
     INTEGER IsegTopT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
@@ -395,19 +441,24 @@ CONTAINS
        ! segment limits in range
        rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop+1 )%x( 1 ) ]   
     ELSE
-       WRITE( PRTFile, * ) 'r = ', r
-       WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )
-       WRITE( PRTFile, * ) 'rRight = ', Top( NatiPts )%x( 1 )
-       CALL ERROUT( 'GetTopSeg', 'Top altimetry undefined above the ray' )
+        WRITE( PRTFile, * ) 'r = ', r
+        WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )
+        WRITE( PRTFile, * ) 'rRight = ', Top( NatiPts )%x( 1 )
+        WRITE(msgBuf,'(2A)') 'BDRYMOD GetTopSeg', &
+                             'Top altimetry undefined above the ray'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R GetTopSeg'
     ENDIF
 
   END SUBROUTINE GetTopSeg
 
   ! **********************************************************************!
 
-  SUBROUTINE GetBotSeg( r )
+  SUBROUTINE GetBotSeg( r, myThid )
 
     ! Get the Bottom segment info (index and range interval) for range, r
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
 
     INTEGER IsegBotT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
@@ -419,10 +470,13 @@ CONTAINS
        ! segment limits in range
        rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]
     ELSE
-       WRITE( PRTFile, * ) 'r = ', r
-       WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
-       WRITE( PRTFile, * ) 'rRight = ', Bot( NbtyPts )%x( 1 )
-       CALL ERROUT( 'GetBotSeg', 'Bottom bathymetry undefined below the source' )
+        WRITE( PRTFile, * ) 'r = ', r
+        WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
+        WRITE( PRTFile, * ) 'rRight = ', Bot( NbtyPts )%x( 1 )
+        WRITE(msgBuf,'(2A)') 'BDRYMOD GetBotSeg', &
+                             'Bottom bathymetry undefined below the source'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R GetBotSeg'
     ENDIF
 
   END SUBROUTINE GetBotSeg

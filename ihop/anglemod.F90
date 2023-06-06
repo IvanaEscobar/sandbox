@@ -7,7 +7,6 @@ MODULE angleMod
     ! </CONTACT>
 
   USE iHopParams,   only: DegRad, PRTFile
-  USE ihop_fatalError,   only: ERROUT
   USE subTabulate,  only: SubTab
   USE srPositions,  only: Pos, Number_to_Echo
   USE sortMod,      only: Sort
@@ -44,8 +43,10 @@ MODULE angleMod
   Type( AnglesStructure ) :: Angles
 
 CONTAINS
-  SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType )
+  SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType, myThid )
 
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90),  INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
     REAL (KIND=_RL90)   :: d_theta_recommended
@@ -75,8 +76,12 @@ CONTAINS
     END IF
 
     ALLOCATE( Angles%alpha( MAX( 3, Angles%Nalpha ) ), STAT = iAllocStat )
-    IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayElevationAngles', &
-                                'Insufficient memory to store beam angles'  )
+    IF ( iAllocStat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        'Insufficient memory to store beam angles'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
+    END IF
 
     Angles%alpha(1:2) = IHOP_alpha
     IF ( Angles%Nalpha > 2 ) Angles%alpha( 3 ) = -999.9
@@ -102,27 +107,39 @@ CONTAINS
     IF ( Angles%Nalpha > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) &
                                         ' ... ', Angles%alpha( Angles%Nalpha )
 
-    IF ( Angles%Nalpha>1 .AND. Angles%alpha( Angles%Nalpha )==Angles%alpha(1) )&
-         CALL ERROUT( 'ReadRayElevationAngles', &
-         'First and last beam take-off angle are identical' )
+    IF ( Angles%Nalpha>1 .AND. &
+    Angles%alpha(Angles%Nalpha) == Angles%alpha(1) ) THEN
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        'First and last beam take-off angle are identical'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
+    END IF
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
-       IF ( Angles%iSingle_alpha<1 .OR. Angles%iSingle_alpha>Angles%Nalpha ) &
-            CALL ERROUT( 'ReadRayElevationAngles', &
-            'Selected beam, iSingl not in [ 1, Angles%Nalpha ]' )
+        IF ( Angles%iSingle_alpha<1 .OR. &
+           Angles%iSingle_alpha>Angles%Nalpha ) THEN
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+            'Selected beam, iSingl not in [ 1, Angles%Nalpha ]'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
+        END IF
     END IF
 
   END SUBROUTINE ReadRayElevationAngles
 
   !**********************************************************************!
 
-  SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType )
+  SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType, myThid )
 
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90), INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
-    CALL ERROUT( 'ReadRayBearingAngles', &
-                 '3D rays not supported in ihop') 
+    WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+                 '3D rays not supported in ihop'
+    CALL PRINT_ERROR( msgBuf, myThid )
+    STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
        ! option to trace a single beam
@@ -141,8 +158,12 @@ CONTAINS
     END IF
 
     ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
-    IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', &
-                        'Insufficient memory to store beam angles'  )
+    IF ( iAllocStat /= 0 ) THEN
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+                        'Insufficient memory to store beam angles'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
+    END IF
 
     IF ( Angles%Nbeta > 2 ) Angles%beta( 3 ) = -999.9
     !READ( ENVFile, * ) Angles%beta
@@ -164,8 +185,13 @@ CONTAINS
 
        Angles%Nbeta = Pos%Ntheta
        ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
-       IF ( iAllocStat /= 0 ) CALL ERROUT( 'ReadRayBearingAngles', &
-                                    'Insufficient memory to store beam angles')
+        IF ( iAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+                            'Insufficient memory to store beam angles'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
+        END IF
+
        ! Nbeta should = Ntheta
        Angles%beta( 1 : Angles%Nbeta ) = Pos%theta( 1 : Pos%Ntheta )  
     END IF
@@ -181,14 +207,22 @@ CONTAINS
     IF ( Angles%Nbeta > Number_to_Echo ) WRITE( PRTFile, "( G14.6 )" ) &
                                             ' ... ', Angles%beta( Angles%Nbeta )
 
-    IF ( Angles%Nbeta>1 .AND. Angles%beta( Angles%Nbeta )==Angles%beta(1) ) &
-         CALL ERROUT( 'ReadRayBearingAngles', &
-         'First and last beam take-off angle are identical' )
+    IF ( Angles%Nbeta>1 .AND. &
+        Angles%beta( Angles%Nbeta )==Angles%beta(1) ) THEN
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+         'First and last beam take-off angle are identical'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
+    END IF
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
-       IF ( Angles%iSingle_beta < 1 .OR. Angles%iSingle_beta > Angles%Nbeta ) &
-            CALL ERROUT( 'ReadRayBearingAngles', &
-            'Selected beam, iSingl not in [ 1, Angles%Nbeta ]' )
+        IF ( Angles%iSingle_beta < 1 .OR. &
+            Angles%iSingle_beta > Angles%Nbeta ) THEN
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+            'Selected beam, iSingl not in [ 1, Angles%Nbeta ]'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
+        END IF
     END IF
     Angles%beta  = DegRad * Angles%beta   ! convert to radians
 

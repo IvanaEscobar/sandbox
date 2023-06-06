@@ -8,8 +8,12 @@ MODULE beamPattern
 
   ! Loads a source beam pattern
 
-  USE ihop_fatalError, only: ERROUT
+  USE iHopParams, only: PRTFile, SBPFile
+
   IMPLICIT NONE
+! == Global variables ==
+#include "EEPARAMS.h"
+
   PRIVATE
 
 ! public interfaces
@@ -17,15 +21,16 @@ MODULE beamPattern
     public NSBPPts, SrcBmPat, SBPFlag, ReadPat
 !=======================================================================
 
-  INTEGER, PARAMETER         :: SBPFile = 50
   INTEGER                    :: NSBPPts ! Number of source beam-pattern points
   REAL (KIND=_RL90), ALLOCATABLE :: SrcBmPat( :, : )
   CHARACTER (LEN=1)          :: SBPFlag ! '*' or 'O' to indicate a directional or omni pattern
 
 CONTAINS
-  SUBROUTINE ReadPat( FileRoot, PRTFile )
+  SUBROUTINE ReadPat( FileRoot, myThid )
 
-    INTEGER,            INTENT( IN ) :: PRTFile  ! Unit for print file
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid 
+
     INTEGER                          :: I, IAllocStat, IOStat
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
@@ -35,20 +40,25 @@ CONTAINS
        WRITE( PRTFile, * ) 'Using source beam pattern file'
 
        OPEN( UNIT = SBPFile, FILE = TRIM( FileRoot ) // '.sbp', STATUS = 'OLD',&
-             IOSTAT = IOStat, ACTION = 'READ' )
+            IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOstat /= 0 ) THEN
-          WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
-          CALL ERROUT( 'BELLHOP-ReadPat', &
-                                    'Unable to open source beampattern file' )
+            WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+                                 'Unable to open source beampattern file'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadPat'
        END IF
 
        READ(  SBPFile, * ) NSBPPts
        WRITE( PRTFile, * ) 'Number of source beam pattern points', NSBPPts
 
        ALLOCATE( SrcBmPat( NSBPPts, 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( 'BELLHOP-ReadPat', &
-            'Insufficient memory for source beam pattern data: reduce # SBP points' )
+       IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            'Insufficient memory for beam pattern data: reduce # SBP points'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadPat'
+        END IF
 
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Angle (degrees)  Power (dB)'
@@ -59,12 +69,16 @@ CONTAINS
        END DO
 
     ELSE   ! no pattern given, use omni source pattern
-       NSBPPts = 2
-       ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) CALL ERROUT( 'BELLHOP-ReadPat', &
-                                           'Insufficient memory'  )
-       SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
-       SrcBmPat( 2, : ) = [  180.0, 0.0 ]
+        NSBPPts = 2
+        ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
+        IF ( IAllocStat /= 0 ) THEN
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+                                 'Insufficient memory'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadPat'
+        END IF
+        SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
+        SrcBmPat( 2, : ) = [  180.0, 0.0 ]
     ENDIF
 
     SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale

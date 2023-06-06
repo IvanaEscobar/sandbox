@@ -9,7 +9,6 @@ MODULE readEnviHop
   ! mbp 12/2018, based on much older subroutine
 
   USE iHopParams,   only: PRTFile, RAYFile, DELFile, ARRFile, SHDFile
-  USE ihop_fatalError, only: ERROUT
   USE iHopMod,      only: Title, Beam
   USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
@@ -41,9 +40,15 @@ CONTAINS
 
     USE angleMod,       only: ReadRayElevationAngles, ReadRayBearingAngles
     USE srPositions,    only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
-                              ReadRcvrBearings, ReadFreqVec
+#ifdef IHOP_THREED
+                              ReadRcvrBearings, &
+#endif /* IHOP_THREED */
+                              ReadFreqVec
 
-    INTEGER, INTENT(IN) :: myThid
+    ! == Routine arguments ==
+    ! myThid :: Thread number for this instance of the routine.
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT( IN ) :: myThid
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
@@ -59,8 +64,10 @@ CONTAINS
 
     ! Prepend model name to title
 #ifdef IHOP_THREED
-    CALL ERROUT( 'READENV', &
-                 '3D not supported in ihop' )
+    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                         '3D not supported in ihop'
+    CALL PRINT_ERROR( msgBuf, myThid )
+    STOP 'ABNORMAL END: S/R ReadEnvironment'
     Title( 1 :11 ) = 'BELLHOP3D- '
     Title( 12:80 ) = IHOP_title
 #else /* IHOP_THREED */
@@ -73,12 +80,13 @@ CONTAINS
 
     ! *** Top Boundary ***
     Bdry%Top%HS%Opt = IHOP_topopt
-    CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot )
+    CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot, &
+                     myThid )
 
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
         "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
 
-    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS )
+    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS, myThid )
 
     ! *** Ocean SSP ***
     Bdry%Bot%HS%Depth = IHOP_depth
@@ -100,18 +108,21 @@ CONTAINS
 
     SELECT CASE ( Bdry%Bot%HS%Opt( 2 : 2 ) )
     CASE ( '~', '*' )
-       WRITE( PRTFile, * ) '    Bathymetry file selected'
+        WRITE( PRTFile, * ) '    Bathymetry file selected'
     CASE( ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READENV', 'Unknown bottom option letter in second position' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                             'Unknown bottom option letter in second position'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadEnvironment'
     END SELECT
 
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
-    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS )
+    CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
     ! *** source and receiver locations ***
 
-    CALL ReadSxSy ! Read source/receiver x-y coordinates
+    CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
 
@@ -119,25 +130,26 @@ CONTAINS
     Pos%NRz = IHOP_nrd
     CALL AllocateSR( Pos%NSz, Pos%Sz, IHOP_sd )
     CALL AllocateSR( Pos%NRz, Pos%Rz, IHOP_rd )
-    CALL ReadSzRz( ZMin, ZMax )
+    CALL ReadSzRz( ZMin, ZMax, myThid )
 
     Pos%NRr = IHOP_nrr
     CALL AllocateSR( Pos%NRr, Pos%Rr, IHOP_rr )
-    CALL ReadRcvrRanges
+    CALL ReadRcvrRanges( myThid )
 
 #ifdef IHOP_THREED
-    CALL ReadRcvrBearings
+    CALL ReadRcvrBearings( myThid )
 #endif /* IHOP_THREED */
-    CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ) )
+    CALL ReadfreqVec( IHOP_freq,  Bdry%Top%HS%Opt( 6:6 ), myThid )
 
     ! *** run type ***
     Beam%RunType = IHOP_runopt
-    CALL ReadRunType( Beam%RunType, PlotType )
+    CALL ReadRunType( Beam%RunType, PlotType, myThid )
 
     Depth = Zmax - Zmin   ! water depth
-    CALL ReadRayElevationAngles( IHOP_freq, Depth, Bdry%Top%HS%Opt, Beam%RunType )
+    CALL ReadRayElevationAngles( IHOP_freq, Depth, Bdry%Top%HS%Opt, &
+        Beam%RunType, myThid )
 #ifdef IHOP_THREED
-    CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType )
+    CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType, myThid )
 #endif /* IHOP_THREED */
 
     WRITE( PRTFile, * )
@@ -147,8 +159,10 @@ CONTAINS
 
     ! Limits for tracing beams
 #ifdef IHOP_THREED
-    CALL ERROUT( 'Readenvihop', &
-                  '3D rays not supported in ihop') 
+    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                         '3D not supported in ihop'
+    CALL PRINT_ERROR( msgBuf, myThid )
+    STOP 'ABNORMAL END: S/R ReadEnvironment'
     !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
     Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
     Beam%Box%y = 1000.0 * Beam%Box%y   ! convert km to m
@@ -254,7 +268,10 @@ CONTAINS
           CASE ( 'S' )
              WRITE( PRTFile, * ) 'Standard curvature condition'
           CASE DEFAULT
-             CALL ERROUT( 'READENV', 'Unknown curvature condition' )
+                WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                                     'Unknown curvature condition'
+                CALL PRINT_ERROR( msgBuf, myThid )
+                STOP 'ABNORMAL END: S/R ReadEnvironment'
           END SELECT
 
           WRITE( PRTFile, * ) 'UNUSED epsMultiplier', Beam%epsMultiplier
@@ -267,8 +284,10 @@ CONTAINS
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
           WRITE( PRTFile, * ) 'Component                 = ', Beam%Component
        CASE DEFAULT
-          CALL ERROUT( 'READENV', &
-              'Unknown beam type (second letter of run type)' )
+            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                                'Unknown beam type (second letter of run type)'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadEnvironment'
        END SELECT
     END IF
 
@@ -277,7 +296,12 @@ CONTAINS
 
   !**********************************************************************!
 
-  SUBROUTINE ReadTopOpt( TopOpt, BC, AttenUnit, FileRoot )
+  SUBROUTINE ReadTopOpt( TopOpt, BC, AttenUnit, FileRoot, myThid )
+
+    ! == Routine Arguments ==
+    ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT(IN) :: myThid
 
     CHARACTER (LEN= 6), INTENT( OUT ) :: TopOpt
     CHARACTER (LEN= 1), INTENT( OUT ) :: BC         ! Boundary condition type
@@ -308,7 +332,10 @@ CONTAINS
     CASE ( 'A' )
        WRITE( PRTFile, * ) '    Analytic SSP option'
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown option for SSP approximation' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+                             'Unknown option for SSP approximation'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     ! Attenuation options
@@ -327,7 +354,10 @@ CONTAINS
     CASE ( 'L' )
        WRITE( PRTFile, * ) '    Attenuation units: Loss parameter'
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown attenuation units' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+                             'Unknown attenuation units'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     ! optional addition of volume attenuation using standard formulas
@@ -358,7 +388,10 @@ CONTAINS
        END DO
     CASE ( ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in fourth position' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+                             'Unknown top option letter in fourth position'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     SELECT CASE ( TopOpt( 5 : 5 ) )
@@ -366,7 +399,10 @@ CONTAINS
        WRITE( PRTFile, * ) '    Altimetry file selected'
     CASE ( '-', '_', ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in fifth position' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+                             'Unknown top option letter in fifth position'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     SELECT CASE ( TopOpt( 6 : 6 ) )
@@ -374,18 +410,26 @@ CONTAINS
        WRITE( PRTFile, * ) '    Development options enabled'
     CASE ( ' ' )
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadTopOpt', 'Unknown top option letter in sixth position' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+                             'Unknown top option letter in sixth position'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
   END SUBROUTINE ReadTopOpt
 
   !**********************************************************************!
 
-  SUBROUTINE ReadRunType( RunType, PlotType )
+  SUBROUTINE ReadRunType( RunType, PlotType, myThid )
 
     ! Read the RunType variable and print to .prt file
 
     USE srPositions, only: Pos
+
+    ! == Routine Arguments ==
+    ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT(IN) :: myThid
 
     CHARACTER (LEN= 7), INTENT( INOUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
@@ -408,7 +452,10 @@ CONTAINS
     CASE ( 'a' )
        WRITE( PRTFile, * ) 'Arrivals calculation, binary file output'
     CASE DEFAULT
-       CALL ERROUT( 'READENV: ReadRunType', 'Unknown RunType selected' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
+            'Unknown RunType selected'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R ReadRunType'
     END SELECT
 
     SELECT CASE ( RunType( 2 : 2 ) )
@@ -446,8 +493,12 @@ CONTAINS
        PlotType = 'rectilin  '
     CASE ( 'I' )
        WRITE( PRTFile, * ) 'Irregular grid: Receivers at Rr( : ) x Rz( : )'
-       IF ( Pos%NRz /= Pos%NRr ) CALL ERROUT( 'READENV: ReadRunType', &
-           'Irregular grid option selected with NRz not equal to Nr' )
+       IF ( Pos%NRz /= Pos%NRr ) THEN
+            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
+                    'Irregular grid option selected with NRz not equal to Nr'
+            CALL PRINT_ERROR( msgBuf, myThid )
+            STOP 'ABNORMAL END: S/R ReadRunType'
+       END IF
        PlotType = 'irregular '
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at', &
@@ -469,9 +520,14 @@ CONTAINS
 
   !**********************************************************************!
 
-  SUBROUTINE TopBot( freq, AttenUnit, HS )
+  SUBROUTINE TopBot( freq, AttenUnit, HS, myThid )
 
     ! Handles top and bottom boundary conditions
+
+    ! == Routine Arguments ==
+    ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
+    INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT( IN    ) :: freq  ! frequency
     CHARACTER (LEN=2), INTENT( IN    ) :: AttenUnit
@@ -496,7 +552,10 @@ CONTAINS
     CASE ( 'P' )
        WRITE( PRTFile, * ) '    reading PRECALCULATED IRC'
     CASE DEFAULT
-       CALL ERROUT( 'READENV: TopBot', 'Unknown boundary condition type' )
+        WRITE(msgBuf,'(2A)') 'READENVIHOP TopBot: ', & 
+                             'Unknown boundary condition type'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R TopBot'
     END SELECT
 
     ! ****** Read in BC parameters depending on particular choice ******
@@ -523,9 +582,9 @@ CONTAINS
        ft            = 1000.0
 
        HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, AttenUnit, &
-                      betaPowerLaw, ft )
+                      betaPowerLaw, ft, myThid )
        HS%cs  = CRCI( zTemp, betaR,  betaI,  freq, freq, AttenUnit, &
-                      betaPowerLaw, ft )
+                      betaPowerLaw, ft, myThid )
 
        HS%rho = rhoR
     CASE ( 'G' )            ! *** Grain size (formulas from UW-APL HF Handbook)
@@ -571,7 +630,8 @@ CONTAINS
        ! loss parameter Sect. IV., Eq. (4) of handbook
        alphaI = alpha2_f * ( vr / 1000 ) * 1500.0 * log( 10.0 ) / ( 40.0 * PI )
 
-       HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, 'L ', betaPowerLaw, ft )
+       HS%cp  = CRCI( zTemp, alphaR, alphaI, freq, freq, 'L ', &
+                      betaPowerLaw, ft, myThid )
        HS%cs  = 0.0
        HS%rho = rhoR
        WRITE( PRTFile, &
