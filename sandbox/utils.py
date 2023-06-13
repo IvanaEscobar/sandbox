@@ -42,7 +42,7 @@ def wgs84Distance( lonA, latA, lonB, latB ):
     dlat = abs(latB - latA)
     dlon = abs(lonB - lonA) 
 
-    latM = 111132.953 - 559.850*cos( 2 * midLat ) + 1.175*cos( 4 * midLat)
+    latM = 111132.953 - 559.850*cos( 2*midLat ) + 1.175*cos( 4*midLat )
     lonM = 111412.877*cos( midLat ) - 93.504*cos( 3*midLat )
 
     return sqrt( (dlat*latM)**2 + (dlon*lonM)**2 ) 
