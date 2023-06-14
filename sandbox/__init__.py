@@ -24,6 +24,9 @@ from .nesb import (
         globalGRID,
         dsBathy,
         )
+from .caatex import (
+        caatex_coords,
+        )
 
 __all__ = [ 'utils',
             'unesco',
