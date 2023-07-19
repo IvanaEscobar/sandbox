@@ -687,7 +687,7 @@ CONTAINS
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
           IF ( SSP%NPts == 1 ) THEN
               WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
-              WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', 
+              WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', &
                                     'The SSP must have at least 2 points'
               CALL PRINT_ERROR( msgBuf, myThid ) 
               STOP 'ABNORMAL END: S/R ReadSSP'
@@ -720,7 +720,7 @@ CONTAINS
       REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
 
       ! == Local Variables ==
-      INTEGER ii
+      INTEGER ii, jj
 
       SSP%Nz = Nr ! NOT going through the bathymetry, need to change BTYFile
       SSP%Nr = IHOP_NPTS_RANGE
@@ -749,15 +749,17 @@ CONTAINS
       DO bj=myByLo(myThid),myByHi(myThid)
        DO bi=myBxLo(myThid),myBxHi(myThid)
         DO i=1,sNx
-         IF (xC(i,1,bi,bj) .EQ. ihop_xc) THEN
-          DO j=1,sNy
-           DO ii=1,IHOP_NPTS_RANGE
-            IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii)) THEN
-             SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
+         DO j=1,sNy
+          DO jj=1,IHOP_NPTS_RANGE
+           DO ii=1,IHOP_IDW_NPTS
+            IF (xC(i,1,bi,bj) .EQ. ihop_xc(ii,jj)) THEN
+             IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii,jj)) THEN
+              SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
+             ENDIF
             ENDIF
-           ENDDO
+           ENDDO 
           ENDDO
-         ENDIF
+         ENDDO
         ENDDO
        ENDDO
       ENDDO

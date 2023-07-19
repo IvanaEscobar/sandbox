@@ -40,6 +40,10 @@
       PARAMETER ( nrr=1 )
 #endif
 
+!     Number of Range points:
+!     =============================
       INTEGER IHOP_NPTS_RANGE 
-      PARAMETER( IHOP_NPTS_RANGE = 6)
+      PARAMETER( IHOP_NPTS_RANGE = 6 )
+      INTEGER IHOP_IDW_NPTS
+      PARAMETER( IHOP_IDW_NPTS = 4 )
 !---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
