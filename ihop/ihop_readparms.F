@@ -31,7 +31,7 @@ C     msgBuf     :: Informational/error message buffer
 C     iUnit      :: Work variable for IO unit number
       CHARACTER*(MAX_LEN_MBUF) msgBuf
       INTEGER iUnit
-      INTEGER i
+      INTEGER i, j
 
       NAMELIST /IHOP_PARM01/
      &      IHOP_fileroot,
@@ -232,10 +232,13 @@ C     Check paramters of IHOP_PARM02
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C--   Default values for IHOP_PARM03
       useSSPFile    = .TRUE.
-      ihop_xc       = 0. _d 0
-      DO i=1,IHOP_NPTS_RANGE
-        ihop_yc(i)      = 0. _d 0
-        ihop_ranges(i)  = 0. _d 0
+      DO j=1,IHOP_NPTS_RANGE
+       DO i=1,IHOP_IDW_NPTS
+        ihop_xc(i,j)            = 0. _d 0
+        ihop_yc(i,j)            = 0. _d 0
+        ihop_idw_weights(i,j)   = 0. _d 0
+       ENDDO
+       ihop_ranges(j)  = 0. _d 0
       ENDDO
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|

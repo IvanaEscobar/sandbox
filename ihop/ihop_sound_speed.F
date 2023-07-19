@@ -142,38 +142,6 @@ C-    end-if calc_soundSpeed
       ENDIF
 
 #endif /* ALLOW_IHOP */ 
-!!=============================================
-!! Option 1: COMPARING LAT LON VALUES DIRECTLY
-!!=============================================
-!      WRITE(msgBuf, *) 'ESCOBAR option1: '
-!      CALL PRINT_ERROR(msgBuf, myThid)
-!
-!      DO bj=myByLo(myThid),myByHi(myThid)
-!       DO bi=myBxLo(myThid),myBxHi(myThid)
-!        DO i=1,sNx
-!         IF (xC(i,1,bi,bj) .EQ. ihop_xc) THEN
-!          DO j=1,sNy
-!           DO ii=1,IHOP_NPTS_RANGE
-!            IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii)) THEN
-!             WRITE(msgBuf, *) 'ESCOBAR: ',
-!     &       i,j,bi,bj
-!             CALL PRINT_ERROR(msgBuf, myThid)
-!             WRITE(msgBuf, *) 'ESCOBAR ssp: ',
-!     &       ihop_ssp(i,j,:,bi,bj)
-!             CALL PRINT_ERROR(msgBuf, myThid)
-!             WRITE(msgBuf, *) 'ESCOBAR theta: ',
-!     &       THETA(i,j,:,bi,bj)
-!             CALL PRINT_ERROR(msgBuf, myThid)
-!            ENDIF
-!           ENDDO
-!          ENDDO
-!         ENDIF
-!        ENDDO
-!       ENDDO
-!      ENDDO
-!!=============================================
-!! END Option 1
-!!=============================================
 
       RETURN
       END
