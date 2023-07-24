@@ -261,6 +261,11 @@ C     == Global variables ==
 # include "LONGSTEP.h"
 #endif
 
+#ifdef ALLOW_IHOP
+# include "IHOP_SIZE.h"
+# include "IHOP.h"
+#endif
+
 #ifdef ALLOW_AUTODIFF
 # include "AUTODIFF_MYFIELDS.h"
 # include "FFIELDS.h"
@@ -328,6 +333,7 @@ C     == Global variables ==
 #  include "BLING_LOAD.h"
 # endif
 # ifdef ALLOW_IHOP
+#  include "IHOP_SIZE.h"
 #  include "IHOP.h"
 # endif
 # ifdef ALLOW_OBCS
@@ -1106,12 +1112,8 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
 
 #ifdef ALLOW_IHOP
       CALL IHOP_SOUND_SPEED( myThid )
-      IF (endTime.EQ.3110400000. .AND. myIter.EQ.nIter0+2500000) THEN
-       CALL IHOP_DRIVER(myTime,myIter,myThid)
-      ELSE IF (endTime.EQ.12000. .AND. myIter.EQ.nIter0+8) THEN
-       CALL IHOP_DRIVER(myTime,myIter,myThid)
-      ELSE IF (myIter.EQ.nIter0+25918) THEN
-       CALL IHOP_DRIVER(myTime,myIter,myThid)
+      IF ( ihop_iter .EQ. myIter ) THEN
+       CALL IHOP_DRIVER( myTime,myIter,myThid )
       ENDIF
 #endif /* ALLOW_IHOP */
 

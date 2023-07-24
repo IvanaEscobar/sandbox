@@ -69,8 +69,13 @@ C     iUnit      :: Work variable for IO unit number
 
       NAMELIST /IHOP_PARM03/
      &      useSSPFile,
-     &      ihop_yc,
+     &      IHOP_interpfile,
+     &      ihop_iter,
+     &      IHOP_npts_range,
+     &      IHOP_npts_idw,
      &      ihop_xc,
+     &      ihop_yc,
+     &      ihop_idw_weights,
      &      ihop_ranges
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
@@ -230,10 +235,15 @@ C     Check paramters of IHOP_PARM02
       ENDIF
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
-C--   Default values for IHOP_PARM03
-      useSSPFile    = .TRUE.
-      DO j=1,IHOP_NPTS_RANGE
-       DO i=1,IHOP_IDW_NPTS
+C--   Default values for IHOP_PARM03 some are populated in
+C     ihop_init_fixed.f
+      useSSPFile        = .TRUE.
+      IHOP_interpfile   = ''
+      ihop_iter         = 0
+      IHOP_npts_range   = 0
+      IHOP_npts_idw     = 0
+      DO i=1,IHOP_MAX_NC_SIZE
+       DO j=1,IHOP_MAX_NC_SIZE
         ihop_xc(i,j)            = 0. _d 0
         ihop_yc(i,j)            = 0. _d 0
         ihop_idw_weights(i,j)   = 0. _d 0
@@ -250,6 +260,12 @@ C     Read parameters from open data file
      &                    SQUEEZE_RIGHT, myThid )
 
 C     Check paramters of IHOP_PARM03
+      IF ( IHOP_interpfile.EQ.'' ) THEN
+       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_interpfile" ',
+     &  'Provide interpolation file name for ihop package'  
+       CALL PRINT_ERROR( msgBuf, myThid )
+       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+      ENDIF
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
