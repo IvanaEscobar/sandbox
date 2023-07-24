@@ -1,1 +1,6 @@
 testme
+make_readnetcdf
+
+
+*.f
+*.o
