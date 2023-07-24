@@ -14,9 +14,9 @@
 !   nsd    :: No. of sound sources at range of 0 m
 !   nrd    :: No. of sound receivers at a single range
 !   nrr    :: No. of sound receivers at a single depth
-!     =============================
+!     ================================
 !     Number of Sources:
-!     =============================
+!     ================================
       INTEGER nsd
 #ifdef IHOP_MULTIPLE_SOURCES
       PARAMETER ( nsd=10 )
@@ -25,7 +25,7 @@
 #endif
     
 !     Number of Receivers:
-!     =============================
+!     ================================
       INTEGER nrd
       INTEGER nrr
 #ifdef IHOP_MULTIPLE_RECEIVER_DEPTHS
@@ -40,10 +40,12 @@
       PARAMETER ( nrr=1 )
 #endif
 
-!     Number of Range points:
-!     =============================
-      INTEGER IHOP_NPTS_RANGE 
-      PARAMETER( IHOP_NPTS_RANGE = 6 )
-      INTEGER IHOP_IDW_NPTS
-      PARAMETER( IHOP_IDW_NPTS = 4 )
+!     Number of interpolation points:
+!     ================================
+      INTEGER IHOP_MAX_NC_SIZE
+      PARAMETER ( IHOP_MAX_NC_SIZE = 10 )
+!      INTEGER IHOP_NPTS_RANGE 
+!      PARAMETER( IHOP_NPTS_RANGE = 6 )
+!      INTEGER IHOP_IDW_NPTS
+!      PARAMETER( IHOP_IDW_NPTS = 4 )
 !---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|

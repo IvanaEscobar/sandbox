@@ -33,18 +33,21 @@
 !-- COMMON /IHOP_PARAMS_C/ IHOP Character-type parameters:
 !   IHOP_fileroot   :: File name for reading in an environment
 !   IHOP_title      :: Title name for writing into output files 
+!   IHOP_interpfile :: File name for reading NetCDF inputs
 !   IHOP_topopt     :: SSP interpolation, top boundary type
 !   IHOP_botopt     :: bottom boundary type
 !   IHOP_runopt     :: run type (R/E/A)
 
-      CHARACTER*(100) IHOP_fileroot
-      CHARACTER*(100) IHOP_title
+      CHARACTER*(MAX_LEN_FNAM) IHOP_fileroot
+      CHARACTER*(MAX_LEN_FNAM) IHOP_title
+      CHARACTER*(MAX_LEN_FNAM) IHOP_interpfile
       CHARACTER*(6) IHOP_topopt
       CHARACTER*(2) IHOP_botopt
       CHARACTER*(7) IHOP_runopt
 
       COMMON /IHOP_PARAMS_C/                                                                                                             &
-     &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt
+     &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt,                                                            &
+     &      IHOP_interpfile
 
 !-- COMMON /IHOP_PARAMS_I/ IHOP Integer-type parameters:
 !   IHOP_nalpha :: No. of rays to propagate
@@ -56,11 +59,15 @@
       INTEGER IHOP_nsd
       INTEGER IHOP_nrd
       INTEGER IHOP_nrr
+      INTEGER ihop_iter
+      INTEGER IHOP_npts_range
+      INTEGER IHOP_npts_idw
 
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
      &      IHOP_nrd, IHOP_nrr,                                                                                                         &
-     &      IHOP_nalpha
+     &      IHOP_npts_range, IHOP_npts_idw,                                                                                                         &
+     &      IHOP_nalpha, ihop_iter
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
 !   IHOP_freq           :: frequency (Hz)
@@ -92,16 +99,16 @@
       _RL IHOP_step
       _RL IHOP_zbox
       _RL IHOP_rbox
-      _RL ihop_xc (IHOP_IDW_NPTS, IHOP_NPTS_RANGE)
-      _RL ihop_yc (IHOP_IDW_NPTS, IHOP_NPTS_RANGE)
-      _RL ihop_idw_weights (IHOP_IDW_NPTS, IHOP_NPTS_RANGE)
-      _RL ihop_ranges (IHOP_NPTS_RANGE) 
+      _RL ihop_xc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RL ihop_yc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RL ihop_idw_weights ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RL ihop_ranges ( IHOP_MAX_NC_SIZE )
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
      &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
      &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
      &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox,                                                                       &
-     &      ihop_yc,ihop_xc, ihop_idw_weights, ihop_ranges
+     &      ihop_yc, ihop_xc, ihop_idw_weights, ihop_ranges
 
 
 

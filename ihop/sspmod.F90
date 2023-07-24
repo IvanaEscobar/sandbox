@@ -750,8 +750,8 @@ CONTAINS
        DO bi=myBxLo(myThid),myBxHi(myThid)
         DO i=1,sNx
          DO j=1,sNy
-          DO jj=1,IHOP_NPTS_RANGE
-           DO ii=1,IHOP_IDW_NPTS
+          DO jj=1,IHOP_npts_range
+           DO ii=1,IHOP_npts_idw
             IF (xC(i,1,bi,bj) .EQ. ihop_xc(ii,jj)) THEN
              IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii,jj)) THEN
               SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
