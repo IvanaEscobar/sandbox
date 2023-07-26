@@ -261,11 +261,6 @@ C     == Global variables ==
 # include "LONGSTEP.h"
 #endif
 
-#ifdef ALLOW_IHOP
-# include "IHOP_SIZE.h"
-# include "IHOP.h"
-#endif
-
 #ifdef ALLOW_AUTODIFF
 # include "AUTODIFF_MYFIELDS.h"
 # include "FFIELDS.h"
@@ -1112,9 +1107,7 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
 
 #ifdef ALLOW_IHOP
       CALL IHOP_SOUND_SPEED( myThid )
-      IF ( ihop_iter .EQ. myIter ) THEN
-       CALL IHOP_DRIVER( myTime,myIter,myThid )
-      ENDIF
+      CALL IHOP_DRIVER( myTime,myIter,myThid )
 #endif /* ALLOW_IHOP */
 
 C--   Do "blocking" sends and receives for tendency "overlap" terms

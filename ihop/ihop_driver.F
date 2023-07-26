@@ -13,12 +13,11 @@ C !FORTRAN90 USE MODULES: ===============================================
       USE bellhop
 
       IMPLICIT NONE
+C  == Global variables ==
 C#include "SIZE.h"
+C#include "GRID.h"
 C#include "EEPARAMS.h"
 C#include "PARAMS.h"
-C#include "GRID.h"
-#include "SURFACE.h"
-#include "FFIELDS.h"
 C#include "IHOP_SIZE.h"
 C#include "IHOP.h"
 
@@ -61,9 +60,11 @@ C  v3d      :: wind speed, 2nd  component (Y-dir)    [m/s]
 CEOP
 
 #ifdef ALLOW_IHOP
-      WRITE( msgBuf, * ) 'Escobar: in IHOP_DRIVER:', myTime
-      CALL PRINT_ERROR( msgBuf, myThid )
-      CALL IHOP_INIT( myThid )
+      IF ( ihop_iter .EQ. myIter ) THEN
+       WRITE( msgBuf, * ) 'Escobar: in IHOP_DRIVER:', myTime
+       CALL PRINT_ERROR( msgBuf, myThid )
+       CALL IHOP_INIT( myThid )
+      ENDIF
 #endif /* ALLOW_IHOP */
 
       RETURN
