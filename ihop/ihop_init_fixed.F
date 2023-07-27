@@ -26,6 +26,8 @@ CEOP
 
 #ifdef ALLOW_IHOP
 C     !LOCAL VARIABLES:
+      CHARACTER*(MAX_LEN_MBUF) msgBuf
+      INTEGER :: iUnit
       INTEGER :: err, ncid, dimid1, dimid2, varid1, varid2, varid3
       INTEGER :: k, i, j
       _RL :: data1vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
@@ -35,8 +37,10 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C Read NetCDF input: setting the acoustic domain
       err = NF_OPEN(TRIM(IHOP_interpfile), NF_NOWRITE, ncid)
       IF (err .NE. NF_NOERR) THEN
-       PRINT *, 'Error opening the NetCDF IHOP input file.'
-       RETURN
+        WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: ',
+     &  'NetCDF IHOP input file NOT found'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
 
 C Get dimension IDs
@@ -48,8 +52,10 @@ C get dimension lengths
 
       IF ( IHOP_npts_range>IHOP_MAX_NC_SIZE .OR. 
      &     IHOP_npts_idw>IHOP_MAX_NC_SIZE ) THEN
-       PRINT *, 'Error: Dimensions exceed maximum allowable size'
-       STOP
+        WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: reading dims',
+     &  'NetCDF Dimensions exceed maximum allowable size'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
 
 C Get data variable IDs
@@ -58,17 +64,22 @@ C Get data variable IDs
       err = NF_INQ_VARID( ncid, 'ihop_idw_weights', varid3 )
 
       IF (err .NE. NF_NOERR) THEN
-       PRINT *, 'Error: Not the right data variables'
-       STOP
+        WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: ',
+     &  'NetCDF IHOP data variable names are incorrect'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
+
 C get data variables
       err = NF_GET_VAR( ncid, varid1, data1vec )
       err = NF_GET_VAR( ncid, varid2, data2vec )
       err = NF_GET_VAR( ncid, varid3, data3vec )
       
       IF (err .NE. NF_NOERR) THEN
-       PRINT *, 'Error reading the NetCDF IHOP input file.'
-       RETURN
+        WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: ',
+     &  'NetCDF IHOP data variables are incorrect'
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
 
 C 'reshape' data variables to 2D array
