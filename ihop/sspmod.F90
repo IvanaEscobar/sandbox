@@ -722,6 +722,9 @@ CONTAINS
       ! == Local Variables ==
       INTEGER ii, jj
 
+      WRITE(msgBuf, * ) 'Escobar: ', IHOP_NPTS_RANGE, ' in Extract SSP.'
+      CALL PRINT_ERROR( msgBuf, myThid )
+
       SSP%Nz = Nr ! NOT going through the bathymetry, need to change BTYFile
       SSP%Nr = IHOP_NPTS_RANGE
 
