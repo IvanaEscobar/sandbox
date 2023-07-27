@@ -66,7 +66,7 @@
       COMMON /IHOP_PARAMS_I/                                                                                                            &
      &      IHOP_nsd,                                                                                                                   &
      &      IHOP_nrd, IHOP_nrr,                                                                                                         &
-     &      IHOP_npts_range, IHOP_npts_idw,                                                                                                         &
+     &      IHOP_npts_range, IHOP_npts_idw,                                                                                             &
      &      IHOP_nalpha, ihop_iter
 
 !-- COMMON /IHOP_PARAMS_R/ IHOP Real-type parameters:
@@ -99,8 +99,8 @@
       _RL IHOP_step
       _RL IHOP_zbox
       _RL IHOP_rbox
-      _RL ihop_xc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
-      _RL ihop_yc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RS ihop_xc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RS ihop_yc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
       _RL ihop_idw_weights ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
       _RL ihop_ranges ( IHOP_MAX_NC_SIZE )
 
@@ -109,7 +109,6 @@
      &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
      &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox,                                                                       &
      &      ihop_yc, ihop_xc, ihop_idw_weights, ihop_ranges
-
 
 
 #ifdef IHOP_3D_STATE
