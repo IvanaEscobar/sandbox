@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE subTabulate
+MODULE subTab_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -62,4 +62,4 @@ CONTAINS
 
   END SUBROUTINE SubTab_dble
 
-END MODULE subTabulate
+END MODULE subTab_mod

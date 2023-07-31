@@ -99,10 +99,10 @@
       _RL IHOP_step
       _RL IHOP_zbox
       _RL IHOP_rbox
-      _RS ihop_xc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
-      _RS ihop_yc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
       _RL ihop_idw_weights ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
       _RL ihop_ranges ( IHOP_MAX_NC_SIZE )
+      _RS ihop_xc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
+      _RS ihop_yc ( IHOP_MAX_NC_SIZE, IHOP_MAX_NC_SIZE )
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
      &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
@@ -117,12 +117,8 @@
       COMMON /IHOP_STATE_3D/                                                                                                             &
      &    ihop_ssp 
 #endif /* IHOP_3D_STATE */
+
 #ifdef IHOP_2D_STATE
-!C     IHOP 2-dim. fields
-      _RL ihop_SST (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RL myPa_Surf2(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      COMMON /IHOP_STATE_2D/                                                                                                             &
-     &    ihop_SST, myPa_Surf2
 #endif /* IHOP_2D_STATE */
 
 #ifdef IHOP_TENDENCY

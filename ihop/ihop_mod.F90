@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE iHopMod
+MODULE ihop_mod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -13,19 +13,43 @@ MODULE iHopMod
 ! <DESCRIPTION>
 ! </DESCRIPTION>
 
-  USE iHopParams,   only: MaxN ! Default: 100 000
   IMPLICIT NONE
+! == Global variables ==
+#include "SIZE.h"
+#include "EEPARAMS.h"
+#include "PARAMS.h"
+
   PRIVATE
 
 ! public interfaces
 !=======================================================================
 
-    public Nrz_per_range, iStep, afreq, SrcDeclAngle, Title, &
-           BeamStructure, Beam, &
-           ray2D, ray2DPt
+    public  rad2deg, i, &
+            PRTFile, RAYFile, DELFile, SHDFile, ARRFile, SSPFile &
+            ATIFile, BTYFile, BRCFile, SBPFile, MaxN,            &
+            Nrz_per_range, iStep, afreq, SrcDeclAngle, Title,    &
+            BeamStructure, Beam, ray2D, ray2DPt
 
 !=======================================================================
 
+  ! *** fixed parameters useful for ONLY ihop ***
+  REAL(KIND=_RL90), PARAMETER :: rad2deg = 180.D0 / PI
+
+  COMPLEX (KIND=_RL90), PARAMETER :: i = ( 0.0D0, 1.0D0 )
+
+  INTEGER, PARAMETER :: PRTFile = 6, &     ! standard output file
+                        RAYFile = 21, &    ! ray paths file
+                        DELFile = 22, &    ! ray paths file
+                        SHDFile = 25, &    ! TL calc output file
+                        ARRFile = 36, &    ! Arrivals calc output file
+                        SSPFile = 40, &    ! optional 2D/3D SSP file
+                        ATIFile = 41, &    ! optional 2D/3D altimetry
+                        BTYFile = 42, &    ! optional 2D/3D bathymetry
+                        BRCFile = 31, TRCFile = 32, IRCFile = 12, &
+                        SBPFile = 50, &
+                        MaxN = 100000
+
+  ! *** varying parameters for ihop ***
   INTEGER            :: Nrz_per_range, iStep
   REAL (KIND=_RL90)  :: afreq, SrcDeclAngle, SrcAzimAngle
   CHARACTER (LEN=80) :: Title
@@ -56,4 +80,4 @@ MODULE iHopMod
   END TYPE ray2DPt
   TYPE( ray2DPt )      :: ray2D( MaxN )
 
-END MODULE iHopMod
+END MODULE ihop_mod

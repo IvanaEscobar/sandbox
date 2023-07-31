@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE sortMod
+MODULE sort_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -151,4 +151,4 @@ CONTAINS
 
   END SUBROUTINE Sort_cmplx
 
-END MODULE sortMod
+END MODULE sort_mod
