@@ -30,8 +30,8 @@ C     !LOCAL VARIABLES:
       INTEGER :: iUnit
       INTEGER :: err, ncid, dimid1, dimid2, varid1, varid2, varid3
       INTEGER :: k, i, j
-      _RL :: data1vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
-      _RL :: data2vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
+      _RS :: data1vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
+      _RS :: data2vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
       _RL :: data3vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C Read NetCDF input: setting the acoustic domain
@@ -74,7 +74,7 @@ C get data variables
       err = NF_GET_VAR( ncid, varid1, data1vec )
       err = NF_GET_VAR( ncid, varid2, data2vec )
       err = NF_GET_VAR( ncid, varid3, data3vec )
-      
+
       IF (err .NE. NF_NOERR) THEN
         WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: ',
      &  'NetCDF IHOP data variables are incorrect'
@@ -93,6 +93,16 @@ C 'reshape' data variables to 2D array
        END DO
       END DO
 
+C     WRITE(msgBuf,*) 'Escobar: ', ihop_xc(1,1), ihop_xc(1,2),
+C    &  ihop_xc(1,3), ihop_xc(1,4), 'in ExtractSSP.'
+C     CALL PRINT_ERROR(msgBuf, myThid)
+C     WRITE(msgBuf,*) 'Escobar: ', ihop_yc(1,1), ihop_yc(1,2),
+C    &  ihop_yc(1,3), ihop_yc(1,4),'in ExtractSSP.'
+C     CALL PRINT_ERROR(msgBuf, myThid)
+C     WRITE(msgBuf,*) 'Escobar: ', ihop_idw_weights(1,1), 
+C    &  ihop_idw_weights(1,2), 'in ExtractSSP.'
+C     CALL PRINT_ERROR(msgBuf, myThid)
+      
 C Close NetCDF file
       err = NF_CLOSE( ncid )
 
