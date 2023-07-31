@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE monotonicMod
+MODULE monotonic_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -45,4 +45,4 @@ CONTAINS
     IF ( ANY( x( 2 : N ) <= x( 1 : N - 1 ) ) ) monotonic_dble = .FALSE.   
   END FUNCTION monotonic_dble
   
-END MODULE monotonicMod
+END MODULE monotonic_mod

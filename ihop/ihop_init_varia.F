@@ -47,12 +47,6 @@ C     3-dim.
 
 C     2-dim.
 #ifdef IHOP_2D_STATE
-        DO j=1-Oly,sNy+OLy
-         DO i=1-Olx,sNx+Olx
-          iHop_SST(i,j,bi,bj) = 0. _d 0
-          myPa_Surf2(i,j,bi,bj) = 0. _d 0
-         ENDDO
-        ENDDO
 #endif /* IHOP_2D_STATE */
 
 C- end bi,bj loops
