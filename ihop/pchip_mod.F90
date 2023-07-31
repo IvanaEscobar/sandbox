@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE pchipMod
+MODULE pchip_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -252,4 +252,4 @@ CONTAINS
     
   END FUNCTION fprime_right_end
 
-END MODULE pchipMod
+END MODULE pchip_mod

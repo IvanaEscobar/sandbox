@@ -13,9 +13,8 @@ MODULE writeRay
   ! During an eigenray calculation, subsets of the full ray may be passed
   ! These have lengths Nsteps1 vs. Nsteps for the entire ray
 
-  USE iHopMod,      only: ray2D 
-  USE iHopParams,   only: RAYFile, DELFile
-  USE sspMod,       only: Bdry
+  USE ihop_mod, only: RAYFile, DELFile, ray2D
+  USE ssp_mod,  only: Bdry
 
   IMPLICIT NONE
   PRIVATE

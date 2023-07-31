@@ -25,10 +25,10 @@ MODULE ihop_mod
 !=======================================================================
 
     public  rad2deg, i, &
-            PRTFile, RAYFile, DELFile, SHDFile, ARRFile, SSPFile &
-            ATIFile, BTYFile, BRCFile, SBPFile, MaxN,            &
-            Nrz_per_range, iStep, afreq, SrcDeclAngle, Title,    &
-            BeamStructure, Beam, ray2D, ray2DPt
+            PRTFile, RAYFile, DELFile, SHDFile, ARRFile, SSPFile,&
+            ATIFile, BTYFile, BRCFile, TRCFile, IRCFile, SBPFile,& 
+            MaxN, Nrz_per_range, iStep, afreq, SrcDeclAngle,     &
+            Title, BeamStructure, Beam, ray2D, ray2DPt
 
 !=======================================================================
 

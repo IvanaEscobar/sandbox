@@ -1,8 +1,7 @@
 #include "IHOP_OPTIONS.h"
-
 !BOP
 ! !INTERFACE:
-MODULE attenMod
+MODULE atten_mod
   ! <CONTACT EMAIL="ivana@utexas.edu">
   !   Ivana Escobar
   ! </CONTACT>
@@ -11,7 +10,7 @@ MODULE attenMod
   ! Routines to convert a sound speed and attenuation in user units to a complex sound speed
   ! Includes a formula for volume attenuation
 
-  USE iHopParams,       only: PRTFile
+  USE ihop_mod, only: PRTFile
 ! ! USES
   implicit none
 !  == Global variables ==
@@ -202,4 +201,4 @@ CONTAINS
 
   END FUNCTION Franc_Garr
 
-END MODULE attenMod
+END MODULE atten_mod

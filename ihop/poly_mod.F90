@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE polymod
+MODULE poly_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -105,4 +105,4 @@ CONTAINS
 
   END FUNCTION PolyZ
 
-END MODULE polymod
+END MODULE poly_mod

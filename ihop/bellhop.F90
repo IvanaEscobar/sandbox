@@ -25,14 +25,14 @@ MODULE BELLHOP
   ! Systems Center
 
   
-  USE iHopMod       ! Added to get Title, Beam
-  USE iHopParams,   only:   i, DegRad, RadDeg, zero, PRTFile, SHDFile,     &
-                            ARRFile, RAYFile, DELFile, MaxN
+  USE ihop_mod       ! Added to get Title, Beam
+! USE ihop_mod,   only:   i, RadDeg, PRTFile, SHDFile,     &
+!                           ARRFile, RAYFile, DELFile, MaxN, Title, Beam
   USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
-  USE angleMod,     only:   Angles, ialpha
-  USE srPositions,  only:   Pos
-  USE sspMod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
-  USE bdryMod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
+  USE angle_mod,     only:   Angles, ialpha
+  USE srPos_mod,  only:   Pos
+  USE ssp_mod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
+  USE bdry_mod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
                             atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
                             IsegTop, IsegBot, rTopSeg, rBotSeg
   USE refCoef,      only:   ReadReflectionCoefficient,                         &
@@ -41,7 +41,7 @@ MODULE BELLHOP
   USE influence,    only:   InfluenceGeoHatRayCen, InfluenceSGB,               &
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
-  USE attenMod,     only:   CRCI
+  USE atten_mod,     only:   CRCI
   USE beamPattern 
   USE writeRay,     only:   WriteRay2D, WriteDel2D
 
@@ -230,7 +230,7 @@ END SUBROUTINE IHOP_INIT
 ! **********************************************************************!
 SUBROUTINE BellhopCore( myThid )
 
-  USE arrmod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
+  USE arr_mod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
 
   CHARACTER*(MAX_LEN_MBUF) :: msgBuf
@@ -246,7 +246,7 @@ SUBROUTINE BellhopCore( myThid )
 
   afreq = 2.0 * PI * IHOP_freq
 
-  Angles%alpha  = DegRad * Angles%alpha   ! convert to radians
+  Angles%alpha  = deg2rad * Angles%alpha   ! convert to radians
   Angles%Dalpha = 0.0
   IF ( Angles%Nalpha > 1 ) THEN
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
@@ -333,7 +333,7 @@ SUBROUTINE BellhopCore( myThid )
   !         begin solve         !
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SourceDepth: DO is = 1, Pos%NSz
-     xs = [ zero, Pos%Sz( is ) ]   ! source coordinate, assuming source @ r=0
+     xs = [ zeroRL, Pos%Sz( is ) ]   ! source coordinate, assuming source @ r=0
 
      SELECT CASE ( Beam%RunType( 1 : 1 ) )
      CASE ( 'C', 'S', 'I' ) ! TL calculation, zero out pressure matrix
@@ -362,7 +362,7 @@ SUBROUTINE BellhopCore( myThid )
      ! Trace successive beams
      DeclinationAngle: DO ialpha = 1, Angles%Nalpha
         ! take-off declination angle in degrees
-        SrcDeclAngle = RadDeg * Angles%alpha( ialpha )
+        SrcDeclAngle = rad2deg * Angles%alpha( ialpha )
 
         ! Single ray run? then don't visit code below
         IF ( Angles%iSingle_alpha==0 .OR. ialpha==Angles%iSingle_alpha ) THEN
@@ -780,7 +780,7 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
      ray2D( is1 )%Amp   = ray2D( is )%Amp
      ray2D( is1 )%Phase = ray2D( is )%Phase + PI
   CASE ( 'F' )                 ! file
-     RInt%theta = RadDeg * ABS( ATAN2( Th, Tg ) )           ! angle of incidence (relative to normal to bathymetry)
+     RInt%theta = rad2deg * ABS( ATAN2( Th, Tg ) )           ! angle of incidence (relative to normal to bathymetry)
      IF ( RInt%theta > 90 ) RInt%theta = 180. - RInt%theta  ! reflection coefficient is symmetric about 90 degrees
      CALL InterpolateReflectionCoefficient( RInt, RefC, Npts )
      ray2D( is1 )%Amp   = ray2D( is )%Amp * RInt%R

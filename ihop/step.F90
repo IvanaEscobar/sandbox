@@ -6,8 +6,8 @@ MODULE step
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopMod,      only: Beam, ray2DPt
-  USE sspMod,       only: EvaluateSSP, SSP, iSegz, iSegr
+  USE ihop_mod, only: Beam, ray2DPt
+  USE ssp_mod,  only: EvaluateSSP, SSP, iSegz, iSegr
 
 ! !USES:
   IMPLICIT NONE
@@ -155,7 +155,7 @@ CONTAINS
     ! calculate a reduced step size, h, that lands on any points where the 
     ! environment leaves water
 
-    USE bdrymod, only: rTopSeg, rBotSeg, iSmallStepCtr
+    USE bdry_mod, only: rTopSeg, rBotSeg, iSmallStepCtr
 
     INTEGER,           INTENT( IN    ) :: iSegz0, iSegr0  ! SSP layer ray is in
     REAL (KIND=_RL90), INTENT( IN    ) :: x0( 2 ), urayt( 2 )   ! ray coordinate and tangent

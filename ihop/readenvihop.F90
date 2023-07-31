@@ -8,11 +8,11 @@ MODULE readEnviHop
 
   ! mbp 12/2018, based on much older subroutine
 
-  USE iHopParams,   only: PRTFile, RAYFile, DELFile, ARRFile, SHDFile
-  USE iHopMod,      only: Title, Beam
-  USE sspMod,       only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
+  USE ihop_mod,     only: PRTFile, RAYFile, DELFile, ARRFile, SHDFile, &
+                        Title, Beam
+  USE ssp_mod,      only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
-  USE attenMod,     only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
+  USE atten_mod,    only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
 
 ! ! USES
   implicit none
@@ -38,8 +38,8 @@ CONTAINS
     ! Routine to read in and print input data
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
-    USE angleMod,       only: ReadRayElevationAngles, ReadRayBearingAngles
-    USE srPositions,    only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
+    USE angle_mod,  only: ReadRayElevationAngles, ReadRayBearingAngles
+    USE srPos_mod,  only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
 #ifdef IHOP_THREED
                               ReadRcvrBearings, &
 #endif /* IHOP_THREED */
@@ -424,7 +424,7 @@ CONTAINS
 
     ! Read the RunType variable and print to .prt file
 
-    USE srPositions, only: Pos
+    USE srPos_mod, only: Pos
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
@@ -646,9 +646,8 @@ CONTAINS
   SUBROUTINE OpenOutputFiles( FileRoot )
     ! Write appropriate header information
 
-    USE anglemod,       only: Angles
-    USE srPositions,    only: Pos
-    !USE bdrymod
+    USE angle_mod,  only: Angles
+    USE srPos_mod,  only: Pos
 
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     REAL               :: atten
@@ -781,7 +780,7 @@ CONTAINS
 
   SUBROUTINE WriteSHDHeader( FileName, Title, freq0, Atten, PlotType )
 
-    USE srPositions,  only: Pos, Nfreq, freqVec
+    USE srPos_mod,  only: Pos, Nfreq, freqVec
 
     ! Write header to disk file
 
