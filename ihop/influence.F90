@@ -10,12 +10,12 @@ MODULE influence
   ! complex pressure
   ! mbp 12/2018, based on much older subroutines
 
-  USE iHopMod,      only: Beam, ray2D, SrcDeclAngle, NRz_per_range, afreq
-  USE iHopParams,   only: i, RadDeg, PRTFile, MaxN
-  USE srPositions,  only: Pos
+  USE ihop_mod,     only: rad2deg, i, PRTFile, MaxN, &
+                        Beam, ray2D, SrcDeclAngle, NRz_per_range, afreq
+  USE srPos_mod,  only: Pos
 ! sspMod used to construct image beams in the Cerveny style beam routines
-  USE SSPMod,       only: Bdry 
-  USE arrMod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
+  USE ssp_mod,       only: Bdry 
+  USE arr_mod,       only: WriteArrivalsASCII, WriteArrivalsBinary, AddArr
   USE writeRay,     only: WriteRay2D
 
 ! ! USES
@@ -60,7 +60,7 @@ CONTAINS
     !!! need to add logic related to NRz_per_range
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
-    SrcDeclAngle = RadDeg * alpha          ! take-off angle in degrees
+    SrcDeclAngle = rad2deg * alpha          ! take-off angle in degrees
 
     dq   = ray2D( 2:Beam%Nsteps )%q( 1 ) - ray2D( 1:Beam%Nsteps-1 )%q( 1 )
     dtau = ray2D( 2:Beam%Nsteps )%tau    - ray2D( 1:Beam%Nsteps-1 )%tau
@@ -70,7 +70,7 @@ CONTAINS
     znV = -ray2D( 1:Beam%Nsteps )%t( 1 ) * ray2D( 1:Beam%Nsteps )%c
     rnV =  ray2D( 1:Beam%Nsteps )%t( 2 ) * ray2D( 1:Beam%Nsteps )%c
 
-    RcvrDeclAngleV( 1:Beam%Nsteps ) = RadDeg * &
+    RcvrDeclAngleV( 1:Beam%Nsteps ) = rad2deg * &
         ATAN2( ray2D( 1:Beam%Nsteps )%t( 2 ), ray2D( 1:Beam%Nsteps )%t( 1 ) )
 
     ! During reflection imag(q) is constant and adjacent normals cannot bracket 
@@ -184,7 +184,7 @@ CONTAINS
     COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
-    SrcDeclAngle = RadDeg * alpha          ! take-off angle, degrees
+    SrcDeclAngle = rad2deg * alpha          ! take-off angle, degrees
     phase        = 0.0
     qOld         = ray2D( 1 )%q( 1 )       ! old KMAH index
     rA           = ray2D( 1 )%x( 1 )       ! range at start of ray, typically 0
@@ -210,7 +210,7 @@ CONTAINS
        IF ( rlen < 1.0D3 * SPACING( ray2D( iS )%x( 1 ) ) ) CYCLE Stepping  
        rayt = rayt / rlen                    ! unit tangent to ray
        rayn = [ -rayt( 2 ), rayt( 1 ) ]      ! unit normal  to ray
-       RcvrDeclAngle = RadDeg * ATAN2( rayt( 2 ), rayt( 1 ) )
+       RcvrDeclAngle = rad2deg * ATAN2( rayt( 2 ), rayt( 1 ) )
 
        q      = ray2D( iS-1 )%q( 1 )
        dqds   = ray2D( iS   )%q( 1 ) - q
@@ -315,7 +315,7 @@ CONTAINS
     COMPLEX (KIND=_RL90) :: dtauds
 
     q0           = ray2D( 1 )%c / Dalpha   ! Reference for J = q0 / q
-    SrcDeclAngle = RadDeg * alpha          ! take-off angle in degrees
+    SrcDeclAngle = rad2deg * alpha          ! take-off angle in degrees
     phase        = 0
     qOld         = ray2D( 1 )%q( 1 )       ! used to track KMAH index
     rA           = ray2D( 1 )%x( 1 )       ! range at start of ray
@@ -351,7 +351,7 @@ CONTAINS
        IF ( rlen < 1.0D3 * SPACING( ray2D( iS )%x( 1 ) ) ) CYCLE Stepping  
        rayt = rayt / rlen
        rayn = [ -rayt( 2 ), rayt( 1 ) ]      ! unit normal to ray
-       RcvrDeclAngle = RadDeg * ATAN2( rayt( 2 ), rayt( 1 ) )
+       RcvrDeclAngle = rad2deg * ATAN2( rayt( 2 ), rayt( 1 ) )
 
        dqds   = ray2D( iS )%q( 1 ) - ray2D( iS - 1 )%q( 1 )
        dtauds = ray2D( iS )%tau    - ray2D( iS - 1 )%tau
@@ -530,7 +530,7 @@ CONTAINS
              ! IF ( Adeltaz < RadiusMax ) THEN
              SELECT CASE( Beam%RunType( 1 : 1 ) )
              CASE ( 'E' )         ! eigenrays
-                SrcDeclAngle = RadDeg * alpha   ! take-off angle in degrees
+                SrcDeclAngle = rad2deg * alpha   ! take-off angle in degrees
                 CALL WriteRay2D( SrcDeclAngle, iS )
              CASE DEFAULT         ! coherent TL
                 CPA    = ABS( deltaz * ( rB - rA ) ) / SQRT( ( rB - rA )**2 &

@@ -1,17 +1,17 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE srPositions
+MODULE srPos_mod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
 
   ! Reads in source depths, receiver depths, receiver ranges, and receiver bearings
 
-  USE subTabulate,  only: SubTab
-  USE monotonicMod, only: monotonic
-  USE sortMod,      only: Sort
-  USE iHopParams,   only: PRTFile
+  USE subTab_mod,       only: SubTab
+  USE monotonic_mod,    only: monotonic
+  USE sort_mod,         only: Sort
+  USE ihop_mod,         only: PRTFile
 
 ! ! USES
   IMPLICIT NONE
@@ -319,4 +319,4 @@ CONTAINS
 
   END SUBROUTINE ReadVector
 
-END MODULE srPositions
+END MODULE srPos_mod

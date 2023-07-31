@@ -1,12 +1,12 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE arrmod
+MODULE arr_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: RadDeg, ARRFile
+  USE ihop_mod,   only: rad2deg, ARRFile
 
 ! ! USES
   implicit none
@@ -145,7 +145,7 @@ CONTAINS
              ! However, you'll need to make sure you keep adequate precision
              WRITE( ARRFile, * ) &
              SNGL( factor ) * Arr( iz, ir, iArr )%A,             &
-             SNGL( RadDeg ) * Arr( iz, ir, iArr )%Phase,         &
+             SNGL( rad2deg ) * Arr( iz, ir, iArr )%Phase,         &
                         REAL( Arr( iz, ir, iArr )%delay ),       &
                        AIMAG( Arr( iz, ir, iArr )%delay ),       &
                               Arr( iz, ir, iArr )%SrcDeclAngle,  &
@@ -192,7 +192,7 @@ CONTAINS
              ! integers written out as reals below for fast reading in Matlab
              WRITE( ARRFile ) &
             SNGL( factor * Arr( iz, ir, iArr )%A ),           &
-            SNGL( RadDeg * Arr( iz, ir, iArr )%Phase ),       &
+            SNGL( rad2deg * Arr( iz, ir, iArr )%Phase ),       &
                            Arr( iz, ir, iArr )%delay,         &
                            Arr( iz, ir, iArr )%SrcDeclAngle,  &
                            Arr( iz, ir, iArr )%RcvrDeclAngle, &
@@ -207,4 +207,4 @@ CONTAINS
   END SUBROUTINE WriteArrivalsBinary
 
   ! **********************************************************************!
-END MODULE arrmod
+END MODULE arr_mod

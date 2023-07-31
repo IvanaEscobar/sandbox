@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE sspMod
+MODULE ssp_mod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -14,8 +14,8 @@ MODULE sspMod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE splinec_mod,      only: cspline, splineall
-  USE iHopParams,   only: PRTFile, SSPFile
+  USE splinec_mod,  only: cspline, splineall
+  USE ihop_mod,     only: PRTFile, SSPFile
 
   IMPLICIT NONE
 ! == Global variables ==
@@ -259,7 +259,7 @@ CONTAINS
     ! This implements the monotone piecewise cubic Hermite interpolating
     ! polynomial (PCHIP) algorithm for the interpolation of the sound speed c.
 
-    USE pchipMod,  only: PCHIP
+    USE pchip_mod,  only: PCHIP
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
@@ -579,7 +579,7 @@ CONTAINS
     ! reads SSP in m/s from .ssp file and convert to AttenUnit (ie. Nepers/m)
     ! Populates SSPStructure: SSP
 
-    USE attenMod, only: CRCI
+    USE atten_mod, only: CRCI
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
@@ -711,7 +711,7 @@ CONTAINS
   SUBROUTINE ExtractSSP( Depth, freq, myThid )
       ! Extracts SSP from MITgcm grid points
 
-      use attenMod, only: CRCI
+      use atten_mod, only: CRCI
 
       ! == Routine Arguments ==
       ! myThid :: Thread number for this instance of the routine
@@ -836,4 +836,4 @@ CONTAINS
 
   END SUBROUTINE ExtractSSP
 
-END MODULE sspMod
+END MODULE ssp_mod

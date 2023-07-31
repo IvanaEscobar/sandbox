@@ -8,7 +8,7 @@ MODULE beamPattern
 
   ! Loads a source beam pattern
 
-  USE iHopParams, only: PRTFile, SBPFile
+  USE ihop_mod, only: PRTFile, SBPFile
 
   IMPLICIT NONE
 ! == Global variables ==

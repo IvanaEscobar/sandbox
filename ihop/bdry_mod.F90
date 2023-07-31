@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE bdrymod
+MODULE bdry_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -10,8 +10,8 @@ MODULE bdrymod
   ! IEsco22: want to rname this for clarity to readTopBot since it takes user
   ! input and populates various structures used in the code
 
-  USE monotonicMod,     only: monotonic
-  USE iHopParams,       only: PRTFile, ATIFile, BTYFile
+  USE monotonic_mod,    only: monotonic
+  USE ihop_mod,         only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
 ! == Global variables ==
@@ -481,4 +481,4 @@ CONTAINS
 
   END SUBROUTINE GetBotSeg
 
-END MODULE bdrymod
+END MODULE bdry_mod

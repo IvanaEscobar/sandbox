@@ -1,15 +1,15 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE angleMod
+MODULE angle_mod
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
 
-  USE iHopParams,   only: DegRad, PRTFile
-  USE subTabulate,  only: SubTab
-  USE srPositions,  only: Pos, Number_to_Echo
-  USE sortMod,      only: Sort
+  USE ihop_mod,     only: PRTFile
+  USE subTab_mod,   only: SubTab
+  USE srPos_mod,    only: Pos, Number_to_Echo
+  USE sort_mod,     only: Sort
 
 ! ! USES
   implicit none
@@ -224,7 +224,7 @@ CONTAINS
             STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
         END IF
     END IF
-    Angles%beta  = DegRad * Angles%beta   ! convert to radians
+    Angles%beta  = deg2rad * Angles%beta   ! convert to radians
 
     Angles%Dbeta = 0.0
     IF ( Angles%Nbeta /= 1 ) Angles%Dbeta = ( Angles%beta( Angles%NBeta ) - &
@@ -232,4 +232,4 @@ CONTAINS
 
   END SUBROUTINE ReadRayBearingAngles
 
-END MODULE angleMod
+END MODULE angle_mod

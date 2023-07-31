@@ -8,11 +8,15 @@ MODULE refCoef
 
   ! reflection coefficient data
 
-  USE iHopParams,   only: PRTFile, BRCFile, TRCFile, IRCFile, DegRad
+  USE ihop_mod,   only: PRTFile, BRCFile, TRCFile, IRCFile
 
 ! ! USES
   implicit none
+!  == Global variables ==
+#include "SIZE.h"
+#include "GRID.h"
 #include "EEPARAMS.h"
+#include "PARAMS.h"
 
   PRIVATE
 
@@ -79,7 +83,7 @@ CONTAINS
        END IF
        READ(  BRCFile, * ) ( RBot( itheta ), itheta = 1, NBotPts )
        CLOSE( BRCFile )
-       RBot%phi = DegRad * RBot%phi   ! convert to radians
+       RBot%phi = deg2rad * RBot%phi   ! convert to radians
 
     ELSE   ! should allocate something anyway, since variable is passed
        ALLOCATE(  RBot( 1 ), Stat = IAllocStat )
@@ -117,7 +121,7 @@ CONTAINS
 
        READ(  TRCFile, * ) ( RTop( itheta ), itheta = 1, NTopPts )
        CLOSE( TRCFile )
-       RTop%phi = DegRad *  RTop%phi   ! convert to radians
+       RTop%phi = deg2rad *  RTop%phi   ! convert to radians
     ELSE   ! should allocate something anyway, since variable is passed
        ALLOCATE( RTop( 1 ), Stat = iAllocStat )
     ENDIF
@@ -226,7 +230,7 @@ CONTAINS
     ! Uses polynomial interpolation to approximate the function between the 
     ! tabulated values
 
-    USE polyMod, only: Poly
+    USE poly_mod, only: Poly
 
     INTEGER, PARAMETER :: N = 3     ! order of the polynomial for interpolation
     INTEGER,                INTENT( IN  ) :: NkTab, iTab( NkTab )
