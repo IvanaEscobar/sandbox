@@ -1,17 +1,20 @@
 #include "IHOP_OPTIONS.h"
 
+C     *==========================================================*
+C     | subroutine ihop_init_fixed
+C     | o initialization for netcdf ihop data
+C     | started: Ivana Escobar July-2023
+C     *==========================================================*
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
-CBOP 0
+CBOP
 C     !ROUTINE: IHOP_INIT_FIXED
 
 C     !INTERFACE:
       SUBROUTINE IHOP_INIT_FIXED( myThid )
 
-C     !DESCRIPTION:
-C     Initialize IHOP constant
-
 C     !USES:
       IMPLICIT NONE
+C ==================== Global Variables ===========================
 #include "EEPARAMS.h"
 #include "SIZE.h"
 #include "PARAMS.h"
@@ -19,14 +22,18 @@ C     !USES:
 #include "IHOP.h"
 #include "netcdf.inc"
 
+C ==================== Routine Arguments ==========================
 C     !INPUT/OUTPUT PARAMETERS:
 C     myThid ::  my Thread Id number
       INTEGER myThid
 CEOP
 
+C ==================== Routine Variables ==========================
+
 #ifdef ALLOW_IHOP
-C     !LOCAL VARIABLES:
+C     !EXTERNAL VARIABLES:
       CHARACTER*(MAX_LEN_MBUF) msgBuf
+C     !LOCAL VARIABLES:
       INTEGER :: iUnit
       INTEGER :: err, ncid, dimid1, dimid2, varid1, varid2, varid3
       INTEGER :: k, i, j
@@ -34,6 +41,7 @@ C     !LOCAL VARIABLES:
       _RS :: data2vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
       _RL :: data3vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+
 C Read NetCDF input: setting the acoustic domain
       err = NF_OPEN(TRIM(IHOP_interpfile), NF_NOWRITE, ncid)
       IF (err .NE. NF_NOERR) THEN
@@ -43,11 +51,11 @@ C Read NetCDF input: setting the acoustic domain
         STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
 
-C Get dimension IDs
+C Get dimension IDs and lengths
       err = NF_INQ_DIMID( ncid, 'nrange', dimid1 )
-      err = NF_INQ_DIMID( ncid, 'nidw', dimid2 )
-C get dimension lengths
       err = NF_INQ_DIMLEN( ncid, dimid1, IHOP_npts_range )
+
+      err = NF_INQ_DIMID( ncid, 'nidw', dimid2 )
       err = NF_INQ_DIMLEN( ncid, dimid2, IHOP_npts_idw )
 
       IF ( IHOP_npts_range>IHOP_MAX_NC_SIZE .OR. 
@@ -103,8 +111,8 @@ C     WRITE(msgBuf,*) 'Escobar: ', ihop_idw_weights(1,1),
 C    &  ihop_idw_weights(1,2), 'in ExtractSSP.'
 C     CALL PRINT_ERROR(msgBuf, myThid)
       
-C Close NetCDF file
-      err = NF_CLOSE( ncid )
+CC Close NetCDF file
+C      err = NF_CLOSE( ncid )
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
