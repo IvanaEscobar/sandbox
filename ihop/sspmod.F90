@@ -14,7 +14,7 @@ MODULE sspMod
   ! Also, a greater premium has been placed on returning this info quickly, 
   ! since BELLHOP calls it at every step so more information is pre-computed
 
-  USE splinec,      only: cspline, splineall
+  USE splinec_mod,      only: cspline, splineall
   USE iHopParams,   only: PRTFile, SSPFile
 
   IMPLICIT NONE
