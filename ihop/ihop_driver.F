@@ -10,7 +10,7 @@ C !DESCRIPTION:
 C Calculate ray travel times, tau
 
 C !FORTRAN90 USE MODULES: ===============================================
-      USE bellhop
+      USE bellhop_mod
 
       IMPLICIT NONE
 C  == Global variables ==
