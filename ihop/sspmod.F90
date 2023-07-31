@@ -718,12 +718,10 @@ CONTAINS
       INTEGER, INTENT(IN) :: myThid
 
       REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
+      REAL (KIND=_RL90) sumweights(IHOP_NPTS_RANGE) 
 
       ! == Local Variables ==
       INTEGER ii, jj
-
-      WRITE(msgBuf, * ) 'Escobar: ', IHOP_NPTS_RANGE, ' in Extract SSP.'
-      CALL PRINT_ERROR( msgBuf, myThid )
 
       SSP%Nz = Nr ! NOT going through the bathymetry, need to change BTYFile
       SSP%Nr = IHOP_NPTS_RANGE
@@ -739,6 +737,9 @@ CONTAINS
         STOP 'ABNORMAL END: S/R ExtractSSP'
       END IF
 
+      ! Initiate SSP%cMat to ceros
+      SSP%cMat = 0.0
+
       ! set SSP%Seg%r from data.ihop -> ihop_ranges
       SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
 
@@ -746,29 +747,41 @@ CONTAINS
       SSP%z( 1:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
       ! ssp extraction
-      !=============================================
-      ! Option 1: COMPARING LAT LON VALUES DIRECTLY
-      !=============================================
+      !==================================================
+      ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
+      !==================================================
+      ! Sum IDW weights
+      DO i = 1,IHOP_NPTS_RANGE
+        sumweights(i) = sum(ihop_idw_weights(i,:))
+      END DO
+
+      ! from ocean grid to acoustic grid with IDW
       DO bj=myByLo(myThid),myByHi(myThid)
        DO bi=myBxLo(myThid),myBxHi(myThid)
         DO i=1,sNx
          DO j=1,sNy
-          DO jj=1,IHOP_npts_range
-           DO ii=1,IHOP_npts_idw
-            IF (xC(i,1,bi,bj) .EQ. ihop_xc(ii,jj)) THEN
-             IF (yC(i,j,bi,bj) .EQ. ihop_yc(ii,jj)) THEN
-              SSP%cMat(:,ii) = ihop_ssp(i,j,:,bi,bj)
-             ENDIF
-            ENDIF
-           ENDDO 
-          ENDDO
+            DO ii=1,IHOP_npts_range
+             DO jj=1,IHOP_npts_idw
+              IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
+                  yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
+               
+               ! IDW Interpolate SSP at second order
+               SSP%cMat(:,ii) = SSP%cMat(:,ii) +       &
+                   ihop_ssp(i,j,:,bi,bj)*ihop_idw_weights(ii,jj)/sumweights(ii)
+
+               !WRITE(msgBuf,*) 'Escobar: ', SSP%cMat(1,ii), 'for', ii
+               !CALL PRINT_ERROR( msgBuf, myThid )
+               
+              ENDIF
+             ENDDO
+            ENDDO
          ENDDO
         ENDDO
        ENDDO
       ENDDO
-      !=============================================
-      ! END Option 1
-      !=============================================
+      !==================================================
+      ! END IDW Interpolate
+      !==================================================
 
       ! set vector structured c, rho, and cz for first range point
       DO iz = 1,SSP%Nz
