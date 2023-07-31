@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE SPLINEC
+MODULE SPLINEC_MOD
     ! <CONTACT EMAIL="ivana@utexas.edu">
     !   Ivana Escobar
     ! </CONTACT>
@@ -268,4 +268,4 @@ END SUBROUTINE CSPLINE
 
       RETURN
       END SUBROUTINE SPLINEALL
-END MODULE splinec
+END MODULE splinec_mod

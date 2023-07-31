@@ -9,7 +9,7 @@ MODULE pchipMod
   ! subroutines and functions related to the calculation of the
   ! Piecewise Cubic Hermite Interpolating Polynomial (PCHIP)
 
-  USE splinec, only: cspline
+  USE splinec_mod, only: cspline
 
   IMPLICIT NONE
   PRIVATE
