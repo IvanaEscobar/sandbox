@@ -1929,10 +1929,7 @@ fi
 rm -f genmake_test_ln genmake_tlink
 
 #  Check for broken *.F/*.f handling and fix if possible
-#  Escobar debug
-echo 'escobar ' $FS $FS90
 check_for_broken_Ff
-echo 'escobar ' $FS $FS90
 
 if test ! "x$MPI" = x ; then
       echo "  Turning on MPI cpp macros"
@@ -3142,7 +3139,7 @@ fwd_exe_target:
 depend:
 	@\$(MAKE) -f \$(MAKEFILE) links
 	\$(MAKEDEPEND) -f \$(MAKEFILE) -o .$FS \$(DEFINES) \$(INCLUDES) \$(CPPINCLUDES) \$(F77_SRC_FILES)
-	\$(TOOLSDIR)/f90mkdepend >> \$(MAKEFILE)
+	\$(TOOLSDIR)/f90mkdepend -fs $FS -fs90 $FS90 >> \$(MAKEFILE)
 	-rm -f makedepend.out
 
 lib: libmitgcmuv.a
