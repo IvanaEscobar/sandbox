@@ -425,7 +425,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
        
         Depth = x( 2 )
-        IF (useSSPFile .EQ. .TRUE.) THEN
+        IF (useSSPFile .EQV. .TRUE.) THEN ! eqv for logical operands
             CALL ReadSSP( Depth, freq, myThid )
         ELSE
             CALL ExtractSSP(Depth, freq, myThid )
