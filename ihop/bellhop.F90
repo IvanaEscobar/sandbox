@@ -2,7 +2,7 @@
 !BOP
 ! !ROUTINE: BELLHOP
 ! !INTERFACE:
-MODULE BELLHOP_MOD
+MODULE BELLHOP
   ! Written as a module to be used in ihop_*.F parts of the MITgcm package
   ! BELLHOP Beam tracing for ocean acoustics
 
@@ -891,4 +891,4 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
 
 END SUBROUTINE Reflect2D
 
-END MODULE BELLHOP_MOD
+END MODULE BELLHOP
