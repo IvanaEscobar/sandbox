@@ -25,14 +25,14 @@ MODULE BELLHOP
   ! Systems Center
 
   
-  USE ihop_mod       ! Added to get Title, Beam
+  USE ihop_mod    
 ! USE ihop_mod,   only:   i, RadDeg, PRTFile, SHDFile,     &
 !                           ARRFile, RAYFile, DELFile, MaxN, Title, Beam
   USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
-  USE angle_mod,     only:   Angles, ialpha
-  USE srPos_mod,  only:   Pos
-  USE ssp_mod,       only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
-  USE bdry_mod,      only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
+  USE angle_mod,    only:   Angles, ialpha
+  USE srPos_mod,    only:   Pos
+  USE ssp_mod,      only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
+  USE bdry_mod,     only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
                             atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
                             IsegTop, IsegBot, rTopSeg, rBotSeg
   USE refCoef,      only:   ReadReflectionCoefficient,                         &
@@ -41,7 +41,7 @@ MODULE BELLHOP
   USE influence,    only:   InfluenceGeoHatRayCen, InfluenceSGB,               &
                             InfluenceGeoGaussianCart, InfluenceGeoHatCart,     &
                             ScalePressure
-  USE atten_mod,     only:   CRCI
+  USE atten_mod,    only:   CRCI
   USE beamPattern 
   USE writeRay,     only:   WriteRay2D, WriteDel2D
 
@@ -86,13 +86,13 @@ SUBROUTINE IHOP_INIT ( myThid )
       STOP 'ABNORMAL END: S/R IHOP_INIT'
   END IF
 
-  ! Read in or otherwise initialize inline all the variables used by BELLHOP 
+  ! Read in or otherwise initialize inline all the variables by BELLHOP 
 
   IF ( Inline ) THEN
-     ! NPts, Sigma not used by BELLHOP
+     ! NPts, Sigma not supported by BELLHOP
      Title = 'BELLHOP- Calibration case with envfil passed as parameters'
      IHOP_freq  = 250
-     ! NMedia variable is not used by BELLHOP
+     ! NMedia variable is not supported by BELLHOP
 
      ! *** Boundary information (type of boundary condition and, if a 
      !     halfspace, then halfspace info)
@@ -477,7 +477,7 @@ SUBROUTINE TraceRay2D( xs, alpha, Amp0, myThid )
   ray2D( 1 )%x         = xs             ! range and depth of source
   ray2D( 1 )%t         = [ COS( alpha ), SIN( alpha ) ] / c ! unit tangent / c
   ray2D( 1 )%p         = [ 1.0, 0.0 ]   ! IESCO22: slowness vector
-  ! second component of qv is not used in geometric beam tracing
+  ! second component of qv is not supported in geometric beam tracing
   ! set I.C. to 0 in hopes of saving run time
   IF ( Beam%RunType( 2:2 ) == 'G' ) THEN ! IESCO22: geometric hat in Cartesian
       ray2D( 1 )%q = [ 0.0, 0.0 ]        ! IESCO22: ray centered coords
@@ -671,7 +671,7 @@ SUBROUTINE Distances2D( rayx, Topx, Botx, dTop, dBot, Topn, Botn, DistTop, &
                         DistBot )
 
   ! Calculates the distances to the boundaries
-  ! Formula differs from JKPS because code uses outward pointing normals
+  ! Formula differs from JKPS because code applies outward pointing normals
 
   REAL (KIND=_RL90), INTENT( IN  ) :: rayx(2)          ! ray coordinate
   REAL (KIND=_RL90), INTENT( IN  ) :: Topx(2), Botx(2) ! top, bottom coordinate
