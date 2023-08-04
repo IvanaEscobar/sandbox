@@ -740,6 +740,8 @@ CONTAINS
       ! Initiate SSP%cMat to ceros
       SSP%cMat = 0.0
 
+               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP b4 ranges', ihop_ranges
+               CALL PRINT_ERROR( msgBuf, myThid )
       ! set SSP%Seg%r from data.ihop -> ihop_ranges
       SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
 
@@ -747,7 +749,7 @@ CONTAINS
       SSP%z( 1:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
       ! ssp extraction
-               WRITE(msgBuf,*) 'Escobar: EXTRAC_SSP'
+               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP before interp'
                CALL PRINT_ERROR( msgBuf, myThid )
       !==================================================
       ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
@@ -785,6 +787,9 @@ CONTAINS
       ! END IDW Interpolate
       !==================================================
 
+
+               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP after interp'
+               CALL PRINT_ERROR( msgBuf, myThid )
       ! set vector structured c, rho, and cz for first range point
       DO iz = 1,SSP%Nz
         alphaR = SSP%cMat( iz, 1 )

@@ -96,7 +96,11 @@ CONTAINS
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
+       WRITE( msgBuf, * ) 'Escobar: in Readenvi: BEFORE EVALUATESSP'
+       CALL PRINT_ERROR( msgBuf, myThid )
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
+       WRITE( msgBuf, * ) 'Escobar: in Readenvi: AFTER EVALUATESSP'
+       CALL PRINT_ERROR( msgBuf, myThid )
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
