@@ -184,10 +184,14 @@ SUBROUTINE IHOP_INIT ( myThid )
      SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
   ELSE ! Read and allocate user input 
      ! Read .env file: REQUIRED
+       WRITE( msgBuf, * ) 'Escobar: in IHOP_INIT: before readenv'
+       CALL PRINT_ERROR( msgBuf, myThid )
      CALL ReadEnvironment( IHOP_fileroot, myThid )
      ! AlTImetry: OPTIONAL, default is no ATIFile
      CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, myThid )
      ! BaThYmetry: OPTIONAL, default is no BTYFile
+       WRITE( msgBuf, * ) 'Escobar: in IHOP_INIT: before bty'
+       CALL PRINT_ERROR( msgBuf, myThid )
      CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, myThid )
      ! (top and bottom): OPTIONAL
      CALL ReadReflectionCoefficient( IHOP_fileroot, Bdry%Bot%HS%Opt( 1:1 ), &

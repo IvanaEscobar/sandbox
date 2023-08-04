@@ -17,21 +17,21 @@
 
  IHOP_sd=73.0,
  IHOP_rd=300.0,
- IHOP_rr=556.0,
+ IHOP_rr=2544.25,
 
  IHOP_runopt='A',
- IHOP_nalpha=10,
- IHOP_alpha=-30.0, 30.0,
- IHOP_step=10.0,
+ IHOP_nalpha=4000,
+ IHOP_alpha=-20.0, 20.0,
+ IHOP_step=0.0,
  
  IHOP_zbox=1800.0,
- IHOP_rbox=556.1,
+ IHOP_rbox=2544.3,
  &
 
  &IHOP_PARM03
  useSSPFile=.FALSE.,
  IHOP_interpfile = 'bc_gyre_ihop_grid.nc',
-# ihop_iter = 25900,
- ihop_iter = 9,
+ ihop_iter = 259000,
+# ihop_iter = 9,
  ihop_ranges=0.,  508.91268732, 1017.82537465, 1526.73806197, 2035.65074929, 2544.56343661,
  &

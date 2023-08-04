@@ -747,6 +747,8 @@ CONTAINS
       SSP%z( 1:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
       ! ssp extraction
+               WRITE(msgBuf,*) 'Escobar: EXTRAC_SSP'
+               CALL PRINT_ERROR( msgBuf, myThid )
       !==================================================
       ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
       !==================================================
