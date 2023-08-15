@@ -31,7 +31,7 @@
  &IHOP_PARM03
  useSSPFile=.FALSE.,
  IHOP_interpfile = 'bc_gyre_ihop_grid.nc',
- ihop_iter = 259000,
-# ihop_iter = 9,
+#ihop_iter = 259000,
+ ihop_iter = 9,
  ihop_ranges=0.,  508.91268732, 1017.82537465, 1526.73806197, 2035.65074929, 2544.56343661,
  &

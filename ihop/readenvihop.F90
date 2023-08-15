@@ -124,6 +124,8 @@ CONTAINS
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
+       WRITE( msgBuf, * ) 'Escobar: in Readenvi: AFTER bottom options'
+       CALL PRINT_ERROR( msgBuf, myThid )
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates
