@@ -9,7 +9,7 @@ MODULE readEnviHop
   ! mbp 12/2018, based on much older subroutine
 
   USE ihop_mod,     only: PRTFile, RAYFile, DELFile, ARRFile, SHDFile, &
-                        Title, Beam
+                          Title, Beam
   USE ssp_mod,      only: EvaluateSSP, HSInfo, Bdry, SSP, zTemp, alphaR, betaR,&
                           alphaI, betaI, rhoR, betaPowerLaw, fT
   USE atten_mod,    only: CRCI, T, Salinity, pH, z_bar, iBio, NBioLayers, bio
@@ -90,17 +90,15 @@ CONTAINS
 
     ! *** Ocean SSP ***
     Bdry%Bot%HS%Depth = IHOP_depth
-    x = [ 0. _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
+    x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
-       WRITE( msgBuf, * ) 'Escobar: in Readenvi: BEFORE EVALUATESSP'
-       CALL PRINT_ERROR( msgBuf, myThid )
+    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: BEFORE EVALUATESSP'
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
-       WRITE( msgBuf, * ) 'Escobar: in Readenvi: AFTER EVALUATESSP'
-       CALL PRINT_ERROR( msgBuf, myThid )
+    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER EVALUATESSP'
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
@@ -124,8 +122,7 @@ CONTAINS
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
-       WRITE( msgBuf, * ) 'Escobar: in Readenvi: AFTER bottom options'
-       CALL PRINT_ERROR( msgBuf, myThid )
+       WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER bottom options'
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates

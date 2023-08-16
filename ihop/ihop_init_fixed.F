@@ -101,16 +101,6 @@ C 'reshape' data variables to 2D array
        END DO
       END DO
 
-C     WRITE(msgBuf,*) 'Escobar: ', ihop_xc(1,1), ihop_xc(1,2),
-C    &  ihop_xc(1,3), ihop_xc(1,4), 'in ExtractSSP.'
-C     CALL PRINT_ERROR(msgBuf, myThid)
-C     WRITE(msgBuf,*) 'Escobar: ', ihop_yc(1,1), ihop_yc(1,2),
-C    &  ihop_yc(1,3), ihop_yc(1,4),'in ExtractSSP.'
-C     CALL PRINT_ERROR(msgBuf, myThid)
-C     WRITE(msgBuf,*) 'Escobar: ', ihop_idw_weights(1,1), 
-C    &  ihop_idw_weights(1,2), 'in ExtractSSP.'
-C     CALL PRINT_ERROR(msgBuf, myThid)
-      
 CC Close NetCDF file
 C      err = NF_CLOSE( ncid )
 

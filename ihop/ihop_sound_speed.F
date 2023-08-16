@@ -42,8 +42,8 @@ C     myThid :: Thread number for this instance of the routine.
 
 #ifdef ALLOW_IHOP 
 C     !FUNCTIONS:
-C      _RL SW_TEMP
-C      EXTERNAL SW_TEMP
+C      _RL CHEN_MILLERO
+C      EXTERNAL CHEN_MILLERO
 C
       _RL CHEN_MILLERO
       EXTERNAL CHEN_MILLERO
