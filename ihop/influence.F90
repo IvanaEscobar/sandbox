@@ -166,7 +166,8 @@ CONTAINS
        END DO Stepping
     END DO RcvrDepths
 
-  END SUBROUTINE InfluenceGeoHatRayCen
+  RETURN
+  END !SUBROUTINE InfluenceGeoHatRayCen
 
   ! **********************************************************************!
 
@@ -297,7 +298,8 @@ CONTAINS
        rA = rB
     END DO Stepping
 
-  END SUBROUTINE InfluenceGeoHatCart
+  RETURN
+  END !SUBROUTINE InfluenceGeoHatCart
 
   ! **********************************************************************!
 
@@ -440,7 +442,8 @@ CONTAINS
        rA = rB
     END DO Stepping
 
-  END SUBROUTINE InfluenceGeoGaussianCart
+  RETURN
+  END !SUBROUTINE InfluenceGeoGaussianCart
 
   ! **********************************************************************!
   
@@ -474,7 +477,8 @@ CONTAINS
        END IF
     END SELECT
 
-  END SUBROUTINE ApplyContribution
+  RETURN
+  END !SUBROUTINE ApplyContribution
                  
   ! **********************************************************************!
 
@@ -556,7 +560,8 @@ CONTAINS
        rA = rB
     END DO Stepping
 
-  END SUBROUTINE InfluenceSGB
+  RETURN
+  END !SUBROUTINE InfluenceSGB
 
   ! **********************************************************************!
 
@@ -598,7 +603,8 @@ CONTAINS
        U( :, ir ) = SNGL( factor ) * U( :, ir )
     END DO Ranges
 
-  END SUBROUTINE ScalePressure
+  RETURN
+  END !SUBROUTINE ScalePressure
 
   ! **********************************************************************!
 
@@ -625,7 +631,7 @@ CONTAINS
        Hermite = ( 1.0d0 + 2.0d0 * u ) * ( 1.0d0 - u ) ** 2
     END IF
 
+  RETURN
+  END !FUNCTION Hermite
 
-  END FUNCTION Hermite
-
-END MODULE influence
+END !MODULE influence

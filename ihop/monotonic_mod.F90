@@ -33,7 +33,8 @@ CONTAINS
     monotonic_sngl = .TRUE.
     IF ( N == 1 ) RETURN
     IF ( ANY( x( 2 : N ) <= x( 1 : N - 1 ) ) ) monotonic_sngl = .FALSE.   
-  END FUNCTION monotonic_sngl
+  RETURN
+  END !FUNCTION monotonic_sngl
 
   FUNCTION monotonic_dble( x, N )
     LOGICAL               :: monotonic_dble
@@ -43,6 +44,7 @@ CONTAINS
     monotonic_dble = .TRUE.
     IF ( N == 1 ) RETURN
     IF ( ANY( x( 2 : N ) <= x( 1 : N - 1 ) ) ) monotonic_dble = .FALSE.   
-  END FUNCTION monotonic_dble
+  RETURN
+  END !FUNCTION monotonic_dble
   
-END MODULE monotonic_mod
+END !MODULE monotonic_mod

@@ -66,6 +66,7 @@ CONTAINS
 
     END DO
 
+  RETURN
   END SUBROUTINE Sort_sngl
 
   ! ________________________________________________________________________
@@ -106,6 +107,7 @@ CONTAINS
 
     END DO
 
+  RETURN
   END SUBROUTINE Sort_dble
 
   ! ________________________________________________________________________
@@ -149,6 +151,7 @@ CONTAINS
 
     END DO
 
+  RETURN
   END SUBROUTINE Sort_cmplx
 
 END MODULE sort_mod

@@ -105,9 +105,8 @@ CONTAINS
        freqVec( 1 ) = freq0
     END IF
 
-    RETURN
-
-  END SUBROUTINE ReadfreqVec
+  RETURN
+  END !SUBROUTINE ReadfreqVec
 
   !********************************************************************!
 
@@ -140,8 +139,8 @@ CONTAINS
     Pos%Sy( 1 ) = 0.
     WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: after init 0'
 #endif /* IHOP_THREED */
-    RETURN
-  END SUBROUTINE ReadSxSy
+  RETURN
+  END !SUBROUTINE ReadSxSy
 
   !********************************************************************!
 
@@ -204,8 +203,8 @@ CONTAINS
                            'near the bottom bdry has been moved up'
     END IF
 
-    RETURN
-  END SUBROUTINE ReadSzRz
+  RETURN
+  END !SUBROUTINE ReadSzRz
 
   !********************************************************************!
 
@@ -229,7 +228,7 @@ CONTAINS
     END IF 
  
     RETURN
-  END SUBROUTINE ReadRcvrRanges
+  END !SUBROUTINE ReadRcvrRanges
 
   !********************************************************************!
   
@@ -263,7 +262,7 @@ CONTAINS
     END IF 
  
     RETURN
-  END SUBROUTINE ReadRcvrBearings
+  END !SUBROUTINE ReadRcvrBearings
 #endif /* IHOP_THREED */
   !********************************************************************!
 
@@ -316,6 +315,7 @@ CONTAINS
        IF ( Units( 1 : 2 ) == 'km' ) x = 1000.0 * x
     END IF
 
-  END SUBROUTINE ReadVector
+  RETURN
+  END !SUBROUTINE ReadVector
 
 END MODULE srpos_mod

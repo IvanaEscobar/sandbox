@@ -108,8 +108,7 @@ CONTAINS
                                         + w2 * SNGL( RcvrDeclAngle )
     ENDIF
 
-    RETURN
-  END SUBROUTINE AddArr
+  END !SUBROUTINE AddArr
 
   ! **********************************************************************!
 
@@ -156,8 +155,8 @@ CONTAINS
        END DO  ! next receiver depth
     END DO  ! next range
 
-    RETURN
-  END SUBROUTINE WriteArrivalsASCII
+  RETURN
+  END !SUBROUTINE WriteArrivalsASCII
 
   ! **********************************************************************!
 
@@ -203,8 +202,8 @@ CONTAINS
        END DO   ! next receiver depth
     END DO   ! next range
 
-    RETURN
-  END SUBROUTINE WriteArrivalsBinary
+  RETURN
+  END !SUBROUTINE WriteArrivalsBinary
 
   ! **********************************************************************!
-END MODULE arr_mod
+END !MODULE arr_mod

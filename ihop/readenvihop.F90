@@ -289,7 +289,9 @@ CONTAINS
     END IF
 
     WRITE( PRTFile, * )
-  END SUBROUTINE ReadEnvironment
+
+  RETURN
+  END !SUBROUTINE ReadEnvironment
 
   !**********************************************************************!
 
@@ -407,7 +409,8 @@ CONTAINS
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
-  END SUBROUTINE ReadTopOpt
+  RETURN
+  END !SUBROUTINE ReadTopOpt
 
   !**********************************************************************!
 
@@ -504,7 +507,8 @@ CONTAINS
        RunType( 6 : 6 ) = '2'
     END SELECT
 
-  END SUBROUTINE ReadRunType
+  RETURN
+  END !SUBROUTINE ReadRunType
 
   !**********************************************************************!
 
@@ -625,7 +629,8 @@ CONTAINS
             HS%cp, rhor, alphaI
     END SELECT
 
-  END SUBROUTINE TopBot
+  RETURN
+  END !SUBROUTINE TopBot
 
   ! **********************************************************************!
 
@@ -760,7 +765,8 @@ CONTAINS
                          atten, PlotType )
     END SELECT
 
-  END SUBROUTINE OpenOutputFiles
+  RETURN
+  END !SUBROUTINE OpenOutputFiles
 
   !**********************************************************************!
 
@@ -840,7 +846,8 @@ CONTAINS
        WRITE( SHDFile, REC = 10 ) Pos%Rr( 1 : Pos%NRr )
     END IF
 
-  END SUBROUTINE WriteSHDHeader
+  RETURN
+  END !SUBROUTINE WriteSHDHeader
 
   !**********************************************************************!
 
@@ -858,7 +865,8 @@ CONTAINS
        WRITE( SHDFile, REC = iRec ) P( iRz, : )
     END DO
 
-  END SUBROUTINE WriteSHDField
+  RETURN
+  END !SUBROUTINE WriteSHDField
 
   !**********************************************************************!
 
@@ -879,7 +887,8 @@ CONTAINS
         x_out(i) = x_in(i)
     END DO
 
-  END SUBROUTINE AllocateSR
+  RETURN
+  END !SUBROUTINE AllocateSR
 
   !**********************************************************************!
 
