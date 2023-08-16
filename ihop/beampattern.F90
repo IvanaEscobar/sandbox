@@ -28,7 +28,6 @@ MODULE beamPattern
 CONTAINS
   SUBROUTINE ReadPat( FileRoot, myThid )
 
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid 
 
     INTEGER                          :: I, IAllocStat, IOStat
@@ -43,9 +42,8 @@ CONTAINS
             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOstat /= 0 ) THEN
             WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
-            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Unable to open source beampattern file'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadPat'
        END IF
 
@@ -54,9 +52,8 @@ CONTAINS
 
        ALLOCATE( SrcBmPat( NSBPPts, 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
             'Insufficient memory for beam pattern data: reduce # SBP points'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
 
@@ -72,9 +69,8 @@ CONTAINS
         NSBPPts = 2
         ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Insufficient memory'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
         SrcBmPat( 1, : ) = [ -180.0, 0.0 ]

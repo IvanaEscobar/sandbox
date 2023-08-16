@@ -45,7 +45,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC! flag set to 'F' if refl. coef. is to be read from a File
@@ -63,9 +62,8 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                             'Unable to open Bottom Reflection Coefficient file'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -76,9 +74,8 @@ CONTAINS
        IF ( ALLOCATED( RBot ) ) DEALLOCATE( RBot )
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for bot. refl. coef.: reduce # points'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
        READ(  BRCFile, * ) ( RBot( itheta ), itheta = 1, NBotPts )
@@ -100,9 +97,8 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
           WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Unable to open Top Reflection Coefficient file'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -113,9 +109,8 @@ CONTAINS
        IF ( ALLOCATED( RTop ) ) DEALLOCATE( RTop )
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
        IF ( iAllocStat /= 0 ) THEN
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for top refl. coef.: reduce # points'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -133,9 +128,8 @@ CONTAINS
        OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                         'Unable to open Internal Reflection Coefficient file'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -149,9 +143,8 @@ CONTAINS
        ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), &
                  Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
-          WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Too many points in reflection coefficient'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 

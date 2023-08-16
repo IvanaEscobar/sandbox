@@ -63,7 +63,6 @@ SUBROUTINE IHOP_INIT ( myThid )
 !     !INPUT/OUTPUT PARAMETERS:
 !     == Routine Arguments ==
 !     myThid :: Thread number for this instance of the routine.
-  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
   INTEGER, INTENT( IN ) :: myThid
 
   LOGICAL, PARAMETER   :: Inline = .FALSE.
@@ -81,8 +80,7 @@ SUBROUTINE IHOP_INIT ( myThid )
         STATUS = 'UNKNOWN', IOSTAT = iostat )
   IF ( iostat /= 0 ) THEN
       WRITE(*,*) 'ihop: IHOP_fileroot not recognized, ', TRIM( IHOP_fileroot )
-      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', 'Unable to recognize env file'
-      CALL PRINT_ERROR( msgBuf, myThid )
+      WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', 'Unable to recognize env file'
       STOP 'ABNORMAL END: S/R IHOP_INIT'
   END IF
 
@@ -144,9 +142,8 @@ SUBROUTINE IHOP_INIT ( myThid )
      ! *** Altimetry ***
      ALLOCATE( Top( 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) THEN
-      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+      WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                            'Insufficient memory for altimetry data'
-      CALL PRINT_ERROR( msgBuf, myThid )
       STOP 'ABNORMAL END: S/R IHOP_INIT'
      END IF
      Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
@@ -157,9 +154,8 @@ SUBROUTINE IHOP_INIT ( myThid )
      ! *** Bathymetry ***
      ALLOCATE( Bot( 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) THEN
-      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+      WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                            'Insufficient memory for bathymetry data'
-      CALL PRINT_ERROR( msgBuf, myThid )
       STOP 'ABNORMAL END: S/R IHOP_INIT'
      END IF
      Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
@@ -174,9 +170,8 @@ SUBROUTINE IHOP_INIT ( myThid )
      NSBPPts = 2
      ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
      IF ( iAllocStat /= 0 ) THEN 
-      WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+      WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                            'Insufficient memory for beam pattern'
-      CALL PRINT_ERROR( msgBuf, myThid )
       STOP 'ABNORMAL END: S/R IHOP_INIT'
      END IF
      SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
@@ -235,7 +230,6 @@ SUBROUTINE BellhopCore( myThid )
   USE arr_mod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                       NArr
 
-  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
   INTEGER, INTENT( IN ) :: myThid
 
   INTEGER              :: iAllocStat  
@@ -254,9 +248,8 @@ SUBROUTINE BellhopCore( myThid )
        Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                        / ( Angles%Nalpha - 1 )  ! angular spacing between beams
   ELSE
-      WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+      WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
                     'Required: Nalpha>1, else add iSingle_alpha (see angleMod)'
-      CALL PRINT_ERROR( msgBuf, myThid )
       STOP 'ABNORMAL END: S/R BellhopCore'
   END IF
 
@@ -296,9 +289,8 @@ SUBROUTINE BellhopCore( myThid )
     CASE ( 'C', 'S', 'I' )        ! TL calculation
         ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
         IF ( iAllocStat /= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+            WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
                            'Insufficient memory for TL matrix: reduce Nr * NRz'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R BellhopCore'
         END IF
     CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
@@ -316,9 +308,8 @@ SUBROUTINE BellhopCore( myThid )
         ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
                    NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
         IF ( iAllocStat /= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+            WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
              'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R BellhopCore'
         END IF
     CASE DEFAULT
@@ -694,7 +685,6 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
 
   ! == Routine Arguments ==
   ! myThid :: Thread number for this instance of the routine
-  CHARACTER*(MAX_LEN_MBUF) :: msgBuf
   INTEGER, INTENT( IN ) :: myThid
 
   ! == Local Variables ==
@@ -873,9 +863,8 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
 
   CASE DEFAULT
      WRITE( PRTFile, * ) 'HS%BC = ', HS%BC
-     WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
+     WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
                           'Unknown boundary condition type'
-     CALL PRINT_ERROR( msgBuf, myThid )
      STOP 'ABNORMAL END: S/R Reflect2D'
   END SELECT
 
@@ -885,9 +874,8 @@ SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
   ELSE IF ( BotTop == 'BOT' ) THEN
      ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
   ELSE
-     WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
+     WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
                           'no reflection bounce, but in relfect2d somehow'
-     CALL PRINT_ERROR( msgBuf, myThid )
      STOP 'ABNORMAL END: S/R Reflect2D'
   END IF
 

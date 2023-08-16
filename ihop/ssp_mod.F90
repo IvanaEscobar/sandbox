@@ -111,7 +111,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     ! == Local Variables ==
@@ -139,8 +138,7 @@ CONTAINS
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid )
     CASE DEFAULT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
-       WRITE(msgBuf,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
-       CALL PRINT_ERROR( msgBuf, myThid )
+       WRITE(errorMessageUnit,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
        STOP 'ABNORMAL END: S/R EvaluateSSP'
     END SELECT
 
@@ -411,7 +409,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     ! == Local Variables ==
@@ -464,9 +461,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean ',&
                               'soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
-          WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+          WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
                     'ray is outside the box where the soundspeed is defined'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R Quad'
        END IF
 
@@ -488,9 +484,8 @@ CONTAINS
        s2      = x( 2 )           - SSP%z( iSegz )            
        delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
        IF (delta_z <= 0 .OR. s2 > delta_z) THEN
-          WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+          WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
                             'depth is not monotonically increasing in SSPFile'
-          CALL PRINT_ERROR( msgBuf, myThid )
           STOP 'ABNORMAL END: S/R Quad'
        END IF
        
@@ -586,7 +581,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
@@ -597,8 +591,7 @@ CONTAINS
         FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
        WRITE( PRTFile, * ) 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
-       WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', 'Unable to open the SSP file'
-       CALL PRINT_ERROR( msgBuf, myThid )
+       WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', 'Unable to open the SSP file'
        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
@@ -620,9 +613,8 @@ CONTAINS
               SSP%Seg%r( SSP%Nr ), &
               STAT = iallocstat )
     IF ( iallocstat /= 0 ) THEN
-       WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+       WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                             'Insufficient memory to store SSP'
-       CALL PRINT_ERROR( msgBuf, myThid )
        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
@@ -676,9 +668,8 @@ CONTAINS
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
               WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z( iz )
-              WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+              WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                             'The depths in the SSP must be monotone increasing'
-              CALL PRINT_ERROR( msgBuf, myThid )
               STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
        END IF
@@ -691,9 +682,8 @@ CONTAINS
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
           IF ( SSP%NPts == 1 ) THEN
               WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
-              WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', &
+              WRITE(errorMessageUnit,'(2A)')  'SSPMOD ReadSSP: ', &
                                     'The SSP must have at least 2 points'
-              CALL PRINT_ERROR( msgBuf, myThid ) 
               STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
 
@@ -705,9 +695,8 @@ CONTAINS
  
     ! Fall through means too many points in the profile
     WRITE( PRTFile, * ) 'Max. #SSP points: ', MaxSSP
-    WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
+    WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                          'Number of SSP points exceeds limit'
-    CALL PRINT_ERROR( msgBuf, myThid )
     STOP 'ABNORMAL END: S/R ReadSSP'
 
   END SUBROUTINE ReadSSP
@@ -719,7 +708,6 @@ CONTAINS
 
       ! == Routine Arguments ==
       ! myThid :: Thread number for this instance of the routine
-      CHARACTER*(MAX_LEN_MBUF) :: msgBuf
       INTEGER, INTENT(IN) :: myThid
 
       REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
@@ -736,9 +724,8 @@ CONTAINS
                 SSP%Seg%r( SSP%Nr ), &
                 STAT = iallocstat )
       IF ( iallocstat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SSPMOD ExtractSSP: ', &
                              'Insufficient memory to store SSP'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ExtractSSP'
       END IF
 
@@ -753,8 +740,6 @@ CONTAINS
       SSP%z( 2:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
       ! ssp extraction
-      WRITE( PRTFile, * ) 'Init SSP points: ', SSP%z(1:SSP%Nz)
-      WRITE(errorMessageUnit,'(A)') 'Escobar: in EXTRACTSSP before interp'
       !==================================================
       ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
       !==================================================
@@ -784,12 +769,10 @@ CONTAINS
         ENDDO
        ENDDO
       ENDDO
+      WRITE(errorMessageUnit,*) 'Escobar: in EXTRACTSSP after interp'
       !==================================================
       ! END IDW Interpolate
       !==================================================
-
-
-      WRITE(errorMessageUnit,*) 'Escobar: in EXTRACTSSP after interp'
 
       ! set vector structured c, rho, and cz for first range point
       DO iz = 1,SSP%Nz
@@ -802,9 +785,8 @@ CONTAINS
         IF ( iz > 1 ) THEN
             IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
                 WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z(iz)
-                WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
+                WRITE( errorMessageUnit,'(2A)' ) 'SSPMOD ExtractSSP: ', &
                             'The depths in the SSP must be monotone increasing'
-                CALL PRINT_ERROR( msgBuf, myThid )
                 STOP 'ABNORMAL END: S/R ExtractSSP'
             END IF
         END IF
