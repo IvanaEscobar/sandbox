@@ -68,7 +68,6 @@ CONTAINS
     ! c     real      part of sound speed
     ! alpha imaginary part of sound speed
 
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90), INTENT( IN ) :: freq, freq0, alpha, c, z, beta, fT
     CHARACTER (LEN=2), INTENT( IN ) :: AttenUnit
@@ -143,9 +142,8 @@ CONTAINS
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI
        WRITE( PRTFile, * ) 'Usually this means you have an attenuation that is way too high'
 
-       WRITE(msgBuf,'(2A)') 'ATTENMOD CRCI: The complex sound speed has an ', &
+       WRITE(errorMessageUnit,'(2A)') 'ATTENMOD CRCI: The complex sound speed has an ', &
        'imaginary part > real part'
-       CALL PRINT_ERROR( msgBuf, myThid )
        STOP 'ABNORMAL END: S/R CRCI'
     END IF
 

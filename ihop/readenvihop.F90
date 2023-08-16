@@ -39,7 +39,7 @@ CONTAINS
     ! Note that default values of SSP, DENSITY, Attenuation will not work
 
     USE angle_mod,  only: ReadRayElevationAngles, ReadRayBearingAngles
-    USE srPos_mod,  only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
+    USE srpos_mod,  only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
 #ifdef IHOP_THREED
                               ReadRcvrBearings, &
 #endif /* IHOP_THREED */
@@ -47,7 +47,6 @@ CONTAINS
 
     ! == Routine arguments ==
     ! myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
@@ -64,9 +63,8 @@ CONTAINS
 
     ! Prepend model name to title
 #ifdef IHOP_THREED
-    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+    WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
-    CALL PRINT_ERROR( msgBuf, myThid )
     STOP 'ABNORMAL END: S/R ReadEnvironment'
     Title( 1 :11 ) = 'BELLHOP3D- '
     Title( 12:80 ) = IHOP_title
@@ -96,7 +94,6 @@ CONTAINS
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 
-    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: BEFORE EVALUATESSP'
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
     WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER EVALUATESSP'
 
@@ -113,19 +110,19 @@ CONTAINS
         WRITE( PRTFile, * ) '    Bathymetry file selected'
     CASE( ' ' )
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                              'Unknown bottom option letter in second position'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadEnvironment'
     END SELECT
 
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
-       WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER bottom options'
+    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER bottom options'
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates
+    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER READSxSy'
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
 
@@ -162,9 +159,8 @@ CONTAINS
 
     ! Limits for tracing beams
 #ifdef IHOP_THREED
-    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+    WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
-    CALL PRINT_ERROR( msgBuf, myThid )
     STOP 'ABNORMAL END: S/R ReadEnvironment'
     !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
     Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
@@ -271,9 +267,8 @@ CONTAINS
           CASE ( 'S' )
              WRITE( PRTFile, * ) 'Standard curvature condition'
           CASE DEFAULT
-                WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                      'Unknown curvature condition'
-                CALL PRINT_ERROR( msgBuf, myThid )
                 STOP 'ABNORMAL END: S/R ReadEnvironment'
           END SELECT
 
@@ -287,9 +282,8 @@ CONTAINS
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
           WRITE( PRTFile, * ) 'Component                 = ', Beam%Component
        CASE DEFAULT
-            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+            WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                 'Unknown beam type (second letter of run type)'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadEnvironment'
        END SELECT
     END IF
@@ -303,7 +297,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     CHARACTER (LEN= 6), INTENT( OUT ) :: TopOpt
@@ -335,9 +328,8 @@ CONTAINS
     CASE ( 'A' )
        WRITE( PRTFile, * ) '    Analytic SSP option'
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown option for SSP approximation'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -357,9 +349,8 @@ CONTAINS
     CASE ( 'L' )
        WRITE( PRTFile, * ) '    Attenuation units: Loss parameter'
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown attenuation units'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -391,9 +382,8 @@ CONTAINS
        END DO
     CASE ( ' ' )
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fourth position'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -402,9 +392,8 @@ CONTAINS
        WRITE( PRTFile, * ) '    Altimetry file selected'
     CASE ( '-', '_', ' ' )
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fifth position'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -413,9 +402,8 @@ CONTAINS
        WRITE( PRTFile, * ) '    Development options enabled'
     CASE ( ' ' )
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in sixth position'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -431,7 +419,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     CHARACTER (LEN= 7), INTENT( INOUT ) :: RunType
@@ -455,9 +442,8 @@ CONTAINS
     CASE ( 'a' )
        WRITE( PRTFile, * ) 'Arrivals calculation, binary file output'
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
             'Unknown RunType selected'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadRunType'
     END SELECT
 
@@ -497,9 +483,8 @@ CONTAINS
     CASE ( 'I' )
        WRITE( PRTFile, * ) 'Irregular grid: Receivers at Rr( : ) x Rz( : )'
        IF ( Pos%NRz /= Pos%NRr ) THEN
-            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
+            WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
                     'Irregular grid option selected with NRz not equal to Nr'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadRunType'
        END IF
        PlotType = 'irregular '
@@ -529,7 +514,6 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT( IN    ) :: freq  ! frequency
@@ -555,9 +539,8 @@ CONTAINS
     CASE ( 'P' )
        WRITE( PRTFile, * ) '    reading PRECALCULATED IRC'
     CASE DEFAULT
-        WRITE(msgBuf,'(2A)') 'READENVIHOP TopBot: ', & 
+        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP TopBot: ', & 
                              'Unknown boundary condition type'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R TopBot'
     END SELECT
 

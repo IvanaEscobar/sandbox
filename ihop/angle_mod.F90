@@ -45,7 +45,6 @@ MODULE angle_mod
 CONTAINS
   SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType, myThid )
 
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90),  INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
@@ -77,9 +76,8 @@ CONTAINS
 
     ALLOCATE( Angles%alpha( MAX( 3, Angles%Nalpha ) ), STAT = iAllocStat )
     IF ( iAllocStat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
         'Insufficient memory to store beam angles'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
     END IF
 
@@ -109,18 +107,16 @@ CONTAINS
 
     IF ( Angles%Nalpha>1 .AND. &
     Angles%alpha(Angles%Nalpha) == Angles%alpha(1) ) THEN
-        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
         'First and last beam take-off angle are identical'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
     END IF
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
         IF ( Angles%iSingle_alpha<1 .OR. &
            Angles%iSingle_alpha>Angles%Nalpha ) THEN
-            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
             'Selected beam, iSingl not in [ 1, Angles%Nalpha ]'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
         END IF
     END IF
@@ -131,14 +127,12 @@ CONTAINS
 
   SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType, myThid )
 
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
     REAL (KIND=_RL90), INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
-    WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+    WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                  '3D rays not supported in ihop'
-    CALL PRINT_ERROR( msgBuf, myThid )
     STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
@@ -159,9 +153,8 @@ CONTAINS
 
     ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
     IF ( iAllocStat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                         'Insufficient memory to store beam angles'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
     END IF
 
@@ -186,9 +179,8 @@ CONTAINS
        Angles%Nbeta = Pos%Ntheta
        ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
         IF ( iAllocStat /= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                             'Insufficient memory to store beam angles'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
         END IF
 
@@ -209,18 +201,16 @@ CONTAINS
 
     IF ( Angles%Nbeta>1 .AND. &
         Angles%beta( Angles%Nbeta )==Angles%beta(1) ) THEN
-        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
          'First and last beam take-off angle are identical'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
     END IF
 
     IF ( TopOpt( 6 : 6 ) == 'I' ) THEN
         IF ( Angles%iSingle_beta < 1 .OR. &
             Angles%iSingle_beta > Angles%Nbeta ) THEN
-            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
             'Selected beam, iSingl not in [ 1, Angles%Nbeta ]'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
         END IF
     END IF

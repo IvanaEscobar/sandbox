@@ -1,7 +1,7 @@
 #include "IHOP_OPTIONS.h"
 !BOP
 ! !INTERFACE:
-MODULE srPos_mod
+MODULE srpos_mod
 ! <CONTACT EMAIL="ivana@utexas.edu">
 !   Ivana Escobar
 ! </CONTACT>
@@ -62,7 +62,6 @@ CONTAINS
     
     !     == Routine Arguments ==
     !     myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
 
     REAL (KIND=_RL90),  INTENT( IN ) :: freq0   ! Source frequency
@@ -78,9 +77,8 @@ CONTAINS
         WRITE( PRTFile, * )
         WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
         IF ( Nfreq <= 0 ) THEN
-            WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+            WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                                  'Number of frequencies must be positive'
-            CALL PRINT_ERROR( msgBuf, myThid )
             STOP 'ABNORMAL END: S/R ReadfreqVec'
         END IF
     END IF
@@ -88,9 +86,8 @@ CONTAINS
     IF ( ALLOCATED( freqVec ) ) DEALLOCATE( freqVec )
     ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                              'Number of frequencies too large'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadfreqVec'
     END IF
 
@@ -128,9 +125,20 @@ CONTAINS
     CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km', &
                     myThid )
 #else /* IHOP_THREED */
-    ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ) )
+    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: before allocate'
+    ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ), Stat=IAllocStat)
+    IF (IAllocStat/=0) THEN
+        WRITE(errorMessageUnit, *) 'allocation failed', IAllocStat
+        !WRITE( errorMessageUnit, '(2A)') 'SRPOS_MOD ReadSxSy: ', 'not allocating'
+        STOP 'ABNORMAL END: S/R ReadSxSy'
+    ELSE
+        WRITE(errorMessageUnit, *) 'allocation passed!', IAllocStat
+    END IF
+
+    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: after allocate'
     Pos%Sx( 1 ) = 0.
     Pos%Sy( 1 ) = 0.
+    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: after init 0'
 #endif /* IHOP_THREED */
     RETURN
   END SUBROUTINE ReadSxSy
@@ -145,7 +153,6 @@ CONTAINS
 
     !     == Routine Arguments ==
     !     myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
 
     REAL,    INTENT( IN ) :: zMin, zMax
@@ -158,18 +165,16 @@ CONTAINS
     IF ( ALLOCATED( Pos%ws ) ) DEALLOCATE( Pos%ws, Pos%iSz )
     ALLOCATE( Pos%ws( Pos%NSz ), Pos%iSz( Pos%NSz ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many sources'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
 
     IF ( ALLOCATED( Pos%wr ) ) DEALLOCATE( Pos%wr, Pos%iRz )
     ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
     IF ( IAllocStat /= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many receivers'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
 
@@ -208,7 +213,6 @@ CONTAINS
 
     !     == Routine Arguments ==
     !     myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
 
     ! IESCO22: assuming receiver positions are equally spaced
@@ -219,9 +223,8 @@ CONTAINS
     IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr-1 )
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
                              'Receiver ranges are not monotonically increasing'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadRcvrRanges'
     END IF 
  
@@ -235,7 +238,6 @@ CONTAINS
 
     !     == Routine Arguments ==
     !     myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
 
 ! IEsco23: NOT SUPPORTED IN ihop
@@ -255,9 +257,8 @@ CONTAINS
                                            - Pos%theta( Pos%Ntheta - 1 )
 
     IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
                             'Receiver bearings are not monotonically increasing'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadRcvrBearings'
     END IF 
  
@@ -274,7 +275,6 @@ CONTAINS
 
     !     == Routine Arguments ==
     !     myThid :: Thread number for this instance of the routine.
-    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT( IN ) :: myThid
  
     INTEGER,                        INTENT( IN ) :: Nx
@@ -290,9 +290,8 @@ CONTAINS
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
 
     IF ( Nx <= 0 ) THEN
-        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadVector: ', &
+        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
                              'Number of ' // Description // 'must be positive'
-        CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R ReadVector'
     END IF
 
@@ -319,4 +318,4 @@ CONTAINS
 
   END SUBROUTINE ReadVector
 
-END MODULE srPos_mod
+END MODULE srpos_mod
