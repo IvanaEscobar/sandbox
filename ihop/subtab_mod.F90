@@ -44,6 +44,7 @@ CONTAINS
        END IF
     END IF
 
+  RETURN
   END SUBROUTINE SubTab_sngl
 
   SUBROUTINE SubTab_dble( x, Nx )
@@ -60,6 +61,7 @@ CONTAINS
        END IF
     END IF
 
+  RETURN
   END SUBROUTINE SubTab_dble
 
 END MODULE subTab_mod

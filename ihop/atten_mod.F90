@@ -147,8 +147,8 @@ CONTAINS
        STOP 'ABNORMAL END: S/R CRCI'
     END IF
 
-    RETURN
-  END FUNCTION CRCI
+  RETURN
+  END !FUNCTION CRCI
 
   !**********************************************************************!
 
@@ -196,7 +196,7 @@ CONTAINS
     Franc_Garr = A1 * P1 * ( f1 * f**2 ) / ( f1**2 + f**2 ) &
                  + A2 * P2 * ( f2 * f**2 ) / ( f2**2 + f**2 ) &
                  + A3 * P3 * f**2
+  RETURN
+  END !FUNCTION Franc_Garr
 
-  END FUNCTION Franc_Garr
-
-END MODULE atten_mod
+END !MODULE atten_mod

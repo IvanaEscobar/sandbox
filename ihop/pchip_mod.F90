@@ -122,8 +122,8 @@ CONTAINS
 
     END IF
 
-    RETURN
-  END SUBROUTINE PCHIP
+  RETURN
+  END !SUBROUTINE PCHIP
 
   !**********************************************************************!
 
@@ -141,8 +141,8 @@ CONTAINS
     del1 = ( y( ix     ) - y( ix - 1 ) ) / h1
     del2 = ( y( ix + 1 ) - y( ix     ) ) / h2
 
-    RETURN
-  END SUBROUTINE h_del
+  RETURN
+  END !SUBROUTINE h_del
 
   !**********************************************************************!
 
@@ -156,7 +156,8 @@ CONTAINS
 
     fprime_interior_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
-  END FUNCTION fprime_interior_Cmplx
+  RETURN
+  END !FUNCTION fprime_interior_Cmplx
 
   !**********************************************************************!
 
@@ -170,7 +171,8 @@ CONTAINS
 
     fprime_left_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
-  END FUNCTION fprime_left_end_Cmplx
+  RETURN
+  END !FUNCTION fprime_left_end_Cmplx
 
   !**********************************************************************!
 
@@ -184,7 +186,8 @@ CONTAINS
 
     fprime_right_end_Cmplx = CMPLX( fprime_r, fprime_i, KIND=_RL90 )
 
-  END FUNCTION fprime_right_end_Cmplx
+  RETURN
+  END !FUNCTION fprime_right_end_Cmplx
 
  !**********************************************************************!
 
@@ -207,7 +210,8 @@ CONTAINS
       fprime_interior = 0.0D0;
     END IF
 
-  END FUNCTION fprime_interior
+  RETURN
+  END !FUNCTION fprime_interior
 
   !**********************************************************************!
 
@@ -227,7 +231,8 @@ CONTAINS
        fprime_left_end = 3.0D0 * del1;
     END IF
 
-  END FUNCTION fprime_left_end
+  RETURN
+  END !FUNCTION fprime_left_end
 
   !**********************************************************************!
 
@@ -250,6 +255,7 @@ CONTAINS
        fprime_right_end = 3.0D0 * del2;
     END IF
     
-  END FUNCTION fprime_right_end
+  RETURN
+  END !FUNCTION fprime_right_end
 
-END MODULE pchip_mod
+END !MODULE pchip_mod

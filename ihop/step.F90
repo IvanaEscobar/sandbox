@@ -146,6 +146,8 @@ CONTAINS
        ray2%p = ray2%p - ray2%q*RN
 
     END IF
+
+  RETURN
   END SUBROUTINE Step2D
 
   ! **********************************************************************!
@@ -233,5 +235,6 @@ CONTAINS
        iSmallStepCtr = 0   ! didn't do a small step so reset the counter
     END IF
 
+  RETURN
   END SUBROUTINE ReduceStep2D
 END MODULE step

@@ -170,7 +170,8 @@ CONTAINS
         STOP 'ABNORMAL END: S/R ReadATI'
     END IF 
  
-  END SUBROUTINE ReadATI
+  RETURN
+  END !SUBROUTINE ReadATI
 
   ! **********************************************************************!
 
@@ -295,7 +296,8 @@ CONTAINS
         STOP 'ABNORMAL END: S/R ReadBTY'
     END IF 
 
-  END SUBROUTINE ReadBTY
+  RETURN
+  END !SUBROUTINE ReadBTY
 
   ! **********************************************************************!
 
@@ -402,7 +404,8 @@ CONTAINS
        Bdry%kappa = 0
     END IF
 
-  END SUBROUTINE ComputeBdryTangentNormal
+  RETURN
+  END !SUBROUTINE ComputeBdryTangentNormal
 
   ! **********************************************************************!
 
@@ -431,7 +434,8 @@ CONTAINS
         STOP 'ABNORMAL END: S/R GetTopSeg'
     ENDIF
 
-  END SUBROUTINE GetTopSeg
+  RETURN
+  END !SUBROUTINE GetTopSeg
 
   ! **********************************************************************!
 
@@ -458,6 +462,7 @@ CONTAINS
         STOP 'ABNORMAL END: S/R GetBotSeg'
     ENDIF
 
-  END SUBROUTINE GetBotSeg
+  RETURN
+  END !SUBROUTINE GetBotSeg
 
-END MODULE bdry_mod
+END !MODULE bdry_mod

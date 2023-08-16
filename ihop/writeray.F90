@@ -64,6 +64,7 @@ CONTAINS
        WRITE( RAYFile, * ) ray2D( is )%x
     END DO
 
+  RETURN
   END SUBROUTINE WriteRay2D
 
   SUBROUTINE WriteDel2D( alpha0, Nsteps1 )
@@ -99,6 +100,7 @@ CONTAINS
        WRITE( DELFile, * ) REAL(ray2D( is )%tau), ray2D( is )%x(2)
     END DO
 
+  RETURN
   END SUBROUTINE WriteDel2D
 
   ! **********************************************************************!

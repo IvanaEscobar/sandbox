@@ -79,6 +79,7 @@ CONTAINS
 
     SrcBmPat( :, 2 ) = 10**( SrcBmPat( :, 2 ) / 20 )  ! convert dB to linear scale
 
-  END SUBROUTINE ReadPat
+  RETURN
+  END !SUBROUTINE ReadPat
 
-END MODULE beamPattern
+END !MODULE beamPattern

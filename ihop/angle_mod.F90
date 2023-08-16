@@ -120,8 +120,9 @@ CONTAINS
             STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
         END IF
     END IF
-
-  END SUBROUTINE ReadRayElevationAngles
+  
+  RETURN
+  END !SUBROUTINE ReadRayElevationAngles
 
   !**********************************************************************!
 
@@ -220,6 +221,7 @@ CONTAINS
     IF ( Angles%Nbeta /= 1 ) Angles%Dbeta = ( Angles%beta( Angles%NBeta ) - &
         Angles%beta( 1 ) ) / ( Angles%Nbeta - 1 )
 
-  END SUBROUTINE ReadRayBearingAngles
+  RETURN
+  END !SUBROUTINE ReadRayBearingAngles
 
-END MODULE angle_mod
+END !MODULE angle_mod

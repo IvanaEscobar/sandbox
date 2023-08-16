@@ -142,7 +142,8 @@ CONTAINS
        STOP 'ABNORMAL END: S/R EvaluateSSP'
     END SELECT
 
-  END SUBROUTINE EvaluateSSP
+  RETURN
+  END !SUBROUTINE EvaluateSSP
   
 !**********************************************************************!
 
@@ -203,7 +204,8 @@ CONTAINS
        rho   = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
 
-  END SUBROUTINE n2Linear
+  RETURN
+  END !SUBROUTINE n2Linear
 
   !**********************************************************************!
 
@@ -250,7 +252,8 @@ CONTAINS
        rho   = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
 
-  END SUBROUTINE cLinear
+  RETURN
+  END !SUBROUTINE cLinear
 
   !**********************************************************************!
 
@@ -325,7 +328,8 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE cPCHIP
+  RETURN
+  END !SUBROUTINE cPCHIP
 
   !**********************************************************************!
 
@@ -399,7 +403,8 @@ CONTAINS
        rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
     END IF
 
-  END SUBROUTINE cCubic
+  RETURN
+  END !SUBROUTINE cCubic
 
   !**********************************************************************!
 
@@ -519,7 +524,8 @@ CONTAINS
     END IF
 
     !IESCO22: for thesis, czz=crr=0, and rho=1 at all times
-  END SUBROUTINE Quad
+  RETURN
+  END !SUBROUTINE Quad
 
 !**********************************************************************!
 
@@ -568,8 +574,8 @@ CONTAINS
     crz = 0.0
     crr = 0.0
 
-    RETURN
-  END SUBROUTINE Analytic
+  RETURN
+  END !SUBROUTINE Analytic
 
 !**********************************************************************!
 
@@ -699,7 +705,8 @@ CONTAINS
                          'Number of SSP points exceeds limit'
     STOP 'ABNORMAL END: S/R ReadSSP'
 
-  END SUBROUTINE ReadSSP
+  RETURN
+  END !SUBROUTINE ReadSSP
 
   SUBROUTINE ExtractSSP( Depth, freq, myThid )
       ! Extracts SSP from MITgcm grid points
@@ -824,6 +831,7 @@ CONTAINS
 #endif
       END DO
 
-  END SUBROUTINE ExtractSSP
+  RETURN
+  END !SUBROUTINE ExtractSSP
 
 END MODULE ssp_mod

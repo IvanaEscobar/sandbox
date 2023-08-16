@@ -49,6 +49,7 @@ CONTAINS
 
     PolyR = ft( 1 )
 
+  RETURN
   END FUNCTION PolyR
 
   !__________________________________________________________________________
@@ -77,6 +78,7 @@ CONTAINS
 
     PolyC = ft( 1 )
 
+  RETURN
   END FUNCTION PolyC
 
   !__________________________________________________________________________
@@ -103,6 +105,7 @@ CONTAINS
     ENDIF
     PolyZ = fT( 1 )
 
+  RETURN
   END FUNCTION PolyZ
 
 END MODULE poly_mod

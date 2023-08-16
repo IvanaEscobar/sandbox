@@ -153,7 +153,8 @@ CONTAINS
        CLOSE( IRCFile )
     ENDIF
 
-  END SUBROUTINE ReadReflectionCoefficient
+  RETURN
+  END !SUBROUTINE ReadReflectionCoefficient
 
   SUBROUTINE InterpolateReflectionCoefficient( RInt, R, NPts )
 
@@ -214,7 +215,8 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE InterpolateReflectionCoefficient
+  RETURN
+  END !SUBROUTINE InterpolateReflectionCoefficient
 
   SUBROUTINE InterpolateIRC( x, f, g, iPower, xTab, fTab, gTab, iTab, NkTab )
 
@@ -284,5 +286,6 @@ CONTAINS
        iPower = iTab( iLeft )
     ENDIF
 
-  END SUBROUTINE InterpolateIRC
+  RETURN
+  END !SUBROUTINE InterpolateIRC
 END MODULE refCoef
