@@ -40,7 +40,6 @@ MODULE ssp_mod
 
 ! LOCAL VARIABLES
 ! == Local Variables ==
-  CHARACTER*(MAX_LEN_MBUF) msgBuf
   INTEGER bi,bj
   INTEGER i,j,k
 
@@ -112,6 +111,7 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     ! == Local Variables ==
@@ -119,8 +119,10 @@ CONTAINS
     REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
     CHARACTER( LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
+#ifdef IHOP_THREED
     REAL (KIND=_RL90)                :: gradc_3d( 3 ), cxx, cyy, cxy, cxz, cyz
     REAL (KIND=_RL90)                :: x3( 3 )
+#endif /* IHOP_THREED */
 
     SELECT CASE ( SSP%Type )
     CASE ( 'N' )  !  N2-linear profile option
@@ -406,10 +408,10 @@ CONTAINS
   SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
 
     ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
-    ! IEsco22: Assuming an SSPFile is required. Missing defensive check for SSPFile
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     ! == Local Variables ==
@@ -425,6 +427,7 @@ CONTAINS
        ! *** Task 'INI' for initialization ***
        
         Depth = x( 2 )
+        ! Defensive check if SSPFile exists
         IF (useSSPFile .EQV. .TRUE.) THEN ! eqv for logical operands
             CALL ReadSSP( Depth, freq, myThid )
         ELSE
@@ -583,6 +586,7 @@ CONTAINS
 
     ! == Routine Arguments ==
     ! myThid :: Thread number for this instance of the routine
+    CHARACTER*(MAX_LEN_MBUF) :: msgBuf
     INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
@@ -715,6 +719,7 @@ CONTAINS
 
       ! == Routine Arguments ==
       ! myThid :: Thread number for this instance of the routine
+      CHARACTER*(MAX_LEN_MBUF) :: msgBuf
       INTEGER, INTENT(IN) :: myThid
 
       REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
@@ -723,7 +728,7 @@ CONTAINS
       ! == Local Variables ==
       INTEGER ii, jj
 
-      SSP%Nz = Nr ! NOT going through the bathymetry, need to change BTYFile
+      SSP%Nz = Nr+1 ! NOT going through the bathymetry, need to change BTYFile
       SSP%Nr = IHOP_NPTS_RANGE
 
       ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
@@ -738,19 +743,18 @@ CONTAINS
       END IF
 
       ! Initiate SSP%cMat to ceros
-      SSP%cMat = 0.0
+      SSP%cMat = 0.0 _d 0
 
-               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP b4 ranges', ihop_ranges
-               CALL PRINT_ERROR( msgBuf, myThid )
       ! set SSP%Seg%r from data.ihop -> ihop_ranges
       SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
 
       ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-      SSP%z( 1:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
+      SSP%z( 1 )        = 0.0 _d 0
+      SSP%z( 2:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
 
       ! ssp extraction
-               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP before interp'
-               CALL PRINT_ERROR( msgBuf, myThid )
+      WRITE( PRTFile, * ) 'Init SSP points: ', SSP%z(1:SSP%Nz)
+      WRITE(errorMessageUnit,'(A)') 'Escobar: in EXTRACTSSP before interp'
       !==================================================
       ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
       !==================================================
@@ -770,12 +774,9 @@ CONTAINS
                   yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
                
                ! IDW Interpolate SSP at second order
-               SSP%cMat(:,ii) = SSP%cMat(:,ii) +       &
+               SSP%cMat(2:SSP%Nz,ii) = SSP%cMat(2:SSP%Nz,ii) +       &
                    ihop_ssp(i,j,:,bi,bj)*ihop_idw_weights(ii,jj)/sumweights(ii)
 
-               !WRITE(msgBuf,*) 'Escobar: ', SSP%cMat(1,ii), 'for', ii
-               !CALL PRINT_ERROR( msgBuf, myThid )
-               
               ENDIF
              ENDDO
             ENDDO
@@ -788,8 +789,8 @@ CONTAINS
       !==================================================
 
 
-               WRITE(msgBuf,*) 'Escobar: in EXTRACTSSP after interp'
-               CALL PRINT_ERROR( msgBuf, myThid )
+      WRITE(errorMessageUnit,*) 'Escobar: in EXTRACTSSP after interp'
+
       ! set vector structured c, rho, and cz for first range point
       DO iz = 1,SSP%Nz
         alphaR = SSP%cMat( iz, 1 )

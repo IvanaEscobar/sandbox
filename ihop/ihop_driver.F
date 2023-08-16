@@ -28,8 +28,6 @@ C  myThid   :: my Thread Id number
       _RL     myTime
       INTEGER myIter, myThid
 
-      CHARACTER*(MAX_LEN_MBUF) msgBuf
-
 C !OUTPUT PARAMETERS: ==================================================
 
 C !LOCAL VARIABLES: ====================================================
@@ -61,8 +59,7 @@ CEOP
 
 #ifdef ALLOW_IHOP
       IF ( ihop_iter .EQ. myIter ) THEN
-       WRITE( msgBuf, * ) 'Escobar: in IHOP_DRIVER:', myTime
-       CALL PRINT_ERROR( msgBuf, myThid )
+       WRITE( errorMessageUnit, * ) 'Escobar: in IHOP_DRIVER:', myTime
        CALL IHOP_INIT( myThid )
       ENDIF
 #endif /* ALLOW_IHOP */
