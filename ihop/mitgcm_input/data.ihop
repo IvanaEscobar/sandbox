@@ -20,7 +20,7 @@
  IHOP_rr=2544.25,
 
  IHOP_runopt='A',
- IHOP_nalpha=4000,
+ IHOP_nalpha=40,
  IHOP_alpha=-20.0, 20.0,
  IHOP_step=0.0,
  

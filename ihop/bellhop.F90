@@ -34,7 +34,8 @@ MODULE BELLHOP
   USE ssp_mod,      only:   EvaluateSSP, HSInfo, Bdry, SSP, betaPowerLaw, fT
   USE bdry_mod,     only:   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top,  &
                             atiType, btyType, NatiPts, NbtyPts, iSmallStepCtr, &
-                            IsegTop, IsegBot, rTopSeg, rBotSeg
+                            IsegTop, IsegBot, rTopSeg, rBotSeg,                &
+                            ComputeBdryTangentNormal
   USE refCoef,      only:   ReadReflectionCoefficient,                         &
                             InterpolateReflectionCoefficient, ReflectionCoef,  &
                             RTop, RBot, NBotPts, NTopPts

@@ -24,7 +24,8 @@ MODULE bdry_mod
 
     public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, &
            IsegTop, IsegBot, rTopSeg, rBotSeg,&
-           iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts
+           iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts, &
+           ComputeBdryTangentNormal
 
 !=======================================================================
 
