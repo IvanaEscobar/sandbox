@@ -344,6 +344,7 @@ CONTAINS
           NArr = 0
        END SELECT
   
+       WRITE(errorMessageUnit,*) 'Escobar: bellhop bellhop core 1'
        CALL EvaluateSSP(  xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, &
                           'TAB', myThid  )
   
@@ -474,6 +475,7 @@ CONTAINS
   
     ! Initial conditions (IC)
     iSmallStepCtr = 0
+    WRITE(errorMessageUnit,*) 'Escobar: bellhop traceray2d 1'
     CALL EvaluateSSP( xs, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, &
                       'TAB', myThid )
     ray2D( 1 )%c         = c              ! sound speed at source [m/s]
@@ -736,6 +738,7 @@ CONTAINS
     ! Based on formulas given by Muller, Geoph. J. R.A.S., 79 (1984).
   
     ! Get c
+    WRITE(errorMessageUnit,*) 'Escobar: bellhop reflect2d 1'
     CALL EvaluateSSP( ray2D( is )%x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq,& 
                       'TAB', myThid  )
   
