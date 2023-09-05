@@ -489,8 +489,9 @@ CONTAINS
        s2      = x( 2 )           - SSP%z( iSegz )            
        delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
        IF (delta_z <= 0 .OR. s2 > delta_z) THEN
+          WRITE(errorMessageUnit, *) delta_z, s2, iSegz, SSP%z(iSegz)
           WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
-                            'depth is not monotonically increasing in SSPFile'
+                            'depth is not monotonically increasing in SSP%z'
           STOP 'ABNORMAL END: S/R Quad'
        END IF
        
