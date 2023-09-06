@@ -25,9 +25,9 @@ MODULE BELLHOP
   ! Systems Center
 
   
-  USE ihop_mod    
-! USE ihop_mod,   only:   i, RadDeg, PRTFile, SHDFile,     &
-!                           ARRFile, RAYFile, DELFile, MaxN, Title, Beam
+  USE ihop_mod,     only:   rad2deg, i, MaxN, Title, Beam, ray2D, istep,       &
+                            NRz_per_range, afreq, SrcDeclAngle,                &
+                            PRTFile, SHDFile, ARRFile, RAYFile, DELFile   
   USE readEnviHop,  only:   ReadEnvironment, OpenOutputFiles
   USE angle_mod,    only:   Angles, ialpha
   USE srPos_mod,    only:   Pos

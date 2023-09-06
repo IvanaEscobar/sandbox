@@ -32,18 +32,29 @@ C ==================== Routine Variables ==========================
 
 #ifdef ALLOW_IHOP
 C     !EXTERNAL VARIABLES:
-      CHARACTER*(MAX_LEN_MBUF) msgBuf
+      CHARACTER*(MAX_LEN_MBUF) :: msgBuf
 C     !LOCAL VARIABLES:
       INTEGER :: iUnit
-      INTEGER :: err, ncid, dimid1, dimid2, varid1, varid2, varid3
+      INTEGER :: IL, err, ncid, dimid1, dimid2, varid1, varid2, varid3
       INTEGER :: k, i, j
       _RS :: data1vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
       _RS :: data2vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
       _RL :: data3vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
+      CHARACTER*(80) :: ihop_file
+
+C ==================== External Functions ==========================
+      INTEGER ILNBLNK
+      EXTERNAL ILNBLNK
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
 C Read NetCDF input: setting the acoustic domain
-      err = NF_OPEN(TRIM(IHOP_interpfile), NF_NOWRITE, ncid)
+      IL  = ILNBLNK( IHOP_interpfile )
+      IF (IL.NE.0) THEN
+          WRITE(ihop_file(1:80), '(1A)') IHOP_interpfile(1:IL)
+      ELSE
+          ihop_file = IHOP_interpfile
+      END IF
+      err = NF_OPEN(ihop_file, NF_NOWRITE, ncid)
       IF (err .NE. NF_NOERR) THEN
         WRITE(msgBuf, '(2A)') 'S/R IHOP_INIT_FIXED: ',
      &  'NetCDF IHOP input file NOT found'
@@ -102,7 +113,7 @@ C 'reshape' data variables to 2D array
       END DO
 
 CC Close NetCDF file
-C      err = NF_CLOSE( ncid )
+      err = NF_CLOSE( ncid )
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
