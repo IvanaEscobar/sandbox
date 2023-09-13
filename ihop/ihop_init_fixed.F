@@ -114,6 +114,12 @@ C 'reshape' data variables to 2D array
 
 CC Close NetCDF file
       err = NF_CLOSE( ncid )
+      IF (err .NE. NF_NOERR) THEN
+        WRITE(msgBuf, '(3A)') 'S/R IHOP_INIT_FIXED: ',
+     &  'NetCDF ERROR: Cannot close file ', IHOP_interpfile(1:IL)
+        CALL PRINT_ERROR( msgBuf, myThid )
+        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
+      END IF
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 

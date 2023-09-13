@@ -21,6 +21,7 @@ C     !LOCAL VARIABLES:
       INTEGER, PARAMETER :: NC_FILENAME_LENGTH=80, IHOP_MAX_NC_SIZE=10
       INTEGER :: i,j,k
       INTEGER :: ncid, dimid1, dimid2, varid1, varid2, varid3
+      INTEGER :: ndims, nvars, ngats, unlimid
       INTEGER :: ihopnx, ihopny, err
       REAL :: data1vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
       REAL :: data2vec( IHOP_MAX_NC_SIZE*IHOP_MAX_NC_SIZE )
@@ -37,7 +38,7 @@ C Read NetCDF input: setting the acoustic domain
        RETURN
       END IF
 
-
+      err = NF_INQ(ncid, ndims, nvars, ngats, unlimid)
 C Get dimension IDs
       err = NF_INQ_DIMID( ncid, 'nrange', dimid1 )
       err = NF_INQ_DIMID( ncid, 'nidw', dimid2 )
