@@ -61,7 +61,6 @@ CONTAINS
 
     ! *** Phase 1 (an Euler step)
 
-    WRITE(errorMessageUnit,*) 'Escobar: step step2d 1'
     CALL EvaluateSSP( ray0%x, c0, cimag0, gradc0, crr0, crz0, czz0, rho, IHOP_freq,&
                       'TAB', myThid )
 
@@ -87,7 +86,6 @@ CONTAINS
 
     ! *** Phase 2 (update step size, and Polygon march forward) 
 
-    WRITE(errorMessageUnit,*) 'Escobar: step step2d 2'
     CALL EvaluateSSP( ray1%x, c1, cimag1, gradc1, crr1, crz1, czz1, rho, IHOP_freq,& 
                       'TAB', myThid  )
     csq1      = c1 * c1
@@ -125,7 +123,6 @@ CONTAINS
     ray2%NumBotBnc = ray0%NumBotBnc
 
     ! If we crossed an interface, apply linear jump condition
-    WRITE(errorMessageUnit,*) 'Escobar: step step2d 3'
     CALL EvaluateSSP( ray2%x, c2, cimag2, gradc2, crr2, crz2, czz2, rho, IHOP_freq,&
                       'TAB', myThid )
     ray2%c = c2

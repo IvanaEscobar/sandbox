@@ -22,7 +22,7 @@
  IHOP_runopt='A',
  IHOP_nalpha=40,
  IHOP_alpha=-20.0, 20.0,
- IHOP_step=0.0,
+ IHOP_step=2000.0,
  
  IHOP_zbox=1800.0,
  IHOP_rbox=2544.3,
