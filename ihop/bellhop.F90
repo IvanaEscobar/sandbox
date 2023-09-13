@@ -224,7 +224,6 @@ CONTAINS
     ! Display run time
 #ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
-#endif /* IHOP_WRITE_OUT */
   
     ! close all files
     SELECT CASE ( Beam%RunType( 1 : 1 ) )
@@ -238,7 +237,6 @@ CONTAINS
        CLOSE( RAYFile )
     END SELECT
   
-#ifdef IHOP_WRITE_OUT
     CLOSE( PRTFile )
 #endif /* IHOP_WRITE_OUT */
   
