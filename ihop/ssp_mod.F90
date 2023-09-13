@@ -38,6 +38,10 @@ MODULE ssp_mod
 
 ! INPUT/OUTPUT PARAMETERS:
 
+! FUNCTIONS:
+  _RL CHEN_MILLERO
+  EXTERNAL CHEN_MILLERO
+
 ! LOCAL VARIABLES
 ! == Local Variables ==
   INTEGER bi,bj
@@ -763,11 +767,17 @@ CONTAINS
          DO j=1,sNy
             DO ii=1,IHOP_npts_range
              DO jj=1,IHOP_npts_idw
+              ! IDW Interpolate SSP at second order
               IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
                   yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
-               
-               ! IDW Interpolate SSP at second order
-               SSP%cMat(2:SSP%Nz,ii) = SSP%cMat(2:SSP%Nz,ii) +       &
+
+               ! Top layer zero depth
+               SSP%cMat(1,ii) = SSP%cMat(1,ii) + &
+                   CHEN_MILLERO(i,j,0,bi,bj,myThid)*ihop_idw_weights(ii,jj)/ &
+                   sumweights(ii)
+
+               ! Middle depth layers: Nr depths
+               SSP%cMat(2:SSP%Nz,ii) = SSP%cMat(2:SSP%Nz,ii) + &
                    ihop_ssp(i,j,:,bi,bj)*ihop_idw_weights(ii,jj)/sumweights(ii)
 
               ENDIF
@@ -826,9 +836,9 @@ CONTAINS
       WRITE( PRTFile, * ) 'Sound speed matrix:'
       WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
 #endif
-      DO ii = 1, SSP%Nz
+      DO iz = 1, SSP%Nz
 #ifdef IHOP_DEBUG
-         WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( ii ), SSP%cMat( ii, : )
+         WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz ), SSP%cMat( iz, : )
 #endif
       END DO
 

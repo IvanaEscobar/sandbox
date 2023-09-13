@@ -8,7 +8,7 @@ C     !INTERFACE:
      I                       myThid )
 C     !DESCRIPTION: \bv
 C     *==========================================================*
-C     | S/R IHOP_SOUND_SPEED
+C     | FXN: CHEN_MILLERO
 C     | o Diagnose speed of sound in seawater
 C     |   from the algorithm by Chen and Millero (1977).
 C     |   This is NOT the sound-speed that can be derived from
@@ -65,7 +65,7 @@ C pressure in dbar (for SW_TEMP)
 C     let k=0 define the surface, a required level for ihop
       IF (k.EQ.0) THEN
        temp = SW_TEMP( SALT(i,j,1,bi,bj),
-     &          THETA(i,j,k,bi,bj), pres, zeroRL )
+     &          THETA(i,j,1,bi,bj), pres, zeroRL )
        sal  = SALT(i,j,1,bi,bj)
       ELSE
        pres = rhoConst*( totPhiHyd(i,j,k,bi,bj)
