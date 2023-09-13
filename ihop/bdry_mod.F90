@@ -77,73 +77,97 @@ CONTAINS
 
     SELECT CASE ( TopATI )
     CASE ( '~', '*' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '______________________________________________', &
                            '____________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using top-altimetry file'
+#endif /* IHOP_WRITE_OUT */
 
        OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', &
              STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
         IF ( IOsTAT /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE( PRTFile, * ) 'ATIFile = ', TRIM( FileRoot ) // '.ati'
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                 'Unable to open altimetry file'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
 
        READ(  ATIFile, * ) atiType
        AltiType: SELECT CASE ( atiType( 1 : 1 ) )
        CASE ( 'C' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+#endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+#endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                        'Unknown option for selecting altimetry interpolation'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
        END SELECT AltiType
 
        READ(  ATIFile, * ) NatiPts
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Number of altimetry points = ', NatiPts
+#endif /* IHOP_WRITE_OUT */
        ! we'll be extending the altimetry to infinity to the left and right
        NatiPts = NatiPts + 2  
 
        ALLOCATE( Top(  NatiPts ), phi( NatiPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                 'Insufficient memory for altimetry data: reduce # ati points'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
 
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
+#endif /* IHOP_WRITE_OUT */
 
        atiPt: DO ii = 2, NatiPts - 1
 
           SELECT CASE ( atiType( 2 : 2 ) )
           CASE ( 'S', '' )
             READ(  ATIFile, * ) Top( ii )%x
+#ifdef IHOP_WRITE_OUT
             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x 
             END IF
+#endif /* IHOP_WRITE_OUT */
           CASE ( 'L' )
              READ(  ATIFile, * ) Top( ii )%x, Top( ii )%HS%alphaR, &
                                  Top( ii )%HS%betaR, Top( ii )%HS%rho, &
                                  Top( ii )%HS%alphaI, Top( ii )%HS%betaI
+#ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
                 WRITE( PRTFile, FMT = "(7G11.3)" ) &
                     Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, &
                     Top( ii )%HS%rho, Top( ii )%HS%alphaI, Top( ii )%HS%betaI
              END IF
+#endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                             'Unknown option for selecting altimetry option'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
           END SELECT
 
           IF ( Top( ii )%x( 2 ) < DepthT ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                 'Altimetry rises above highest point in the sound speed profile'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
           END IF
        END DO atiPt
@@ -188,17 +212,21 @@ CONTAINS
 
     SELECT CASE ( BotBTY )
     CASE ( '~', '*' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '________________________________________________', &
                            '__________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
+#endif /* IHOP_WRITE_OUT */
 
        OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
              IOSTAT = IOStat, ACTION = 'READ' )
         IF ( IOsTAT /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Unable to open bathymetry file'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END IF
  
@@ -206,39 +234,57 @@ CONTAINS
  
        BathyType: SELECT CASE ( btyType( 1 : 1 ) )
        CASE ( 'C' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+#endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+#endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyType
 
 
        READ(  BTYFile, * ) NbtyPts
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
+#endif /* IHOP_WRITE_OUT */
 
         ! we'll be extending the bathymetry to infinity on both sides
         NbtyPts = NbtyPts + 2  
         ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                 'Insufficient memory for bathymetry data: reduce # bty points'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
         END IF
         
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
        CASE ( 'S', '' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Short format (bathymetry only)'
           WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
+#endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'Long format (bathymetry and geoacoustics)'
           WRITE( PRTFile, "( ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+#endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyTypeB
 
@@ -247,27 +293,35 @@ CONTAINS
           SELECT CASE ( btyType( 2 : 2 ) )
           CASE ( 'S', '' )   ! short format
              READ(  BTYFile, * ) Bot( ii )%x
+#ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  
                 WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( ii )%x
              END IF
+#endif /* IHOP_WRITE_OUT */
           CASE ( 'L' )       ! long format
              READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, &
                                  Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
                                  Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+#ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   
                 WRITE( PRTFile, FMT="( F10.2, F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
                    Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
                    Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
              END IF
+#endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
           END SELECT
 
           IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                 'Bathymetry drops below lowest point in the sound speed profile'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
           END IF
  
@@ -278,11 +332,15 @@ CONTAINS
        Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
+#ifdef IHOP_WRITE_OUT
         WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
+#endif /* IHOP_WRITE_OUT */
         ALLOCATE( Bot( 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Insufficient memory for bathymetry data'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
         END IF
         Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
@@ -292,8 +350,10 @@ CONTAINS
     CALL ComputeBdryTangentNormal( Bot, 'Bot' )
 
     IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Bathymetry ranges are not monotonically increasing'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadBTY'
     END IF 
 
@@ -427,11 +487,13 @@ CONTAINS
        ! segment limits in range
        rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop+1 )%x( 1 ) ]   
     ELSE
+#ifdef IHOP_WRITE_OUT
         WRITE( PRTFile, * ) 'r = ', r
         WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )
         WRITE( PRTFile, * ) 'rRight = ', Top( NatiPts )%x( 1 )
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetTopSeg', &
                              'Top altimetry undefined above the ray'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R GetTopSeg'
     ENDIF
 
@@ -455,11 +517,13 @@ CONTAINS
        ! segment limits in range
        rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]
     ELSE
+#ifdef IHOP_WRITE_OUT
         WRITE( PRTFile, * ) 'r = ', r
         WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
         WRITE( PRTFile, * ) 'rRight = ', Bot( NbtyPts )%x( 1 )
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetBotSeg', &
                              'Bottom bathymetry undefined below the source'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R GetBotSeg'
     ENDIF
 

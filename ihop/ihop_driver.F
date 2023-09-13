@@ -59,7 +59,7 @@ CEOP
 
 #ifdef ALLOW_IHOP
       IF ( ihop_iter .EQ. myIter ) THEN
-       WRITE( errorMessageUnit, * ) 'Escobar: in IHOP_DRIVER:', myTime
+C      WRITE( errorMessageUnit, * ) 'Escobar: in IHOP_DRIVER:', myTime
        CALL IHOP_INIT( myThid )
       ENDIF
 #endif /* ALLOW_IHOP */

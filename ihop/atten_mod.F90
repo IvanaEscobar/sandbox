@@ -139,11 +139,13 @@ CONTAINS
     CRCI   = CMPLX( c, alphaT, KIND=_RL90 )
 
     IF ( alphaT > c ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Complex sound speed: ', CRCI
        WRITE( PRTFile, * ) 'Usually this means you have an attenuation that is way too high'
 
        WRITE(errorMessageUnit,'(2A)') 'ATTENMOD CRCI: The complex sound speed has an ', &
        'imaginary part > real part'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R CRCI'
     END IF
 

@@ -141,8 +141,10 @@ CONTAINS
     CASE ( 'A' )  !  Analytic profile option
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid )
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Profile option: ', SSP%Type
        WRITE(errorMessageUnit,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R EvaluateSSP'
     END SELECT
 
@@ -467,11 +469,13 @@ CONTAINS
 
        ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'ray is outside the box where the ocean ',&
                               'soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
           WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
                     'ray is outside the box where the soundspeed is defined'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R Quad'
        END IF
 
@@ -547,7 +551,9 @@ CONTAINS
     REAL (KIND=_RL90)                :: c0, cr, cz, DxtDz, xt
 
     IF ( Task == 'INI' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Analytic SSP option'
+#endif /* IHOP_WRITE_OUT */
        SSP%NPts = 2
        SSP%z(1) = 0.0
        SSP%z(2) = IHOP_depth
@@ -601,23 +607,29 @@ CONTAINS
     OPEN ( FILE = TRIM( IHOP_fileroot ) // '.ssp', UNIT = SSPFile, &
         FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
        WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', 'Unable to open the SSP file'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
     ! Write relevant diagnostics
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) "Sound Speed Field" 
     WRITE( PRTFile, * ) '____________________________________________________',&
                         '______________________'
     WRITE( PRTFile, * ) 
+#endif /* IHOP_WRITE_OUT */
 
     READ( SSPFile,  * ) SSP%Nr, SSP%Nz
+#ifdef IHOP_WRITE_OUT
     IF (SSP%Nr .GT. 1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
     IF (SSP%Nr .EQ. 1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
 
     WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
     WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
+#endif /* IHOP_WRITE_OUT */
 
     ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
               SSP%czMat( SSP%Nz-1, SSP%Nr ), &
@@ -630,33 +642,42 @@ CONTAINS
     END IF
 
     READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Profile ranges (km):'
     WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1 : SSP%Nr )
+#endif /* IHOP_WRITE_OUT */
     SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
 
     READ( SSPFile,  * ) SSP%z( 1 : SSP%Nz )
 !#ifdef IHOP_DEBUG
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Profile depths (m):'
     WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%z( 1 : SSP%Nz )
+#endif /* IHOP_WRITE_OUT */
 !#endif
 
     ! IEsco23: contain read of ssp in this subroutine only 
     ! IEsco23: change to allocatable memory since we should know Nz
 #ifdef IHOP_DEBUG
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed matrix:'
     WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
-#endif
+#endif /* IHOP_WRITE_OUT */
+#endif /* IHOP_DEBUG */
     DO iz2 = 1, SSP%Nz
        READ(  SSPFile, * ) SSP%cMat( iz2, : )
 #ifdef IHOP_DEBUG
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz2 ), SSP%cMat( iz2, : )
-#endif
+#endif /* IHOP_WRITE_OUT */
+#endif /* IHOP_DEBUG */
     END DO
     CLOSE( SSPFile )
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Sound speed profile:'
     WRITE( PRTFile, "( '      z         alphaR      betaR     rho        alphaI     betaI'    )" )
@@ -665,11 +686,14 @@ CONTAINS
     WRITE( PRTFile, * ) '____________________________________________________',&
                         '______________________'
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
     SSP%NPts = 1
     DO iz = 1, MaxSSP 
        alphaR = SSP%cMat( iz, 1 )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, FMT="( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
            SSP%z( iz ), alphaR, betaR, rhoR, alphaI, betaI
+#endif /* IHOP_WRITE_OUT */
 
        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                              SSP%AttenUnit, betaPowerLaw, fT, myThid )
@@ -678,9 +702,11 @@ CONTAINS
        ! verify depths are monotone increasing
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
+#ifdef IHOP_WRITE_OUT
               WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z( iz )
               WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                             'The depths in the SSP must be monotone increasing'
+#endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
        END IF
@@ -692,9 +718,11 @@ CONTAINS
        ! Did we read the last point?
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
           IF ( SSP%NPts == 1 ) THEN
+#ifdef IHOP_WRITE_OUT
               WRITE( PRTFile, * ) '#SSP points: ', SSP%NPts
               WRITE(errorMessageUnit,'(2A)')  'SSPMOD ReadSSP: ', &
                                     'The SSP must have at least 2 points'
+#endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
 
@@ -705,9 +733,11 @@ CONTAINS
     END DO
  
     ! Fall through means too many points in the profile
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) 'Max. #SSP points: ', MaxSSP
     WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                          'Number of SSP points exceeds limit'
+#endif /* IHOP_WRITE_OUT */
     STOP 'ABNORMAL END: S/R ReadSSP'
 
   RETURN
@@ -787,7 +817,6 @@ CONTAINS
         ENDDO
        ENDDO
       ENDDO
-      WRITE(errorMessageUnit,*) 'Escobar: in EXTRACTSSP after interp'
       !==================================================
       ! END IDW Interpolate
       !==================================================
@@ -802,9 +831,11 @@ CONTAINS
 
         IF ( iz > 1 ) THEN
             IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
+#ifdef IHOP_WRITE_OUT
                 WRITE( PRTFile, * ) 'Bad depth in SSP: ', SSP%z(iz)
                 WRITE( errorMessageUnit,'(2A)' ) 'SSPMOD ExtractSSP: ', &
                             'The depths in the SSP must be monotone increasing'
+#endif /* IHOP_WRITE_OUT */
                 STOP 'ABNORMAL END: S/R ExtractSSP'
             END IF
         END IF
@@ -816,6 +847,7 @@ CONTAINS
       END DO
 
       ! Write relevant diagnostics
+#ifdef IHOP_WRITE_OUT
       WRITE( PRTFile, * ) "Sound Speed Field" 
       WRITE( PRTFile, * ) '________________________________________________', &
           '__________________________'
@@ -830,16 +862,21 @@ CONTAINS
       WRITE( PRTFile, * )
       WRITE( PRTFile, * ) 'Profile ranges (km):'
       WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
+#endif /* IHOP_WRITE_OUT */
       SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
 #ifdef IHOP_DEBUG
+#ifdef IHOP_WRITE_OUT
       WRITE( PRTFile, * )
       WRITE( PRTFile, * ) 'Sound speed matrix:'
       WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
-#endif
+#endif /* IHOP_WRITE_OUT */
+#endif /* IHOP_DEBUG */
       DO iz = 1, SSP%Nz
 #ifdef IHOP_DEBUG
+#ifdef IHOP_WRITE_OUT
          WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz ), SSP%cMat( iz, : )
-#endif
+#endif /* IHOP_WRITE_OUT */
+#endif /* IHOP_DEBUG */
       END DO
 
   RETURN

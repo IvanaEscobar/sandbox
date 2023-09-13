@@ -261,7 +261,9 @@ CONTAINS
                 RadiusMax = ABS( q / q0 )                                   
 
                 IF ( n < RadiusMax ) THEN
+#ifdef IHOP_WRITE_OUT
                    WRITE( PRTFile, * ) "influence: Eigenray w/ RadiusMax = ", RadiusMax
+#endif /* IHOP_WRITE_OUT */
                    ! interpolated delay
                    delay    = ray2D( iS-1 )%tau + s*dtauds              
                    Amp      = Ratio1 * SQRT( ray2D( iS )%c / ABS( q ) ) &

@@ -58,8 +58,10 @@ CONTAINS
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) 'BELLHOP/BELLHOP3D'
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
     ! Prepend model name to title
 #ifdef IHOP_THREED
@@ -73,16 +75,20 @@ CONTAINS
     Title( 10:80 ) = IHOP_title
 #endif /* IHOP_THREED */
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) Title
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
+#endif /* IHOP_WRITE_OUT */
 
     ! *** Top Boundary ***
     Bdry%Top%HS%Opt = IHOP_topopt
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot, &
                      myThid )
 
+#ifdef IHOP_WRITE_OUT
     IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
         "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+#endif /* IHOP_WRITE_OUT */
 
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS, myThid )
 
@@ -90,39 +96,44 @@ CONTAINS
     Bdry%Bot%HS%Depth = IHOP_depth
     x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, FMT = "( ' Depth = ', F10.2, ' m' )" ) Bdry%Bot%HS%Depth
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
+#endif /* IHOP_WRITE_OUT */
 
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
-    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER EVALUATESSP'
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
     ! *** Bottom Boundary ***
     ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = IHOP_botopt 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Bottom options: ', Bdry%Bot%HS%Opt
+#endif /* IHOP_WRITE_OUT */
 
     SELECT CASE ( Bdry%Bot%HS%Opt( 2 : 2 ) )
     CASE ( '~', '*' )
+#ifdef IHOP_WRITE_OUT
         WRITE( PRTFile, * ) '    Bathymetry file selected'
+#endif /* IHOP_WRITE_OUT */
     CASE( ' ' )
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                              'Unknown bottom option letter in second position'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadEnvironment'
     END SELECT
 
     Bdry%Bot%HS%BC = Bdry%Bot%HS%Opt( 1 : 1 )
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
-    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER bottom options'
     ! *** source and receiver locations ***
 
     CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates
-    WRITE( errorMessageUnit, * ) 'Escobar: in Readenvi: AFTER READSxSy'
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
 
@@ -152,10 +163,12 @@ CONTAINS
     CALL ReadRayBearingAngles( IHOP_freq, Bdry%Top%HS%Opt, Beam%RunType, myThid )
 #endif /* IHOP_THREED */
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) '___________________________________________________', &
                         '_______________________'
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
     ! Limits for tracing beams
 #ifdef IHOP_THREED
@@ -169,6 +182,7 @@ CONTAINS
     ! Automatic step size selection
     IF ( Beam%deltas == 0.0 ) Beam%deltas = &
         ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+#ifdef IHOP_WRITE_OUT
     ! WRITE( PRTFile, '('' IHOP_frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 
     WRITE( PRTFile, * )
@@ -185,10 +199,12 @@ CONTAINS
     WRITE( PRTFile, &
            fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
          Beam%Box%z
+#endif /* IHOP_WRITE_OUT */
 #else /* IHOP_THREED */
     Beam%deltas = IHOP_step
     Beam%Box%z  = IHOP_zbox
     Beam%Box%r  = IHOP_rbox
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
         Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
@@ -207,6 +223,7 @@ CONTAINS
     WRITE( PRTFile, &
            fmt = '(  '' Maximum ray range, Box%r  = '', G11.4, ''km'' )' ) &
          Beam%Box%r
+#endif /* IHOP_WRITE_OUT */
 
     Beam%Box%r = 1000.0 * Beam%Box%r   ! convert km to m
 #endif /* IHOP_THREED */
@@ -214,12 +231,14 @@ CONTAINS
     ! *** Beam characteristics ***
        Beam%Type( 4 : 4 ) = Beam%RunType( 7 : 7 )   ! selects beam shift option
           
+#ifdef IHOP_WRITE_OUT
        SELECT CASE ( Beam%Type( 4 : 4 ) )
        CASE ( 'S' )
           WRITE( PRTFile, * ) 'Beam shift in effect'
        CASE DEFAULT
           WRITE( PRTFile, * ) 'No beam shift in effect'
        END SELECT
+#endif /* IHOP_WRITE_OUT */
 
        ! no worry about the beam type if this is a ray trace run
        IF ( Beam%RunType( 1:1 ) /= 'R' .OR. Beam%RunType( 1:1 ) /= 'E' ) THEN 
@@ -255,23 +274,34 @@ CONTAINS
 ! Cerveny Gaussian Beams; read extra lines to specify the beam options
        CASE ( 'R', 'C' )   
           !READ(  ENVFile, * ) Beam%Type( 2 : 3 ), Beam%epsMultiplier, Beam%rLoop
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * )
           WRITE( PRTFile, * )
           WRITE( PRTFile, * ) 'Type of beam = ', Beam%Type( 1 : 1 )
+#endif /* IHOP_WRITE_OUT */
 
           SELECT CASE ( Beam%Type( 3 : 3 ) )
           CASE ( 'D' )
+#ifdef IHOP_WRITE_OUT
              WRITE( PRTFile, * ) 'Curvature doubling invoked'
+#endif /* IHOP_WRITE_OUT */
           CASE ( 'Z' )
+#ifdef IHOP_WRITE_OUT
              WRITE( PRTFile, * ) 'Curvature zeroing invoked'
+#endif /* IHOP_WRITE_OUT */
           CASE ( 'S' )
+#ifdef IHOP_WRITE_OUT
              WRITE( PRTFile, * ) 'Standard curvature condition'
+#endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
                 WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                      'Unknown curvature condition'
+#endif /* IHOP_WRITE_OUT */
                 STOP 'ABNORMAL END: S/R ReadEnvironment'
           END SELECT
 
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'UNUSED epsMultiplier', Beam%epsMultiplier
           WRITE( PRTFile, * ) 'Range for choosing beam width', Beam%rLoop
 
@@ -281,14 +311,19 @@ CONTAINS
           WRITE( PRTFile, * ) 'Number of images, Nimage  = ', Beam%Nimage
           WRITE( PRTFile, * ) 'Beam windowing parameter  = ', Beam%iBeamWindow
           WRITE( PRTFile, * ) 'Component                 = ', Beam%Component
+#endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                 'Unknown beam type (second letter of run type)'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadEnvironment'
        END SELECT
     END IF
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
   RETURN
   END !SUBROUTINE ReadEnvironment
@@ -308,7 +343,9 @@ CONTAINS
     INTEGER            :: iostat
 
     TopOpt = IHOP_topopt
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
     SSP%Type  = TopOpt( 1 : 1 )
     BC        = TopOpt( 2 : 2 )
@@ -318,20 +355,34 @@ CONTAINS
     ! SSP approximation options
     SELECT CASE ( SSP%Type )
     CASE ( 'N' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    N2-linear approximation to SSP'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'C' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    C-linear approximation to SSP'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'P' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    PCHIP approximation to SSP'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'S' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Spline approximation to SSP'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'Q' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Quad approximation to SSP'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'A' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Analytic SSP option'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown option for SSP approximation'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -339,20 +390,34 @@ CONTAINS
 
     SELECT CASE ( AttenUnit( 1 : 1 ) )
     CASE ( 'N' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: nepers/m'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'F' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: dB/mkHz'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'M' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: dB/m'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'W' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: dB/wavelength'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'Q' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: Q'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'L' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Attenuation units: Loss parameter'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown attenuation units'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -360,14 +425,19 @@ CONTAINS
 
     SELECT CASE ( AttenUnit( 2 : 2 ) )
     CASE ( 'T' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    THORP volume attenuation added'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'F' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Francois-Garrison volume attenuation added'
        !READ(  ENVFile, * ) T, Salinity, pH, z_bar
        WRITE( PRTFile, &
               "( ' T = ', G11.4, 'degrees   S = ', G11.4, ' psu   pH = ', G11.4, ' z_bar = ', G11.4, ' m' )" ) &
             T, Salinity, pH, z_bar
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'B' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Biological attenaution'
        !READ( ENVFile, *  ) NBioLayers
        WRITE( PRTFile, * ) '      Number of Bio Layers = ', NBioLayers
@@ -382,30 +452,41 @@ CONTAINS
           WRITE( PRTFile, * ) '      Q  = ', bio( iBio )%Q
           WRITE( PRTFile, * ) '      a0 = ', bio( iBio )%a0
        END DO
+#endif /* IHOP_WRITE_OUT */
     CASE ( ' ' )
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fourth position'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     SELECT CASE ( TopOpt( 5 : 5 ) )
     CASE ( '~', '*' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Altimetry file selected'
+#endif /* IHOP_WRITE_OUT */
     CASE ( '-', '_', ' ' )
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fifth position'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
     SELECT CASE ( TopOpt( 6 : 6 ) )
     CASE ( 'I' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Development options enabled'
+#endif /* IHOP_WRITE_OUT */
     CASE ( ' ' )
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in sixth position'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
 
@@ -427,82 +508,132 @@ CONTAINS
     CHARACTER (LEN= 7), INTENT( INOUT ) :: RunType
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
     SELECT CASE ( RunType( 1 : 1 ) )
     CASE ( 'R' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Ray trace run'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'E' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Eigenray trace run'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'I' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Incoherent TL calculation'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'S' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Semi-coherent TL calculation'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'C' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Coherent TL calculation'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'A' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Arrivals calculation, ASCII  file output'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'a' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Arrivals calculation, binary file output'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
             'Unknown RunType selected'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRunType'
     END SELECT
 
     SELECT CASE ( RunType( 2 : 2 ) )
     CASE ( 'C' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Cartesian beams'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'R' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Ray centered beams'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'S' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Simple gaussian beams'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'b' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Geometric gaussian beams in ray-centered coordinates'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'B' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Geometric gaussian beams in Cartesian coordinates'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'g' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Geometric hat beams in ray-centered coordinates'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
        RunType( 2 : 2 ) = 'G'
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Geometric hat beams in Cartesian coordinates'
+#endif /* IHOP_WRITE_OUT */
     END SELECT
 
     SELECT CASE ( RunType( 4 : 4 ) )
     CASE ( 'R' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Point source (cylindrical coordinates)'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'X' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Line source (Cartesian coordinates)'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
        RunType( 4 : 4 ) = 'R'
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Point source (cylindrical coordinates)'
+#endif /* IHOP_WRITE_OUT */
     END SELECT
 
     SELECT CASE ( RunType( 5 : 5 ) )
     CASE ( 'R' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at', &
                            ' ( Rr( ir ), Rz( ir ) ) )'
+#endif /* IHOP_WRITE_OUT */
        PlotType = 'rectilin  '
     CASE ( 'I' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Irregular grid: Receivers at Rr( : ) x Rz( : )'
+#endif /* IHOP_WRITE_OUT */
        IF ( Pos%NRz /= Pos%NRr ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
                     'Irregular grid option selected with NRz not equal to Nr'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadRunType'
        END IF
        PlotType = 'irregular '
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Rectilinear receiver grid: Receivers at', &
                            ' Rr( : ) x Rz( : )'
+#endif /* IHOP_WRITE_OUT */
        RunType( 5 : 5 ) = 'R'
        PlotType = 'rectilin  '
     END SELECT
 
     SELECT CASE ( RunType( 6 : 6 ) )
     CASE ( '2' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'N x 2D calculation (neglects horizontal refraction)'
+#endif /* IHOP_WRITE_OUT */
     CASE ( '3' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '3D calculation'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
        RunType( 6 : 6 ) = '2'
     END SELECT
@@ -529,22 +660,38 @@ CONTAINS
 
     SELECT CASE ( HS%BC )
     CASE ( 'V' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Surface modeled as a VACUUM'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'R' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Perfectly RIGID'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'A' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    ACOUSTO-ELASTIC half-space'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'G' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Grain size to define half-space'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'F' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    FILE used for reflection loss'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'W' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    Writing an IRC file'
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'P' )
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '    reading PRECALCULATED IRC'
+#endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'READENVIHOP TopBot: ', & 
                              'Unknown boundary condition type'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R TopBot'
     END SELECT
 
@@ -563,8 +710,10 @@ CONTAINS
        rhoR     = IHOP_brho
        alphaI   = IHOP_bcsoundI
        betaI    = IHOP_bcsoundshearI
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, FMT = "( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
             zTemp, alphaR, betaR, rhoR, alphaI, betaI
+#endif /* IHOP_WRITE_OUT */
        ! dummy parameters for a layer with a general power law for attenuation
        ! these are not in play because the AttenUnit for this is not allowed yet
        !freq0         = freq
@@ -583,7 +732,9 @@ CONTAINS
        ! vr   is the sound speed ratio
        ! rhor is the density ratio
        !READ(  ENVFile, *    ) zTemp, Mz
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, FMT = "( F10.2, 3X, F10.2 )" ) zTemp, Mz
+#endif /* IHOP_WRITE_OUT */
 
        IF ( Mz >= -1 .AND. Mz < 1 ) THEN
           vr   = 0.002709 * Mz**2 - 0.056452 * Mz + 1.2778
@@ -624,9 +775,11 @@ CONTAINS
                       betaPowerLaw, ft, myThid )
        HS%cs  = 0.0
        HS%rho = rhoR
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, &
               FMT = "( 'Converted sound speed =', 2F10.2, 3X, 'density = ', F10.2, 3X, 'loss parm = ', F10.4 )" ) &
             HS%cp, rhor, alphaI
+#endif /* IHOP_WRITE_OUT */
     END SELECT
 
   RETURN
