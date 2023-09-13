@@ -37,15 +37,15 @@ MODULE ihop_mod
 
   COMPLEX (KIND=_RL90), PARAMETER :: i = ( 0.0D0, 1.0D0 )
 
-  INTEGER, PARAMETER :: PRTFile = 6, &     ! standard output file
+  INTEGER, PARAMETER :: PRTFile = 61, &    ! standard output file
                         RAYFile = 21, &    ! ray paths file
                         DELFile = 22, &    ! ray paths file
                         SHDFile = 25, &    ! TL calc output file
-                        ARRFile = 36, &    ! Arrivals calc output file
+                        ARRFile = 37, &    ! Arrivals calc output file
                         SSPFile = 40, &    ! optional 2D/3D SSP file
                         ATIFile = 41, &    ! optional 2D/3D altimetry
                         BTYFile = 42, &    ! optional 2D/3D bathymetry
-                        BRCFile = 31, TRCFile = 32, IRCFile = 12, &
+                        BRCFile = 38, TRCFile = 39, IRCFile = 16, &
                         SBPFile = 50, &
                         MaxN = 100000
 
