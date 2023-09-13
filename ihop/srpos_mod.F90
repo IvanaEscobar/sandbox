@@ -71,11 +71,13 @@ CONTAINS
 
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE( PRTFile, * ) '________________________________________________', &
                             '__________________________'
         WRITE( PRTFile, * )
         WRITE( PRTFile, * )
         WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
+#endif /* IHOP_WRITE_OUT */
         IF ( Nfreq <= 0 ) THEN
             WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                                  'Number of frequencies must be positive'
@@ -92,15 +94,19 @@ CONTAINS
     END IF
 
     IF ( BroadbandOption == 'B' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Frequencies (Hz)'
+#endif /* IHOP_WRITE_OUT */
        freqVec( 3 ) = -999.9
        !READ(  ENVFile, * ) freqVec( 1 : Nfreq )
        CALL SubTab( freqVec, Nfreq )
 
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
                                       MIN( Nfreq, Number_to_Echo ) )
        IF ( Nfreq > Number_to_Echo ) &
            WRITE( PRTFile,  "( G14.6 )" ) ' ... ', freqVec( Nfreq )
+#endif /* IHOP_WRITE_OUT */
     ELSE
        freqVec( 1 ) = freq0
     END IF
@@ -124,20 +130,17 @@ CONTAINS
     CALL ReadVector( Pos%NSy, Pos%Sy, 'source   y-coordinates, Sy', 'km', &
                     myThid )
 #else /* IHOP_THREED */
-    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: before allocate'
     ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ), Stat=IAllocStat)
     IF (IAllocStat/=0) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit, *) 'allocation failed', IAllocStat
-        !WRITE( errorMessageUnit, '(2A)') 'SRPOS_MOD ReadSxSy: ', 'not allocating'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSxSy'
     ELSE
-        WRITE(errorMessageUnit, *) 'allocation passed!', IAllocStat
     END IF
 
-    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: after allocate'
     Pos%Sx( 1 ) = 0.
     Pos%Sy( 1 ) = 0.
-    WRITE(errorMessageUnit, *) 'Escobar: SRPOS in ReadSxSy: after init 0'
 #endif /* IHOP_THREED */
   RETURN
   END !SUBROUTINE ReadSxSy
@@ -179,10 +182,10 @@ CONTAINS
 
     ! *** Check for Sz/Rz in water column ***
 
+#ifdef IHOP_WRITE_OUT
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
        WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
-                           'near the top bdry has been moved down'
     END IF
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
@@ -202,6 +205,7 @@ CONTAINS
        WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too ',&
                            'near the bottom bdry has been moved up'
     END IF
+#endif /* IHOP_WRITE_OUT */
 
   RETURN
   END !SUBROUTINE ReadSzRz
@@ -282,11 +286,13 @@ CONTAINS
                                                     Units*( * )
     INTEGER :: ix
    
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) '__________________________________________________', &
                         '________________________'
     WRITE( PRTFile, * )
     WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
+#endif /* IHOP_WRITE_OUT */
 
     IF ( Nx <= 0 ) THEN
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
@@ -300,15 +306,19 @@ CONTAINS
     !                                        Description )
     !END IF
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'
+#endif /* IHOP_WRITE_OUT */
 
     CALL SubTab( x, Nx )
     CALL Sort(   x, Nx )
 
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, "( 5G14.6 )" ) ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
     IF ( Nx > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', x( Nx )
 
     WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
 
     ! Vectors in km should be converted to m for internal use
     IF ( LEN_TRIM( Units ) >= 2 ) THEN

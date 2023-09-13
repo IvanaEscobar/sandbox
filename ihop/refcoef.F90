@@ -54,22 +54,28 @@ CONTAINS
     CHARACTER (LEN=80) :: Title2
 
     IF ( BotRC == 'F' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '_______________________________________________', &
                            '___________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated bottom reflection coef.'
+#endif /* IHOP_WRITE_OUT */
        OPEN( FilE = TRIM( FileRoot ) // '.brc', UNIT = BRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                             'Unable to open Bottom Reflection Coefficient file'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
        READ(  BRCFile, * ) NBotPts
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Number of points in bottom reflection ',&
                            'coefficient = ', NBotPts
+#endif /* IHOP_WRITE_OUT */
 
        IF ( ALLOCATED( RBot ) ) DEALLOCATE( RBot )
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
@@ -89,22 +95,28 @@ CONTAINS
     ! Optionally read in top reflection coefficient
 
     IF ( TopRC == 'F' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) '_______________________________________________', &
                            '___________________________'
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Using tabulated top    reflection coef.'
+#endif /* IHOP_WRITE_OUT */
        OPEN( FILE = TRIM( FileRoot ) // '.trc', UNIT = TRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Unable to open Top Reflection Coefficient file'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
        READ(  TRCFile, * ) NTopPts
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Number of points in top reflection ',& 
                            'coefficient = ', NTopPts
+#endif /* IHOP_WRITE_OUT */
 
        IF ( ALLOCATED( RTop ) ) DEALLOCATE( RTop )
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
@@ -124,7 +136,9 @@ CONTAINS
     ! Optionally read in internal reflection coefficient data
 
     IF ( BotRC == 'P' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Reading precalculated refl. coeff. table'
+#endif /* IHOP_WRITE_OUT */
        OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
@@ -135,9 +149,11 @@ CONTAINS
 
        READ(  IRCFile, * ) Title2, freq
        READ(  IRCFile, * ) NkTab
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) 'Number of points in internal reflection ', &
                            'coefficient = ', NkTab
+#endif /* IHOP_WRITE_OUT */
 
        IF ( ALLOCATED( xTab ) )  DEALLOCATE( xTab, fTab, gTab, iTab )
        ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), &
@@ -183,10 +199,12 @@ CONTAINS
        !iRight = 2
        RInt%R   = 0.0     ! R( iLeft  )%R
        RInt%phi = 0.0     ! R( iLeft  )%phi
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Warning in InterpolateReflectionCoefficient : ',&
                            'Refl. Coef. being set to 0 outside tabulated domain'
        WRITE( PRTFile, * ) 'angle = ', thetaintr, 'lower limit = ', &
                            R( iLeft)%theta
+#endif /* IHOP_WRITE_OUT */
 
     ELSE IF( thetaIntr > R( iRight )%theta ) THEN
        !iLeft = NPts - 1

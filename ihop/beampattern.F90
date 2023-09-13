@@ -34,43 +34,57 @@ CONTAINS
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
     IF ( SBPFlag == '*' ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) '______________________________'
        WRITE( PRTFile, * ) 'Using source beam pattern file'
+#endif /* IHOP_WRITE_OUT */
 
        OPEN( UNIT = SBPFile, FILE = TRIM( FileRoot ) // '.sbp', STATUS = 'OLD',&
             IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOstat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
             WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Unable to open source beampattern file'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
        END IF
 
        READ(  SBPFile, * ) NSBPPts
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'Number of source beam pattern points', NSBPPts
+#endif /* IHOP_WRITE_OUT */
 
        ALLOCATE( SrcBmPat( NSBPPts, 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
             'Insufficient memory for beam pattern data: reduce # SBP points'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
 
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * )
        WRITE( PRTFile, * ) ' Angle (degrees)  Power (dB)'
+#endif /* IHOP_WRITE_OUT */
 
        DO I = 1, NSBPPts
           READ(  SBPFile, * ) SrcBmPat( I, : )
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, FMT = "( 2G11.3 )" ) SrcBmPat( I, : )
+#endif /* IHOP_WRITE_OUT */
        END DO
 
     ELSE   ! no pattern given, use omni source pattern
         NSBPPts = 2
         ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Insufficient memory'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
         SrcBmPat( 1, : ) = [ -180.0, 0.0 ]

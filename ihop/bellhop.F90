@@ -77,6 +77,7 @@ CONTAINS
     ! should add some checks here ...
   
     ! Open the print file
+#ifdef IHOP_WRITE_OUT
     OPEN( UNIT = PRTFile, FILE = TRIM( IHOP_fileroot ) // '.prt', &
           STATUS = 'UNKNOWN', IOSTAT = iostat )
     IF ( iostat /= 0 ) THEN
@@ -84,6 +85,7 @@ CONTAINS
         WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', 'Unable to recognize env file'
         STOP 'ABNORMAL END: S/R IHOP_INIT'
     END IF
+#endif /* IHOP_WRITE_OUT */
   
     ! Read in or otherwise initialize inline all the variables by BELLHOP 
   
@@ -143,8 +145,10 @@ CONTAINS
        ! *** Altimetry ***
        ALLOCATE( Top( 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for altimetry data'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
        Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, 0.d0 ]
@@ -155,8 +159,10 @@ CONTAINS
        ! *** Bathymetry ***
        ALLOCATE( Bot( 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for bathymetry data'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
        Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, 5000.d0 ]
@@ -171,8 +177,10 @@ CONTAINS
        NSBPPts = 2
        ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN 
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for beam pattern'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
        SrcBmPat( 1, : ) = [ -180.0, 0.0 ]
@@ -182,12 +190,10 @@ CONTAINS
   
     ELSE ! Read and allocate user input 
        ! Read .env file: REQUIRED
-       WRITE( errorMessageUnit, * ) 'Escobar: IHOP_INIT: before readenv'
        CALL ReadEnvironment( IHOP_fileroot, myThid )
        ! AlTImetry: OPTIONAL, default is no ATIFile
        CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, myThid )
        ! BaThYmetry: OPTIONAL, default is no BTYFile
-       WRITE( errorMessageUnit, * ) 'Escobar: in IHOP_INIT: before bty'
        CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, myThid )
        ! (top and bottom): OPTIONAL
        CALL ReadReflectionCoefficient( IHOP_fileroot, Bdry%Bot%HS%Opt( 1:1 ), &
@@ -198,8 +204,10 @@ CONTAINS
        Pos%Ntheta = 1
        ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
        IF ( IAllocStat/=0 ) THEN
+#ifdef IHOP_WRITE_OUT
            WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', &
                'Unable to allocate Pos%theta'
+#endif /* IHOP_WRITE_OUT */
            STOP 'ABNORMAL END: S/R  IHOP_INIT'
        ENDIF
        Pos%theta( 1 ) = 0.
@@ -214,7 +222,9 @@ CONTAINS
     CALL CPU_TIME( Tstop )
   
     ! Display run time
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+#endif /* IHOP_WRITE_OUT */
   
     ! close all files
     SELECT CASE ( Beam%RunType( 1 : 1 ) )
@@ -228,7 +238,9 @@ CONTAINS
        CLOSE( RAYFile )
     END SELECT
   
+#ifdef IHOP_WRITE_OUT
     CLOSE( PRTFile )
+#endif /* IHOP_WRITE_OUT */
   
   RETURN
   END !SUBROUTINE IHOP_INIT
@@ -257,8 +269,10 @@ CONTAINS
          Angles%Dalpha = ( Angles%alpha( Angles%Nalpha ) - Angles%alpha( 1 ) ) &
                          / ( Angles%Nalpha - 1 )  ! angular spacing between beams
     ELSE
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
                       'Required: Nalpha>1, else add iSingle_alpha (see angleMod)'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R BellhopCore'
     END IF
   
@@ -298,8 +312,10 @@ CONTAINS
       CASE ( 'C', 'S', 'I' )        ! TL calculation
           ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
           IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
               WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
                              'Insufficient memory for TL matrix: reduce Nr * NRz'
+#endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R BellhopCore'
           END IF
       CASE ( 'A', 'a', 'R', 'E' )   ! Arrivals calculation
@@ -311,14 +327,18 @@ CONTAINS
       CASE ( 'A', 'a' )
           ! allow space for at least MinNArr arrivals
           MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * )
           WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
+#endif /* IHOP_WRITE_OUT */
   
           ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
                      NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
           IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
               WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
                'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage'
+#endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R BellhopCore'
           END IF
       CASE DEFAULT
@@ -329,7 +349,9 @@ CONTAINS
   
       NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
   
+#ifdef IHOP_WRITE_OUT
       WRITE( PRTFile, * )
+#endif /* IHOP_WRITE_OUT */
   
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !         begin solve         !
@@ -354,10 +376,12 @@ CONTAINS
           DalphaOpt = SQRT( c / ( 6.0 * IHOP_freq * Pos%Rr( Pos%NRr ) ) )
           NalphaOpt = 2 + INT( ( Angles%alpha( Angles%Nalpha ) &
                                - Angles%alpha( 1 ) ) / DalphaOpt )
+#ifdef IHOP_WRITE_OUT
           IF ( Angles%Nalpha < NalphaOpt ) THEN
              WRITE( PRTFile, * ) 'Warning BELLHOP : Too few beams'
              WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
           ENDIF
+#endif /* IHOP_WRITE_OUT */
        ENDIF
        !!IESCO22: end BEAM stuff !!
   
@@ -389,12 +413,14 @@ CONTAINS
                        * SIN( Angles%alpha( ialpha ) ) ) )
              !!IESCO22: end BEAM stuff !!
   
+#ifdef IHOP_WRITE_OUT
              ! report progress in PRTFile (skipping some angles)
              IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
                 WRITE( PRTFile, FMT = "( 'Tracing ray ', I7, F10.2 )" ) &
                        ialpha, SrcDeclAngle
                 FLUSH( PRTFile )
              END IF
+#endif /* IHOP_WRITE_OUT */
              
              ! Trace a ray, update ray2D structure
              CALL TraceRay2D( xs, Angles%alpha( ialpha ), Amp0, myThid )   
@@ -519,8 +545,10 @@ CONTAINS
   
     IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
        Beam%Nsteps = 1
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) &
            'WARNING: TraceRay2D: The source is outside the domain boundaries'
+#endif /* IHOP_WRITE_OUT */
        RETURN       ! source must be within the domain
     END IF
   
@@ -634,30 +662,44 @@ CONTAINS
        ! IESCO22: Rewriting for debugging with gcov
        IF ( ray2D( is+1 )%x( 1 ) > Beam%Box%r ) THEN
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%r'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ray2D( is+1 )%x( 1 ) < 0 ) THEN
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray left Box r=0'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ray2D( is+1 )%x( 2 ) > Beam%Box%z ) THEN 
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%z'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ABS( ray2D( is+1 )%Amp ) < 0.005 ) THEN
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray lost energy'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray escaped top bound'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
           Beam%Nsteps = is + 1
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'TraceRay2D : ray escaped bot bound'
+#endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( is >= MaxN - 3 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
+#endif /* IHOP_WRITE_OUT */
           Beam%Nsteps = is
           EXIT Stepping
        END IF
@@ -875,9 +917,11 @@ CONTAINS
        ENDIF
   
     CASE DEFAULT
+#ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, * ) 'HS%BC = ', HS%BC
        WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
                             'Unknown boundary condition type'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R Reflect2D'
     END SELECT
   
@@ -887,8 +931,10 @@ CONTAINS
     ELSE IF ( BotTop == 'BOT' ) THEN
        ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
     ELSE
+#ifdef IHOP_WRITE_OUT
        WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
                             'no reflection bounce, but in relfect2d somehow'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R Reflect2D'
     END IF
   
