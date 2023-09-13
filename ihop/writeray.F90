@@ -56,6 +56,7 @@ CONTAINS
 
     ! write to ray file
 
+#ifdef IHOP_WRITE_OUT
     WRITE( RAYFile, * ) alpha0
     WRITE( RAYFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, &
                         ray2D( Nsteps1 )%NumBotBnc
@@ -63,6 +64,7 @@ CONTAINS
     DO is = 1, N2
        WRITE( RAYFile, * ) ray2D( is )%x
     END DO
+#endif /* IHOP_WRITE_OUT */
 
   RETURN
   END SUBROUTINE WriteRay2D
@@ -92,6 +94,7 @@ CONTAINS
 
     ! write to ray file
 
+#ifdef IHOP_WRITE_OUT
     WRITE( DELFile, * ) alpha0
     WRITE( DELFile, * ) N2, ray2D( Nsteps1 )%NumTopBnc, &
                         ray2D( Nsteps1 )%NumBotBnc
@@ -99,6 +102,7 @@ CONTAINS
     DO is = 1, N2
        WRITE( DELFile, * ) REAL(ray2D( is )%tau), ray2D( is )%x(2)
     END DO
+#endif /* IHOP_WRITE_OUT */
 
   RETURN
   END SUBROUTINE WriteDel2D

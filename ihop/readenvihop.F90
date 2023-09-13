@@ -799,6 +799,7 @@ CONTAINS
 
     SELECT CASE ( Beam%RunType( 1 : 1 ) )
     CASE ( 'R', 'E' )   ! Ray trace or Eigenrays
+#ifdef IHOP_WRITE_OUT
        OPEN ( FILE = TRIM( FileRoot ) // '.ray', UNIT = RAYFile, &
               FORM = 'FORMATTED' )
        WRITE( RAYFile, * ) '''', Title( 1 : 50 ), ''''
@@ -813,8 +814,10 @@ CONTAINS
 #else /* IHOP_THREED */
        WRITE( RAYFile, * ) '''rz'''
 #endif /* IHOP_THREED */
+#endif /* IHOP_WRITE_OUT */
 
     CASE ( 'A' )        ! arrival file in ascii format
+#ifdef IHOP_WRITE_OUT
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
               FORM = 'FORMATTED' )
 
@@ -872,7 +875,9 @@ CONTAINS
 # else /* IHOP_THREED */
        WRITE( DELFile, * ) '''rz'''
 # endif /* IHOP_THREED */
+#endif /* IHOP_WRITE_OUT */
     CASE ( 'a' )        ! arrival file in binary format
+#ifdef IHOP_WRITE_OUT
        OPEN ( FILE = TRIM( FileRoot ) // '.arr', UNIT = ARRFile, &
               FORM = 'UNFORMATTED' )
 
@@ -899,6 +904,7 @@ CONTAINS
 # ifdef IHOP_THREED
        WRITE( ARRFile    ) Pos%Ntheta, Pos%theta( 1 : Pos%Ntheta )
 # endif /* IHOP_THREED */
+#endif /* IHOP_WRITE_OUT */
 
     CASE DEFAULT
        atten = 0.0

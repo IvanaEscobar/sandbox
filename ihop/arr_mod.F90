@@ -123,7 +123,9 @@ CONTAINS
     INTEGER             :: ir, iz, iArr
     REAL (KIND=_RL90)   :: factor
 
+#ifdef IHOP_WRITE_OUT
     WRITE( ARRFile, * ) MAXVAL( NArr( 1 : Nrz, 1 : Nr ) )
+#endif /* IHOP_WRITE_OUT */
 
     DO iz = 1, Nrz
        DO ir = 1, Nr
@@ -137,6 +139,7 @@ CONTAINS
              END IF
           END IF
 
+#ifdef IHOP_WRITE_OUT
           WRITE( ARRFile, * ) NArr( iz, ir )
           DO iArr = 1, NArr( iz, ir )
              ! You can compress the output file a lot by putting in an explicit 
@@ -152,6 +155,7 @@ CONTAINS
                               Arr( iz, ir, iArr )%NTopBnc,       &
                               Arr( iz, ir, iArr )%NBotBnc
           END DO  ! next arrival
+#endif /* IHOP_WRITE_OUT */
        END DO  ! next receiver depth
     END DO  ! next range
 
@@ -171,7 +175,9 @@ CONTAINS
     INTEGER                 :: ir, iz, iArr
     REAL     (KIND=_RL90)   :: factor
 
+#ifdef IHOP_WRITE_OUT
     WRITE( ARRFile ) MAXVAL( NArr( 1 : Nrz, 1 : Nr ) )
+#endif /* IHOP_WRITE_OUT */
 
     DO iz = 1, Nrz
        DO ir = 1, Nr
@@ -185,8 +191,8 @@ CONTAINS
              END IF
           END IF
 
+#ifdef IHOP_WRITE_OUT
           WRITE( ARRFile ) NArr( iz, ir )
-          
           DO iArr = 1, NArr( iz, ir )
              ! integers written out as reals below for fast reading in Matlab
              WRITE( ARRFile ) &
@@ -197,8 +203,8 @@ CONTAINS
                            Arr( iz, ir, iArr )%RcvrDeclAngle, &
                      REAL( Arr( iz, ir, iArr )%NTopBnc ),     &
                      REAL( Arr( iz, ir, iArr )%NBotBnc )
-
           END DO   ! next arrival
+#endif /* IHOP_WRITE_OUT */
        END DO   ! next receiver depth
     END DO   ! next range
 
