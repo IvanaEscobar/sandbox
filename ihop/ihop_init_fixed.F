@@ -46,6 +46,8 @@ C ==================== External Functions ==========================
       INTEGER ILNBLNK
       EXTERNAL ILNBLNK
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
+C Only do I/O if in the main thread
+      _BEGIN_MASTER( myThid )
 
 C Read NetCDF input: setting the acoustic domain
       IL  = ILNBLNK( IHOP_interpfile )
@@ -120,6 +122,9 @@ CC Close NetCDF file
         CALL PRINT_ERROR( msgBuf, myThid )
         STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
       END IF
+
+C Only do I/O if in the main thread
+      _END_MASTER( myThid )
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
