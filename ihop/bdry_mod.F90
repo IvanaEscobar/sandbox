@@ -179,8 +179,10 @@ CONTAINS
     CASE DEFAULT   ! no altimetry given, use SSP depth for flat top
         ALLOCATE( Top( 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                                     'Insufficient memory for altimetry data'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
         Top( 1 )%x = [ -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5, DepthT ]
@@ -190,8 +192,10 @@ CONTAINS
     CALL ComputeBdryTangentNormal( Top, 'Top' )
 
     IF ( .NOT. monotonic( Top%x( 1 ), NAtiPts ) ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                         'Altimetry ranges are not monotonically increasing'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadATI'
     END IF 
  

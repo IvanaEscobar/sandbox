@@ -497,9 +497,11 @@ CONTAINS
        s2      = x( 2 )           - SSP%z( iSegz )            
        delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
        IF (delta_z <= 0 .OR. s2 > delta_z) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE(errorMessageUnit, *) delta_z, s2, iSegz, SSP%z(iSegz)
           WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
                             'depth is not monotonically increasing in SSP%z'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R Quad'
        END IF
        
@@ -636,8 +638,10 @@ CONTAINS
               SSP%Seg%r( SSP%Nr ), &
               STAT = iallocstat )
     IF ( iallocstat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
        WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
                             'Insufficient memory to store SSP'
+#endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
@@ -766,8 +770,10 @@ CONTAINS
                 SSP%Seg%r( SSP%Nr ), &
                 STAT = iallocstat )
       IF ( iallocstat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SSPMOD ExtractSSP: ', &
                              'Insufficient memory to store SSP'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ExtractSSP'
       END IF
 

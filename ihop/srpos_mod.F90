@@ -79,8 +79,10 @@ CONTAINS
         WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
 #endif /* IHOP_WRITE_OUT */
         IF ( Nfreq <= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
             WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                                  'Number of frequencies must be positive'
+#endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadfreqVec'
         END IF
     END IF
@@ -88,8 +90,10 @@ CONTAINS
     IF ( ALLOCATED( freqVec ) ) DEALLOCATE( freqVec )
     ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                              'Number of frequencies too large'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadfreqVec'
     END IF
 
@@ -167,16 +171,20 @@ CONTAINS
     IF ( ALLOCATED( Pos%ws ) ) DEALLOCATE( Pos%ws, Pos%iSz )
     ALLOCATE( Pos%ws( Pos%NSz ), Pos%iSz( Pos%NSz ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many sources'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
 
     IF ( ALLOCATED( Pos%wr ) ) DEALLOCATE( Pos%wr, Pos%iRz )
     ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
     IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many receivers'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
 
@@ -226,8 +234,10 @@ CONTAINS
     IF ( Pos%NRr /= 1 ) Pos%delta_r = Pos%Rr( Pos%NRr ) - Pos%Rr( Pos%NRr-1 )
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
                              'Receiver ranges are not monotonically increasing'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRcvrRanges'
     END IF 
  
@@ -260,8 +270,10 @@ CONTAINS
                                            - Pos%theta( Pos%Ntheta - 1 )
 
     IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
                             'Receiver bearings are not monotonically increasing'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRcvrBearings'
     END IF 
  
@@ -295,8 +307,10 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
 
     IF ( Nx <= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
         WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
                              'Number of ' // Description // 'must be positive'
+#endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadVector'
     END IF
 

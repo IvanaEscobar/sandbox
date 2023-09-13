@@ -31,7 +31,7 @@ C     msgBuf     :: Informational/error message buffer
 C     iUnit      :: Work variable for IO unit number
       CHARACTER*(MAX_LEN_MBUF) msgBuf
       INTEGER iUnit
-      INTEGER i, j
+      INTEGER i, j, v
 
       NAMELIST /IHOP_PARM01/
      &      IHOP_fileroot,
@@ -73,6 +73,9 @@ C     iUnit      :: Work variable for IO unit number
      &      ihop_iter,
      &      IHOP_npts_range,
      &      IHOP_npts_idw,
+     &      ihop_v_xc,
+     &      ihop_v_yc,
+     &      ihop_v_weight,
      &      ihop_xc,
      &      ihop_yc,
      &      ihop_idw_weights,
@@ -242,11 +245,17 @@ C     ihop_init_fixed.f
       ihop_iter         = 0
       IHOP_npts_range   = 0
       IHOP_npts_idw     = 0
+      v=1
       DO i=1,IHOP_MAX_NC_SIZE
        DO j=1,IHOP_MAX_NC_SIZE
+        ihop_v_xc(v)            = 0. _d 0
+        ihop_v_yc(v)            = 0. _d 0
+        ihop_v_weight(v)        = 0. _d 0
+
         ihop_xc(i,j)            = 0. _d 0
         ihop_yc(i,j)            = 0. _d 0
         ihop_idw_weights(i,j)   = 0. _d 0
+        v=v+1
        ENDDO
        ihop_ranges(j)  = 0. _d 0
       ENDDO
@@ -259,13 +268,13 @@ C     Read parameters from open data file
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                    SQUEEZE_RIGHT, myThid )
 
-C     Check paramters of IHOP_PARM03
-      IF ( IHOP_interpfile.EQ.'' ) THEN
-       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_interpfile" ',
-     &  'Provide interpolation file name for ihop package'  
-       CALL PRINT_ERROR( msgBuf, myThid )
-       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
-      ENDIF
+CC     Check paramters of IHOP_PARM03
+C      IF ( IHOP_interpfile.EQ.'' ) THEN
+C       WRITE(msgBuf, '(2A)') 'S/R IHOP_READPARMS: "IHOP_interpfile" ',
+C     &  'Provide interpolation file name for ihop package'  
+C       CALL PRINT_ERROR( msgBuf, myThid )
+C       STOP 'ABNORMAL END: S/R IHOP_READPARMS'
+C      ENDIF
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 

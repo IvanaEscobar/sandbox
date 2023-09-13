@@ -80,8 +80,10 @@ CONTAINS
        IF ( ALLOCATED( RBot ) ) DEALLOCATE( RBot )
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for bot. refl. coef.: reduce # points'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
        READ(  BRCFile, * ) ( RBot( itheta ), itheta = 1, NBotPts )
@@ -121,8 +123,10 @@ CONTAINS
        IF ( ALLOCATED( RTop ) ) DEALLOCATE( RTop )
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
        IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for top refl. coef.: reduce # points'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -142,8 +146,10 @@ CONTAINS
        OPEN( FILE = TRIM( FileRoot ) // '.irc', UNIT = IRCFile, STATUS = 'OLD',&
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                         'Unable to open Internal Reflection Coefficient file'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
@@ -159,8 +165,10 @@ CONTAINS
        ALLOCATE( xTab( NkTab ), fTab( NkTab ), gTab( NkTab ), iTab( NkTab ), &
                  Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
           WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Too many points in reflection coefficient'
+#endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
 
