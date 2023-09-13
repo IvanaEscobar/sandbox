@@ -194,6 +194,7 @@ CONTAINS
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
        WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
+                           'near the top bdry has been moved down'
     END IF
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
