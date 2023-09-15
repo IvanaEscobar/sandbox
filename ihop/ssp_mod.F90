@@ -49,7 +49,7 @@ MODULE ssp_mod
 
 ! LEGACY VARIABLES
 ! == Legacy Local Variables ==
-  INTEGER, PARAMETER     :: MaxSSP = 20001
+  INTEGER, PARAMETER     :: MaxSSP = 201
   INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
   INTEGER                :: iostat, iallocstat
   INTEGER,           PRIVATE :: iz
@@ -785,7 +785,7 @@ CONTAINS
 
       ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
       SSP%z( 1 )        = 0.0 _d 0
-      SSP%z( 2:SSP%Nz ) = rkSign*rC( 1:SSP%Nz )
+      SSP%z( 2:SSP%Nz ) = rkSign*rC( 1:Nr )
 
       ! ssp extraction
       !==================================================
