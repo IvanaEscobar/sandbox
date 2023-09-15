@@ -140,7 +140,6 @@ CONTAINS
         WRITE(errorMessageUnit, *) 'allocation failed', IAllocStat
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSxSy'
-    ELSE
     END IF
 
     Pos%Sx( 1 ) = 0.
@@ -294,7 +293,7 @@ CONTAINS
     INTEGER, INTENT( IN ) :: myThid
  
     INTEGER,                        INTENT( IN ) :: Nx
-    REAL (KIND=_RL90), INTENT( INOUT ) :: x( : )
+    REAL (KIND=_RL90), ALLOCATABLE, INTENT( INOUT ) :: x( : )
     CHARACTER,                      INTENT( IN ) :: Description*( * ), &
                                                     Units*( * )
     INTEGER :: ix
@@ -315,11 +314,16 @@ CONTAINS
         STOP 'ABNORMAL END: S/R ReadVector'
     END IF
 
-    !IF ( .NOT. ALLOCATED( x ) ) THEN 
-    !    ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
-    !    IF ( IAllocStat /= 0 ) CALL ERROUT( 'ReadVector', 'Too many ' // &
-    !                                        Description )
-    !END IF
+    IF ( .NOT. ALLOCATED( x ) ) THEN 
+        ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
+        IF ( IAllocStat /= 0 ) THEN
+#ifdef IHOP_WRITE_OUT
+            WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
+                                'Too many ' // Description
+#endif /* IHOP_WRITE_OUT */
+            STOP 'ABNORMAL END: S/R ReadVector'
+        END IF
+    END IF
 
 #ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * ) Description // ' (' // Units // ')'

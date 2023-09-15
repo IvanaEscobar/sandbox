@@ -17,7 +17,7 @@
 ! Place CPP define/undef flag here
 #define IHOP_DEBUG
 
-#define IHOP_WRITE_OUT
+#undef IHOP_WRITE_OUT
 
 ! Only consider 2D propagation
 #undef IHOP_THREED
