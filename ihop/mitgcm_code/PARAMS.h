@@ -84,24 +84,24 @@
 !C     lambdaSaltFile  :: File containing SSS relaxation coefficient
 !C     wghtBalanceFile :: File containing weight used in balancing net EmPmR
 !C     the_run_name    :: string identifying the name of the model "run"
-      COMMON /PARM_C/                                                                                                                   &
-     &                buoyancyRelation, eosType,                                                                                        &
-     &                pickupSuff, mdsioLocalDir, adTapeDir,                                                                             &
-     &                tRefFile, sRefFile, rhoRefFile, gravityFile,                                                                      &
-     &                delRFile, delRcFile, hybSigmFile,                                                                                 &
-     &                delXFile, delYFile, horizGridFile,                                                                                &
-     &                bathyFile, topoFile, addWwallFile, addSwallFile,                                                                  &
-     &                viscAhDfile, viscAhZfile,                                                                                         &
-     &                viscA4Dfile, viscA4Zfile,                                                                                         &
-     &                hydrogThetaFile, hydrogSaltFile, diffKrFile,                                                                      &
-     &                zonalWindFile, meridWindFile, thetaClimFile,                                                                      &
-     &                saltClimFile,                                                                                                     &
-     &                EmPmRfile, saltFluxFile,                                                                                          &
-     &                surfQfile, surfQnetFile, surfQswFile,                                                                             &
-     &                uVelInitFile, vVelInitFile, pSurfInitFile,                                                                        &
-     &                pLoadFile, geoPotAnomFile, addMassFile,                                                                           &
-     &                eddyPsiXFile, eddyPsiYFile, geothermalFile,                                                                       &
-     &                lambdaThetaFile, lambdaSaltFile, wghtBalanceFile,                                                                 &
+      COMMON /PARM_C/                                                                                                               &
+     &                buoyancyRelation, eosType,                                                                                    &
+     &                pickupSuff, mdsioLocalDir, adTapeDir,                                                                         &
+     &                tRefFile, sRefFile, rhoRefFile, gravityFile,                                                                  &
+     &                delRFile, delRcFile, hybSigmFile,                                                                             &
+     &                delXFile, delYFile, horizGridFile,                                                                            &
+     &                bathyFile, topoFile, addWwallFile, addSwallFile,                                                              &
+     &                viscAhDfile, viscAhZfile,                                                                                     &
+     &                viscA4Dfile, viscA4Zfile,                                                                                     &
+     &                hydrogThetaFile, hydrogSaltFile, diffKrFile,                                                                  &
+     &                zonalWindFile, meridWindFile, thetaClimFile,                                                                  &
+     &                saltClimFile,                                                                                                 &
+     &                EmPmRfile, saltFluxFile,                                                                                      &
+     &                surfQfile, surfQnetFile, surfQswFile,                                                                         &
+     &                uVelInitFile, vVelInitFile, pSurfInitFile,                                                                    &
+     &                pLoadFile, geoPotAnomFile, addMassFile,                                                                       &
+     &                eddyPsiXFile, eddyPsiYFile, geothermalFile,                                                                   &
+     &                lambdaThetaFile, lambdaSaltFile, wghtBalanceFile,                                                             &
      &                the_run_name
       CHARACTER*(MAX_LEN_FNAM) buoyancyRelation
       CHARACTER*(6)  eosType
@@ -225,22 +225,22 @@
 !C                            and statistics ; higher -> more writing
 !C-    plotLevel           :: controls printing of field maps ; higher -> more flds
 
-      COMMON /PARM_I/                                                                                                                   &
-     &        cg2dMaxIters, cg2dMinItersNSA,                                                                                            &
-     &        cg2dPreCondFreq, cg2dUseMinResSol,                                                                                        &
-     &        cg3dMaxIters, printResidualFreq,                                                                                          &
-     &        nIter0, nTimeSteps, nTimeSteps_l2, nEndIter,                                                                              &
-     &        selectCoriMap,                                                                                                            &
-     &        selectSigmaCoord,                                                                                                         &
-     &        nonlinFreeSurf, select_rStar,                                                                                             &
-     &        selectNHfreeSurf, selectP_inEOS_Zc,                                                                                       &
-     &        selectAddFluid, selectBalanceEmPmR, selectImplicitDrag,                                                                   &
-     &        momForcingOutAB, tracForcingOutAB,                                                                                        &
-     &        tempAdvScheme, tempVertAdvScheme,                                                                                         &
-     &        saltAdvScheme, saltVertAdvScheme,                                                                                         &
-     &        selectKEscheme, selectVortScheme, selectCoriScheme,                                                                       &
-     &        selectBotDragQuadr, pCellMix_select,                                                                                      &
-     &        readBinaryPrec, writeBinaryPrec, writeStatePrec,                                                                          &
+      COMMON /PARM_I/                                                                                                               &
+     &        cg2dMaxIters, cg2dMinItersNSA,                                                                                        &
+     &        cg2dPreCondFreq, cg2dUseMinResSol,                                                                                    &
+     &        cg3dMaxIters, printResidualFreq,                                                                                      &
+     &        nIter0, nTimeSteps, nTimeSteps_l2, nEndIter,                                                                          &
+     &        selectCoriMap,                                                                                                        &
+     &        selectSigmaCoord,                                                                                                     &
+     &        nonlinFreeSurf, select_rStar,                                                                                         &
+     &        selectNHfreeSurf, selectP_inEOS_Zc,                                                                                   &
+     &        selectAddFluid, selectBalanceEmPmR, selectImplicitDrag,                                                               &
+     &        momForcingOutAB, tracForcingOutAB,                                                                                    &
+     &        tempAdvScheme, tempVertAdvScheme,                                                                                     &
+     &        saltAdvScheme, saltVertAdvScheme,                                                                                     &
+     &        selectKEscheme, selectVortScheme, selectCoriScheme,                                                                   &
+     &        selectBotDragQuadr, pCellMix_select,                                                                                  &
+     &        readBinaryPrec, writeBinaryPrec, writeStatePrec,                                                                      &
      &        rwSuffixType, monitorSelect, debugLevel, plotLevel
       INTEGER cg2dMaxIters
       INTEGER cg2dMinItersNSA
@@ -419,47 +419,47 @@
 !C     dumpInitAndLast :: dumps model state to files at Initial (nIter0)
 !C                        & Last iteration, in addition multiple of dumpFreq iter.
 
-      COMMON /PARM_L/                                                                                                                   &
-     & fluidIsAir, fluidIsWater,                                                                                                        &
-     & usingPCoords, usingZCoords,                                                                                                      &
-     & usingCartesianGrid, usingSphericalPolarGrid, rotateGrid,                                                                         &
-     & usingCylindricalGrid, usingCurvilinearGrid, hasWetCSCorners,                                                                     &
-     & deepAtmosphere, setInterFDr, setCenterDr, useMin4hFacEdges,                                                                      &
-     & interViscAr_pCell, interDiffKr_pCell,                                                                                            &
-     & no_slip_sides, no_slip_bottom, bottomVisc_pCell, useSmag3D,                                                                      &
-     & useFullLeith, useStrainTensionVisc, useAreaViscLength,                                                                           &
-     & momViscosity, momAdvection, momForcing, momTidalForcing,                                                                         &
-     & momPressureForcing, metricTerms, useNHMTerms,                                                                                    &
-     & useCoriolis, use3dCoriolis,                                                                                                      &
-     & useCDscheme, vectorInvariantMomentum,                                                                                            &
-     & useJamartMomAdv, upwindVorticity, highOrderVorticity,                                                                            &
-     & useAbsVorticity, upwindShear,                                                                                                    &
-     & momStepping, calc_wVelocity, tempStepping, saltStepping,                                                                         &
-     & addFrictionHeating, temp_stayPositive, salt_stayPositive,                                                                        &
-     & tempAdvection, tempVertDiff4, tempIsActiveTr, tempForcing,                                                                       &
-     & saltAdvection, saltVertDiff4, saltIsActiveTr, saltForcing,                                                                       &
-     & maskIniTemp, maskIniSalt, checkIniTemp, checkIniSalt,                                                                            &
-     & useNSACGSolver, useSRCGSolver,                                                                                                   &
-     & rigidLid, implicitFreeSurface,                                                                                                   &
-     & uniformLin_PhiSurf, uniformFreeSurfLev,                                                                                          &
-     & exactConserv, linFSConserveTr, useRealFreshWaterFlux,                                                                            &
-     & storePhiHyd4Phys, quasiHydrostatic, nonHydrostatic,                                                                              &
-     & use3Dsolver, implicitIntGravWave, staggerTimeStep,                                                                               &
-     & applyExchUV_early, doResetHFactors,                                                                                              &
-     & implicitDiffusion, implicitViscosity,                                                                                            &
-     & tempImplVertAdv, saltImplVertAdv, momImplVertAdv,                                                                                &
-     & multiDimAdvection, useMultiDimAdvec,                                                                                             &
-     & momDissip_In_AB, doAB_onGtGs,                                                                                                    &
-     & balanceQnet, balancePrintMean,                                                                                                   &
-     & balanceThetaClimRelax, balanceSaltClimRelax,                                                                                     &
-     & doThetaClimRelax, doSaltClimRelax,                                                                                               &
-     & allowFreezing,                                                                                                                   &
-     & periodicExternalForcing,                                                                                                         &
-     & globalFiles,                                                                                                                     &
-     & pickupStrictlyMatch, usePickupBeforeC54, startFromPickupAB2,                                                                     &
-     & pickup_read_mdsio, pickup_write_mdsio, pickup_write_immed,                                                                       &
-     & writePickupAtEnd,                                                                                                                &
-     & timeave_mdsio, snapshot_mdsio, monitor_stdio,                                                                                    &
+      COMMON /PARM_L/                                                                                                               &
+     & fluidIsAir, fluidIsWater,                                                                                                    &
+     & usingPCoords, usingZCoords,                                                                                                  &
+     & usingCartesianGrid, usingSphericalPolarGrid, rotateGrid,                                                                     &
+     & usingCylindricalGrid, usingCurvilinearGrid, hasWetCSCorners,                                                                 &
+     & deepAtmosphere, setInterFDr, setCenterDr, useMin4hFacEdges,                                                                  &
+     & interViscAr_pCell, interDiffKr_pCell,                                                                                        &
+     & no_slip_sides, no_slip_bottom, bottomVisc_pCell, useSmag3D,                                                                  &
+     & useFullLeith, useStrainTensionVisc, useAreaViscLength,                                                                       &
+     & momViscosity, momAdvection, momForcing, momTidalForcing,                                                                     &
+     & momPressureForcing, metricTerms, useNHMTerms,                                                                                &
+     & useCoriolis, use3dCoriolis,                                                                                                  &
+     & useCDscheme, vectorInvariantMomentum,                                                                                        &
+     & useJamartMomAdv, upwindVorticity, highOrderVorticity,                                                                        &
+     & useAbsVorticity, upwindShear,                                                                                                &
+     & momStepping, calc_wVelocity, tempStepping, saltStepping,                                                                     &
+     & addFrictionHeating, temp_stayPositive, salt_stayPositive,                                                                    &
+     & tempAdvection, tempVertDiff4, tempIsActiveTr, tempForcing,                                                                   &
+     & saltAdvection, saltVertDiff4, saltIsActiveTr, saltForcing,                                                                   &
+     & maskIniTemp, maskIniSalt, checkIniTemp, checkIniSalt,                                                                        &
+     & useNSACGSolver, useSRCGSolver,                                                                                               &
+     & rigidLid, implicitFreeSurface,                                                                                               &
+     & uniformLin_PhiSurf, uniformFreeSurfLev,                                                                                      &
+     & exactConserv, linFSConserveTr, useRealFreshWaterFlux,                                                                        &
+     & storePhiHyd4Phys, quasiHydrostatic, nonHydrostatic,                                                                          &
+     & use3Dsolver, implicitIntGravWave, staggerTimeStep,                                                                           &
+     & applyExchUV_early, doResetHFactors,                                                                                          &
+     & implicitDiffusion, implicitViscosity,                                                                                        &
+     & tempImplVertAdv, saltImplVertAdv, momImplVertAdv,                                                                            &
+     & multiDimAdvection, useMultiDimAdvec,                                                                                         &
+     & momDissip_In_AB, doAB_onGtGs,                                                                                                &
+     & balanceQnet, balancePrintMean,                                                                                               &
+     & balanceThetaClimRelax, balanceSaltClimRelax,                                                                                 &
+     & doThetaClimRelax, doSaltClimRelax,                                                                                           &
+     & allowFreezing,                                                                                                               &
+     & periodicExternalForcing,                                                                                                     &
+     & globalFiles,                                                                                                                 &
+     & pickupStrictlyMatch, usePickupBeforeC54, startFromPickupAB2,                                                                 &
+     & pickup_read_mdsio, pickup_write_mdsio, pickup_write_immed,                                                                   &
+     & writePickupAtEnd,                                                                                                            &
+     & timeave_mdsio, snapshot_mdsio, monitor_stdio,                                                                                &
      & outputTypesInclusive, dumpInitAndLast
 
       LOGICAL fluidIsAir
@@ -815,51 +815,51 @@
 !C     phiEuler      :: Euler angle, rotation about original z-axis
 !C     thetaEuler    :: Euler angle, rotation about new x-axis
 !C     psiEuler      :: Euler angle, rotation about new z-axis
-      COMMON /PARM_R/ cg2dTargetResidual, cg2dTargetResWunit,                                                                           &
-     & cg2dpcOffDFac, cg3dTargetResidual,                                                                                               &
-     & delR, delRc, xgOrigin, ygOrigin, rSphere, recip_rSphere,                                                                         &
-     & radius_fromHorizGrid, seaLev_Z, top_Pres, rSigmaBnd,                                                                             &
-     & deltaT, deltaTMom, dTtracerLev, deltaTFreeSurf, deltaTClock,                                                                     &
-     & abEps, alph_AB, beta_AB,                                                                                                         &
-     & f0, beta, fPrime, omega, rotationPeriod,                                                                                         &
-     & viscFacAdj, viscAh, viscAhW, smag3D_coeff, smag3D_diffCoeff,                                                                     &
-     & viscAhMax, viscAhGrid, viscAhGridMax, viscAhGridMin,                                                                             &
-     & viscC2leith, viscC2leithD, viscC2LeithQG,                                                                                        &
-     & viscC2smag, viscC4smag,                                                                                                          &
-     & viscAhD, viscAhZ, viscA4D, viscA4Z,                                                                                              &
-     & viscA4, viscA4W, viscA4Max,                                                                                                      &
-     & viscA4Grid, viscA4GridMax, viscA4GridMin,                                                                                        &
-     & viscAhReMax, viscA4ReMax,                                                                                                        &
-     & viscC4leith, viscC4leithD, viscArNr,                                                                                             &
-     & diffKhT, diffK4T, diffKrNrT, diffKr4T,                                                                                           &
-     & diffKhS, diffK4S, diffKrNrS, diffKr4S,                                                                                           &
-     & diffKrBL79surf, diffKrBL79deep, diffKrBL79scl, diffKrBL79Ho,                                                                     &
-     & BL79LatVary,                                                                                                                     &
-     & diffKrBLEQsurf, diffKrBLEQdeep, diffKrBLEQscl, diffKrBLEQHo,                                                                     &
-     & pCellMix_maxFac, pCellMix_delR, pCellMix_viscAr, pCellMix_diffKr,                                                                &
-     & tauCD, rCD, epsAB_CD,                                                                                                            &
-     & freeSurfFac, implicSurfPress, implicDiv2DFlow, implicitNHPress,                                                                  &
-     & hFacMin, hFacMinDz, hFacInf, hFacSup,                                                                                            &
-     & gravity, recip_gravity, gBaro,                                                                                                   &
-     & gravFacC, recip_gravFacC, gravFacF, recip_gravFacF,                                                                              &
-     & rhoNil, rhoConst, recip_rhoConst, rho1Ref,                                                                                       &
-     & rhoFacC, recip_rhoFacC, rhoFacF, recip_rhoFacF, rhoConstFresh,                                                                   &
-     & thetaConst, tRef, sRef, rhoRef, dBdrRef,                                                                                         &
-     & surf_pRef, pRef4EOS, phiRef,                                                                                                     &
-     & rVel2wUnit, wUnit2rVel, rUnit2z, z2rUnit, mass2rUnit, rUnit2mass,                                                                &
-     & baseTime, startTime, endTime,                                                                                                    &
-     & chkPtFreq, pChkPtFreq, dumpFreq, adjDumpFreq,                                                                                    &
-     & diagFreq, taveFreq, tave_lastIter, monitorFreq, adjMonitorFreq,                                                                  &
-     & afFacMom, vfFacMom, pfFacMom, cfFacMom, foFacMom, mtFacMom,                                                                      &
-     & cosPower, cAdjFreq,                                                                                                              &
-     & tauThetaClimRelax, tauSaltClimRelax, latBandClimRelax,                                                                           &
-     & externForcingCycle, externForcingPeriod,                                                                                         &
-     & convertFW2Salt, temp_EvPrRn, salt_EvPrRn,                                                                                        &
-     & temp_addMass, salt_addMass, hFacMinDr, hFacMinDp,                                                                                &
-     & ivdc_kappa, hMixCriteria, dRhoSmall, hMixSmooth,                                                                                 &
-     & sideDragFactor, bottomDragLinear, bottomDragQuadratic, nh_Am2,                                                                   &
-     & smoothAbsFuncRange, sIceLoadFac,                                                                                                 &
-     & tCylIn, tCylOut,                                                                                                                 &
+      COMMON /PARM_R/ cg2dTargetResidual, cg2dTargetResWunit,                                                                       &
+     & cg2dpcOffDFac, cg3dTargetResidual,                                                                                           &
+     & delR, delRc, xgOrigin, ygOrigin, rSphere, recip_rSphere,                                                                     &
+     & radius_fromHorizGrid, seaLev_Z, top_Pres, rSigmaBnd,                                                                         &
+     & deltaT, deltaTMom, dTtracerLev, deltaTFreeSurf, deltaTClock,                                                                 &
+     & abEps, alph_AB, beta_AB,                                                                                                     &
+     & f0, beta, fPrime, omega, rotationPeriod,                                                                                     &
+     & viscFacAdj, viscAh, viscAhW, smag3D_coeff, smag3D_diffCoeff,                                                                 &
+     & viscAhMax, viscAhGrid, viscAhGridMax, viscAhGridMin,                                                                         &
+     & viscC2leith, viscC2leithD, viscC2LeithQG,                                                                                    &
+     & viscC2smag, viscC4smag,                                                                                                      &
+     & viscAhD, viscAhZ, viscA4D, viscA4Z,                                                                                          &
+     & viscA4, viscA4W, viscA4Max,                                                                                                  &
+     & viscA4Grid, viscA4GridMax, viscA4GridMin,                                                                                    &
+     & viscAhReMax, viscA4ReMax,                                                                                                    &
+     & viscC4leith, viscC4leithD, viscArNr,                                                                                         &
+     & diffKhT, diffK4T, diffKrNrT, diffKr4T,                                                                                       &
+     & diffKhS, diffK4S, diffKrNrS, diffKr4S,                                                                                       &
+     & diffKrBL79surf, diffKrBL79deep, diffKrBL79scl, diffKrBL79Ho,                                                                 &
+     & BL79LatVary,                                                                                                                 &
+     & diffKrBLEQsurf, diffKrBLEQdeep, diffKrBLEQscl, diffKrBLEQHo,                                                                 &
+     & pCellMix_maxFac, pCellMix_delR, pCellMix_viscAr, pCellMix_diffKr,                                                            &
+     & tauCD, rCD, epsAB_CD,                                                                                                        &
+     & freeSurfFac, implicSurfPress, implicDiv2DFlow, implicitNHPress,                                                              &
+     & hFacMin, hFacMinDz, hFacInf, hFacSup,                                                                                        &
+     & gravity, recip_gravity, gBaro,                                                                                               &
+     & gravFacC, recip_gravFacC, gravFacF, recip_gravFacF,                                                                          &
+     & rhoNil, rhoConst, recip_rhoConst, rho1Ref,                                                                                   &
+     & rhoFacC, recip_rhoFacC, rhoFacF, recip_rhoFacF, rhoConstFresh,                                                               &
+     & thetaConst, tRef, sRef, rhoRef, dBdrRef,                                                                                     &
+     & surf_pRef, pRef4EOS, phiRef,                                                                                                 &
+     & rVel2wUnit, wUnit2rVel, rUnit2z, z2rUnit, mass2rUnit, rUnit2mass,                                                            &
+     & baseTime, startTime, endTime,                                                                                                &
+     & chkPtFreq, pChkPtFreq, dumpFreq, adjDumpFreq,                                                                                &
+     & diagFreq, taveFreq, tave_lastIter, monitorFreq, adjMonitorFreq,                                                              &
+     & afFacMom, vfFacMom, pfFacMom, cfFacMom, foFacMom, mtFacMom,                                                                  &
+     & cosPower, cAdjFreq,                                                                                                          &
+     & tauThetaClimRelax, tauSaltClimRelax, latBandClimRelax,                                                                       &
+     & externForcingCycle, externForcingPeriod,                                                                                     &
+     & convertFW2Salt, temp_EvPrRn, salt_EvPrRn,                                                                                    &
+     & temp_addMass, salt_addMass, hFacMinDr, hFacMinDp,                                                                            &
+     & ivdc_kappa, hMixCriteria, dRhoSmall, hMixSmooth,                                                                             &
+     & sideDragFactor, bottomDragLinear, bottomDragQuadratic, nh_Am2,                                                               &
+     & smoothAbsFuncRange, sIceLoadFac,                                                                                             &
+     & tCylIn, tCylOut,                                                                                                             &
      & phiEuler, thetaEuler, psiEuler
 
       _RL cg2dTargetResidual
@@ -1022,9 +1022,9 @@
 !C                     (still a subject of discussions ...)
 !C     selectFindRoSurf :: select the way surf. ref. pressure (=Ro_surf) is
 !C             derived from the orography. Implemented: 0,1 (see INI_P_GROUND)
-      COMMON /PARM_ATM/                                                                                                                 &
-     &            celsius2K,                                                                                                            &
-     &            atm_Cp, atm_Rd, atm_kappa, atm_Rq, atm_Po,                                                                            &
+      COMMON /PARM_ATM/                                                                                                             &
+     &            celsius2K,                                                                                                        &
+     &            atm_Cp, atm_Rd, atm_kappa, atm_Rq, atm_Po,                                                                        &
      &            integr_GeoPot, selectFindRoSurf
       _RL celsius2K
       _RL atm_Po, atm_Cp, atm_Rd, atm_kappa, atm_Rq
@@ -1084,19 +1084,19 @@
       LOGICAL useEMBED_FILES
       LOGICAL useMYPACKAGE
       LOGICAL useIHOP
-      COMMON /PARM_PACKAGES/                                                                                                            &
-     &        useGAD, useOBCS, useSHAP_FILT, useZONAL_FILT,                                                                             &
-     &        useOPPS, usePP81, useKL10, useMY82, useGGL90, useKPP,                                                                     &
-     &        useGMRedi, useBBL, useDOWN_SLOPE,                                                                                         &
-     &        useCAL, useEXF, useBulkForce, useEBM, useCheapAML,                                                                        &
-     &        useGrdchk, useSMOOTH, usePROFILES, useECCO, useCTRL,                                                                      &
-     &        useSBO, useFLT, useAUTODIFF,                                                                                              &
-     &        usePTRACERS, useGCHEM, useRBCS, useOffLine, useMATRIX,                                                                    &
-     &        useFRAZIL, useSEAICE, useSALT_PLUME, useShelfIce,                                                                         &
-     &        useStreamIce, useICEFRONT, useThSIce, useLand,                                                                            &
-     &        useATM2D, useAIM, useAtm_Phys, useFizhi, useGridAlt,                                                                      &
-     &        useDiagnostics, useREGRID, useLayers, useMNC,                                                                             &
-     &        useRunClock, useEMBED_FILES,                                                                                              &
+      COMMON /PARM_PACKAGES/                                                                                                        &
+     &        useGAD, useOBCS, useSHAP_FILT, useZONAL_FILT,                                                                         &
+     &        useOPPS, usePP81, useKL10, useMY82, useGGL90, useKPP,                                                                 &
+     &        useGMRedi, useBBL, useDOWN_SLOPE,                                                                                     &
+     &        useCAL, useEXF, useBulkForce, useEBM, useCheapAML,                                                                    &
+     &        useGrdchk, useSMOOTH, usePROFILES, useECCO, useCTRL,                                                                  &
+     &        useSBO, useFLT, useAUTODIFF,                                                                                          &
+     &        usePTRACERS, useGCHEM, useRBCS, useOffLine, useMATRIX,                                                                &
+     &        useFRAZIL, useSEAICE, useSALT_PLUME, useShelfIce,                                                                     &
+     &        useStreamIce, useICEFRONT, useThSIce, useLand,                                                                        &
+     &        useATM2D, useAIM, useAtm_Phys, useFizhi, useGridAlt,                                                                  &
+     &        useDiagnostics, useREGRID, useLayers, useMNC,                                                                         &
+     &        useRunClock, useEMBED_FILES,                                                                                          &
      &        useMYPACKAGE, useIHOP
 
 !CEH3 ;;; Local Variables: ***

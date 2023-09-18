@@ -134,16 +134,16 @@
       INTEGER INDEX_J
       INTEGER INDEX_K
       INTEGER INDEX_NONE
-      PARAMETER ( INDEX_I    = 1,                                                                                                       &
-     &            INDEX_J    = 2,                                                                                                       &
-     &            INDEX_K    = 3,                                                                                                       &
+      PARAMETER ( INDEX_I    = 1,                                                                                                   &
+     &            INDEX_J    = 2,                                                                                                   &
+     &            INDEX_K    = 3,                                                                                                   &
      &            INDEX_NONE = 4 )
 
 !C     EXCH_IGNORE_CORNERS :: Flag to select ignoring or
 !C     EXCH_UPDATE_CORNERS    updating of corners during an edge exchange.
       INTEGER EXCH_IGNORE_CORNERS
       INTEGER EXCH_UPDATE_CORNERS
-      PARAMETER ( EXCH_IGNORE_CORNERS = 0,                                                                                              &
+      PARAMETER ( EXCH_IGNORE_CORNERS = 0,                                                                                          &
      &            EXCH_UPDATE_CORNERS = 1 )
 
 !C     FORWARD_SIMULATION
@@ -152,8 +152,8 @@
       INTEGER FORWARD_SIMULATION
       INTEGER REVERSE_SIMULATION
       INTEGER TANGENT_SIMULATION
-      PARAMETER ( FORWARD_SIMULATION = 0,                                                                                               &
-     &            REVERSE_SIMULATION = 1,                                                                                               &
+      PARAMETER ( FORWARD_SIMULATION = 0,                                                                                           &
+     &            REVERSE_SIMULATION = 1,                                                                                           &
      &            TANGENT_SIMULATION = 2 )
 
 !C--   COMMON /EEPARAMS_L/ Execution environment public logical variables.
@@ -177,13 +177,13 @@
 !C     useNest2W_parent :: use Parent 2-W Nesting interface (pkg/nest2w_parent)
 !C     useNest2W_child  :: use Child  2-W Nesting interface (pkg/nest2w_child)
 !C     useOASIS       :: use OASIS-coupler for a multi-components set-up.
-      COMMON /EEPARAMS_L/                                                                                                               &
-!c    &  eeBootError, fatalError, eeEndError,                                                                                           &
-     &  eeBootError, eeEndError, fatalError, debugMode,                                                                                 &
-     &  useSingleCpuIO, useSingleCpuInput, printMapIncludesZeros,                                                                       &
-     &  useCubedSphereExchange, useCoupler,                                                                                             &
-     &  useNEST_PARENT, useNEST_CHILD,                                                                                                  &
-     &  useNest2W_parent, useNest2W_child, useOASIS,                                                                                    &
+      COMMON /EEPARAMS_L/                                                                                                           &
+!c    &  eeBootError, fatalError, eeEndError,                                                                                       &
+     &  eeBootError, eeEndError, fatalError, debugMode,                                                                             &
+     &  useSingleCpuIO, useSingleCpuInput, printMapIncludesZeros,                                                                   &
+     &  useCubedSphereExchange, useCoupler,                                                                                         &
+     &  useNEST_PARENT, useNEST_CHILD,                                                                                              &
+     &  useNest2W_parent, useNest2W_child, useOASIS,                                                                                &
      &  useSETRLSTK, useSIGREG
       LOGICAL eeBootError
       LOGICAL eeEndError
@@ -233,12 +233,12 @@
 !C                      which is not required elsewhere but that makes it easier
 !C     ioErrorCount  :: IO Error Counter. Set to zero initially and increased
 !C                      by one every time an IO error occurs.
-      COMMON /EEPARAMS_I/                                                                                                               &
-     &  errorMessageUnit, standardMessageUnit, maxLengthPrt1D,                                                                          &
-     &  scrUnit1, scrUnit2, eeDataUnit, modelDataUnit,                                                                                  &
-     &  numberOfProcs, pidIO, myProcId,                                                                                                 &
-     &  myPx, myPy, myXGlobalLo, myYGlobalLo, nThreads,                                                                                 &
-     &  myBxLo, myBxHi, myByLo, myByHi,                                                                                                 &
+      COMMON /EEPARAMS_I/                                                                                                           &
+     &  errorMessageUnit, standardMessageUnit, maxLengthPrt1D,                                                                      &
+     &  scrUnit1, scrUnit2, eeDataUnit, modelDataUnit,                                                                              &
+     &  numberOfProcs, pidIO, myProcId,                                                                                             &
+     &  myPx, myPy, myXGlobalLo, myYGlobalLo, nThreads,                                                                             &
+     &  myBxLo, myBxHi, myByLo, myByHi,                                                                                             &
      &  nTx, nTy, ioErrorCount
       INTEGER errorMessageUnit
       INTEGER standardMessageUnit

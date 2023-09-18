@@ -46,7 +46,8 @@
       CHARACTER*(7) IHOP_runopt
 
       COMMON /IHOP_PARAMS_C/                                                                                                             &
-     &      IHOP_fileroot, IHOP_title, IHOP_topopt, IHOP_botopt, IHOP_runopt,                                                            &
+     &      IHOP_fileroot, IHOP_title,                                                                                                   &
+     &      IHOP_topopt, IHOP_botopt, IHOP_runopt,                                                                                       &
      &      IHOP_interpfile
 
 !-- COMMON /IHOP_PARAMS_I/ IHOP Integer-type parameters:
@@ -108,11 +109,11 @@
       _RL ihop_ranges ( IHOP_MAX_NC_SIZE )
 
       COMMON /IHOP_PARAMS_R/                                                                                                            &
-     &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear, IHOP_brho,                                                          &
-     &      IHOP_bcsoundI, IHOP_bcsoundshearI, IHOP_sd, IHOP_rd,                                                                        &
-     &      IHOP_rr, IHOP_alpha, IHOP_step, IHOP_zbox, IHOP_rbox,                                                                       &
+     &      IHOP_freq, IHOP_depth, IHOP_bcsound, IHOP_bcsoundshear,                                                                     &
+     &      ihop_brho, IHOP_bcsoundI, IHOP_bcsoundshearI,                                                                               &
+     &      IHOP_sd, IHOP_rd, IHOP_rr, IHOP_alpha, IHOP_step,                                                                           &
      &      ihop_yc, ihop_xc, ihop_idw_weights, ihop_ranges,                                                                            &
-     &      ihop_v_yc, ihop_v_xc, ihop_v_weight
+     &      ihop_v_yc, ihop_v_xc, ihop_v_weight, IHOP_zbox, IHOP_rbox
 
 
 #ifdef IHOP_3D_STATE
