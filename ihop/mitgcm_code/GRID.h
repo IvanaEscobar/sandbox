@@ -308,10 +308,10 @@
 !C     rkSign     :: Vertical coordinate to vertical index orientation.
 !C                   ( +1 same orientation, -1 opposite orientation )
 !C     globalArea :: Domain Integrated horizontal Area [m2]
-      COMMON /GRID_RL/                                                                                                                  &
-     &  cosFacU, cosFacV, sqCosFacU, sqCosFacV,                                                                                         &
-     &  deepFacC, deepFac2C, recip_deepFacC, recip_deepFac2C,                                                                           &
-     &  deepFacF, deepFac2F, recip_deepFacF, recip_deepFac2F,                                                                           &
+      COMMON /GRID_RL/                                                                                                              &
+     &  cosFacU, cosFacV, sqCosFacU, sqCosFacV,                                                                                     &
+     &  deepFacC, deepFac2C, recip_deepFacC, recip_deepFac2C,                                                                       &
+     &  deepFacF, deepFac2F, recip_deepFacF, recip_deepFac2F,                                                                       &
      &  gravitySign, rkSign, globalArea
       _RL cosFacU        (1-OLy:sNy+OLy,nSx,nSy)
       _RL cosFacV        (1-OLy:sNy+OLy,nSx,nSy)
@@ -408,21 +408,21 @@
 !C     fCoriG    :: Coriolis parameter at grid Corner point
 !C     fCoriCos  :: Coriolis Cos(phi) parameter at grid Center point (for NH)
 
-      COMMON /GRID_RS/                                                                                                                  &
-     &  dxC,dxF,dxG,dxV,dyC,dyF,dyG,dyU,                                                                                                &
-     &  rLowW, rLowS,                                                                                                                   &
-     &  Ro_surf, rSurfW, rSurfS,                                                                                                        &
-     &  recip_dxC,recip_dxF,recip_dxG,recip_dxV,                                                                                        &
-     &  recip_dyC,recip_dyF,recip_dyG,recip_dyU,                                                                                        &
-     &  xC,yC,rA,rAw,rAs,rAz,xG,yG,                                                                                                     &
-     &  maskInC, maskInW, maskInS,                                                                                                      &
-     &  maskC, maskW, maskS,                                                                                                            &
-     &  recip_rA,recip_rAw,recip_rAs,recip_rAz,                                                                                         &
-     &  drC, drF, recip_drC, recip_drF, rC, rF,                                                                                         &
-     &  aHybSigmF, bHybSigmF, aHybSigmC, bHybSigmC,                                                                                     &
-     &  dAHybSigF, dBHybSigF, dBHybSigC, dAHybSigC,                                                                                     &
-     &  tanPhiAtU, tanPhiAtV,                                                                                                           &
-     &  angleCosC, angleSinC, u2zonDir, v2zonDir,                                                                                       &
+      COMMON /GRID_RS/                                                                                                              &
+     &  dxC,dxF,dxG,dxV,dyC,dyF,dyG,dyU,                                                                                            &
+     &  rLowW, rLowS,                                                                                                               &
+     &  Ro_surf, rSurfW, rSurfS,                                                                                                    &
+     &  recip_dxC,recip_dxF,recip_dxG,recip_dxV,                                                                                    &
+     &  recip_dyC,recip_dyF,recip_dyG,recip_dyU,                                                                                    &
+     &  xC,yC,rA,rAw,rAs,rAz,xG,yG,                                                                                                 &
+     &  maskInC, maskInW, maskInS,                                                                                                  &
+     &  maskC, maskW, maskS,                                                                                                        &
+     &  recip_rA,recip_rAw,recip_rAs,recip_rAz,                                                                                     &
+     &  drC, drF, recip_drC, recip_drF, rC, rF,                                                                                     &
+     &  aHybSigmF, bHybSigmF, aHybSigmC, bHybSigmC,                                                                                 &
+     &  dAHybSigF, dBHybSigF, dBHybSigC, dAHybSigC,                                                                                 &
+     &  tanPhiAtU, tanPhiAtV,                                                                                                       &
+     &  angleCosC, angleSinC, u2zonDir, v2zonDir,                                                                                   &
      &  fCori, fCoriG, fCoriCos
       _RS dxC            (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS dxF            (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
@@ -492,9 +492,9 @@
 !C     time-dependent when using a non-linear free surface, or they are
 !C     active in an AD sense when using depth as a control parameter, or
 !C     both.
-      COMMON /GRID_VAR_RS/                                                                                                              &
-     &  hFacC, hFacW, hFacS,                                                                                                            &
-     &  recip_hFacC,recip_hFacW,recip_hFacS,                                                                                            &
+      COMMON /GRID_VAR_RS/                                                                                                          &
+     &  hFacC, hFacW, hFacS,                                                                                                        &
+     &  recip_hFacC,recip_hFacW,recip_hFacS,                                                                                        &
      &  R_low, recip_Rcol
       _RS hFacC          (1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
       _RS hFacW          (1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy)
@@ -508,7 +508,7 @@
 #ifdef ALLOW_DEPTH_CONTROL
 !C--   COMMON /GRID_DEPTH_CTRL/ grid defining variables for Depth Control code.
 !C     xx_r_low  :: in TAF-sense active replacement of R_low
-      COMMON /GRID_DEPTH_CTRL/                                                                                                          &
+      COMMON /GRID_DEPTH_CTRL/                                                                                                      &
      &  xx_r_low
       _RL xx_r_low       (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
 #endif /* ALLOW_DEPTH_CONTROL */
@@ -520,8 +520,8 @@
 !C     kLowC   :: index of the r-lowest "wet cell" (2D)
 !C IMPORTANT: kLowC = 0 and kSurfC,W,S = Nr+1 (or =Nr+2 on a thin-wall)
 !C            where the fluid column is empty (continent)
-      COMMON /GRID_I/                                                                                                                   &
-     &  kSurfC, kSurfW, kSurfS,                                                                                                         &
+      COMMON /GRID_I/                                                                                                               &
+     &  kSurfC, kSurfW, kSurfS,                                                                                                     &
      &  kLowC
       INTEGER kSurfC(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       INTEGER kSurfW(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
