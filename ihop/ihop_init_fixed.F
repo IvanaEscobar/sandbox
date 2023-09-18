@@ -20,7 +20,9 @@ C ==================== Global Variables ===========================
 #include "PARAMS.h"
 #include "IHOP_SIZE.h"
 #include "IHOP.h"
+#ifdef HAVE_NETCDF
 #include "netcdf.inc"
+#endif
 
 C ==================== Routine Arguments ==========================
 C     !INPUT/OUTPUT PARAMETERS:
