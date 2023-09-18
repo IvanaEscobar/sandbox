@@ -257,7 +257,7 @@ C     ihop_init_fixed.f
         ihop_idw_weights(i,j)   = 0. _d 0
         v=v+1
        ENDDO
-       ihop_ranges(j)  = 0. _d 0
+       ihop_ranges(i)  = 0. _d 0
       ENDDO
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|

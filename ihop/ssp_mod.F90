@@ -781,7 +781,7 @@ CONTAINS
       SSP%cMat = 0.0 _d 0
 
       ! set SSP%Seg%r from data.ihop -> ihop_ranges
-      SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges
+      SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
 
       ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
       SSP%z( 1 )        = 0.0 _d 0
@@ -792,7 +792,7 @@ CONTAINS
       ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
       !==================================================
       ! Sum IDW weights
-      DO i = 1,IHOP_NPTS_RANGE
+      DO i = 1,SSP%Nr
         sumweights(i) = sum(ihop_idw_weights(i,:))
       END DO
 
