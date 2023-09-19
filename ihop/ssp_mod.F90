@@ -45,12 +45,15 @@ MODULE ssp_mod
 ! LOCAL VARIABLES
 ! == Local Variables ==
   INTEGER bi,bj
-  INTEGER i,j,k
+  INTEGER i,j
 
 ! LEGACY VARIABLES
 ! == Legacy Local Variables ==
   INTEGER, PARAMETER     :: MaxSSP = 201
-  INTEGER                :: iSegr = 1, iSegx = 1, iSegy = 1, iSegz = 1
+  INTEGER                :: iSegr = 1, iSegz = 1
+#ifdef IHOP_THREED
+  INTEGER                :: iSegx = 1, iSegy = 1
+#endif /* IHOP_THREED */
   INTEGER                :: iostat, iallocstat
   INTEGER,           PRIVATE :: iz
   REAL (KIND=_RL90), PRIVATE :: Depth, W
@@ -428,7 +431,7 @@ CONTAINS
     CHARACTER (LEN=3), INTENT( IN  ) :: Task
     REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
                                         rho ! sound speed and its derivatives
-    INTEGER             :: AllocateStatus, irT, iz2
+    INTEGER             :: irT, iz2
     REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
     
     IF ( Task == 'INI' ) THEN
@@ -470,7 +473,7 @@ CONTAINS
        ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'ray is outside the box where the ocean ',&
+          WRITE( PRTFile, * ) 'ray is outside the box where ocean ',&
                               'soundspeed is defined'
           WRITE( PRTFile, * ) ' x = ( r, z ) = ', x
           WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
@@ -558,7 +561,7 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        SSP%NPts = 2
        SSP%z(1) = 0.0
-       SSP%z(2) = IHOP_depth
+       SSP%z(2) = Bdry%Bot%HS%Depth
     END IF
 
     iSegz = 1
@@ -603,7 +606,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: myThid
 
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
-    INTEGER :: iz2,k
+    INTEGER :: iz2
 
     ! OPEN SSPFile to read
     OPEN ( FILE = TRIM( IHOP_fileroot ) // '.ssp', UNIT = SSPFile, &
@@ -747,6 +750,8 @@ CONTAINS
   RETURN
   END !SUBROUTINE ReadSSP
 
+!**********************************************************************!
+
   SUBROUTINE ExtractSSP( Depth, freq, myThid )
       ! Extracts SSP from MITgcm grid points
 
@@ -762,7 +767,7 @@ CONTAINS
       ! == Local Variables ==
       INTEGER ii, jj
 
-      SSP%Nz = Nr+1 ! NOT going through the bathymetry, need to change BTYFile
+      SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
       SSP%Nr = IHOP_NPTS_RANGE
 
       ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
@@ -784,12 +789,13 @@ CONTAINS
       SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
 
       ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-      SSP%z( 1 )        = 0.0 _d 0
-      SSP%z( 2:SSP%Nz ) = rkSign*rC( 1:Nr )
+      SSP%z( 1 )            = 0.0 _d 0
+      SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
+      SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
 
       ! ssp extraction
       !==================================================
-      ! IDW Interpolate: COMPARING with LAT LONs (xC, yC) 
+      ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
       !==================================================
       ! Sum IDW weights
       DO i = 1,SSP%Nr
@@ -809,12 +815,19 @@ CONTAINS
 
                ! Top layer zero depth
                SSP%cMat(1,ii) = SSP%cMat(1,ii) + &
-                   CHEN_MILLERO(i,j,0,bi,bj,myThid)*ihop_idw_weights(ii,jj)/ &
-                   sumweights(ii)
+                   CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
+                   ihop_idw_weights(ii,jj)/sumweights(ii)
 
                ! Middle depth layers: Nr depths
-               SSP%cMat(2:SSP%Nz,ii) = SSP%cMat(2:SSP%Nz,ii) + &
-                   ihop_ssp(i,j,:,bi,bj)*ihop_idw_weights(ii,jj)/sumweights(ii)
+               SSP%cMat(2:(SSP%Nz-1),ii) = SSP%cMat(2:(SSP%Nz-1),ii) + &
+                   ihop_ssp(i,j,:,bi,bj)* &
+                   ihop_idw_weights(ii,jj)/sumweights(ii)
+
+               ! Bottom layer, below deepest point
+               SSP%cMat(SSP%Nz,ii) = SSP%cMat(SSP%Nz,ii) + &
+                   CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
+                   ihop_idw_weights(ii,jj)/sumweights(ii)
+
 
               ENDIF
              ENDDO
@@ -846,17 +859,17 @@ CONTAINS
             END IF
         END IF
 
+        ! Compute gradient, cz
         IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
                                      ( SSP%z( iz ) - SSP%z( iz-1 ) )
-        IF ( ABS( SSP%z( iz )-Depth ) < 100.*EPSILON( 1.0e0 ) ) RETURN
-        
       END DO
 
       ! Write relevant diagnostics
 #ifdef IHOP_WRITE_OUT
-      WRITE( PRTFile, * ) "Sound Speed Field" 
       WRITE( PRTFile, * ) '________________________________________________', &
           '__________________________'
+      WRITE( PRTFile, * )
+      WRITE( PRTFile, * ) "Sound Speed Field" 
       WRITE( PRTFile, * ) 
   
       IF (SSP%Nr .GT. 1) WRITE( PRTFile,* ) 'Using range-dependent sound speed'
@@ -868,23 +881,15 @@ CONTAINS
       WRITE( PRTFile, * )
       WRITE( PRTFile, * ) 'Profile ranges (km):'
       WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
-#endif /* IHOP_WRITE_OUT */
-      SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
-#ifdef IHOP_DEBUG
-#ifdef IHOP_WRITE_OUT
       WRITE( PRTFile, * )
       WRITE( PRTFile, * ) 'Sound speed matrix:'
       WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
-#endif /* IHOP_WRITE_OUT */
-#endif /* IHOP_DEBUG */
       DO iz = 1, SSP%Nz
-#ifdef IHOP_DEBUG
-#ifdef IHOP_WRITE_OUT
          WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz ), SSP%cMat( iz, : )
-#endif /* IHOP_WRITE_OUT */
-#endif /* IHOP_DEBUG */
       END DO
+#endif /* IHOP_WRITE_OUT */
 
+      SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
   RETURN
   END !SUBROUTINE ExtractSSP
 
