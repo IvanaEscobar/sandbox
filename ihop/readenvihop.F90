@@ -20,6 +20,7 @@ MODULE readEnviHop
 #include "SIZE.h"
 #include "EEPARAMS.h"
 #include "PARAMS.h"
+#include "GRID.h"
 #include "IHOP_SIZE.h"
 #include "IHOP.h"
 
@@ -35,8 +36,7 @@ MODULE readEnviHop
 CONTAINS
   SUBROUTINE ReadEnvironment( FileRoot, myThid )
 
-    ! Routine to read in and print input data
-    ! Note that default values of SSP, DENSITY, Attenuation will not work
+    ! I/O routine for acoustic fixed inputS
 
     USE angle_mod,  only: ReadRayElevationAngles, ReadRayBearingAngles
     USE srpos_mod,  only: Pos, ReadSxSy, ReadSzRz, ReadRcvrRanges,         &
@@ -51,7 +51,6 @@ CONTAINS
 
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
-    INTEGER            :: NMedia, iostat, i
     REAL               :: ZMin, ZMax
     REAL (KIND=_RL90)  :: x( 2 ), c, cimag, gradc( 2 ), crr, crz, czz, rho, &
                           Depth
@@ -59,7 +58,7 @@ CONTAINS
     CHARACTER (LEN=10) :: PlotType
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * ) 'BELLHOP/BELLHOP3D'
+    WRITE( PRTFile, * ) 'iHOP Print File'
     WRITE( PRTFile, * )
 #endif /* IHOP_WRITE_OUT */
 
@@ -68,10 +67,10 @@ CONTAINS
     WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
     STOP 'ABNORMAL END: S/R ReadEnvironment'
-    Title( 1 :11 ) = 'BELLHOP3D- '
+    Title( 1 :11 ) = 'iHOP3D - '
     Title( 12:80 ) = IHOP_title
 #else /* IHOP_THREED */
-    Title( 1 : 9 ) = 'BELLHOP- '
+    Title( 1 : 9 ) = 'iHOP - '
     Title( 10:80 ) = IHOP_title
 #endif /* IHOP_THREED */
 
@@ -82,18 +81,18 @@ CONTAINS
 
     ! *** Top Boundary ***
     Bdry%Top%HS%Opt = IHOP_topopt
+    Bdry%Top%HS%Depth = 0 !initiate to dummy value
     CALL ReadTopOpt( Bdry%Top%HS%Opt, Bdry%Top%HS%BC, AttenUnit, FileRoot, &
                      myThid )
-
-#ifdef IHOP_WRITE_OUT
-    IF ( Bdry%Top%HS%BC == 'A' ) WRITE( PRTFile, &
-        "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
-#endif /* IHOP_WRITE_OUT */
 
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Top%HS, myThid )
 
     ! *** Ocean SSP ***
-    Bdry%Bot%HS%Depth = IHOP_depth
+    IF ( IHOP_depth.NE.0 ) THEN
+        Bdry%Bot%HS%Depth = IHOP_depth
+    ELSE
+        Bdry%Bot%HS%Depth = rkSign*rF( Nr+1 )*1.05
+    END IF
     x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
 #ifdef IHOP_WRITE_OUT
@@ -132,7 +131,6 @@ CONTAINS
     CALL TopBot( IHOP_freq, AttenUnit, Bdry%Bot%HS, myThid )
 
     ! *** source and receiver locations ***
-
     CALL ReadSxSy( myThid ) ! Read source/receiver x-y coordinates
     ZMin = SNGL( Bdry%Top%HS%Depth )
     ZMax = SNGL( Bdry%Bot%HS%Depth )
@@ -200,14 +198,22 @@ CONTAINS
            fmt = '(  '' Maximum ray z-range, Box%z = '', G11.4, '' m'' )' )&
          Beam%Box%z
 #endif /* IHOP_WRITE_OUT */
-#else /* IHOP_THREED */
+#else /* not IHOP_THREED */
+    IF ( IHOP_zbox.NE.0 ) THEN
+        Beam%Box%z = IHOP_zbox
+    ELSE
+        Beam%Box%z = Bdry%Bot%HS%Depth
+    END IF
+    IF ( IHOP_rbox.NE.0 ) THEN
+        Beam%Box%r = IHOP_rbox
+    ELSE
+        Beam%Box%r = SSP%Seg%r( SSP%Nr ) / 1000.0 ! in km
+    END IF
     Beam%deltas = IHOP_step
-    Beam%Box%z  = IHOP_zbox
-    Beam%Box%r  = IHOP_rbox
-#ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * )
     IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
         Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
+#ifdef IHOP_WRITE_OUT
+        WRITE( PRTFile, * )
         WRITE( PRTFile, &
                fmt = '(  '' Step length,       deltas = '', G11.4, '' m (automatic step)'' )' ) & 
              Beam%deltas
@@ -215,7 +221,9 @@ CONTAINS
          WRITE( PRTFile, &
                 fmt = '(  '' Step length,       deltas = '', G11.4, '' m'' )' ) & 
               Beam%deltas
+#endif /* IHOP_WRITE_OUT */
     END IF
+#ifdef IHOP_WRITE_OUT
     WRITE( PRTFile, * )
     WRITE( PRTFile, &
            fmt = '(  '' Maximum ray depth, Box%z  = '', G11.4, '' m'' )' ) &
@@ -225,7 +233,7 @@ CONTAINS
          Beam%Box%r
 #endif /* IHOP_WRITE_OUT */
 
-    Beam%Box%r = 1000.0 * Beam%Box%r   ! convert km to m
+    Beam%Box%r = 1000.0*Beam%Box%r   ! convert km to m
 #endif /* IHOP_THREED */
 
     ! *** Beam characteristics ***
@@ -340,7 +348,6 @@ CONTAINS
     CHARACTER (LEN= 1), INTENT( OUT ) :: BC         ! Boundary condition type
     CHARACTER (LEN= 2), INTENT( OUT ) :: AttenUnit
     CHARACTER (LEN=80), INTENT( IN  ) :: FileRoot
-    INTEGER            :: iostat
 
     TopOpt = IHOP_topopt
 #ifdef IHOP_WRITE_OUT
@@ -704,13 +711,15 @@ CONTAINS
     SELECT CASE ( HS%BC )
     CASE ( 'A' )                  ! *** Half-space properties ***
        ! IEsco23: MISSING IF BOTTOM BC CHECK
-       zTemp    = IHOP_depth
+       zTemp    = HS%Depth
        alphaR   = IHOP_bcsound
        betaR    = IHOP_bcsoundshear
        rhoR     = IHOP_brho
        alphaI   = IHOP_bcsoundI
        betaI    = IHOP_bcsoundshearI
 #ifdef IHOP_WRITE_OUT
+       WRITE( PRTFile, &
+        "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
        WRITE( PRTFile, FMT = "( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
             zTemp, alphaR, betaR, rhoR, alphaI, betaI
 #endif /* IHOP_WRITE_OUT */

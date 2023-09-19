@@ -9,7 +9,7 @@
  &IHOP_PARM02
  IHOP_freq=550.0,
  IHOP_topopt='QVF',
- IHOP_depth=1800.0,
+#IHOP_depth=1800.0,
  
  IHOP_botopt='A*',
  IHOP_bcsound=1650.0,
@@ -17,15 +17,17 @@
 
  IHOP_sd=73.0,
  IHOP_rd=300.0,
- IHOP_rr=2544.25,
+# rr + ihop_step < ihop_ranges(end)
+ IHOP_rr=2542.25,
 
  IHOP_runopt='A',
  IHOP_nalpha=4,
  IHOP_alpha=-20.0, 20.0,
- IHOP_step=2000.0,
+# step in m
+ IHOP_step=0.0,
  
- IHOP_zbox=1800.0,
- IHOP_rbox=2544.3,
+#IHOP_zbox=2000.0,
+#IHOP_rbox=2544.6,
  &
 
  &IHOP_PARM03
@@ -35,6 +37,7 @@
  ihop_iter = 9,
  ihop_npts_range=6,
  ihop_npts_idw=4,
+# ranges in km
  ihop_ranges=0.,  508.91268732, 1017.82537465, 1526.73806197, 2035.65074929, 2544.56343661,
  ihop_v_xc= 2.5, 3.5, 2.5, 1.5, 
             7.5, 8.5, 6.5, 7.5, 

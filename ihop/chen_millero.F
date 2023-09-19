@@ -67,6 +67,12 @@ C     let k=0 define the surface, a required level for ihop
        temp = SW_TEMP( SALT(i,j,1,bi,bj),
      &          THETA(i,j,1,bi,bj), pres, zeroRL )
        sal  = SALT(i,j,1,bi,bj)
+      ELSE IF (k.GT.Nr) THEN
+       pres = rhoConst*( totPhiHyd(i,j,Nr,bi,bj)
+     &        - ( rF(Nr+1)*1.05 )*gravity )*SItodBar
+       temp = SW_TEMP( SALT(i,j,Nr,bi,bj),
+     &          THETA(i,j,Nr,bi,bj), pres, zeroRL )
+       sal  = SALT(i,j,Nr,bi,bj)
       ELSE
        pres = rhoConst*( totPhiHyd(i,j,k,bi,bj)
      &        - rC(k)*gravity )*SItodBar
