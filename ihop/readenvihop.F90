@@ -62,7 +62,7 @@ CONTAINS
     WRITE( PRTFile, * )
 #endif /* IHOP_WRITE_OUT */
 
-    ! Prepend model name to title
+    ! *** TITLE ***
 #ifdef IHOP_THREED
     WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
@@ -202,12 +202,12 @@ CONTAINS
     IF ( IHOP_zbox.NE.0 ) THEN
         Beam%Box%z = IHOP_zbox
     ELSE
-        Beam%Box%z = Bdry%Bot%HS%Depth
+        Beam%Box%z = Bdry%Bot%HS%Depth ! in m
     END IF
     IF ( IHOP_rbox.NE.0 ) THEN
         Beam%Box%r = IHOP_rbox
     ELSE
-        Beam%Box%r = SSP%Seg%r( SSP%Nr ) / 1000.0 ! in km
+        Beam%Box%r = ( SSP%Seg%r( SSP%Nr ) - 0.05) / 1000.0 ! in km
     END IF
     Beam%deltas = IHOP_step
     IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
@@ -719,7 +719,7 @@ CONTAINS
        betaI    = IHOP_bcsoundshearI
 #ifdef IHOP_WRITE_OUT
        WRITE( PRTFile, &
-        "( //, '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+        "( /,'   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI' )" )
        WRITE( PRTFile, FMT = "( F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
             zTemp, alphaR, betaR, rhoR, alphaI, betaI
 #endif /* IHOP_WRITE_OUT */
