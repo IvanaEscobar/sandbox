@@ -18,12 +18,12 @@
  IHOP_sd=73.0,
  IHOP_rd=300.0,
 # rr + ihop_step < ihop_ranges(end)
- IHOP_rr=2542.25,
+ IHOP_rr=2542.0,
 
  IHOP_runopt='A',
  IHOP_nalpha=4,
  IHOP_alpha=-20.0, 20.0,
-# step in m
+# step in m: Default is 10% of rF(end)
  IHOP_step=0.0,
  
 #IHOP_zbox=2000.0,
