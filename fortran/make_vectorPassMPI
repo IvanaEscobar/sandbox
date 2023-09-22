@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat vectorPass.F90 | cpp -traditional -P -I${MPI_DIR}/include > vectorPass.f90
+ifort -o vectorpassMPI.exe vectorPass.f90 -g -I${MPI_DIR}/lib -Wl,-rpath -Wl,${MPI_DIR}/lib -L${MPI_DIR}/lib -lmpi_usempif08 -lmpi_mpifh -lmpi
