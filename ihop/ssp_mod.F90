@@ -608,6 +608,8 @@ CONTAINS
     REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
     INTEGER :: iz2
 
+    ! I/O on main thread only
+    _BEGIN_MASTER(myThid)
     ! OPEN SSPFile to read
     OPEN ( FILE = TRIM( IHOP_fileroot ) // '.ssp', UNIT = SSPFile, &
         FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
@@ -747,6 +749,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
     STOP 'ABNORMAL END: S/R ReadSSP'
 
+    ! I/O on main thread only
+    _END_MASTER(myThid)
+    _BARRIER
   RETURN
   END !SUBROUTINE ReadSSP
 
@@ -805,8 +810,8 @@ CONTAINS
       ! from ocean grid to acoustic grid with IDW
       DO bj=myByLo(myThid),myByHi(myThid)
        DO bi=myBxLo(myThid),myBxHi(myThid)
-        DO i=1,sNx
-         DO j=1,sNy
+        DO j=1-OLy,sNy+OLy
+         DO i=1-OLx,sNx+OLx
             DO ii=1,IHOP_npts_range
              DO jj=1,IHOP_npts_idw
               ! IDW Interpolate SSP at second order
@@ -828,7 +833,6 @@ CONTAINS
                    CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
                    ihop_idw_weights(ii,jj)/sumweights(ii)
 
-
               ENDIF
              ENDDO
             ENDDO
@@ -840,6 +844,9 @@ CONTAINS
       ! END IDW Interpolate
       !==================================================
 
+    ! I/O on main thread only
+    _BARRIER
+    _BEGIN_MASTER(myThid)
       ! set vector structured c, rho, and cz for first range point
       DO iz = 1,SSP%Nz
         alphaR = SSP%cMat( iz, 1 )
@@ -872,8 +879,8 @@ CONTAINS
       WRITE( PRTFile, * ) "Sound Speed Field" 
       WRITE( PRTFile, * ) 
   
-      IF (SSP%Nr .GT. 1) WRITE( PRTFile,* ) 'Using range-dependent sound speed'
-      IF (SSP%Nr .EQ. 1) WRITE( PRTFile,* ) 'Using range-independent sound speed'
+      IF (SSP%Nr.GT.1) WRITE( PRTFile, * ) 'Using range-dependent sound speed'
+      IF (SSP%Nr.EQ.1) WRITE( PRTFile, * ) 'Using range-independent sound speed'
   
       WRITE( PRTFile, * ) 'Number of SSP ranges = ', SSP%Nr
       WRITE( PRTFile, * ) 'Number of SSP depths = ', SSP%Nz
@@ -883,13 +890,17 @@ CONTAINS
       WRITE( PRTFile, FMT="( F10.2 )"  ) SSP%Seg%r( 1:SSP%Nr )
       WRITE( PRTFile, * )
       WRITE( PRTFile, * ) 'Sound speed matrix:'
-      WRITE( PRTFile, * ) ' Depth (m )     Soundspeed (m/s)'
+      WRITE( PRTFile, * ) ' Depth (m)     Soundspeed (m/s)'
       DO iz = 1, SSP%Nz
          WRITE( PRTFile, FMT="( 12F10.2 )"  ) SSP%z( iz ), SSP%cMat( iz, : )
       END DO
 #endif /* IHOP_WRITE_OUT */
 
       SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+
+    ! I/O on main thread only
+    _END_MASTER(myThid)
+    _BARRIER
   RETURN
   END !SUBROUTINE ExtractSSP
 
