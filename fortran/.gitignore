@@ -2,5 +2,6 @@ testme
 make_readnetcdf
 
 
+*.f90
 *.f
 *.o
