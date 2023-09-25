@@ -48,9 +48,9 @@ CC ==================== External Functions ==========================
 C      INTEGER ILNBLNK
 C      EXTERNAL ILNBLNK
 CC---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
-CC Only do I/O if in the main thread
-C      _BEGIN_MASTER( myThid )
-C
+C Only do I/O if in the main thread
+       _BEGIN_MASTER( myThid )
+ 
 CC Read NetCDF input: setting the acoustic domain
 C      IL  = ILNBLNK( IHOP_interpfile )
 C      IF (IL.NE.0) THEN
@@ -124,9 +124,7 @@ C     &  'NetCDF ERROR: Cannot close file ', IHOP_interpfile(1:IL)
 C        CALL PRINT_ERROR( msgBuf, myThid )
 C        STOP 'ABNORMAL END: S/R IHOP_INIT_FIXED'
 C      END IF
-C
-CC Only do I/O if in the main thread
-C      _END_MASTER( myThid )
+
 
 C 'reshape' ihop_v_* arrays to 2D arrays
       k=1
@@ -138,6 +136,8 @@ C 'reshape' ihop_v_* arrays to 2D arrays
         k = k+1
        END DO
       END DO
+C Only do I/O if in the main thread
+      _END_MASTER( myThid )
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 

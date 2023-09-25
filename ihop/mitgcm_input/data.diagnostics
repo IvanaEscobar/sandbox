@@ -1,7 +1,7 @@
  &DIAGNOSTICS_LIST
   fileName(1)     = 'diags/ssp',
   fields(1:1,1)   = 'ihop_ssp',
-  frequency(1)    = 6400.,
+  frequency(1)    = 1200.,
  &
 
  &DIAG_STATIS_PARMS

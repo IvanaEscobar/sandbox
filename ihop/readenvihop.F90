@@ -49,6 +49,9 @@ CONTAINS
     ! myThid :: Thread number for this instance of the routine.
     INTEGER, INTENT( IN ) :: myThid
 
+    ! == Local arguments ==
+    CHARACTER*(MAX_LEN_MBUF) :: msgbuf
+
     REAL (KIND=_RL90),  PARAMETER   :: c0 = 1500.0
     CHARACTER (LEN=80), INTENT(IN ) :: FileRoot
     REAL               :: ZMin, ZMax
@@ -57,9 +60,12 @@ CONTAINS
     CHARACTER (LEN= 2) :: AttenUnit
     CHARACTER (LEN=10) :: PlotType
 
+    !   Only do I/O if in the main thread
+    _BEGIN_MASTER(myThid)
+
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * ) 'iHOP Print File'
-    WRITE( PRTFile, * )
+    WRITE(msgbuf,'(A)') '(iHOP Print File, / )'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
     ! *** TITLE ***
@@ -69,13 +75,14 @@ CONTAINS
     STOP 'ABNORMAL END: S/R ReadEnvironment'
     Title( 1 :11 ) = 'iHOP3D - '
     Title( 12:80 ) = IHOP_title
-#else /* IHOP_THREED */
+#else /* not IHOP_THREED */
     Title( 1 : 9 ) = 'iHOP - '
     Title( 10:80 ) = IHOP_title
 #endif /* IHOP_THREED */
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * ) Title
+    WRITE(msgbuf,'(A)') Title
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE( PRTFile, '('' frequency = '', G11.4, '' Hz'', / )' ) IHOP_freq
 #endif /* IHOP_WRITE_OUT */
 
@@ -101,7 +108,11 @@ CONTAINS
     WRITE( PRTFile, * ) 'Top options: ', Bdry%Top%HS%Opt
 #endif /* IHOP_WRITE_OUT */
 
+    !   Only do I/O if in the main thread
+    _END_MASTER(myThid)
     CALL EvaluateSSP( x, c, cimag, gradc, crr, crz, czz, rho, IHOP_freq, 'INI', myThid )
+    !   Only do I/O if in the main thread
+    _BEGIN_MASTER(myThid)
 
     Bdry%Top%HS%Depth = SSP%z( 1 )   ! first SSP point is top depth
 
@@ -333,6 +344,10 @@ CONTAINS
     WRITE( PRTFile, * )
 #endif /* IHOP_WRITE_OUT */
 
+    !-- Only do I/O if in the main thread
+    _END_MASTER( myThid)
+    !--   Everyone else must wait for the parameters to be loaded
+    _BARRIER
   RETURN
   END !SUBROUTINE ReadEnvironment
 
@@ -796,12 +811,16 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE OpenOutputFiles( FileRoot )
+  SUBROUTINE OpenOutputFiles( FileRoot, myThid )
     ! Write appropriate header information
 
     USE angle_mod,  only: Angles
     USE srPos_mod,  only: Pos
 
+    ! == Routine Arguments ==
+    INTEGER, INTENT( IN ) :: myThid
+
+    ! == Local variables ==
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     REAL               :: atten
     CHARACTER (LEN=10) :: PlotType
