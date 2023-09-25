@@ -1105,11 +1105,6 @@ CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
       ENDIF
 #endif /* ALLOW_GCHEM */
 
-#ifdef ALLOW_IHOP
-      CALL IHOP_SOUND_SPEED( myThid )
-      CALL IHOP_DRIVER( myTime,myIter,myThid )
-#endif /* ALLOW_IHOP */
-
 C--   Do "blocking" sends and receives for tendency "overlap" terms
 c     CALL TIMER_START('BLOCKING_EXCHANGES  [FORWARD_STEP]',myThid)
 c     CALL DO_GTERM_BLOCKING_EXCHANGES( myThid )
@@ -1130,6 +1125,12 @@ CADJ STORE totPhiHyd   = comlev1, key = ikey_dynamics, kind = isbyte
 CADJ STORE pTracer     = comlev1, key = ikey_dynamics, kind = isbyte
 # endif
 #endif
+
+#ifdef ALLOW_IHOP
+C--   Acoustical physics
+      CALL IHOP_SOUND_SPEED( myThid )
+      CALL IHOP_DRIVER( myTime,myIter,myThid )
+#endif /* ALLOW_IHOP */
 
 #ifdef ALLOW_DIAGNOSTICS
       IF ( useDiagnostics ) THEN
