@@ -60,10 +60,13 @@ CONTAINS
     ! If the broadband option is not selected, then the input freq (a scalar) 
     ! is stored in the frequency vector
     
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL (KIND=_RL90),  INTENT( IN ) :: freq0   ! Source frequency
     CHARACTER,          INTENT( IN ) :: BroadbandOption*( 1 )
     INTEGER :: ifreq
@@ -72,11 +75,15 @@ CONTAINS
     ! Broadband run?
     IF ( BroadbandOption == 'B' ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE( PRTFile, * ) '________________________________________________', &
+        WRITE(msgBuf,'(2A)')'________________________________________________',&
                             '__________________________'
-        WRITE( PRTFile, * )
-        WRITE( PRTFile, * )
-        WRITE( PRTFile, * ) 'Number of frequencies =', Nfreq
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A)') NEW_LINE('a')
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A)') NEW_LINE('a')
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A,I)') 'Number of frequencies =', Nfreq
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
         IF ( Nfreq <= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
@@ -99,17 +106,20 @@ CONTAINS
 
     IF ( BroadbandOption == 'B' ) THEN
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) 'Frequencies (Hz)'
+       WRITE(msgBuf,'(A)') 'Frequencies (Hz)'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        freqVec( 3 ) = -999.9
        !READ(  ENVFile, * ) freqVec( 1 : Nfreq )
        CALL SubTab( freqVec, Nfreq )
 
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, "( 5G14.6 )" ) ( freqVec( ifreq ), ifreq = 1, &
-                                      MIN( Nfreq, Number_to_Echo ) )
+       WRITE( msgBuf, '(5G14.6)' ) ( freqVec( ifreq ), ifreq = 1, &
+           MIN( Nfreq, Number_to_Echo ) )
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        IF ( Nfreq > Number_to_Echo ) &
-           WRITE( PRTFile,  "( G14.6 )" ) ' ... ', freqVec( Nfreq )
+           WRITE( msgBuf,'(G14.6)' ) ' ... ', freqVec( Nfreq )
+           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
     ELSE
        freqVec( 1 ) = freq0
@@ -124,9 +134,13 @@ CONTAINS
 
     ! Reads source x-y coordinates
     
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
 
 #ifdef IHOP_THREED
     CALL ReadVector( Pos%NSx, Pos%Sx, 'source   x-coordinates, Sx', 'km', &
@@ -156,10 +170,13 @@ CONTAINS
     ! zMin and zMax are limits for those depths; sources and receivers are 
     ! shifted to be within those limits
 
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL,    INTENT( IN ) :: zMin, zMax
 
     CALL ReadVector( Pos%NSz, Pos%Sz, 'Source   depths, Sz', 'm', &
@@ -192,26 +209,30 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) < zMin ) ) THEN
        WHERE ( Pos%Sz < zMin ) Pos%Sz = zMin
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source above or too ',&
+       WRITE(msgBuf,'(2A)') 'Warning in ReadSzRz : Source above or too ',&
                            'near the top bdry has been moved down'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 
     IF ( ANY( Pos%Sz( 1 : Pos%NSz ) > zMax ) ) THEN
        WHERE( Pos%Sz > zMax ) Pos%Sz = zMax
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Source below or too ',&
+       WRITE(msgBuf,'(2A)') 'Warning in ReadSzRz : Source below or too ',&
                            'near the bottom bdry has been moved up'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 
     IF ( ANY( Pos%Rz( 1 : Pos%NRz ) < zMin ) ) THEN
        WHERE( Pos%Rz < zMin ) Pos%Rz = zMin
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver above or too ',&
+       WRITE(msgBuf,'(2A)') 'Warning in ReadSzRz : Receiver above or too ',&
            'near the top bdry has been moved down'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 
     IF ( ANY( Pos%Rz( 1 : Pos%NRz ) > zMax ) ) THEN
        WHERE( Pos%Rz > zMax ) Pos%Rz = zMax
-       WRITE( PRTFile, * ) 'Warning in ReadSzRz : Receiver below or too ',&
+       WRITE(msgBuf,'(2A)') 'Warning in ReadSzRz : Receiver below or too ',&
                            'near the bottom bdry has been moved up'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 #endif /* IHOP_WRITE_OUT */
 
@@ -222,9 +243,13 @@ CONTAINS
 
   SUBROUTINE ReadRcvrRanges( myThid )
 
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
 
     ! IESCO22: assuming receiver positions are equally spaced
     CALL ReadVector( Pos%NRr, Pos%Rr, 'Receiver ranges, Rr', 'km', myThid )
@@ -249,9 +274,13 @@ CONTAINS
 #ifdef IHOP_THREED
   SUBROUTINE ReadRcvrBearings( myThid )   ! for 3D bellhop
 
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
 
 ! IEsco23: NOT SUPPORTED IN ihop
     CALL ReadVector( Pos%Ntheta, Pos%theta, 'receiver bearings, theta', &
@@ -288,10 +317,13 @@ CONTAINS
     ! Description is something like 'receiver ranges'
     ! Units       is something like 'km'
 
-    !     == Routine Arguments ==
-    !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
- 
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     INTEGER,                        INTENT( IN ) :: Nx
     REAL (KIND=_RL90), ALLOCATABLE, INTENT( INOUT ) :: x( : )
     CHARACTER,                      INTENT( IN ) :: Description*( * ), &
@@ -299,11 +331,15 @@ CONTAINS
     INTEGER :: ix
    
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) '__________________________________________________', &
+    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(2A)')'__________________________________________________', &
                         '________________________'
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) 'Number of ' // Description // ' = ', Nx
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 'Number of ' // Description // ' = ', Nx
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
     IF ( Nx <= 0 ) THEN
@@ -326,17 +362,23 @@ CONTAINS
     END IF
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * ) Description // ' (' // Units // ')'
+    WRITE(msgBuf,'(A)') Description // ' (' // Units // ')'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
     CALL SubTab( x, Nx )
     CALL Sort(   x, Nx )
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, "( 5G14.6 )" ) ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
-    IF ( Nx > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) ' ... ', x( Nx )
+    WRITE(msgBuf,'(5G14.6)') ( x( ix ), ix = 1, MIN( Nx, Number_to_Echo ) )
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    IF ( Nx > Number_to_Echo ) THEN
+        WRITE(msgBuf,'(G14.6)') ' ... ', x( Nx )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
 
-    WRITE( PRTFile, * )
+    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
     ! Vectors in km should be converted to m for internal use

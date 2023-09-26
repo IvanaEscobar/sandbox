@@ -68,8 +68,13 @@ CONTAINS
   SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, myThid ) 
     ! Reads in the top altimetry
 
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     CHARACTER (LEN= 1), INTENT( IN ) :: TopATI
     REAL (KIND=_RL90),  INTENT( IN ) :: DepthT
     REAL (KIND=_RL90),  ALLOCATABLE  :: phi( : )
@@ -78,17 +83,21 @@ CONTAINS
     SELECT CASE ( TopATI )
     CASE ( '~', '*' )
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) '______________________________________________', &
+       WRITE(msgBuf,'(2A)') '______________________________________________', &
                            '____________________________'
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Using top-altimetry file'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') 'Using top-altimetry file'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
        OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', &
              STATUS = 'OLD', IOSTAT = IOStat, ACTION = 'READ' )
         IF ( IOsTAT /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE( PRTFile, * ) 'ATIFile = ', TRIM( FileRoot ) // '.ati'
+            WRITE(msgBuf,'(A)') 'ATIFile = ', TRIM( FileRoot ) // '.ati'
+            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
                 'Unable to open altimetry file'
 #endif /* IHOP_WRITE_OUT */
@@ -99,11 +108,13 @@ CONTAINS
        AltiType: SELECT CASE ( atiType( 1 : 1 ) )
        CASE ( 'C' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+          WRITE(msgBuf,'(A)') 'Curvilinear Interpolation'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+          WRITE(msgBuf,'(A)') 'Piecewise linear interpolation'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
@@ -115,7 +126,8 @@ CONTAINS
 
        READ(  ATIFile, * ) NatiPts
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) 'Number of altimetry points = ', NatiPts
+       WRITE(msgBuf,'(A,I)') 'Number of altimetry points = ', NatiPts
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        ! we'll be extending the altimetry to infinity to the left and right
        NatiPts = NatiPts + 2  
@@ -130,8 +142,10 @@ CONTAINS
         END IF
 
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
+       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') ' Range (km)  Depth (m)'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
        atiPt: DO ii = 2, NatiPts - 1
@@ -141,7 +155,8 @@ CONTAINS
             READ(  ATIFile, * ) Top( ii )%x
 #ifdef IHOP_WRITE_OUT
             IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
-                WRITE( PRTFile, FMT = "(2G11.3)" ) Top( ii )%x 
+                WRITE( msgBuf,"(2G11.3)" ) Top( ii )%x 
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
             END IF
 #endif /* IHOP_WRITE_OUT */
           CASE ( 'L' )
@@ -150,9 +165,10 @@ CONTAINS
                                  Top( ii )%HS%alphaI, Top( ii )%HS%betaI
 #ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NatiPts ) THEN   
-                WRITE( PRTFile, FMT = "(7G11.3)" ) &
+                WRITE( msgBuf,"(7G11.3)" ) &
                     Top( ii )%x, Top( ii )%HS%alphaR, Top( ii )%HS%betaR, &
                     Top( ii )%HS%rho, Top( ii )%HS%alphaI, Top( ii )%HS%betaI
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
              END IF
 #endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
@@ -208,8 +224,13 @@ CONTAINS
 
     ! Reads in the bottom bathymetry
 
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
     REAL (KIND=_RL90),  INTENT( IN ) :: DepthB
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
@@ -217,17 +238,21 @@ CONTAINS
     SELECT CASE ( BotBTY )
     CASE ( '~', '*' )
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) '________________________________________________', &
+       WRITE(msgBuf,'(2A)')'________________________________________________', &
                            '__________________________'
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') 'Using bottom-bathymetry file'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
        OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
              IOSTAT = IOStat, ACTION = 'READ' )
         IF ( IOsTAT /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE( PRTFile, * ) 'BTYFile = ', TRIM( FileRoot ) // '.bty'
+            WRITE(msgBuf,'(A)') 'BTYFile = ', TRIM( FileRoot ) // '.bty'
+            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
             WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Unable to open bathymetry file'
 #endif /* IHOP_WRITE_OUT */
@@ -239,11 +264,13 @@ CONTAINS
        BathyType: SELECT CASE ( btyType( 1 : 1 ) )
        CASE ( 'C' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+          WRITE(msgBuf,'(A)') 'Curvilinear Interpolation'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+          WRITE(msgBuf,'(A)') 'Piecewise linear interpolation'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
@@ -256,7 +283,8 @@ CONTAINS
 
        READ(  BTYFile, * ) NbtyPts
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) 'Number of bathymetry points = ', NbtyPts
+       WRITE(msgBuf,'(A,I)') 'Number of bathymetry points = ', NbtyPts
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
         ! we'll be extending the bathymetry to infinity on both sides
@@ -271,18 +299,26 @@ CONTAINS
         END IF
         
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * )
+       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
        CASE ( 'S', '' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Short format (bathymetry only)'
-          WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
+          WRITE(msgBuf,'(A)') 'Short format (bathymetry only)'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+          WRITE(msgBuf,'(A)') ' Range (km)  Depth (m)'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'Long format (bathymetry and geoacoustics)'
-          WRITE( PRTFile, "( ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI', / )" )
+          WRITE(msgBuf,'(A)') 'Long format (bathymetry and geoacoustics)'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+          WRITE(msgBuf,'(A)') &
+              ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI'
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+          WRITE(msgBuf,'(A)') NEW_LINE('a')
+          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
@@ -299,7 +335,8 @@ CONTAINS
              READ(  BTYFile, * ) Bot( ii )%x
 #ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  
-                WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( ii )%x
+                WRITE(msgBuf,'(2G11.3)' ) Bot( ii )%x
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
              END IF
 #endif /* IHOP_WRITE_OUT */
           CASE ( 'L' )       ! long format
@@ -308,9 +345,10 @@ CONTAINS
                                  Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
 #ifdef IHOP_WRITE_OUT
              IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   
-                WRITE( PRTFile, FMT="( F10.2, F10.2, 3X, 2F10.2, 3X, F6.2, 3X, 2F10.4 )" ) &
+                WRITE( msgBuf,'(2F10.2,3X,2F10.2,3X,F6.2,3X,2F10.4)' ) &
                    Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
                    Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
              END IF
 #endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
@@ -337,7 +375,8 @@ CONTAINS
 
     CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
 #ifdef IHOP_WRITE_OUT
-        WRITE( PRTFile, * ) 'No BTYFile; assuming flat bottom'
+        WRITE(msgBuf,'(A)') 'No BTYFile; assuming flat bottom'
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
         ALLOCATE( Bot( 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
@@ -478,8 +517,13 @@ CONTAINS
 
     ! Get the Top segment info (index and range interval) for range, r
 
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     INTEGER IsegTopT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
 
@@ -492,9 +536,12 @@ CONTAINS
        rTopSeg = [ Top( IsegTop )%x( 1 ), Top( IsegTop+1 )%x( 1 ) ]   
     ELSE
 #ifdef IHOP_WRITE_OUT
-        WRITE( PRTFile, * ) 'r = ', r
-        WRITE( PRTFile, * ) 'rLeft  = ', Top( 1       )%x( 1 )
-        WRITE( PRTFile, * ) 'rRight = ', Top( NatiPts )%x( 1 )
+        WRITE(msgBuf,'(A,F10.4)') 'r = ', r
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A,F10.4)') 'rLeft  = ', Top( 1       )%x( 1 )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A,F10.4)') 'rRight = ', Top( NatiPts )%x( 1 )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetTopSeg', &
                              'Top altimetry undefined above the ray'
 #endif /* IHOP_WRITE_OUT */
@@ -509,8 +556,13 @@ CONTAINS
   SUBROUTINE GetBotSeg( r, myThid )
 
     ! Get the Bottom segment info (index and range interval) for range, r
-    INTEGER, INTENT( IN ) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     INTEGER IsegBotT( 1 )
     REAL (KIND=_RL90), INTENT( IN ) :: r
 
@@ -522,9 +574,12 @@ CONTAINS
        rBotSeg = [ Bot( IsegBot )%x( 1 ), Bot( IsegBot + 1 )%x( 1 ) ]
     ELSE
 #ifdef IHOP_WRITE_OUT
-        WRITE( PRTFile, * ) 'r = ', r
-        WRITE( PRTFile, * ) 'rLeft  = ', Bot( 1       )%x( 1 )
-        WRITE( PRTFile, * ) 'rRight = ', Bot( NbtyPts )%x( 1 )
+        WRITE(msgBuf,'(A,F10.4)') 'r = ', r
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A,F10.4)') 'rLeft  = ', Bot( 1       )%x( 1 )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A,F10.4)') 'rRight = ', Bot( NbtyPts )%x( 1 )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
         WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetBotSeg', &
                              'Bottom bathymetry undefined below the source'
 #endif /* IHOP_WRITE_OUT */
