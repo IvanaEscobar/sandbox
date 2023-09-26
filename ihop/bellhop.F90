@@ -52,6 +52,7 @@ MODULE BELLHOP
 #include "SIZE.h"
 #include "GRID.h"
 #include "EEPARAMS.h"
+#include "EESUPPORT.h"
 #include "PARAMS.h"
 #include "IHOP_SIZE.h"
 #include "IHOP.h"
@@ -59,39 +60,74 @@ MODULE BELLHOP
 # include "CTRL_FIELDS.h"
 #endif
 
+!   == External Functions ==
+    INTEGER  ILNBLNK
+    EXTERNAL ILNBLNK
+
 CONTAINS
   SUBROUTINE IHOP_INIT ( myThid )
   !     !INPUT/OUTPUT PARAMETERS:
   !     == Routine Arguments ==
-  !     myThid :: Thread number for this instance of the routine.
-    INTEGER, INTENT( IN ) :: myThid
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
   
-    LOGICAL, PARAMETER   :: Inline = .FALSE.
-    INTEGER              :: iostat, iAllocStat  
-    INTEGER              :: jj 
-    REAL                 :: Tstart, Tstop
+  !     == Local Variables ==
+    LOGICAL, PARAMETER  :: Inline = .FALSE.
+    INTEGER             :: iostat, iAllocStat  
+    INTEGER             :: jj 
+    REAL                :: Tstart, Tstop
   ! added locally previously read in from unknown mod ... IEsco2022
-    CHARACTER ( LEN=2  ) :: AttenUnit
-  
-    ! get the file root for naming all input and output files
-    ! should add some checks here ...
-  
-    ! Open the print file
+    CHARACTER ( LEN=2 ) :: AttenUnit
+  ! For MPI writing: copying eeboot_minimal.F
+    CHARACTER*(13)      :: fNam
+    CHARACTER*(6)       :: fmtStr
+    INTEGER             :: mpiRC, iTmp
+  ! ===========================================================================
+ 
+    ! Open the print file: template from eeboot_minimal.F
 #ifdef IHOP_WRITE_OUT
-    OPEN( UNIT = PRTFile, FILE = TRIM( IHOP_fileroot ) // '.prt', &
-          STATUS = 'UNKNOWN', IOSTAT = iostat )
-    IF ( iostat /= 0 ) THEN
-        WRITE(*,*) 'ihop: IHOP_fileroot not recognized, ', TRIM( IHOP_fileroot )
-        WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', 'Unable to recognize env file'
-        STOP 'ABNORMAL END: S/R IHOP_INIT'
+    IF ( .NOT.usingMPI ) THEN
+        WRITE(myProcessStr, '(I4.4)') myProcId
+        WRITE(fNam,'(A,A,A,A)') TRIM(IHOP_fileroot),'.',myProcessStr(1:4),'.prt'
+        OPEN(PRTFile, FILE = fNam, STATUS = 'UNKNOWN', IOSTAT = iostat )
+    ELSE ! using MPI
+        CALL MPI_COMM_RANK( MPI_COMM_MODEL, mpiMyId, mpiRC )
+        myProcId = mpiMyId
+        iTmp = MAX(4,1+INT(LOG10(DFLOAT(nPx*nPy))))
+        WRITE(fmtStr,'(2(A,I1),A)') '(I',iTmp,'.',iTmp,')'
+        WRITE(myProcessStr,fmtStr) myProcId
+        iTmp = ILNBLNK( myProcessStr )
+        mpiPidIo = myProcId
+        pidIO    = mpiPidIo
+
+        IF( mpiPidIo.EQ.myProcId ) THEN
+# ifdef SINGLE_DISK_IO
+         IF( myProcId.eq.0) THEN
+# endif
+            WRITE(fNam,'(A,A,A,A)') &
+                TRIM(IHOP_fileroot),'.',myProcessStr(1:iTmp),'.prt'
+            OPEN(PRTFile, FILE=fNam, STATUS='UNKNOWN', IOSTAT=iostat )
+            IF ( iostat /= 0 ) THEN
+                WRITE(*,*) 'ihop: IHOP_fileroot not recognized, ', &
+                    TRIM(IHOP_fileroot)
+                WRITE(msgBuf,'(A)') 'BELLHOP IHOP_INIT: Unable to recognize env file'
+                CALL PRINT_ERROR( msgBuf, myThid )
+                STOP 'ABNORMAL END: S/R IHOP_INIT'
+            END IF
+# ifdef SINGLE_DISK_IO
+         END IF
+# endif
+        END IF
     END IF
 #endif /* IHOP_WRITE_OUT */
   
+  ! ===========================================================================
     ! Read in or otherwise initialize inline all the variables by BELLHOP 
-  
     IF ( Inline ) THEN
        ! NPts, Sigma not supported by BELLHOP
-       Title = 'BELLHOP- Calibration case with envfil passed as parameters'
+       Title = 'iHOP- Calibration case with envfil passed as parameters'
        IHOP_freq  = 250
        ! NMedia variable is not supported by BELLHOP
   
@@ -146,8 +182,9 @@ CONTAINS
        ALLOCATE( Top( 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+        WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for altimetry data'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
@@ -160,8 +197,9 @@ CONTAINS
        ALLOCATE( Bot( 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+        WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for bathymetry data'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
@@ -178,8 +216,9 @@ CONTAINS
        ALLOCATE( SrcBmPat( 2, 2 ), Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN 
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', & 
+        WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: ', & 
                              'Insufficient memory for beam pattern'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R IHOP_INIT'
        END IF
@@ -205,8 +244,8 @@ CONTAINS
        ALLOCATE( Pos%theta( Pos%Ntheta ), Stat = IAllocStat )
        IF ( IAllocStat/=0 ) THEN
 #ifdef IHOP_WRITE_OUT
-           WRITE(errorMessageUnit,'(2A)') 'BELLHOP IHOP_INIT: ', &
-               'Unable to allocate Pos%theta'
+           WRITE(msgBuf,'(2A)') 'BELLHOP IHOP_INIT: failed allocation Pos%theta'
+           CALL PRINT_ERROR( msgBuf, myThid )
 #endif /* IHOP_WRITE_OUT */
            STOP 'ABNORMAL END: S/R  IHOP_INIT'
        ENDIF
@@ -221,19 +260,20 @@ CONTAINS
     CALL BellhopCore(myThid)
     CALL CPU_TIME( Tstop )
   
-    ! Display run time
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, "( /, ' CPU Time = ', G15.3, 's' )" ) Tstop - Tstart
+    ! print run time
+    WRITE(msgBuf, '(A,G15.3,A)' ) 'CPU Time = ', Tstop-Tstart, 's'
+    CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
   
     ! close all files
     SELECT CASE ( Beam%RunType( 1 : 1 ) )
-    CASE ( 'C', 'S', 'I' )      ! TL calculation
+    CASE ( 'C', 'S', 'I' )  ! TL calculation
        CLOSE( SHDFile )
-    CASE ( 'A', 'a' )           ! arrivals calculation
+    CASE ( 'A', 'a' )       ! arrivals calculation
        CLOSE( ARRFile )
        CLOSE( RAYFile )
        CLOSE( DELFile )
-    CASE ( 'R', 'E' )           ! ray and eigen ray trace
+    CASE ( 'R', 'E' )       ! ray and eigen ray trace
        CLOSE( RAYFile )
     END SELECT
   
@@ -249,10 +289,15 @@ CONTAINS
     USE arr_mod,   only: WriteArrivalsASCII, WriteArrivalsBinary, MaxNArr, Arr, &
                         NArr
   
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
   
+  !     == Local Variables ==
     INTEGER              :: iAllocStat  
-    INTEGER, PARAMETER   :: ArrivalsStorage = 20000000, MinNArr = 10
+    INTEGER, PARAMETER   :: ArrivalsStorage = 200000, MinNArr = 10
     INTEGER              :: IBPvec( 1 ), ibp, is, iBeamWindow2, Irz1, Irec, &
                             NalphaOpt, iSeg
     REAL    (KIND=_RL90) :: Amp0, DalphaOpt, xs( 2 ), RadMax, s, &
@@ -268,8 +313,9 @@ CONTAINS
                          / ( Angles%Nalpha - 1 )  ! angular spacing between beams
     ELSE
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
-                      'Required: Nalpha>1, else add iSingle_alpha (see angleMod)'
+        WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+                      'Required: Nalpha>1, else add iSingle_alpha(see angleMod)'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R BellhopCore'
     END IF
@@ -311,8 +357,9 @@ CONTAINS
           ALLOCATE ( U( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
           IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-              WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
-                             'Insufficient memory for TL matrix: reduce Nr * NRz'
+              WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+                             'Insufficient memory for TL matrix: reduce Nr*NRz'
+              CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R BellhopCore'
           END IF
@@ -324,18 +371,21 @@ CONTAINS
       SELECT CASE ( Beam%RunType( 1 : 1 ) )
       CASE ( 'A', 'a' )
           ! allow space for at least MinNArr arrivals
-          MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )  
+          MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * )
-          WRITE( PRTFile, * ) '( Maximum # of arrivals = ', MaxNArr, ')'
+          WRITE( msgBuf,'(A)' ) NEW_LINE('a')
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
+          WRITE( msgBuf,'(A,I,A)' ) 'Max. # of arrivals = ', MaxNArr
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
   
           ALLOCATE ( Arr( NRz_per_range, Pos%NRr, MaxNArr ), &
                      NArr( NRz_per_range, Pos%NRr ), Stat = iAllocStat )
           IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-              WRITE(errorMessageUnit,'(2A)') 'BELLHOP BellhopCore: ', & 
-               'Insufficient memory to allocate arrivals matrix; reduce parameter ArrivalsStorage'
+              WRITE(msgBuf,'(2A)') 'BELLHOP BellhopCore: ', & 
+               'Not enough allocation for Arr; reduce ArrivalsStorage'
+              CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
               STOP 'ABNORMAL END: S/R BellhopCore'
           END IF
@@ -348,7 +398,8 @@ CONTAINS
       NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
   
 #ifdef IHOP_WRITE_OUT
-      WRITE( PRTFile, * )
+      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
   
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -376,8 +427,9 @@ CONTAINS
                                - Angles%alpha( 1 ) ) / DalphaOpt )
 #ifdef IHOP_WRITE_OUT
           IF ( Angles%Nalpha < NalphaOpt ) THEN
-             WRITE( PRTFile, * ) 'Warning BELLHOP : Too few beams'
-             WRITE( PRTFile, * ) 'Nalpha should be at least = ', NalphaOpt
+             WRITE( msgBuf, '(A,/,A,I10.4)' ) 'WARNING: Too few beams',&
+                 'Nalpha should be at least = ', NalphaOpt
+            CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
           ENDIF
 #endif /* IHOP_WRITE_OUT */
        ENDIF
@@ -414,8 +466,9 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
              ! report progress in PRTFile (skipping some angles)
              IF ( MOD( ialpha - 1, max( Angles%Nalpha / 50, 1 ) ) == 0 ) THEN
-                WRITE( PRTFile, FMT = "( 'Tracing ray ', I7, F10.2 )" ) &
+                WRITE(msgBuf,'(A,I7,F10.2)') 'Tracing ray ', &
                        ialpha, SrcDeclAngle
+                CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
                 FLUSH( PRTFile )
              END IF
 #endif /* IHOP_WRITE_OUT */
@@ -480,11 +533,13 @@ CONTAINS
   
     USE step,     only: Step2D
   
-    ! == Routine Arguments ==
-    ! myThid :: Thread number for this instance of the routine
-    INTEGER, INTENT(IN) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
   
-    ! == Local Variables ==
+  !     == Local Variables ==
     REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! coordinate of source
     REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! init angle, beam amplitude
     INTEGER           :: is, is1                   ! indices for ray step
@@ -544,8 +599,9 @@ CONTAINS
     IF ( DistBegTop <= 0 .OR. DistBegBot <= 0 ) THEN
        Beam%Nsteps = 1
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) &
+        WRITE(msgBuf,'(A)') &
            'WARNING: TraceRay2D: The source is outside the domain boundaries'
+        CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
        RETURN       ! source must be within the domain
     END IF
@@ -570,8 +626,6 @@ CONTAINS
                       declAlpha >= 0.0d0 .AND. declAlphaOld < 0.0d0 )
           IF ( RayTurn) THEN
              ray2D( is1 )%NumTurnPt = ray2D( is )%NumTurnPt + 1
-             !WRITE( PRTFile, * ) 'traceray2d: rcvranlge is ',&
-             !                    declAlpha, ' at x = ', ray2D(is1)%x(1)
           END IF
        END IF
   
@@ -661,42 +715,49 @@ CONTAINS
        IF ( ray2D( is+1 )%x( 1 ) > Beam%Box%r ) THEN
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%r'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray left Box%r'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ray2D( is+1 )%x( 1 ) < 0 ) THEN
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray left Box r=0'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray left Box r=0'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ray2D( is+1 )%x( 2 ) > Beam%Box%z ) THEN 
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray left Box%z'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray left Box%z'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( ABS( ray2D( is+1 )%Amp ) < 0.005 ) THEN
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray lost energy'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray lost energy'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( DistBegTop < 0.0 .AND. DistEndTop < 0.0 ) THEN 
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray escaped top bound'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray escaped top bound'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( DistBegBot < 0.0 .AND. DistEndBot < 0.0 ) THEN
           Beam%Nsteps = is + 1
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TraceRay2D : ray escaped bot bound'
+          WRITE(msgBuf,'(A)') 'TraceRay2D: ray escaped bot bound'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           EXIT Stepping
        ELSE IF ( is >= MaxN - 3 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'WARNING: TraceRay2D : Insufficient storage for ray trajectory'
+          WRITE(msgBuf,'(A)') 'WARNING: TraceRay2D: Check storage for ray trajectory'
+          CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
           Beam%Nsteps = is
           EXIT Stepping
@@ -736,11 +797,13 @@ CONTAINS
   
   SUBROUTINE Reflect2D( is, HS, BotTop, tBdry, nBdry, kappa, RefC, Npts, myThid )
   
-    ! == Routine Arguments ==
-    ! myThid :: Thread number for this instance of the routine
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
   
-    ! == Local Variables ==
+  !     == Local Variables ==
     INTEGER,              INTENT( IN ) :: Npts ! unsued if there are no refcoef files
     REAL (KIND=_RL90),    INTENT( IN ) :: tBdry(2), nBdry(2)  ! Tangent and normal to the boundary
     REAL (KIND=_RL90),    INTENT( IN ) :: kappa ! Boundary curvature, for curvilinear grids
@@ -916,9 +979,11 @@ CONTAINS
   
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * ) 'HS%BC = ', HS%BC
-       WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
+       WRITE(msgBuf,'(2A)') 'HS%BC = ', HS%BC
+       CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
+       WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
                             'Unknown boundary condition type'
+       CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R Reflect2D'
     END SELECT
@@ -930,8 +995,9 @@ CONTAINS
        ray2D( is+1 )%NumBotBnc = ray2D( is )%NumBotBnc + 1
     ELSE
 #ifdef IHOP_WRITE_OUT
-       WRITE(errorMessageUnit,'(2A)') 'BELLHOP Reflect2D: ', & 
+       WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
                             'no reflection bounce, but in relfect2d somehow'
+       CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R Reflect2D'
     END IF
