@@ -66,7 +66,7 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
     WRITE(msgbuf,'(A)') 'iHOP Print File'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgbuf,'(A)') NEW_LINE('a')
+    WRITE(msgbuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -84,6 +84,8 @@ CONTAINS
 
 #ifdef IHOP_WRITE_OUT
     WRITE(msgbuf,'(A)') Title
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgbuf,'(A)')
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE( msgBuf, '(A,G11.4,A)' )'Frequency ', IHOP_freq, 'Hz'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -106,7 +108,7 @@ CONTAINS
     x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A,F10.2,A)' ) 'Depth = ',Bdry%Bot%HS%Depth,' m'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -128,7 +130,7 @@ CONTAINS
     ! bottom depth should perhaps be set the same way?
     Bdry%Bot%HS%Opt = IHOP_botopt 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(2A)') 'Bottom options: ', Bdry%Bot%HS%Opt
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -184,12 +186,12 @@ CONTAINS
 #endif /* IHOP_THREED */
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(2A)')'___________________________________________________', &
-                        '_______________________'
+                        '________'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -206,12 +208,12 @@ CONTAINS
     IF ( Beam%deltas == 0.0 ) Beam%deltas = &
         ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A,T5,A,G11.4,A)') &
-        ' Step length', 'deltas = ', Beam%deltas, ' m'
+    WRITE(msgBuf,'(A,A,G11.4,A)') &
+        ' Step length,', ' deltas = ', Beam%deltas, ' m'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A,G11.4,A)') &
         ' Maximum ray x-range, Box%X = ', Beam%Box%X,' m'
@@ -238,19 +240,19 @@ CONTAINS
     IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
         Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
 #ifdef IHOP_WRITE_OUT
-        WRITE(msgBuf,'(A)') NEW_LINE('a')
+        WRITE(msgBuf,'(A)') 
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-        WRITE(msgBuf,'(A,T5,A,G11.4,A)') &
-            ' Step length', 'deltas = ', Beam%deltas, ' m (automatic step)'
+        WRITE(msgBuf,'(A,A,G11.4,A)') &
+            ' Step length,', ' deltas = ', Beam%deltas, ' m (automatic step)'
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     ELSE
-        WRITE(msgBuf,'(A,T5,A,G11.4,A)') &
-            ' Step length', 'deltas = ', Beam%deltas, ' m'
+        WRITE(msgBuf,'(A,A,G11.4,A)') &
+            ' Step length,', ' deltas = ', Beam%deltas, ' m'
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
     END IF
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A,G11.4,A)') &
         ' Maximum ray range, Box%R = ', Beam%Box%R,' km'
@@ -269,10 +271,10 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
        SELECT CASE ( Beam%Type( 4 : 4 ) )
        CASE ( 'S' )
-          WRITE(msgBuf,'(A)') 'Beam shift in effect'
+          WRITE(msgBuf,'(A)') ' Beam shift in effect'
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        CASE DEFAULT
-          WRITE(msgBuf,'(A)') 'No beam shift in effect'
+          WRITE(msgBuf,'(A)') ' No beam shift in effect'
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        END SELECT
 #endif /* IHOP_WRITE_OUT */
@@ -312,9 +314,9 @@ CONTAINS
        CASE ( 'R', 'C' )   
           !READ(  ENVFile, * ) Beam%Type( 2 : 3 ), Beam%epsMultiplier, Beam%rLoop
 #ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(A)') NEW_LINE('a')
+          WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A)') NEW_LINE('a')
+          WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
           WRITE(msgBuf,'(2A)') 'Type of beam = ', Beam%Type( 1:1 )
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -351,7 +353,7 @@ CONTAINS
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 
           ! Images, windows
-          WRITE(msgBuf,'(A)') NEW_LINE('a')
+          WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
           WRITE(msgBuf,'(A,I)') 'Number of images, Nimage  = ', Beam%Nimage
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -370,7 +372,7 @@ CONTAINS
     END IF
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -397,7 +399,7 @@ CONTAINS
 
     TopOpt = IHOP_topopt
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -587,7 +589,7 @@ CONTAINS
     CHARACTER (LEN=10), INTENT( OUT ) :: PlotType
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -822,7 +824,7 @@ CONTAINS
        alphaI   = IHOP_bcsoundI
        betaI    = IHOP_bcsoundshearI
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       WRITE(msgBuf,'(A)') 
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        WRITE(msgBuf,'(A)') &
         '   z (m)     alphaR (m/s)   betaR  rho (g/cm^3)  alphaI     betaI'

@@ -262,6 +262,8 @@ CONTAINS
   
 #ifdef IHOP_WRITE_OUT
     ! print run time
+    WRITE(msgBuf, '(A)' )
+    CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
     WRITE(msgBuf, '(A,G15.3,A)' ) 'CPU Time = ', Tstop-Tstart, 's'
     CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
   
@@ -373,7 +375,7 @@ CONTAINS
           ! allow space for at least MinNArr arrivals
           MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )
 #ifdef IHOP_WRITE_OUT
-          WRITE( msgBuf,'(A)' ) NEW_LINE('a')
+          WRITE( msgBuf,'(A)' ) 
           CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
           WRITE( msgBuf,'(A,I,A)' ) 'Max. # of arrivals = ', MaxNArr
           CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
@@ -398,7 +400,7 @@ CONTAINS
       NArr( 1:NRz_per_range, 1:Pos%NRr ) = 0 ! IEsco22 unnecessary? NArr = 0 below
   
 #ifdef IHOP_WRITE_OUT
-      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
   

@@ -640,9 +640,9 @@ CONTAINS
     WRITE(msgBuf,'(A)') "Sound Speed Field" 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(2A)')'____________________________________________________',&
-                        '______________________'
+                        '_______'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -677,7 +677,7 @@ CONTAINS
 
     READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A)') 'Profile ranges (km):'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -689,7 +689,7 @@ CONTAINS
     READ( SSPFile,  * ) SSP%z( 1 : SSP%Nz )
 !#ifdef IHOP_DEBUG
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A)') 'Profile depths (m):'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -702,7 +702,7 @@ CONTAINS
     ! IEsco23: change to allocatable memory since we should know Nz
 #ifdef IHOP_DEBUG
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A)') 'Sound speed matrix:'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -722,7 +722,7 @@ CONTAINS
     CLOSE( SSPFile )
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A)') 'Sound speed profile:'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -732,9 +732,9 @@ CONTAINS
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     
     WRITE(msgBuf,'(2A)')'____________________________________________________',&
-                        '______________________'
+                        '_______'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
     SSP%NPts = 1
@@ -919,14 +919,14 @@ CONTAINS
 
       ! Write relevant diagnostics
 #ifdef IHOP_WRITE_OUT
-      WRITE(msgBuf,'(2A)') '________________________________________________', &
-          '__________________________'
+      WRITE(msgBuf,'(2A)')'________________________________________________', &
+                          '___________'
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(A)') "Sound Speed Field" 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   
       IF (SSP%Nr.GT.1) THEN
@@ -943,14 +943,14 @@ CONTAINS
       WRITE(msgBuf,'(A,I)') 'Number of SSP depths = ', SSP%Nz
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   
-      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(A)') 'Profile ranges (km):'
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(fmtStr,'(A,I,A)') '(T11,',SSP%Nr, 'F10.2)'
       WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') NEW_LINE('a')
+      WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(A)') 'Sound speed matrix:'
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )

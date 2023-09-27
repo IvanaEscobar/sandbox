@@ -45,7 +45,13 @@ MODULE angle_mod
 CONTAINS
   SUBROUTINE ReadRayElevationAngles( freq, Depth, TopOpt, RunType, myThid )
 
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL (KIND=_RL90),  INTENT( IN  ) :: freq, Depth
     CHARACTER (LEN= 6), INTENT( IN  ) :: TopOpt, RunType
     REAL (KIND=_RL90)   :: d_theta_recommended
@@ -95,18 +101,28 @@ CONTAINS
                     Angles%Nalpha = Angles%Nalpha - 1
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * ) '_________________________________________________', &
-                        '_________________________'
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) 'Number of beams in elevation   = ', Angles%Nalpha
-    IF ( Angles%iSingle_alpha > 0 ) WRITE( PRTFile, * ) &
-                                'Trace only beam number ', Angles%iSingle_alpha
-    WRITE( PRTFile, * ) 'Beam take-off angles (degrees)'
+    WRITE(msgBuf,'(2A)')'_________________________________________________', &
+                        '__________'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)')
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A,I)') 'Number of beams in elevation   = ', Angles%Nalpha
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    IF ( Angles%iSingle_alpha > 0 ) THEN
+        WRITE(msgBuf,'(A,I)') 'Trace only beam number ', Angles%iSingle_alpha
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
+    WRITE(msgBuf,'(A)') 'Beam take-off angles (degrees)'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 
-    IF ( Angles%Nalpha >= 1 ) WRITE( PRTFile, "( 5G14.6 )" ) &
-                        Angles%alpha( 1 : MIN( Angles%Nalpha, Number_to_Echo ) )
-    IF ( Angles%Nalpha > Number_to_Echo ) WRITE( PRTFile,  "( G14.6 )" ) &
-                                        ' ... ', Angles%alpha( Angles%Nalpha )
+    IF ( Angles%Nalpha >= 1 ) THEN
+        WRITE(msgBuf,'(5G14.6)') Angles%alpha( 1:MIN(Angles%Nalpha,Number_to_Echo) )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
+    IF ( Angles%Nalpha > Number_to_Echo ) THEN
+        WRITE(msgBuf,'(G14.6)') ' ... ', Angles%alpha( Angles%Nalpha )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
 #endif /* IHOP_WRITE_OUT */
 
     IF ( Angles%Nalpha>1 .AND. &
@@ -136,7 +152,13 @@ CONTAINS
 
   SUBROUTINE ReadRayBearingAngles( freq, TopOpt, RunType, myThid )
 
-    INTEGER, INTENT( IN ) :: myThid
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL (KIND=_RL90), INTENT( IN ) :: freq
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
@@ -185,9 +207,11 @@ CONTAINS
     ! Nx2D CASE: beams must lie on rcvr radials--- replace beta with theta
     IF ( RunType( 6 : 6 ) == '2' .AND. RunType( 1 : 1 ) /= 'R' ) THEN
 #ifdef IHOP_WRITE_OUT
-       WRITE( PRTFile, * )
-       WRITE( PRTFile, * ) 'Replacing beam take-off angles, beta, with ', &
+       WRITE(msgBuf,'(A)')
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+       WRITE(msgBuf,'(A)') 'Replacing beam take-off angles, beta, with ', &
                            'receiver bearing lines, theta'
+       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        DEALLOCATE( Angles%beta )
 
@@ -206,16 +230,25 @@ CONTAINS
     END IF
 
 #ifdef IHOP_WRITE_OUT
-    WRITE( PRTFile, * )
-    WRITE( PRTFile, * ) 'Number of beams in bearing   = ', Angles%Nbeta
-    IF ( Angles%iSingle_beta > 0 ) WRITE( PRTFile, * ) &
-                                'Trace only beam number ', Angles%iSingle_beta
-    WRITE( PRTFile, * ) 'Beam take-off angles (degrees)'
+    WRITE(msgBuf,'(A)')
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A,I)') 'Number of beams in bearing   = ', Angles%Nbeta
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    IF ( Angles%iSingle_beta > 0 ) THEN
+        WRITE(msgBuf,'(A,I)') 'Trace only beam number ', Angles%iSingle_beta
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
+    WRITE(msgBuf,'(A)') 'Beam take-off angles (degrees)'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 
-    IF ( Angles%Nbeta >= 1 ) WRITE( PRTFile, "( 5G14.6 )" ) &
-                        Angles%beta( 1 : MIN( Angles%Nbeta, Number_to_Echo ) )
-    IF ( Angles%Nbeta > Number_to_Echo ) WRITE( PRTFile, "( G14.6 )" ) &
-                                            ' ... ', Angles%beta( Angles%Nbeta )
+    IF ( Angles%Nbeta >= 1 ) THEN
+        WRITE(msgBuf,'(5G14.6)') Angles%beta( 1:MIN(Angles%Nbeta,Number_to_Echo) )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
+    IF ( Angles%Nbeta > Number_to_Echo ) THEN
+        WRITE(msgBuf,'(G14.6)') ' ... ', Angles%beta( Angles%Nbeta )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
 #endif /* IHOP_WRITE_OUT */
 
     IF ( Angles%Nbeta>1 .AND. &
