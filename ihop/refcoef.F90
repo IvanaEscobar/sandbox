@@ -43,10 +43,13 @@ CONTAINS
 
     ! Optionally read in reflection coefficient for Top or Bottom boundary
 
-    ! == Routine Arguments ==
-    ! myThid :: Thread number for this instance of the routine
-    INTEGER, INTENT(IN) :: myThid
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     CHARACTER (LEN=1 ), INTENT( IN ) :: BotRC, TopRC! flag set to 'F' if refl. coef. is to be read from a File
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
     INTEGER            :: itheta, ik, IOStat, iAllocStat
@@ -64,9 +67,10 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+            WRITE( PRTFile, * ) 'BRCFile = ', TRIM( FileRoot ) // '.brc'
+            WRITE(msgBuf,'(2A)')'REFCOEF ReadReflectionCoeffcient: ',&
                             'Unable to open Bottom Reflection Coefficient file'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
@@ -81,8 +85,9 @@ CONTAINS
        ALLOCATE( RBot( NBotPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+        WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for bot. refl. coef.: reduce # points'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
@@ -107,9 +112,10 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+        WRITE( PRTFile, * ) 'TRCFile = ', TRIM( FileRoot ) // '.trc'
+        WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Unable to open Top Reflection Coefficient file'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
@@ -124,8 +130,9 @@ CONTAINS
        ALLOCATE( RTop( NTopPts ), Stat = IAllocStat )
        IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+        WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                     'Insufficient memory for top refl. coef.: reduce # points'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
@@ -147,8 +154,9 @@ CONTAINS
              IOSTAT = IOStat, ACTION = 'READ' )
        IF ( IOStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+        WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                         'Unable to open Internal Reflection Coefficient file'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF
@@ -166,8 +174,9 @@ CONTAINS
                  Stat = iAllocStat )
        IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(errorMessageUnit,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
+        WRITE(msgBuf,'(2A)') 'REFCOEF ReadReflectionCoeffcient: ', &
                                'Too many points in reflection coefficient'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R ReadReflectionCoefficient'
        END IF

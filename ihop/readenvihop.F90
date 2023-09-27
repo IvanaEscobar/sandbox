@@ -72,8 +72,9 @@ CONTAINS
 
     ! *** TITLE ***
 #ifdef IHOP_THREED
-    WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
+    CALL PRINT_ERROR( msgBuf,myThid )
     STOP 'ABNORMAL END: S/R ReadEnvironment'
     Title( 1 :11 ) = 'iHOP3D - '
     Title( 12:80 ) = IHOP_title
@@ -145,8 +146,9 @@ CONTAINS
     CASE( ' ' )
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                              'Unknown bottom option letter in second position'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadEnvironment'
     END SELECT
@@ -197,8 +199,9 @@ CONTAINS
 
     ! Limits for tracing beams
 #ifdef IHOP_THREED
-    WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+    WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                          '3D not supported in ihop'
+    CALL PRINT_ERROR( msgBuf,myThid )
     STOP 'ABNORMAL END: S/R ReadEnvironment'
     !READ(  ENVFile, * ) Beam%deltas, Beam%Box%x, Beam%Box%y, Beam%Box%z
     Beam%Box%x = 1000.0 * Beam%Box%x   ! convert km to m
@@ -340,8 +343,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-                WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+                WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                      'Unknown curvature condition'
+                CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
                 STOP 'ABNORMAL END: S/R ReadEnvironment'
           END SELECT
@@ -364,8 +368,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
+            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadEnvironment: ', & 
                                 'Unknown beam type (second letter of run type)'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadEnvironment'
        END SELECT
@@ -442,8 +447,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown option for SSP approximation'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
@@ -483,8 +489,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown attenuation units'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
@@ -531,8 +538,9 @@ CONTAINS
     CASE ( ' ' )
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fourth position'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
@@ -546,8 +554,9 @@ CONTAINS
     CASE ( '-', '_', ' ' )
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in fifth position'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
@@ -561,8 +570,9 @@ CONTAINS
     CASE ( ' ' )
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadTopOpt: ', & 
                              'Unknown top option letter in sixth position'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadTopOpt'
     END SELECT
@@ -631,8 +641,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
             'Unknown RunType selected'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRunType'
     END SELECT
@@ -710,8 +721,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        IF ( Pos%NRz /= Pos%NRr ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'READENVIHOP ReadRunType: ', & 
+            WRITE(msgBuf,'(2A)') 'READENVIHOP ReadRunType: ', & 
                     'Irregular grid option selected with NRz not equal to Nr'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadRunType'
        END IF
@@ -802,8 +814,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'READENVIHOP TopBot: ', & 
+        WRITE(msgBuf,'(2A)') 'READENVIHOP TopBot: ', & 
                              'Unknown boundary condition type'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R TopBot'
     END SELECT

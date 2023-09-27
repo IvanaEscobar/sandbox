@@ -83,8 +83,9 @@ CONTAINS
     ALLOCATE( Angles%alpha( MAX( 3, Angles%Nalpha ) ), STAT = iAllocStat )
     IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
         'Insufficient memory to store beam angles'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
     END IF
@@ -128,8 +129,9 @@ CONTAINS
     IF ( Angles%Nalpha>1 .AND. &
     Angles%alpha(Angles%Nalpha) == Angles%alpha(1) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
         'First and last beam take-off angle are identical'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
     END IF
@@ -138,8 +140,9 @@ CONTAINS
         IF ( Angles%iSingle_alpha<1 .OR. &
            Angles%iSingle_alpha>Angles%Nalpha ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadRayElevationAngles:', &
             'Selected beam, iSingl not in [ 1, Angles%Nalpha ]'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadRayElevationAngles'
         END IF
@@ -163,8 +166,9 @@ CONTAINS
     CHARACTER (LEN= 6), INTENT( IN ) :: TopOpt, RunType
 
 #ifdef IHOP_WRITE_OUT
-    WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+    WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                  '3D rays not supported in ihop'
+    CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
     STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
 
@@ -187,8 +191,9 @@ CONTAINS
     ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
     IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                         'Insufficient memory to store beam angles'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
     END IF
@@ -219,8 +224,9 @@ CONTAINS
        ALLOCATE( Angles%beta( MAX( 3, Angles%Nbeta ) ), STAT = iAllocStat )
         IF ( iAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
                             'Insufficient memory to store beam angles'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
         END IF
@@ -254,8 +260,10 @@ CONTAINS
     IF ( Angles%Nbeta>1 .AND. &
         Angles%beta( Angles%Nbeta )==Angles%beta(1) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+        WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
          'First and last beam take-off angle are identical'
+        CALL PRINT_ERROR( msgBuf,myThid )
+
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
     END IF
@@ -264,8 +272,9 @@ CONTAINS
         IF ( Angles%iSingle_beta < 1 .OR. &
             Angles%iSingle_beta > Angles%Nbeta ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
+            WRITE(msgBuf,'(2A)') 'ANGLEMOD ReadBearingElevationAngles:', &
             'Selected beam, iSingl not in [ 1, Angles%Nbeta ]'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBearingElevationAngles'
         END IF

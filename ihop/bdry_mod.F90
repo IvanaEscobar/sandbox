@@ -98,8 +98,9 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
             WRITE(msgBuf,'(A)') 'ATIFile = ', TRIM( FileRoot ) // '.ati'
             CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                 'Unable to open altimetry file'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
@@ -118,8 +119,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                        'Unknown option for selecting altimetry interpolation'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
        END SELECT AltiType
@@ -135,8 +137,9 @@ CONTAINS
        ALLOCATE( Top(  NatiPts ), phi( NatiPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                 'Insufficient memory for altimetry data: reduce # ati points'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
@@ -173,16 +176,18 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                             'Unknown option for selecting altimetry option'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
           END SELECT
 
           IF ( Top( ii )%x( 2 ) < DepthT ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                 'Altimetry rises above highest point in the sound speed profile'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
           END IF
@@ -196,8 +201,9 @@ CONTAINS
         ALLOCATE( Top( 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                                     'Insufficient memory for altimetry data'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadATI'
         END IF
@@ -209,8 +215,9 @@ CONTAINS
 
     IF ( .NOT. monotonic( Top%x( 1 ), NAtiPts ) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadATI', &
+        WRITE(msgBuf,'(2A)') 'BDRYMOD ReadATI', &
                         'Altimetry ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadATI'
     END IF 
@@ -253,8 +260,9 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
             WRITE(msgBuf,'(A)') 'BTYFile = ', TRIM( FileRoot ) // '.bty'
             CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Unable to open bathymetry file'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END IF
@@ -274,8 +282,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyType
@@ -292,8 +301,9 @@ CONTAINS
         ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                 'Insufficient memory for bathymetry data: reduce # bty points'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
         END IF
@@ -322,8 +332,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
        END SELECT BathyTypeB
@@ -353,16 +364,18 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
           CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Unknown option for selecting bathymetry interpolation'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
           END SELECT
 
           IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                 'Bathymetry drops below lowest point in the sound speed profile'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
           END IF
@@ -381,8 +394,9 @@ CONTAINS
         ALLOCATE( Bot( 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Insufficient memory for bathymetry data'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
         END IF
@@ -394,8 +408,9 @@ CONTAINS
 
     IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'BDRYMOD ReadBTY: ', &
+        WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                     'Bathymetry ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadBTY'
     END IF 
@@ -542,8 +557,9 @@ CONTAINS
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
         WRITE(msgBuf,'(A,F10.4)') 'rRight = ', Top( NatiPts )%x( 1 )
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-        WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetTopSeg', &
+        WRITE(msgBuf,'(2A)') 'BDRYMOD GetTopSeg', &
                              'Top altimetry undefined above the ray'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R GetTopSeg'
     ENDIF
@@ -580,8 +596,9 @@ CONTAINS
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
         WRITE(msgBuf,'(A,F10.4)') 'rRight = ', Bot( NbtyPts )%x( 1 )
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-        WRITE(errorMessageUnit,'(2A)') 'BDRYMOD GetBotSeg', &
+        WRITE(msgBuf,'(2A)') 'BDRYMOD GetBotSeg', &
                              'Bottom bathymetry undefined below the source'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R GetBotSeg'
     ENDIF

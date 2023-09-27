@@ -28,8 +28,13 @@ MODULE beamPattern
 CONTAINS
   SUBROUTINE ReadPat( FileRoot, myThid )
 
-    INTEGER, INTENT( IN ) :: myThid 
-
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     INTEGER                          :: I, IAllocStat, IOStat
     CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
 
@@ -45,8 +50,9 @@ CONTAINS
        IF ( IOstat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
             WRITE( PRTFile, * ) 'SBPFile = ', TRIM( FileRoot ) // '.sbp'
-            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Unable to open source beampattern file'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
        END IF
@@ -59,8 +65,9 @@ CONTAINS
        ALLOCATE( SrcBmPat( NSBPPts, 2 ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
             'Insufficient memory for beam pattern data: reduce # SBP points'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
@@ -82,8 +89,9 @@ CONTAINS
         ALLOCATE( SrcBmPat( 2, 2 ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'BEAMPATTERN ReadPat: ', &
+            WRITE(msgBuf,'(2A)') 'BEAMPATTERN ReadPat: ', &
                                  'Insufficient memory'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadPat'
         END IF
