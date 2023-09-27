@@ -44,11 +44,18 @@ MODULE influence
   COMPLEX (KIND=_RL90), PRIVATE :: delay
 
 CONTAINS
-  SUBROUTINE InfluenceGeoHatRayCen( U, alpha, dalpha )
+  SUBROUTINE InfluenceGeoHatRayCen( U, alpha, dalpha, myThid )
 
     ! Geometrically-spreading beams with a hat-shaped beam in ray-centered 
     ! coordinates
 
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle radians
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )   ! complex pressure field
     INTEGER              :: irA, irB, II
@@ -171,10 +178,17 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE InfluenceGeoHatCart( U, alpha, Dalpha )
+  SUBROUTINE InfluenceGeoHatCart( U, alpha, Dalpha, myThid )
 
     ! Geometric, hat-shaped beams in Cartesisan coordinates
 
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     REAL (KIND=_RL90), INTENT( IN    ) :: alpha, & ! take-off angle, radians
                                           Dalpha   ! angular spacing
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr ) ! complex pressure field
@@ -262,7 +276,8 @@ CONTAINS
 
                 IF ( n < RadiusMax ) THEN
 #ifdef IHOP_WRITE_OUT
-                   WRITE( PRTFile, * ) "influence: Eigenray w/ RadiusMax = ", RadiusMax
+                    WRITE(msgBuf,'(A,F10.2)') "Influence: Eigenray w RadiusMax = ", RadiusMax
+                    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
                    ! interpolated delay
                    delay    = ray2D( iS-1 )%tau + s*dtauds              
@@ -305,11 +320,18 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE InfluenceGeoGaussianCart( U, alpha, Dalpha )
+  SUBROUTINE InfluenceGeoGaussianCart( U, alpha, Dalpha, myThid )
 
     ! Geometric, Gaussian beams in Cartesian coordintes
     
     ! beam window: kills beams outside e**(-0.5 * ibwin**2 )
+  !     == Routine Arguments ==
+  !     myThid :: Thread number. Unused by IESCO
+  !     msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT( IN )   :: myThid
+    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  
+  !     == Local Variables ==
     INTEGER,           PARAMETER       :: BeamWindow = 4 
     REAL (KIND=_RL90), INTENT( IN    ) :: alpha, dalpha ! take-off angle, angular spacing
     COMPLEX,           INTENT( INOUT ) :: U( NRz_per_range, Pos%NRr )  ! complex pressure field

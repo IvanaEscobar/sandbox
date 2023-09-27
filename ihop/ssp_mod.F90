@@ -662,9 +662,9 @@ CONTAINS
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 
-    WRITE(msgBuf,'(A,I)') 'Number of SSP ranges = ', SSP%Nr
+    WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A,I)') 'Number of SSP depths = ', SSP%Nz
+    WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -778,7 +778,7 @@ CONTAINS
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
           IF ( SSP%NPts == 1 ) THEN
 #ifdef IHOP_WRITE_OUT
-                WRITE(msgBuf,'(A,I)') '#SSP points: ', SSP%NPts
+                WRITE(msgBuf,'(A,I10)') '#SSP points: ', SSP%NPts
                 CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
                 WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', &
                                     'The SSP must have at least 2 points'
@@ -795,7 +795,7 @@ CONTAINS
  
     ! Fall through means too many points in the profile
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A,I)') 'Max. #SSP points: ', MaxSSP
+    WRITE(msgBuf,'(A,I10)') 'Max. #SSP points: ', MaxSSP
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
                          'Number of SSP points exceeds limit'
@@ -949,16 +949,16 @@ CONTAINS
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       END IF
   
-      WRITE(msgBuf,'(A,I)') 'Number of SSP ranges = ', SSP%Nr
+      WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A,I)') 'Number of SSP depths = ', SSP%Nz
+      WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   
       WRITE(msgBuf,'(A)') 
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(A)') 'Profile ranges (km):'
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(fmtStr,'(A,I,A)') '(T11,',SSP%Nr, 'F10.2)'
+      WRITE(fmtStr,'(A,I10,A)') '(T11,',SSP%Nr, 'F10.2)'
       WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(A)') 

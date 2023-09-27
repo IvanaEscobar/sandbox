@@ -92,6 +92,7 @@ CONTAINS
         WRITE(myProcessStr, '(I4.4)') myProcId
         WRITE(fNam,'(A,A,A,A)') TRIM(IHOP_fileroot),'.',myProcessStr(1:4),'.prt'
         OPEN(PRTFile, FILE = fNam, STATUS = 'UNKNOWN', IOSTAT = iostat )
+#ifdef ALLOW_USE_MPI
     ELSE ! using MPI
         CALL MPI_COMM_RANK( MPI_COMM_MODEL, mpiMyId, mpiRC )
         myProcId = mpiMyId
@@ -103,9 +104,9 @@ CONTAINS
         pidIO    = mpiPidIo
 
         IF( mpiPidIo.EQ.myProcId ) THEN
-# ifdef SINGLE_DISK_IO
+#  ifdef SINGLE_DISK_IO
          IF( myProcId.eq.0) THEN
-# endif
+#  endif
             WRITE(fNam,'(A,A,A,A)') &
                 TRIM(IHOP_fileroot),'.',myProcessStr(1:iTmp),'.prt'
             OPEN(PRTFile, FILE=fNam, STATUS='UNKNOWN', IOSTAT=iostat )
@@ -116,10 +117,11 @@ CONTAINS
                 CALL PRINT_ERROR( msgBuf, myThid )
                 STOP 'ABNORMAL END: S/R IHOP_INIT'
             END IF
-# ifdef SINGLE_DISK_IO
+#  ifdef SINGLE_DISK_IO
          END IF
-# endif
+#  endif
         END IF
+# endif /* ALLOW_USE_MPI */
     END IF
 #endif /* IHOP_WRITE_OUT */
   
@@ -375,9 +377,9 @@ CONTAINS
           ! allow space for at least MinNArr arrivals
           MaxNArr = MAX( ArrivalsStorage / ( NRz_per_range * Pos%NRr ), MinNArr )
 #ifdef IHOP_WRITE_OUT
-          WRITE( msgBuf,'(A)' ) 
+          WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
-          WRITE( msgBuf,'(A,I,A)' ) 'Max. # of arrivals = ', MaxNArr
+          WRITE(msgBuf,'(A,I10)') 'Max. # of arrivals = ', MaxNArr
           CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
 #endif /* IHOP_WRITE_OUT */
   
@@ -488,15 +490,15 @@ CONTAINS
                 SELECT CASE ( Beam%Type( 1 : 1 ) )
                 CASE ( 'g' )
                    CALL InfluenceGeoHatRayCen(    U, Angles%alpha( ialpha ), &
-                                                  Angles%Dalpha )
+                                                  Angles%Dalpha, myThid )
                 CASE ( 'S' )
                    CALL InfluenceSGB( U, Angles%alpha( ialpha ), Angles%Dalpha )
                 CASE ( 'B' )
                    CALL InfluenceGeoGaussianCart( U, Angles%alpha( ialpha ), &
-                                                  Angles%Dalpha )
+                                                  Angles%Dalpha, myThid )
                CASE DEFAULT !IEsco22: thesis is in default behavior
                    CALL InfluenceGeoHatCart(  U, Angles%alpha( ialpha ), &
-                                              Angles%Dalpha )
+                                              Angles%Dalpha, myThid )
                 END SELECT
              END IF
   
