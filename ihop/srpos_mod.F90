@@ -87,8 +87,9 @@ CONTAINS
 #endif /* IHOP_WRITE_OUT */
         IF ( Nfreq <= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+            WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                                  'Number of frequencies must be positive'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadfreqVec'
         END IF
@@ -98,8 +99,9 @@ CONTAINS
     ALLOCATE( freqVec( MAX( 3, Nfreq ) ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadfreqVec: ', &
                              'Number of frequencies too large'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadfreqVec'
     END IF
@@ -151,7 +153,8 @@ CONTAINS
     ALLOCATE( Pos%Sx( 1 ), Pos%Sy( 1 ), Stat=IAllocStat)
     IF (IAllocStat/=0) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit, *) 'allocation failed', IAllocStat
+        WRITE(msgBuf, *) 'allocation failed', IAllocStat
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSxSy'
     END IF
@@ -188,8 +191,9 @@ CONTAINS
     ALLOCATE( Pos%ws( Pos%NSz ), Pos%iSz( Pos%NSz ), Stat = IAllocStat )
     IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many sources'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
@@ -198,8 +202,9 @@ CONTAINS
     ALLOCATE( Pos%wr( Pos%NRz ), Pos%iRz( Pos%NRz ), Stat = IAllocStat  )
     IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadSzRz: ', &
                              'Too many receivers'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadSzRz'
     END IF
@@ -260,8 +265,9 @@ CONTAINS
 
     IF ( .NOT. monotonic( Pos%Rr, Pos%NRr ) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrRanges: ', &
                              'Receiver ranges are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRcvrRanges'
     END IF 
@@ -300,8 +306,9 @@ CONTAINS
 
     IF ( .NOT. monotonic( Pos%theta, Pos%Ntheta ) ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadRcvrBearings: ', &
                             'Receiver bearings are not monotonically increasing'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadRcvrBearings'
     END IF 
@@ -344,8 +351,9 @@ CONTAINS
 
     IF ( Nx <= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
+        WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadVector: ', &
                              'Number of ' // Description // 'must be positive'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ReadVector'
     END IF
@@ -354,8 +362,9 @@ CONTAINS
         ALLOCATE( x( MAX( 3, Nx ) ), Stat = IAllocStat )
         IF ( IAllocStat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-            WRITE(errorMessageUnit,'(2A)') 'SRPOSITIONS ReadVector: ', &
+            WRITE(msgBuf,'(2A)') 'SRPOSITIONS ReadVector: ', &
                                 'Too many ' // Description
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadVector'
         END IF

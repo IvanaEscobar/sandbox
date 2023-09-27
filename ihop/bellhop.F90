@@ -983,8 +983,7 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
        WRITE(msgBuf,'(2A)') 'HS%BC = ', HS%BC
        CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
-       WRITE(msgBuf,'(2A)') 'BELLHOP Reflect2D: ', & 
-                            'Unknown boundary condition type'
+       WRITE(msgBuf,'(A)') 'BELLHOP Reflect2D: Unknown boundary condition type'
        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
        STOP 'ABNORMAL END: S/R Reflect2D'

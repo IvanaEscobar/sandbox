@@ -147,11 +147,12 @@ CONTAINS
        CALL Analytic( x, c, cimag, gradc, crr, crz, czz, rho, Task, myThid )
     CASE DEFAULT
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(2A)') 'Profile option: ', SSP%Type
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(errorMessageUnit,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
+        WRITE(msgBuf,'(2A)') 'Profile option: ', SSP%Type
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(2A)') 'SSPMOD EvaluateSSP: ', 'Invalid SSP profile option'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-       STOP 'ABNORMAL END: S/R EvaluateSSP'
+        STOP 'ABNORMAL END: S/R EvaluateSSP'
     END SELECT
 
   RETURN
@@ -478,15 +479,16 @@ CONTAINS
        ! Check that x is inside the box where the sound speed is defined
        IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(2A)') 'ray is outside the box where ocean ',&
+            WRITE(msgBuf,'(2A)') 'ray is outside the box where ocean ',&
                               'soundspeed is defined'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A,2F10.4)') ' x = ( r, z ) = ', x
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
+            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+            WRITE(msgBuf,'(A,2F10.4)') ' x = ( r, z ) = ', x
+            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+            WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
                     'ray is outside the box where the soundspeed is defined'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-          STOP 'ABNORMAL END: S/R Quad'
+            STOP 'ABNORMAL END: S/R Quad'
        END IF
 
        ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
@@ -508,9 +510,11 @@ CONTAINS
        delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
        IF (delta_z <= 0 .OR. s2 > delta_z) THEN
 #ifdef IHOP_WRITE_OUT
-          WRITE(errorMessageUnit, *) delta_z, s2, iSegz, SSP%z(iSegz)
-          WRITE(errorMessageUnit,'(2A)') 'SSPMOD Quad: ', &
+            WRITE(msgBuf, *) delta_z, s2, iSegz, SSP%z(iSegz)
+            CALL PRINT_ERROR( msgBuf,myThid )
+            WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
                             'depth is not monotonically increasing in SSP%z'
+            CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
           STOP 'ABNORMAL END: S/R Quad'
        END IF
@@ -628,11 +632,12 @@ CONTAINS
         FORM = 'FORMATTED', STATUS = 'OLD', IOSTAT = iostat )
     IF ( IOSTAT /= 0 ) THEN   ! successful open?
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A)') 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(errorMessageUnit,'(A)') 'SSPMOD ReadSSP: Unable to open the SSP file'
+        WRITE(msgBuf,'(A)') 'SSPFile = ', TRIM( IHOP_fileroot ) // '.ssp'
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE(msgBuf,'(A)') 'SSPMOD ReadSSP: Unable to open the SSP file'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-       STOP 'ABNORMAL END: S/R ReadSSP'
+        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
     ! Write relevant diagnostics
@@ -669,10 +674,11 @@ CONTAINS
               STAT = iallocstat )
     IF ( iallocstat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-       WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
+        WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
                             'Insufficient memory to store SSP'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-       STOP 'ABNORMAL END: S/R ReadSSP'
+        STOP 'ABNORMAL END: S/R ReadSSP'
     END IF
 
     READ( SSPFile,  * ) SSP%Seg%r( 1 : SSP%Nr )
@@ -754,12 +760,13 @@ CONTAINS
        IF ( iz > 1 ) THEN
           IF ( SSP%z( iz ) .LE. SSP%z( iz - 1 ) ) THEN
 #ifdef IHOP_WRITE_OUT
-              WRITE(msgBuf,'(A,F10.2)') 'Bad depth in SSP: ', SSP%z( iz )
-              CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-              WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
+                WRITE(msgBuf,'(A,F10.2)') 'Bad depth in SSP: ', SSP%z( iz )
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+                WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
                             'The depths in the SSP must be monotone increasing'
+                CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-              STOP 'ABNORMAL END: S/R ReadSSP'
+                STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
        END IF
 
@@ -771,12 +778,13 @@ CONTAINS
        IF ( ABS( SSP%z( iz ) - Depth ) < 100. * EPSILON( 1.0e0 ) ) THEN
           IF ( SSP%NPts == 1 ) THEN
 #ifdef IHOP_WRITE_OUT
-              WRITE(msgBuf,'(A,I)') '#SSP points: ', SSP%NPts
-              CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-              WRITE(errorMessageUnit,'(2A)')  'SSPMOD ReadSSP: ', &
+                WRITE(msgBuf,'(A,I)') '#SSP points: ', SSP%NPts
+                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+                WRITE(msgBuf,'(2A)')  'SSPMOD ReadSSP: ', &
                                     'The SSP must have at least 2 points'
+                CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
-              STOP 'ABNORMAL END: S/R ReadSSP'
+                STOP 'ABNORMAL END: S/R ReadSSP'
           END IF
 
           RETURN
@@ -789,8 +797,9 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
     WRITE(msgBuf,'(A,I)') 'Max. #SSP points: ', MaxSSP
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(errorMessageUnit,'(2A)') 'SSPMOD ReadSSP: ', &
+    WRITE(msgBuf,'(2A)') 'SSPMOD ReadSSP: ', &
                          'Number of SSP points exceeds limit'
+    CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
     STOP 'ABNORMAL END: S/R ReadSSP'
 
@@ -827,8 +836,9 @@ CONTAINS
                 STAT = iallocstat )
       IF ( iallocstat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
-        WRITE(errorMessageUnit,'(2A)') 'SSPMOD ExtractSSP: ', &
+        WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
                              'Insufficient memory to store SSP'
+        CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ExtractSSP'
       END IF
@@ -905,8 +915,9 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
                 WRITE(msgBuf,'(A)') 'Bad depth in SSP: ', SSP%z(iz)
                 CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-                WRITE( errorMessageUnit,'(2A)' ) 'SSPMOD ExtractSSP: ', &
+                WRITE( msgBuf,'(2A)' ) 'SSPMOD ExtractSSP: ', &
                             'The depths in the SSP must be monotone increasing'
+                CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
                 STOP 'ABNORMAL END: S/R ExtractSSP'
             END IF
