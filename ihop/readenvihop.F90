@@ -359,9 +359,9 @@ CONTAINS
           ! Images, windows
           WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A,I)') 'Number of images, Nimage  = ', Beam%Nimage
+          WRITE(msgBuf,'(A,I10)') 'Number of images, Nimage  = ', Beam%Nimage
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A,I)') 'Beam windowing parameter  = ', Beam%iBeamWindow
+          WRITE(msgBuf,'(A,I10)') 'Beam windowing parameter  = ', Beam%iBeamWindow
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
           WRITE(msgBuf,'(A)') 'Component                 = ', Beam%Component
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -516,7 +516,7 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
        WRITE(msgBuf,'(A)') '    Biological attenaution'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(msgBuf,'(A,I)') '      Number of Bio Layers = ', NBioLayers
+       WRITE(msgBuf,'(A,I10)') '      Number of Bio Layers = ', NBioLayers
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 
        DO iBio = 1, NBioLayers

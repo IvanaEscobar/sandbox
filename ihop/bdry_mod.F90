@@ -128,7 +128,7 @@ CONTAINS
 
        READ(  ATIFile, * ) NatiPts
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A,I)') 'Number of altimetry points = ', NatiPts
+       WRITE(msgBuf,'(A,I10)') 'Number of altimetry points = ', NatiPts
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        ! we'll be extending the altimetry to infinity to the left and right
@@ -292,7 +292,7 @@ CONTAINS
 
        READ(  BTYFile, * ) NbtyPts
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A,I)') 'Number of bathymetry points = ', NbtyPts
+       WRITE(msgBuf,'(A,I10)') 'Number of bathymetry points = ', NbtyPts
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 

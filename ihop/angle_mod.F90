@@ -107,10 +107,10 @@ CONTAINS
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(A)')
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A,I)') 'Number of beams in elevation   = ', Angles%Nalpha
+    WRITE(msgBuf,'(A,I10)') 'Number of beams in elevation   = ', Angles%Nalpha
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     IF ( Angles%iSingle_alpha > 0 ) THEN
-        WRITE(msgBuf,'(A,I)') 'Trace only beam number ', Angles%iSingle_alpha
+        WRITE(msgBuf,'(A,I10)') 'Trace only beam number ', Angles%iSingle_alpha
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
     WRITE(msgBuf,'(A)') 'Beam take-off angles (degrees)'
@@ -238,10 +238,10 @@ CONTAINS
 #ifdef IHOP_WRITE_OUT
     WRITE(msgBuf,'(A)')
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A,I)') 'Number of beams in bearing   = ', Angles%Nbeta
+    WRITE(msgBuf,'(A,I10)') 'Number of beams in bearing   = ', Angles%Nbeta
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     IF ( Angles%iSingle_beta > 0 ) THEN
-        WRITE(msgBuf,'(A,I)') 'Trace only beam number ', Angles%iSingle_beta
+        WRITE(msgBuf,'(A,I10)') 'Trace only beam number ', Angles%iSingle_beta
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
     WRITE(msgBuf,'(A)') 'Beam take-off angles (degrees)'
