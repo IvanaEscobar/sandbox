@@ -84,9 +84,9 @@ CONTAINS
     CASE ( '~', '*' )
 #ifdef IHOP_WRITE_OUT
        WRITE(msgBuf,'(2A)') '______________________________________________', &
-                           '____________________________'
+                           '_____________'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       WRITE(msgBuf,'(A)') 
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        WRITE(msgBuf,'(A)') 'Using top-altimetry file'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -142,7 +142,7 @@ CONTAINS
         END IF
 
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       WRITE(msgBuf,'(A)') 
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        WRITE(msgBuf,'(A)') ' Range (km)  Depth (m)'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -239,9 +239,9 @@ CONTAINS
     CASE ( '~', '*' )
 #ifdef IHOP_WRITE_OUT
        WRITE(msgBuf,'(2A)')'________________________________________________', &
-                           '__________________________'
+                           '___________'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       WRITE(msgBuf,'(A)') 
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
        WRITE(msgBuf,'(A)') 'Using bottom-bathymetry file'
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -299,7 +299,7 @@ CONTAINS
         END IF
         
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A)') NEW_LINE('a')
+       WRITE(msgBuf,'(A)') 
        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
@@ -317,7 +317,7 @@ CONTAINS
           WRITE(msgBuf,'(A)') &
               ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI'
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A)') NEW_LINE('a')
+          WRITE(msgBuf,'(A)') 
           CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
        CASE DEFAULT

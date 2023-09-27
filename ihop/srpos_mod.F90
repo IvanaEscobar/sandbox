@@ -76,11 +76,11 @@ CONTAINS
     IF ( BroadbandOption == 'B' ) THEN
 #ifdef IHOP_WRITE_OUT
         WRITE(msgBuf,'(2A)')'________________________________________________',&
-                            '__________________________'
+                            '___________'
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-        WRITE(msgBuf,'(A)') NEW_LINE('a')
+        WRITE(msgBuf,'(A)') 
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-        WRITE(msgBuf,'(A)') NEW_LINE('a')
+        WRITE(msgBuf,'(A)') 
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
         WRITE(msgBuf,'(A,I)') 'Number of frequencies =', Nfreq
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
@@ -331,14 +331,14 @@ CONTAINS
     INTEGER :: ix
    
 #ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     WRITE(msgBuf,'(2A)')'__________________________________________________', &
-                        '________________________'
+                        '_________'
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 'Number of ' // Description // ' = ', Nx
+    WRITE(msgBuf,'(A,I)') 'Number of ' // Description // ' = ', Nx
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
@@ -377,7 +377,7 @@ CONTAINS
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
     END IF
 
-    WRITE(msgBuf,'(A)') NEW_LINE('a')
+    WRITE(msgBuf,'(A)') 
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
