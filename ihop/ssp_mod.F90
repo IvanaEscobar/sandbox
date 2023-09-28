@@ -810,102 +810,107 @@ CONTAINS
 
 !**********************************************************************!
 
-  SUBROUTINE ExtractSSP( Depth, freq, myThid )
-      ! Extracts SSP from MITgcm grid points
+SUBROUTINE ExtractSSP( Depth, freq, myThid )
+    ! Extracts SSP from MITgcm grid points
 
-      use atten_mod, only: CRCI
+    use atten_mod, only: CRCI
 
-  !     == Routine Arguments ==
-  !     myThid :: Thread number. Unused by IESCO
-  !     msgBuf :: Used to build messages for printing.
-    INTEGER, INTENT( IN )   :: myThid
+    ! == Routine Arguments ==
+    ! myThid :: Thread number. Unused by IESCO
+    ! msgBuf :: Used to build messages for printing.
+    INTEGER, INTENT(IN)     :: myThid
     CHARACTER*(MAX_LEN_MBUF):: msgBuf
-    CHARACTER*(80)::fmtstr
+    CHARACTER*(80)          :: fmtstr
   
-  !     == Local Variables ==
-      INTEGER ii, jj
-      REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
-      REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE)
+    ! == Local Variables ==
+    INTEGER                       :: ii, jj
+    REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
+    REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE)
+    REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
 
-      SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
-      SSP%Nr = IHOP_NPTS_RANGE
+    SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
+    SSP%Nr = IHOP_NPTS_RANGE
 
-      ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
-                SSP%czMat( SSP%Nz-1, SSP%Nr ), &
-                SSP%Seg%r( SSP%Nr ), &
-                STAT = iallocstat )
-      IF ( iallocstat /= 0 ) THEN
+    ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
+              SSP%czMat( SSP%Nz-1, SSP%Nr ), &
+              SSP%Seg%r( SSP%Nr ), tmpSSP(SSP%Nz,SSP%Nr,nSx,nSy),&
+              STAT = iallocstat )
+    IF ( iallocstat /= 0 ) THEN
 #ifdef IHOP_WRITE_OUT
         WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
                              'Insufficient memory to store SSP'
         CALL PRINT_ERROR( msgBuf,myThid )
 #endif /* IHOP_WRITE_OUT */
         STOP 'ABNORMAL END: S/R ExtractSSP'
-      END IF
+    END IF
 
-      ! Initiate SSP%cMat to ceros
-      SSP%cMat = 0.0 _d 0
+    ! Initiate SSP%cMat to ceros
+    SSP%cMat  = 0.0 _d 0
+    tmpSSP    = 0.0 _d 0
 
-      ! set SSP%Seg%r from data.ihop -> ihop_ranges
-      SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
+    ! set SSP%Seg%r from data.ihop -> ihop_ranges
+    SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
 
-      ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-      SSP%z( 1 )            = 0.0 _d 0
-      SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
-      SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
+    ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
+    SSP%z( 1 )            = 0.0 _d 0
+    SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
+    SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
 
-      ! ssp extraction
-      !==================================================
-      ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
-      !==================================================
-      ! Sum IDW weights
-      DO i = 1,SSP%Nr
+    ! ssp extraction
+    !==================================================
+    ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
+    !==================================================
+    ! Sum IDW weights
+    DO i = 1,SSP%Nr
         sumweights(i) = sum(ihop_idw_weights(i,:))
-      END DO
+    END DO
 
-      ! from ocean grid to acoustic grid with IDW
-      DO bj=myByLo(myThid),myByHi(myThid)
-       DO bi=myBxLo(myThid),myBxHi(myThid)
-        DO j=1,sNy
-         DO i=1,sNx
-            DO ii=1,IHOP_npts_range !6
-             DO jj=1,IHOP_npts_idw  !4
-              ! IDW Interpolate SSP at second order
-              IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
-                  yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
+    ! from ocean grid to acoustic grid with IDW
+    DO bj=myByLo(myThid),myByHi(myThid)
+     DO bi=myBxLo(myThid),myBxHi(myThid)
+      DO j=1,sNy
+       DO i=1,sNx
+         DO ii=1,IHOP_npts_range
+          DO jj=1,IHOP_npts_idw
+           ! IDW Interpolate SSP at second order
+           IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
+               yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
 
-               ! Top layer zero depth
-               SSP%cMat(1,ii) = SSP%cMat(1,ii) + &
-                   CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
-                   ihop_idw_weights(ii,jj)/sumweights(ii)
+            ! Top layer zero depth
+            tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
+                CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
+                ihop_idw_weights(ii,jj)/sumweights(ii)
 
-               ! Middle depth layers: Nr depths
-               SSP%cMat(2:(SSP%Nz-1),ii) = SSP%cMat(2:(SSP%Nz-1),ii) + &
-                   ihop_ssp(i,j,:,bi,bj)* &
-                   ihop_idw_weights(ii,jj)/sumweights(ii)
+            ! Middle depth layers: Nr depths
+            tmpSSP(2:(SSP%Nz-1),ii,bi,bj) = tmpSSP(2:(SSP%Nz-1),ii,bi,bj) + &
+                ihop_ssp(i,j,:,bi,bj)* &
+                ihop_idw_weights(ii,jj)/sumweights(ii)
 
-               ! Bottom layer, below deepest point
-               SSP%cMat(SSP%Nz,ii) = SSP%cMat(SSP%Nz,ii) + &
-                   CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
-                   ihop_idw_weights(ii,jj)/sumweights(ii)
+            ! Bottom layer, extrapolate below deepest point
+            tmpSSP(SSP%Nz,ii,bi,bj) = tmpSSP(SSP%Nz,ii,bi,bj) + &
+                CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
+                ihop_idw_weights(ii,jj)/sumweights(ii)
 
-              ENDIF
-             ENDDO
-            ENDDO
+           ENDIF
+          ENDDO
          ENDDO
-        ENDDO
        ENDDO
       ENDDO
-      !==================================================
-      ! END IDW Interpolate
-      !==================================================
+     ENDDO
+    ENDDO
+
+    CALL GLOBAL_VEC_SUM_R8(SSP%Nz*SSP%Nr,SSP%Nz*SSP%Nr,tmpSSP,myThid)
+    SSP%cMAT = tmpSSP(:,:,1,1)
+    !==================================================
+    ! END IDW Interpolate
+    !==================================================
 
     ! I/O on main thread only
     _BEGIN_MASTER(myThid)
-      ! set vector structured c, rho, and cz for first range point
-      DO iz = 1,SSP%Nz
+    ! set vector structured c, rho, and cz for first range point
+    DO iz = 1,SSP%Nz
         alphaR = SSP%cMat( iz, 1 )
-        
+      
         SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                               SSP%AttenUnit, betaPowerLaw, fT, myThid )
         SSP%rho( iz ) = rhoR
@@ -926,58 +931,59 @@ CONTAINS
         ! Compute gradient, cz
         IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
                                      ( SSP%z( iz ) - SSP%z( iz-1 ) )
-      END DO
+    END DO
 
-      ! Write relevant diagnostics
+    ! Write relevant diagnostics
 #ifdef IHOP_WRITE_OUT
-      WRITE(msgBuf,'(2A)')'________________________________________________', &
-                          '___________'
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') 
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') "Sound Speed Field" 
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') 
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(2A)')'________________________________________________', &
+                        '___________'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') "Sound Speed Field" 
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   
-      IF (SSP%Nr.GT.1) THEN
-          WRITE(msgBuf,'(A)') 'Using range-dependent sound speed'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      END IF
-      IF (SSP%Nr.EQ.1) THEN
-          WRITE(msgBuf,'(A)') 'Using range-independent sound speed'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      END IF
+    IF (SSP%Nr.GT.1) THEN
+        WRITE(msgBuf,'(A)') 'Using range-dependent sound speed'
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
+    IF (SSP%Nr.EQ.1) THEN
+        WRITE(msgBuf,'(A)') 'Using range-independent sound speed'
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END IF
   
-      WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   
-      WRITE(msgBuf,'(A)') 
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') 'Profile ranges (km):'
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(fmtStr,'(A,I10,A)') '(T11,',SSP%Nr, 'F10.2)'
-      WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') 
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') 'Sound speed matrix:'
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
-      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      DO iz = 1, SSP%Nz
-         WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
-         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      END DO
+    WRITE(msgBuf,'(A)') 
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 'Profile ranges (km):'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(fmtStr,'(A,I10,A)') '(T11,',SSP%Nr, 'F10.2)'
+    WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') 'Sound speed matrix:'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    DO iz = 1, SSP%Nz
+        WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
+        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+    END DO
 #endif /* IHOP_WRITE_OUT */
-
-      SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
-
     ! I/O on main thread only
     _END_MASTER(myThid)
-  RETURN
-  END !SUBROUTINE ExtractSSP
+    _BARRIER
+
+    SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+
+RETURN
+END !SUBROUTINE ExtractSSP
 
 END MODULE ssp_mod
