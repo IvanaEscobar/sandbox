@@ -258,9 +258,13 @@ CONTAINS
     CALL OpenOutputFiles( IHOP_fileroot )
   
     ! Run Bellhop solver
-    CALL CPU_TIME( Tstart )
-    CALL BellhopCore(myThid)
-    CALL CPU_TIME( Tstop )
+    if (numberOfProcs.gt.1) then
+        if(myProcId.eq.(numberOfProcs-1)) then
+            CALL CPU_TIME( Tstart )
+            CALL BellhopCore(myThid)
+            CALL CPU_TIME( Tstop )
+        endif
+    endif
   
 #ifdef IHOP_WRITE_OUT
     ! print run time

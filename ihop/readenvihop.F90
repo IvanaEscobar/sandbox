@@ -61,6 +61,7 @@ CONTAINS
     CHARACTER (LEN=10) :: PlotType
 
     !   Only do I/O if in the main thread
+    _BARRIER
     _BEGIN_MASTER(myThid)
 
 #ifdef IHOP_WRITE_OUT
