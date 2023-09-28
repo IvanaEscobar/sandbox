@@ -268,6 +268,12 @@ CONTAINS
   
 #ifdef IHOP_WRITE_OUT
     ! print run time
+    if (numberOfProcs.gt.1) then
+        if(myProcId.ne.(numberOfProcs-1)) then
+            WRITE(msgBuf,'(A,I4,A)') 'Proc ',myProcId, " didn't run ihop"
+            CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
+        endif
+    endif
     WRITE(msgBuf, '(A)' )
     CALL PRINT_MESSAGE(msgBuf, PRTFile, SQUEEZE_RIGHT, myThid)
     WRITE(msgBuf, '(A,G15.3,A)' ) 'CPU Time = ', Tstop-Tstart, 's'
