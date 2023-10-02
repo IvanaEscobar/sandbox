@@ -857,8 +857,8 @@
      & convertFW2Salt, temp_EvPrRn, salt_EvPrRn,                                                                                    &
      & temp_addMass, salt_addMass, hFacMinDr, hFacMinDp,                                                                            &
      & ivdc_kappa, hMixCriteria, dRhoSmall, hMixSmooth,                                                                             &
-     & sideDragFactor, bottomDragLinear, bottomDragQuadratic, nh_Am2,                                                               &
-     & smoothAbsFuncRange, sIceLoadFac,                                                                                             &
+     & sideDragFactor, bottomDragLinear, bottomDragQuadratic,                                                                       &
+     & zRoughBot, nh_Am2, smoothAbsFuncRange, sIceLoadFac,                                                                          &
      & tCylIn, tCylOut,                                                                                                             &
      & phiEuler, thetaEuler, psiEuler
 
@@ -1000,6 +1000,7 @@
       _RL sideDragFactor
       _RL bottomDragLinear
       _RL bottomDragQuadratic
+      _RL zRoughBot
       _RL smoothAbsFuncRange
       _RL sIceLoadFac
       _RL nh_Am2
