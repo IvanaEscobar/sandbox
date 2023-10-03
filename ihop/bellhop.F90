@@ -234,7 +234,7 @@ CONTAINS
        CALL ReadEnvironment( IHOP_fileroot, myThid )
        ! AlTImetry: OPTIONAL, default is no ATIFile
        CALL ReadATI( IHOP_fileroot, Bdry%Top%HS%Opt( 5:5 ), Bdry%Top%HS%Depth, myThid )
-       ! BaThYmetry: OPTIONAL, default is no BTYFile
+       ! BaThYmetry: OPTIONAL, default is BTYFile
        CALL ReadBTY( IHOP_fileroot, Bdry%Bot%HS%Opt( 2:2 ), Bdry%Bot%HS%Depth, myThid )
        ! (top and bottom): OPTIONAL
        CALL ReadReflectionCoefficient( IHOP_fileroot, Bdry%Bot%HS%Opt( 1:1 ), &
@@ -264,6 +264,10 @@ CONTAINS
             CALL BellhopCore(myThid)
             CALL CPU_TIME( Tstop )
         endif
+    else
+        CALL CPU_TIME( Tstart )
+        CALL BellhopCore(myThid)
+        CALL CPU_TIME( Tstop )
     endif
   
 #ifdef IHOP_WRITE_OUT
