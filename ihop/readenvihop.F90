@@ -105,7 +105,7 @@ CONTAINS
     IF ( IHOP_depth.NE.0 ) THEN
         Bdry%Bot%HS%Depth = IHOP_depth
     ELSE
-        Bdry%Bot%HS%Depth = rkSign*rF( Nr+1 )*1.05
+        Bdry%Bot%HS%Depth = rkSign*rF( Nr+1 ) + 5*1500.0/IHOP_freq ! add 5 wavelengths
     END IF
     x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
