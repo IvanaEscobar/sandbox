@@ -229,7 +229,7 @@ CONTAINS
 
   ! **********************************************************************!
 
-   SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
+SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
    ! Reads in the bottom bathymetry
 
    !     == Routine Arguments ==
@@ -448,7 +448,7 @@ CONTAINS
    END IF 
 
    RETURN
-   END !SUBROUTINE ReadBTY
+END !SUBROUTINE ReadBTY
 
   ! **********************************************************************!
 
