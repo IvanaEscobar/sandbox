@@ -419,138 +419,137 @@ CONTAINS
   RETURN
   END !SUBROUTINE cCubic
 
-  !**********************************************************************!
+!**********************************************************************!
 
-  SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
-
+SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
   ! Bilinear quadrilatteral interpolation of SSP data in 2D, SSP%Type = 'Q'
 
   !     == Routine Arguments ==
   !     myThid :: Thread number. Unused by IESCO
   !     msgBuf :: Used to build messages for printing.
-    INTEGER, INTENT( IN )   :: myThid
-    CHARACTER*(MAX_LEN_MBUF):: msgBuf
-  
+  INTEGER, INTENT( IN )   :: myThid
+  CHARACTER*(MAX_LEN_MBUF):: msgBuf
+
   !     == Local Variables ==
-    REAL (KIND=_RL90), INTENT( IN  ) :: freq
-    REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
-    CHARACTER (LEN=3), INTENT( IN  ) :: Task
-    REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
-                                        rho ! sound speed and its derivatives
-    INTEGER             :: irT, iz2
-    REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
-    
-    IF ( Task == 'INI' ) THEN
-       ! *** Task 'INI' for initialization ***
-       
-        Depth = x( 2 )
-        ! Defensive check if SSPFile exists
-        IF (useSSPFile .EQV. .TRUE.) THEN ! eqv for logical operands
-            CALL ReadSSP( Depth, freq, myThid )
-        ELSE
-            CALL ExtractSSP(Depth, freq, myThid )
-        END IF
-
-        ! calculate cz
-        DO irT = 1, SSP%Nr
-            DO iz2 = 2, SSP%Nz
-                delta_z = ( SSP%z( iz2 ) - SSP%z( iz2-1 ) )
-                SSP%czMat( iz2-1, irT ) = ( SSP%cMat( iz2  , irT ) - &
-                                            SSP%cMat( iz2-1, irT ) ) / delta_z
-            END DO
-        END DO
-
-        RETURN
-
-    ELSE ! Task == 'TAB'
-       ! *** Section to return SSP info ***
-
-       ! IESCO22: iSegz is the depth index containing x depth
-       ! find depth-layer where x(2) in ( SSP%z( iSegz ), SSP%z( iSegz+1 ) )
-       IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
-          DO iz = 2, SSP%Nz   ! Search for bracketting Depths
-             IF ( x( 2 ) < SSP%z( iz ) ) THEN
-                iSegz = iz - 1
-                EXIT
-             END IF
-          END DO
-       END IF
-
-       ! Check that x is inside the box where the sound speed is defined
-       IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'ray is outside the box where ocean ',&
-                              'soundspeed is defined'
-            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-            WRITE(msgBuf,'(A,2F10.4)') ' x = ( r, z ) = ', x
-            CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-            WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
-                    'ray is outside the box where the soundspeed is defined'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-            STOP 'ABNORMAL END: S/R Quad'
-       END IF
-
-       ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
-       IF ( x( 1 ) < SSP%Seg%r( iSegr ) .OR. x( 1 ) >= SSP%Seg%r( iSegr + 1 ) ) THEN
-          DO irT = 2, SSP%Nr   ! Search for bracketting segment ranges
-             IF ( x( 1 ) < SSP%Seg%r( irT ) ) THEN
-                iSegr = irT - 1
-                EXIT
-             END IF
-          END DO
-       END IF
-
-       ! for depth, x(2), get the sound speed at both ends of range segment
-       cz1 = SSP%czMat( iSegz, iSegr   )
-       cz2 = SSP%czMat( iSegz, iSegr+1 )
-
-       ! IESCO22: s2 is distance btwn field point, x(2), and ssp depth @ iSegz
-       s2      = x( 2 )           - SSP%z( iSegz )            
-       delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
-       IF (delta_z <= 0 .OR. s2 > delta_z) THEN
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf, *) delta_z, s2, iSegz, SSP%z(iSegz)
-            CALL PRINT_ERROR( msgBuf,myThid )
-            WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
-                            'depth is not monotonically increasing in SSP%z'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-          STOP 'ABNORMAL END: S/R Quad'
-       END IF
-       
-       c1 = SSP%cMat( iSegz, iSegr   ) + s2*cz1
-       c2 = SSP%cMat( iSegz, iSegr+1 ) + s2*cz2
-
-       ! s1 = proportional distance of x(1) in range
-       delta_r = SSP%Seg%r( iSegr+1 ) - SSP%Seg%r( iSegr )
-       s1 = ( x( 1 ) - SSP%Seg%r( iSegr ) ) / delta_r
-       s1 = MIN( s1, 1.0D0 )   ! piecewise constant extrapolation for ranges outside SSPFile box
-       s1 = MAX( s1, 0.0D0 )   ! "
-
-       c = ( 1.0D0-s1 )*c1 + s1*c2 ! c @ x
-
-       ! interpolate the attenuation !!!! SSP in ENVFile needs to match first column of SSPFile
-       s2    = s2 / delta_z   ! normalize depth layer
-       cimag = AIMAG( ( 1.0D0-s2 )*SSP%c( Isegz ) + s2*SSP%c( Isegz+1 ) )   ! volume attenuation is taken from the single c(z) profile
-
-       cz  = ( 1.0D0-s1 )*cz1 + s1*cz2 ! cz @ x
-
-       cr  = ( c2  - c1  ) / delta_r ! SSPFile grid cr
-       crz = ( cz2 - cz1 ) / delta_r ! SSPFile grid crz
-
-       gradc = [ cr, cz ]
-       crr   = 0.0D0
-       czz   = 0.0D0
-
-       ! linear interpolation for density
-       W   = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
-       rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
+  REAL (KIND=_RL90), INTENT( IN  ) :: freq
+  REAL (KIND=_RL90), INTENT( IN  ) :: x( 2 )  ! r-z SSP evaluation point
+  CHARACTER (LEN=3), INTENT( IN  ) :: Task
+  REAL (KIND=_RL90), INTENT( OUT ) :: c, cimag, gradc( 2 ), crr, crz, czz, &
+                                      rho ! sound speed and its derivatives
+  INTEGER             :: irT, iz2
+  REAL (KIND=_RL90)   :: c1, c2, cz1, cz2, cr, cz, s1, s2, delta_r, delta_z
+  
+  IF ( Task == 'INI' ) THEN
+    ! *** Task 'INI' for initialization ***
+      
+    Depth = x( 2 )
+    ! Defensive check if SSPFile exists
+    IF (useSSPFile .EQV. .TRUE.) THEN ! eqv for logical operands
+      CALL ReadSSP( Depth, freq, myThid )
+    ELSE
+      CALL ExtractSSP(Depth, freq, myThid )
     END IF
 
-    !IESCO22: for thesis, czz=crr=0, and rho=1 at all times
-  RETURN
-  END !SUBROUTINE Quad
+    ! calculate cz
+    DO irT = 1, SSP%Nr
+      DO iz2 = 2, SSP%Nz
+        delta_z = ( SSP%z( iz2 ) - SSP%z( iz2-1 ) )
+        SSP%czMat( iz2-1, irT ) = ( SSP%cMat( iz2  , irT ) - &
+                                    SSP%cMat( iz2-1, irT ) ) / delta_z
+      END DO
+    END DO
+
+    RETURN
+
+  ELSE ! Task == 'TAB'
+    ! *** Section to return SSP info ***
+
+    ! IESCO22: iSegz is the depth index containing x depth
+    ! find depth-layer where x(2) in ( SSP%z( iSegz ), SSP%z( iSegz+1 ) )
+    IF ( x( 2 ) < SSP%z( iSegz ) .OR. x( 2 ) > SSP%z( iSegz + 1 ) ) THEN
+      DO iz = 2, SSP%Nz   ! Search for bracketting Depths
+        IF ( x( 2 ) < SSP%z( iz ) ) THEN
+          iSegz = iz - 1
+          EXIT
+        END IF
+      END DO
+    END IF
+
+    ! Check that x is inside the box where the sound speed is defined
+    IF ( x( 1 ) < SSP%Seg%r( 1 ) .OR. x( 1 ) > SSP%Seg%r( SSP%Nr ) ) THEN
+#ifdef IHOP_WRITE_OUT
+      WRITE(msgBuf,'(2A)') 'ray is outside the box where ocean ',&
+        'soundspeed is defined'
+      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+      WRITE(msgBuf,'(A,2F10.4)') ' x = ( r, z ) = ', x
+      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+      WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+        'ray is outside the box where the soundspeed is defined'
+      CALL PRINT_ERROR( msgBuf,myThid )
+#endif /* IHOP_WRITE_OUT */
+      STOP 'ABNORMAL END: S/R Quad'
+    END IF
+
+    ! find range-segment where x(1) in [ SSP%Seg%r( iSegr ), SSP%Seg%r( iSegr+1 ) )
+    IF ( x( 1 ) < SSP%Seg%r( iSegr ) .OR. x( 1 ) >= SSP%Seg%r( iSegr + 1 ) ) THEN
+      DO irT = 2, SSP%Nr   ! Search for bracketting segment ranges
+        IF ( x( 1 ) < SSP%Seg%r( irT ) ) THEN
+          iSegr = irT - 1
+          EXIT
+        END IF
+      END DO
+    END IF
+
+    ! for depth, x(2), get the sound speed at both ends of range segment
+    cz1 = SSP%czMat( iSegz, iSegr   )
+    cz2 = SSP%czMat( iSegz, iSegr+1 )
+
+    ! IESCO22: s2 is distance btwn field point, x(2), and ssp depth @ iSegz
+    s2      = x( 2 )           - SSP%z( iSegz )            
+    delta_z = SSP%z( iSegz+1 ) - SSP%z( iSegz )
+    IF (delta_z <= 0 .OR. s2 > delta_z) THEN
+#ifdef IHOP_WRITE_OUT
+      WRITE(msgBuf, *) delta_z, s2, iSegz, SSP%z(iSegz)
+      CALL PRINT_ERROR( msgBuf,myThid )
+      WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
+        'depth is not monotonically increasing in SSP%z'
+      CALL PRINT_ERROR( msgBuf,myThid )
+#endif /* IHOP_WRITE_OUT */
+      STOP 'ABNORMAL END: S/R Quad'
+    END IF
+    
+    c1 = SSP%cMat( iSegz, iSegr   ) + s2*cz1
+    c2 = SSP%cMat( iSegz, iSegr+1 ) + s2*cz2
+
+    ! s1 = proportional distance of x(1) in range
+    delta_r = SSP%Seg%r( iSegr+1 ) - SSP%Seg%r( iSegr )
+    s1 = ( x( 1 ) - SSP%Seg%r( iSegr ) ) / delta_r
+    s1 = MIN( s1, 1.0D0 )   ! piecewise constant extrapolation for ranges outside SSPFile box
+    s1 = MAX( s1, 0.0D0 )   ! "
+
+    c = ( 1.0D0-s1 )*c1 + s1*c2 ! c @ x
+
+    ! interpolate the attenuation !!!! SSP in ENVFile needs to match first column of SSPFile
+    s2    = s2 / delta_z   ! normalize depth layer
+    cimag = AIMAG( ( 1.0D0-s2 )*SSP%c( Isegz ) + s2*SSP%c( Isegz+1 ) )   ! volume attenuation is taken from the single c(z) profile
+
+    cz  = ( 1.0D0-s1 )*cz1 + s1*cz2 ! cz @ x
+
+    cr  = ( c2  - c1  ) / delta_r ! SSPFile grid cr
+    crz = ( cz2 - cz1 ) / delta_r ! SSPFile grid crz
+
+    gradc = [ cr, cz ]
+    crr   = 0.0D0
+    czz   = 0.0D0
+
+    ! linear interpolation for density
+    W   = ( x( 2 ) - SSP%z( iSegz ) ) / ( SSP%z( iSegz + 1 ) - SSP%z( iSegz ) )
+    rho = ( 1.0D0 - W ) * SSP%rho( iSegz ) + W * SSP%rho( iSegz + 1 )
+  END IF
+
+  !IESCO22: for thesis, czz=crr=0, and rho=1 at all times
+RETURN
+END !SUBROUTINE Quad
 
 !**********************************************************************!
 
@@ -811,177 +810,187 @@ CONTAINS
 !**********************************************************************!
 
 SUBROUTINE ExtractSSP( Depth, freq, myThid )
-    ! Extracts SSP from MITgcm grid points
+  ! Extracts SSP from MITgcm grid points
 
-    use atten_mod, only: CRCI
+  use atten_mod, only: CRCI
 
-    ! == Routine Arguments ==
-    ! myThid :: Thread number. Unused by IESCO
-    ! msgBuf :: Used to build messages for printing.
-    INTEGER, INTENT(IN)     :: myThid
-    CHARACTER*(MAX_LEN_MBUF):: msgBuf
-    CHARACTER*(80)          :: fmtstr
-  
-    ! == Local Variables ==
-    INTEGER                       :: ii, jj
-    REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
-    REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE)
-    REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
+  ! == Routine Arguments ==
+  ! myThid :: Thread number. Unused by IESCO
+  ! msgBuf :: Used to build messages for printing.
+  INTEGER, INTENT(IN)     :: myThid
+  CHARACTER*(MAX_LEN_MBUF):: msgBuf
+  CHARACTER*(80)          :: fmtstr
 
-    SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
-    SSP%Nr = IHOP_NPTS_RANGE
+  ! == Local Variables ==
+  INTEGER                       :: ii, jj, k
+  REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
+  REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE), dcdz
+  REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
 
-    ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
-              SSP%czMat( SSP%Nz-1, SSP%Nr ), &
-              SSP%Seg%r( SSP%Nr ), tmpSSP(SSP%Nz,SSP%Nr,nSx,nSy),&
-              STAT = iallocstat )
-    IF ( iallocstat /= 0 ) THEN
-#ifdef IHOP_WRITE_OUT
-        WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
-                             'Insufficient memory to store SSP'
-        CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-        STOP 'ABNORMAL END: S/R ExtractSSP'
-    END IF
+  SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
+  SSP%Nr = IHOP_NPTS_RANGE
 
-    ! Initiate SSP%cMat to ceros
-    SSP%cMat  = 0.0 _d 0
-    tmpSSP    = 0.0 _d 0
+  ALLOCATE( SSP%cMat( SSP%Nz, SSP%Nr ), &
+            SSP%czMat( SSP%Nz-1, SSP%Nr ), &
+            SSP%Seg%r( SSP%Nr ), tmpSSP(SSP%Nz,SSP%Nr,nSx,nSy),&
+            STAT = iallocstat )
+  IF ( iallocstat /= 0 ) THEN
+# ifdef IHOP_WRITE_OUT
+    WRITE(msgBuf,'(2A)') 'SSPMOD ExtractSSP: ', &
+      'Insufficient memory to store SSP'
+    CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+      STOP 'ABNORMAL END: S/R ExtractSSP'
+  END IF
 
-    ! set SSP%Seg%r from data.ihop -> ihop_ranges
-    SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
+  ! Initiate SSP%cMat to ceros
+  SSP%cMat  = 0.0 _d 0
+  tmpSSP    = 0.0 _d 0
 
-    ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
-    SSP%z( 1 )            = 0.0 _d 0
-    SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
-    SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
+  ! set SSP%Seg%r from data.ihop -> ihop_ranges
+  SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
 
-    ! ssp extraction
-    !==================================================
-    ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
-    !==================================================
-    ! Sum IDW weights
-    DO i = 1,SSP%Nr
-        sumweights(i) = sum(ihop_idw_weights(i,:))
-    END DO
+  ! set SSP%z from rC, rkSign=-1 used bc ihop uses +ive depths
+  SSP%z( 1 )            = 0.0 _d 0
+  SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
+  SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
 
-    ! from ocean grid to acoustic grid with IDW
-    DO bj=myByLo(myThid),myByHi(myThid)
-     DO bi=myBxLo(myThid),myBxHi(myThid)
+  ! ssp extraction
+  !==================================================
+  ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
+  !==================================================
+  ! Sum IDW weights
+  DO i = 1,SSP%Nr
+    sumweights(i) = sum(ihop_idw_weights(i,:))
+  END DO
+
+  ! from ocean grid to acoustic grid with IDW
+  DO bj=myByLo(myThid),myByHi(myThid)
+    DO bi=myBxLo(myThid),myBxHi(myThid)
       DO j=1,sNy
-       DO i=1,sNx
-         DO ii=1,IHOP_npts_range
-          DO jj=1,IHOP_npts_idw
-           ! IDW Interpolate SSP at second order
-           IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
-               yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
+        DO i=1,sNx
+          DO ii=1,IHOP_npts_range
+            ! IDW Interpolate SSP at second order
+            DO jj=1,IHOP_npts_idw
+            IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
+                yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
 
-            ! Top layer zero depth
-            tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
+              ! Top layer zero depth
+              tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
                 CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
                 ihop_idw_weights(ii,jj)/sumweights(ii)
 
-            ! Middle depth layers: Nr depths
-            tmpSSP(2:(SSP%Nz-1),ii,bi,bj) = tmpSSP(2:(SSP%Nz-1),ii,bi,bj) + &
-                ihop_ssp(i,j,:,bi,bj)* &
-                ihop_idw_weights(ii,jj)/sumweights(ii)
+              ! Middle depth layers: Nr depths
+              tmpSSP(2:(SSP%Nz-1),ii,bi,bj) = tmpSSP(2:(SSP%Nz-1),ii,bi,bj) + &
+                  ihop_ssp(i,j,:,bi,bj)* &
+                  ihop_idw_weights(ii,jj)/sumweights(ii)
 
-            ! Bottom layer, extrapolate below deepest point
-            tmpSSP(SSP%Nz,ii,bi,bj) = tmpSSP(SSP%Nz,ii,bi,bj) + &
-                CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
-                ihop_idw_weights(ii,jj)/sumweights(ii)
+              ! ! Bottom layer, extrapolate below deepest point
+              ! tmpSSP(SSP%Nz,ii,bi,bj) = tmpSSP(SSP%Nz,ii,bi,bj) + &
+              !     CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
+              !     ihop_idw_weights(ii,jj)/sumweights(ii)
+            ENDIF
+            ENDDO ! End interpolation
 
-           ENDIF
+            ! Exptrapolate SSP through bathymetry
+            DO k=1,Nr
+              IF (hFacC(i,j,k,bi,bj).eq.0) THEN ! in a fully bathymetric vlevel
+                ! Extrapolate at a constant gradient; tmpSSP is shifted in k by +1
+                dcdz =  ( tmpSSP(k-1,ii,bi,bj) - tmpSSP(k-2,ii,bi,bj) ) / &
+                        ( SSP%z(k-1) - SSP%z(k-2) )
+                print *, 'dcdz', dcdz, 'i,j,k', i,j,k
+                tmpSSP(k+1,ii,bi,bj) = tmpSSP(k,ii,bi,bj) + dcdz*SSP%z(k)
+              END IF
+            END DO
           ENDDO
-         ENDDO
-       ENDDO
+        ENDDO
       ENDDO
-     ENDDO
     ENDDO
+  ENDDO
 
-    CALL GLOBAL_VEC_SUM_R8(SSP%Nz*SSP%Nr,SSP%Nz*SSP%Nr,tmpSSP,myThid)
-    SSP%cMAT = tmpSSP(:,:,1,1)
-    !==================================================
-    ! END IDW Interpolate
-    !==================================================
+  CALL GLOBAL_VEC_SUM_R8(SSP%Nz*SSP%Nr,SSP%Nz*SSP%Nr,tmpSSP,myThid)
+  SSP%cMAT = tmpSSP(:,:,1,1)
+  !==================================================
+  ! END IDW Interpolate
+  !==================================================
 
-    ! I/O on main thread only
-    _BEGIN_MASTER(myThid)
-    ! set vector structured c, rho, and cz for first range point
-    DO iz = 1,SSP%Nz
-        alphaR = SSP%cMat( iz, 1 )
-      
-        SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
-                              SSP%AttenUnit, betaPowerLaw, fT, myThid )
-        SSP%rho( iz ) = rhoR
-
-        IF ( iz > 1 ) THEN
-            IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
-#ifdef IHOP_WRITE_OUT
-                WRITE(msgBuf,'(A)') 'Bad depth in SSP: ', SSP%z(iz)
-                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-                WRITE( msgBuf,'(2A)' ) 'SSPMOD ExtractSSP: ', &
-                            'The depths in the SSP must be monotone increasing'
-                CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-                STOP 'ABNORMAL END: S/R ExtractSSP'
-            END IF
-        END IF
-
-        ! Compute gradient, cz
-        IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
-                                     ( SSP%z( iz ) - SSP%z( iz-1 ) )
-    END DO
-
-    ! Write relevant diagnostics
-#ifdef IHOP_WRITE_OUT
-    WRITE(msgBuf,'(2A)')'________________________________________________', &
-                        '___________'
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') "Sound Speed Field" 
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  ! I/O on main thread only
+  _BEGIN_MASTER(myThid)
+  ! set vector structured c, rho, and cz for first range point
+  DO iz = 1,SSP%Nz
+    alphaR = SSP%cMat( iz, 1 )
   
-    IF (SSP%Nr.GT.1) THEN
-        WRITE(msgBuf,'(A)') 'Using range-dependent sound speed'
+    SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
+                          SSP%AttenUnit, betaPowerLaw, fT, myThid )
+    SSP%rho( iz ) = rhoR
+
+    IF ( iz > 1 ) THEN
+      IF ( SSP%z( iz ) .LE. SSP%z( iz-1 ) ) THEN
+#  ifdef IHOP_WRITE_OUT
+        WRITE(msgBuf,'(A)') 'Bad depth in SSP: ', SSP%z(iz)
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+        WRITE( msgBuf,'(2A)' ) 'SSPMOD ExtractSSP: ', &
+          'The depths in the SSP must be monotone increasing'
+        CALL PRINT_ERROR( msgBuf,myThid )
+#  endif /* IHOP_WRITE_OUT */
+        STOP 'ABNORMAL END: S/R ExtractSSP'
+      END IF
     END IF
-    IF (SSP%Nr.EQ.1) THEN
-        WRITE(msgBuf,'(A)') 'Using range-independent sound speed'
-        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    END IF
-  
-    WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-  
-    WRITE(msgBuf,'(A)') 
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 'Profile ranges (km):'
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(fmtStr,'(A,I10,A)') '(T11,',SSP%Nr, 'F10.2)'
-    WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') 'Sound speed matrix:'
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
-    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    DO iz = 1, SSP%Nz
-        WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
-        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-    END DO
-#endif /* IHOP_WRITE_OUT */
-    ! I/O on main thread only
-    _END_MASTER(myThid)
-    _BARRIER
 
-    SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
+    ! Compute gradient, cz
+    IF ( iz>1 ) SSP%cz( iz-1 ) = ( SSP%c( iz ) - SSP%c( iz-1 ) ) / &
+                                  ( SSP%z( iz ) - SSP%z( iz-1 ) )
+  END DO
+
+  ! Write relevant diagnostics
+#ifdef IHOP_WRITE_OUT
+  WRITE(msgBuf,'(2A)')'________________________________________________', &
+    '___________'
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') 
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') "Sound Speed Field" 
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') 
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+
+  IF (SSP%Nr.GT.1) THEN
+    WRITE(msgBuf,'(A)') 'Using range-dependent sound speed'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  END IF
+  IF (SSP%Nr.EQ.1) THEN
+    WRITE(msgBuf,'(A)') 'Using range-independent sound speed'
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  END IF
+
+  WRITE(msgBuf,'(A,I10)') 'Number of SSP ranges = ', SSP%Nr
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A,I10)') 'Number of SSP depths = ', SSP%Nz
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+
+  WRITE(msgBuf,'(A)') 
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') 'Profile ranges (km):'
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(fmtStr,'(A,I10,A)') '(T11,',SSP%Nr, 'F10.2)'
+  WRITE(msgBuf,fmtStr) SSP%Seg%r( 1:SSP%Nr )
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') 
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') 'Sound speed matrix:'
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
+  CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  DO iz = 1, SSP%Nz
+    WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
+    CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+  END DO
+#endif /* IHOP_WRITE_OUT */
+  ! I/O on main thread only
+  _END_MASTER(myThid)
+  _BARRIER
+
+  SSP%Seg%r = 1000.0 * SSP%Seg%r   ! convert km to m
 
 RETURN
 END !SUBROUTINE ExtractSSP
