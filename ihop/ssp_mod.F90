@@ -855,7 +855,6 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   SSP%z( 2:(SSP%Nz-1) ) = rkSign*rC( 1:Nr )
   SSP%z( SSP%Nz )       = Bdry%Bot%HS%Depth ! rkSign*rF(Nr+1)*1.05
 
-  ! ssp extraction
   !==================================================
   ! IDW Interpolate: COMPARING with LAT LONs (xC, yC)
   !==================================================
@@ -892,7 +891,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
                   dcdz(jj) =  ( tmpSSP(iz-1,ii,bi,bj) - tmpSSP(iz-2,ii,bi,bj) ) / &
                               ( SSP%z(iz-1) - SSP%z(iz-2) )
                   print *, 'dcdz', dcdz(jj), 'i,j,iz,jj', i,j,iz,jj
-                  ! Mean depth gradient of SSP
+                  ! Mean depth gradient of SSP ! ADATIVE IDW needs a new size defined
                   IF (jj.eq.IHOP_npts_idw) dcdz(1) = SUM(dcdz) / SIZE(dcdz)
 
                   ! Extend through SSP deepest depth level
