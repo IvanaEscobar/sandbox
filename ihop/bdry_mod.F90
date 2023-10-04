@@ -10,59 +10,61 @@ MODULE bdry_mod
   ! IEsco22: want to rname this for clarity to readTopBot since it takes user
   ! input and populates various structures used in the code
 
-  USE monotonic_mod,    only: monotonic
-  USE ihop_mod,         only: PRTFile, ATIFile, BTYFile
+   USE monotonic_mod,   only: monotonic
+   USE ihop_mod,        only: PRTFile, ATIFile, BTYFile
 
   IMPLICIT NONE
 ! == Global variables ==
 #include "EEPARAMS.h"
+#include "SIZE.h"
+#include "GRID.h"
 
-  PRIVATE
+   PRIVATE
 
 ! public interfaces
 !=======================================================================
 
-    public ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, &
-           IsegTop, IsegBot, rTopSeg, rBotSeg,&
-           iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts, &
-           ComputeBdryTangentNormal
+   public   ReadATI, ReadBTY, GetTopSeg, GetBotSeg, Bot, Top, &
+            IsegTop, IsegBot, rTopSeg, rBotSeg,&
+            iSmallStepCtr, atiType, btyType, NATIPts, NBTYPts, &
+            ComputeBdryTangentNormal
 
 !=======================================================================
 
-  INTEGER, PARAMETER :: Number_to_Echo = 21
-  INTEGER            :: IsegTop, IsegBot ! indices point to current active segment
-  INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
-  INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
+   INTEGER, PARAMETER :: Number_to_Echo = 21
+   INTEGER            :: IsegTop, IsegBot ! indices point to current active segment
+   INTEGER, PROTECTED :: NATIPts = 2, NBTYPts = 2
+   INTEGER            :: ii, IOStat, IAllocStat, iSmallStepCtr = 0
 
-  ! range intervals defining the current active segment
-  REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  
-  CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
+   ! range intervals defining the current active segment
+   REAL (KIND=_RL90)  :: rTopseg( 2 ), rBotseg( 2 )  
+   CHARACTER  (LEN=2) :: atiType= 'LS', btyType = 'LS'
 
-  ! ***Halfspace properties***
-  TYPE HSInfo2
-     ! compressional and shear wave speeds/attenuations in user units
-     REAL     (KIND=_RL90) :: alphaR, alphaI, betaR, betaI  
-     REAL     (KIND=_RL90) :: rho, Depth        ! density, depth
-     COMPLEX  (KIND=_RL90) :: cP, cS            ! P-wave, S-wave speeds
-     CHARACTER (LEN=1) :: BC                    ! Boundary condition type
-     CHARACTER (LEN=6) :: Opt
-  END TYPE
+   ! ***Halfspace properties***
+   TYPE HSInfo2
+      ! compressional and shear wave speeds/attenuations in user units
+      REAL     (KIND=_RL90)   :: alphaR, alphaI, betaR, betaI  
+      REAL     (KIND=_RL90)   :: rho, Depth  ! density, depth
+      COMPLEX  (KIND=_RL90)   :: cP, cS      ! P-wave, S-wave speeds
+      CHARACTER(LEN=1)        :: BC          ! Boundary condition type
+      CHARACTER(LEN=6)        :: Opt
+   END TYPE
 
-  ! ***Boundary properties***
-  TYPE BdryPt
-     REAL (KIND=_RL90) :: x( 2 ), &     ! segment coordinate
-                          t( 2 ), &     ! segment tangent
-                          n( 2 )        ! segment outward
-     REAL (KIND=_RL90) :: Len, Kappa    ! length and curvature of a segement
-     ! For the curvilinear grid option
-     REAL (KIND=_RL90) :: Nodet( 2 ), & ! tangent at the node
-                          Noden( 2 )    ! normal at the node 
-     REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
-                          Dss           ! derivative along tangent
-     TYPE( HSInfo2 )   :: HS
-  END TYPE
+   ! ***Boundary properties***
+   TYPE BdryPt
+      REAL (KIND=_RL90) :: x( 2 ), &     ! segment coordinate
+                           t( 2 ), &     ! segment tangent
+                           n( 2 )        ! segment outward
+      REAL (KIND=_RL90) :: Len, Kappa    ! length and curvature of a segement
+      ! For the curvilinear grid option
+      REAL (KIND=_RL90) :: Nodet( 2 ), & ! tangent at the node
+                           Noden( 2 )    ! normal at the node 
+      REAL (KIND=_RL90) :: Dx, Dxx, &    ! 1st, 2nd derivatives wrt depth
+                           Dss           ! derivative along tangent
+      TYPE( HSInfo2 )   :: HS
+   END TYPE
 
-  TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
+   TYPE(BdryPt), ALLOCATABLE :: Top( : ), Bot( : )
 
 CONTAINS
   SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, myThid ) 
@@ -227,196 +229,226 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
+   SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
+   ! Reads in the bottom bathymetry
 
-    ! Reads in the bottom bathymetry
-
-  !     == Routine Arguments ==
-  !     myThid :: Thread number. Unused by IESCO
-  !     msgBuf :: Used to build messages for printing.
-    INTEGER, INTENT( IN )   :: myThid
-    CHARACTER*(MAX_LEN_MBUF):: msgBuf
+   !     == Routine Arguments ==
+   !     myThid :: Thread number. Unused by IESCO
+   !     msgBuf :: Used to build messages for printing.
+      INTEGER, INTENT( IN )   :: myThid
+      CHARACTER*(MAX_LEN_MBUF):: msgBuf
   
-  !     == Local Variables ==
-    CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
-    REAL (KIND=_RL90),  INTENT( IN ) :: DepthB
-    CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
+   !     == Local Variables ==
+      CHARACTER (LEN= 1), INTENT( IN ) :: BotBTY
+      REAL (KIND=_RL90),  INTENT( IN ) :: DepthB
+      CHARACTER (LEN=80), INTENT( IN ) :: FileRoot
+      INTEGER :: i,j,bi,bj
+      LOGICAL :: firstnonzero
+      REAL (KIND=_RL90) :: gcmbathy(sNx,sNy), gcmmin, gcmmax
 
-    SELECT CASE ( BotBTY )
-    CASE ( '~', '*' )
-#ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(2A)')'________________________________________________', &
-                           '___________'
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(msgBuf,'(A)') 
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-       WRITE(msgBuf,'(A)') 'Using bottom-bathymetry file'
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
+      SELECT CASE ( BotBTY )
+      CASE ( '~', '*' )
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(2A)')'________________________________________________', &
+                             '___________'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+         WRITE(msgBuf,'(A)') 
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+         WRITE(msgBuf,'(A)') 'Using bottom-bathymetry file'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
 
-       OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
-             IOSTAT = IOStat, ACTION = 'READ' )
-        IF ( IOsTAT /= 0 ) THEN
-#ifdef IHOP_WRITE_OUT
+         OPEN( UNIT = BTYFile, FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD',& 
+               IOSTAT = IOStat, ACTION = 'READ' )
+         IF ( IOsTAT /= 0 ) THEN
+# ifdef IHOP_WRITE_OUT
             WRITE(msgBuf,'(A)') 'BTYFile = ', TRIM( FileRoot ) // '.bty'
             CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
             WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
                                  'Unable to open bathymetry file'
             CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
+# endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
-       END IF
+         END IF
  
-       READ( BTYFile, * ) btyType
+         READ( BTYFile, * ) btyType
  
-       BathyType: SELECT CASE ( btyType( 1 : 1 ) )
-       CASE ( 'C' )
-#ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(A)') 'Curvilinear Interpolation'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
-       CASE ( 'L' )
-#ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(A)') 'Piecewise linear interpolation'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
-       CASE DEFAULT
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                    'Unknown option for selecting bathymetry interpolation'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-            STOP 'ABNORMAL END: S/R ReadBTY'
-       END SELECT BathyType
+         BathyType: SELECT CASE ( btyType( 1 : 1 ) )
+      CASE ( 'C' )
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(A)') 'Curvilinear Interpolation'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
+      CASE ( 'L' )
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(A)') 'Piecewise linear interpolation'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
+      CASE DEFAULT
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+               'Unknown option for selecting bathymetry interpolation'
+         CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+         STOP 'ABNORMAL END: S/R ReadBTY'
+      END SELECT BathyType
 
 
-       READ(  BTYFile, * ) NbtyPts
+      READ(  BTYFile, * ) NbtyPts
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A,I10)') 'Number of bathymetry points = ', NbtyPts
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+      WRITE(msgBuf,'(A,I10)') 'Number of bathymetry points = ', NbtyPts
+      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
-        ! we'll be extending the bathymetry to infinity on both sides
-        NbtyPts = NbtyPts + 2  
-        ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
-        IF ( IAllocStat /= 0 ) THEN
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                'Insufficient memory for bathymetry data: reduce # bty points'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-            STOP 'ABNORMAL END: S/R ReadBTY'
-        END IF
+      ! we'll be extending the bathymetry to infinity on both sides
+      NbtyPts = NbtyPts + 2  
+      ALLOCATE( Bot( NbtyPts ), Stat = IAllocStat )
+      IF ( IAllocStat /= 0 ) THEN
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+            'Insufficient memory for bathymetry data: reduce # bty points'
+         CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+         STOP 'ABNORMAL END: S/R ReadBTY'
+      END IF
         
 #ifdef IHOP_WRITE_OUT
-       WRITE(msgBuf,'(A)') 
-       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+      WRITE(msgBuf,'(A)') 
+      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
-       BathyTypeB: SELECT CASE ( btyType( 2 : 2 ) )
-       CASE ( 'S', '' )
-#ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(A)') 'Short format (bathymetry only)'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A)') ' Range (km)  Depth (m)'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
+      BathyTypeB: SELECT CASE ( btyType( 2:2 ) )
+      CASE ( 'S', '' )
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(A)') 'Short format (bathymetry only)'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+         WRITE(msgBuf,'(A)') ' Range (km)  Depth (m)'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
        CASE ( 'L' )
-#ifdef IHOP_WRITE_OUT
-          WRITE(msgBuf,'(A)') 'Long format (bathymetry and geoacoustics)'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A)') &
-              ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI'
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-          WRITE(msgBuf,'(A)') 
-          CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
-       CASE DEFAULT
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                    'Unknown option for selecting bathymetry interpolation'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-            STOP 'ABNORMAL END: S/R ReadBTY'
-       END SELECT BathyTypeB
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(A)') 'Long format (bathymetry and geoacoustics)'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+         WRITE(msgBuf,'(A)') &
+            ' Range (km)  Depth (m)  alphaR (m/s)  betaR  rho (g/cm^3)  alphaI     betaI'
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+         WRITE(msgBuf,'(A)') 
+         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
+      CASE DEFAULT
+# ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+            'Unknown option for selecting bathymetry interpolation'
+         CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+         STOP 'ABNORMAL END: S/R ReadBTY'
+      END SELECT BathyTypeB
 
-       btyPt: DO ii = 2, NbtyPts - 1
+       ! R_low check of gcm depths, change to positive values
+      firstnonzero=.true.
+      DO bj=myByLo(myThid),myByHi(myThid)
+         DO bi=myBxLo(myThid),myBxHi(myThid)
+            gcmbathy(1:sNx,1:sNy) = rkSign*R_low(1:sNx,1:sNy,bi,bj)
+            DO i=1,sNx
+               DO j=1,sNy
+                  IF ( gcmbathy(i,j) .ne. 0.0 ) THEN
+                     IF (firstnonzero) THEN
+                        gcmmin = gcmbathy(i,j)
+                        gcmmax = gcmbathy(i,j)
+                        firstnonzero=.false.
+                     ELSE
+                        IF ( gcmbathy(i,j) < gcmmin ) gcmmin = gcmbathy(i,j)
+                        IF ( gcmbathy(i,j) > gcmmax ) gcmmax = gcmbathy(i,j)
+                     END IF
+                  END IF
+               END DO
+            END DO
+         END DO
+      END DO
 
-          SELECT CASE ( btyType( 2 : 2 ) )
-          CASE ( 'S', '' )   ! short format
-             READ(  BTYFile, * ) Bot( ii )%x
-#ifdef IHOP_WRITE_OUT
-             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  
-                WRITE(msgBuf,'(2G11.3)' ) Bot( ii )%x
-                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-             END IF
-#endif /* IHOP_WRITE_OUT */
-          CASE ( 'L' )       ! long format
-             READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, &
-                                 Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
-                                 Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
-#ifdef IHOP_WRITE_OUT
-             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   
-                WRITE( msgBuf,'(2F10.2,3X,2F10.2,3X,F6.2,3X,2F10.4)' ) &
-                   Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
-                   Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
-                CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-             END IF
-#endif /* IHOP_WRITE_OUT */
-          CASE DEFAULT
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                    'Unknown option for selecting bathymetry interpolation'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-            STOP 'ABNORMAL END: S/R ReadBTY'
-          END SELECT
+      ! Read in the bathymetry
+      btyPt: DO ii = 2, NbtyPts - 1
 
-          IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
-#ifdef IHOP_WRITE_OUT
+         SELECT CASE ( btyType( 2:2 ) )
+         CASE ( 'S', '' )   ! short format
+            READ(  BTYFile, * ) Bot( ii )%x
+# ifdef IHOP_WRITE_OUT
+            IF (Bot(ii)%x(2) .lt. gcmmin .or. Bot(ii)%x(2) .gt. gcmmax) THEN
+               WRITE(msgBuf,'(2A,F10.2)') '** Warning ** BDRYMOD ReadBTY: ', &
+                  'ihop bathymetry out of gcm bathymetry limits: ', Bot(ii)%x(2)
+               CALL PRINT_MESSAGE( msgBuf, errorMessageUnit, SQUEEZE_RIGHT, myThid )
+            END IF
+            IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  
+               WRITE(msgBuf,'(2G11.3)' ) Bot( ii )%x
+               CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+            END IF
+# endif /* IHOP_WRITE_OUT */
+         CASE ( 'L' )       ! long format
+            READ(  BTYFile, * ) Bot( ii )%x, Bot( ii )%HS%alphaR, &
+                                Bot( ii )%HS%betaR, Bot( ii )%HS%rho, &
+                                Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+# ifdef IHOP_WRITE_OUT
+            IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN   
+               WRITE( msgBuf,'(2F10.2,3X,2F10.2,3X,F6.2,3X,2F10.4)' ) &
+                  Bot( ii )%x, Bot( ii )%HS%alphaR, Bot( ii )%HS%betaR, &
+                  Bot( ii )%HS%rho, Bot( ii )%HS%alphaI, Bot( ii )%HS%betaI
+               CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+            END IF
+# endif /* IHOP_WRITE_OUT */
+         CASE DEFAULT
+# ifdef IHOP_WRITE_OUT
             WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                'Bathymetry drops below lowest point in the sound speed profile'
+               'Unknown option for selecting bathymetry interpolation'
             CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
+# endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
-          END IF
+         END SELECT
+
+         IF ( Bot( ii )%x( 2 ) > DepthB ) THEN
+# ifdef IHOP_WRITE_OUT
+            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+               'Bathymetry drops below lowest point in the sound speed profile'
+            CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+            STOP 'ABNORMAL END: S/R ReadBTY'
+         END IF
  
-       END DO btyPt
+      END DO btyPt
 
-       CLOSE( BTYFile )
+      CLOSE( BTYFile )
 
-       Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
+      Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
-    CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
-#ifdef IHOP_WRITE_OUT
-        WRITE(msgBuf,'(A)') 'No BTYFile; assuming flat bottom'
-        CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-#endif /* IHOP_WRITE_OUT */
-        ALLOCATE( Bot( 2 ), Stat = IAllocStat )
-        IF ( IAllocStat /= 0 ) THEN
-#ifdef IHOP_WRITE_OUT
-            WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                                 'Insufficient memory for bathymetry data'
-            CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
+   CASE DEFAULT   ! no bathymetry given, use SSP depth for flat bottom
+# ifdef IHOP_WRITE_OUT
+      WRITE(msgBuf,'(A)') 'No BTYFile; assuming flat bottom'
+      CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
+# endif /* IHOP_WRITE_OUT */
+      ALLOCATE( Bot( 2 ), Stat = IAllocStat )
+      IF ( IAllocStat /= 0 ) THEN
+#  ifdef IHOP_WRITE_OUT
+         WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+            'Insufficient memory for bathymetry data'
+         CALL PRINT_ERROR( msgBuf,myThid )
+#  endif /* IHOP_WRITE_OUT */
             STOP 'ABNORMAL END: S/R ReadBTY'
-        END IF
-        Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
-        Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
-    END SELECT
+      END IF
+      Bot( 1 )%x = [ -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
+      Bot( 2 )%x = [  sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5, DepthB ]
+   END SELECT
 
-    CALL ComputeBdryTangentNormal( Bot, 'Bot' )
+   CALL ComputeBdryTangentNormal( Bot, 'Bot' )
 
-    IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
-#ifdef IHOP_WRITE_OUT
-        WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
-                    'Bathymetry ranges are not monotonically increasing'
-        CALL PRINT_ERROR( msgBuf,myThid )
-#endif /* IHOP_WRITE_OUT */
-        STOP 'ABNORMAL END: S/R ReadBTY'
-    END IF 
+   IF ( .NOT. monotonic( Bot%x( 1 ), NBtyPts ) ) THEN
+# ifdef IHOP_WRITE_OUT
+      WRITE(msgBuf,'(2A)') 'BDRYMOD ReadBTY: ', &
+         'Bathymetry ranges are not monotonically increasing'
+      CALL PRINT_ERROR( msgBuf,myThid )
+# endif /* IHOP_WRITE_OUT */
+      STOP 'ABNORMAL END: S/R ReadBTY'
+   END IF 
 
-  RETURN
-  END !SUBROUTINE ReadBTY
+   RETURN
+   END !SUBROUTINE ReadBTY
 
   ! **********************************************************************!
 
