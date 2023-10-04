@@ -822,9 +822,9 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   CHARACTER*(80)          :: fmtstr
 
   ! == Local Variables ==
-  INTEGER                       :: ii, jj, k
+  INTEGER                       :: ii, jj
   REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
-  REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE), dcdz
+  REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE), dcdz(IHOP_NPTS_IDW)
   REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
 
   SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
@@ -884,25 +884,27 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
               tmpSSP(2:(SSP%Nz-1),ii,bi,bj) = tmpSSP(2:(SSP%Nz-1),ii,bi,bj) + &
                   ihop_ssp(i,j,:,bi,bj)* &
                   ihop_idw_weights(ii,jj)/sumweights(ii)
+                  
+              ! Extrapolate from first zero partial cell through bathymetry
+              DO iz=2,SSP%Nz
+                IF ( hFacC(i,j,iz-1,bi,bj).eq.0 .or. iz.eq.Nr ) THEN ! underground vlevel
+                  ! calc gradient at first underground depth point
+                  dcdz(jj) =  ( tmpSSP(iz-1,ii,bi,bj) - tmpSSP(iz-2,ii,bi,bj) ) / &
+                              ( SSP%z(iz-1) - SSP%z(iz-2) )
+                  print *, 'dcdz', dcdz(jj), 'i,j,iz,jj', i,j,iz,jj
+                  ! Mean depth gradient of SSP
+                  IF (jj.eq.IHOP_npts_idw) dcdz(1) = SUM(dcdz) / SIZE(dcdz)
 
-              ! ! Bottom layer, extrapolate below deepest point
-              ! tmpSSP(SSP%Nz,ii,bi,bj) = tmpSSP(SSP%Nz,ii,bi,bj) + &
-              !     CHEN_MILLERO(i,j,SSP%Nz,bi,bj,myThid)* &
-              !     ihop_idw_weights(ii,jj)/sumweights(ii)
+                  ! Extend through SSP deepest depth level
+                  tmpSSP(iz:SSP%Nz,ii,bi,bj) = tmpSSP(iz-1,ii,bi,bj) + dcdz(1)*SSP%z(iz:SSP%Nz)
+                  EXIT
+                END IF
+              END DO
+            
             ENDIF
             ENDDO ! End interpolation
 
-            ! Exptrapolate SSP through bathymetry
-            DO k=1,Nr
-              IF (hFacC(i,j,k,bi,bj).eq.0) THEN ! in a fully bathymetric vlevel
-                ! Extrapolate at a constant gradient; tmpSSP is shifted in k by +1
-                dcdz =  ( tmpSSP(k-1,ii,bi,bj) - tmpSSP(k-2,ii,bi,bj) ) / &
-                        ( SSP%z(k-1) - SSP%z(k-2) )
-                print *, 'dcdz', dcdz, 'i,j,k', i,j,k
-                tmpSSP(k+1,ii,bi,bj) = tmpSSP(k,ii,bi,bj) + dcdz*SSP%z(k)
-              END IF
-            END DO
-          ENDDO
+          ENDDO 
         ENDDO
       ENDDO
     ENDDO
