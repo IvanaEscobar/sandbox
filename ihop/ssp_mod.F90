@@ -825,9 +825,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   INTEGER                       :: ii, jj, njj(IHOP_NPTS_RANGE)
   REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
   REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE, Nr), &
-                                   dcdzAvg(IHOP_NPTS_RANGE), &
-                                   dcdz(IHOP_NPTS_IDW), &
-                                   sdcdz(IHOP_NPTS_RANGE,Nr)
+                                   dcdz
   REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
 
   SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
@@ -851,7 +849,6 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   tmpSSP    = 0.0 _d 0
   njj       = 0
   dcdz      = 0.0 _d 0
-  sdcdz     = SIZE(dcdz) ! IDW max is set to 4 points
 
   ! set SSP%Seg%r from data.ihop -> ihop_ranges
   SSP%Seg%r( 1:SSP%Nr ) = ihop_ranges( 1:SSP%Nr )
@@ -879,9 +876,9 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
               IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
                   yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN 
                   DO iz=1,Nr
-                    IF ( hFacC(i,j,iz,bi,bj).eq.0.0 ) &
+                    IF ( hFacC(i,j,iz,bi,bj).eq.0.0 ) THEN
                       sumweights(ii,iz) = sumweights(ii,iz) - ihop_idw_weights(ii,jj)
-                      sdcdz(ii,iz) = sdcdz(ii,iz) - 1
+                    ENDIF
                   ENDDO
               END IF
             ENDDO
@@ -901,34 +898,34 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
             interp: DO jj=1,IHOP_npts_idw
             IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
                 yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
-              !njj(ii) = njj(ii) + 1
+              njj(ii) = njj(ii) + 1
 
               vlevel: DO iz=1,SSP%Nz-1
-                !print *, "Esco range", ii, 'interp', jj, 'depth:', iz
                 IF (iz.eq.1) THEN
                   ! Top vlevel zero depth
                   tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
                     CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
-                    ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
+                    ihop_idw_weights(ii,jj)/sumweights(ii,iz)
                 ELSE ! 2:(SSP%Nz-1)
-
                   ! Middle depth layers
-                  tmpSSP(iz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + &
-                    ihop_ssp(i,j,iz-1,bi,bj)* &
-                    ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
-
-                  ! ! Extrapolate from first cero partial cell through bathymetry
-                  ! IF ( hFacC(i,j,iz-1,bi,bj).eq.0 .or. iz.eq.SSP%Nz-1 ) THEN ! underground or last gcm vlevel
-                  !   ! calc gradient at first underground depth point
-                  !   dcdz(jj) =  ( tmpSSP(iz-1,ii,bi,bj) - tmpSSP(iz-2,ii,bi,bj) ) / &
-                  !               ( SSP%z(iz-1) - SSP%z(iz-2) )
-                  !   ! Mean depth gradient of SSP ! ADATIVE IDW needs a new size defined
-                  !   IF (njj(ii).eq.sdcdz(ii)) dcdzAvg(ii) = SUM(dcdz) / sdcdz(ii)
-
-                  !   ! Extend through SSP deepest depth level
-                  !   tmpSSP(iz+1:SSP%Nz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + dcdzAvg(ii)*SSP%z(iz+1:SSP%Nz)
-                  !   EXIT interp
-                  ! END IF
+                  IF (sumweights(ii,iz-1).gt.0.0) THEN
+                    tmpSSP(iz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + &
+                      ihop_ssp(i,j,iz-1,bi,bj)* &
+                      ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
+                  END IF 
+                  
+                  IF (iz.eq.SSP%Nz-1) THEN ! sumweights(ii,iz-1).eq.0.0 .or. 
+                  ! Extrapolate from first cero partial cell through bathymetry
+                    IF ( njj(ii).eq.IHOP_npts_idw ) THEN 
+                      ! calc gradient at first underground depth point
+                      dcdz =  ( tmpSSP(iz,ii,bi,bj) - tmpSSP(iz-1,ii,bi,bj) ) / &
+                              ( SSP%z(iz) - SSP%z(iz-1) )
+                      print *, 'Esco, ii,dcdz', ii, dcdz
+                      ! Extend through SSP deepest depth level
+                      tmpSSP(iz+1:SSP%Nz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + dcdz*SSP%z(iz+1:SSP%Nz)
+                      EXIT interp
+                    ENDIF 
+                  END IF
 
                 END IF
               END DO vlevel
