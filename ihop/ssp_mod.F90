@@ -824,10 +824,10 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   ! == Local Variables ==
   INTEGER                       :: ii, jj, njj(IHOP_NPTS_RANGE)
   REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
-  REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE), &
+  REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE, Nr), &
                                    dcdzAvg(IHOP_NPTS_RANGE), &
                                    dcdz(IHOP_NPTS_IDW), &
-                                   sdcdz(IHOP_NPTS_RANGE)
+                                   sdcdz(IHOP_NPTS_RANGE,Nr)
   REAL (KIND=_RL90), ALLOCATABLE:: tmpSSP(:,:,:,:)
 
   SSP%Nz = Nr+2 ! add z=0 z=Depth layers 
@@ -866,8 +866,30 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   !==================================================
   ! Sum IDW weights
   DO ii = 1,IHOP_npts_range
-    sumweights(ii) = sum(ihop_idw_weights(ii,:))
-  END DO  
+    sumweights(ii,:) = sum(ihop_idw_weights(ii,:))
+  END DO 
+
+  DO bj=myByLo(myThid),myByHi(myThid)
+    DO bi=myBxLo(myThid),myBxHi(myThid)
+      DO j=1,sNy
+        DO i=1,sNx
+          DO ii=1,IHOP_npts_range
+            ! IDW Interpolation weights
+            DO jj=1,IHOP_npts_idw
+              IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
+                  yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN 
+                  DO iz=1,Nr
+                    IF ( hFacC(i,j,iz,bi,bj).eq.0.0 ) &
+                      sumweights(ii,iz) = sumweights(ii,iz) - ihop_idw_weights(ii,jj)
+                      sdcdz(ii,iz) = sdcdz(ii,iz) - 1
+                  ENDDO
+              END IF
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+  ENDDO
 
   ! from ocean grid to acoustic grid with IDW
   DO bj=myByLo(myThid),myByHi(myThid)
@@ -879,43 +901,35 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
             interp: DO jj=1,IHOP_npts_idw
             IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
                 yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
-              njj(ii) = njj(ii) + 1
+              !njj(ii) = njj(ii) + 1
 
               vlevel: DO iz=1,SSP%Nz-1
+                !print *, "Esco range", ii, 'interp', jj, 'depth:', iz
                 IF (iz.eq.1) THEN
                   ! Top vlevel zero depth
                   tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
                     CHEN_MILLERO(i,j,0,bi,bj,myThid)* &
-                    ihop_idw_weights(ii,jj)/sumweights(ii)
+                    ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
                 ELSE ! 2:(SSP%Nz-1)
-                  ! Middle Nr levels and last vlevel
-                  IF ( hFacC(i,j,iz-1,bi,bj).eq.0.0 .and. ii.eq.2 ) THEN
-                    ! ADAPT IDW interpolation, there is no ssp info here
-                    sdcdz(ii) = sdcdz(ii) - 1
-                    ! IF sdcdz = 0, you aren't in a pothole, you're just underground
-                    sumweights(ii) = sumweights(ii) - ihop_idw_weights(ii,jj)
-                    EXIT interp
-                  END IF
 
-                  ! Middle depth layers: Nr w hFacC.gt.0 depths
+                  ! Middle depth layers
                   tmpSSP(iz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + &
                     ihop_ssp(i,j,iz-1,bi,bj)* &
-                    ihop_idw_weights(ii,jj)/sumweights(ii)
-              
-                  ! Extrapolate from first cero partial cell through bathymetry
-                  IF ( hFacC(i,j,iz-1,bi,bj).eq.0 .or. iz.eq.SSP%Nz-1 ) THEN ! underground or last gcm vlevel
-                    print *, "Esco range", ii, 'depth:', iz, 'interp', jj
-                    ! calc gradient at first underground depth point
-                    dcdz(jj) =  ( tmpSSP(iz-1,ii,bi,bj) - tmpSSP(iz-2,ii,bi,bj) ) / &
-                                ( SSP%z(iz-1) - SSP%z(iz-2) )
-                    ! Mean depth gradient of SSP ! ADATIVE IDW needs a new size defined
-                    IF (njj(ii).eq.sdcdz(ii)) dcdzAvg(ii) = SUM(dcdz) / sdcdz(ii)
-                    print *, "Esco dcdz", dcdz(jj), 'size', sdcdz(ii), 'dcdzAvg', dcdzAvg(ii)
+                    ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
 
-                    ! Extend through SSP deepest depth level
-                    tmpSSP(iz+1:SSP%Nz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + dcdzAvg(ii)*SSP%z(iz+1:SSP%Nz)
-                    EXIT !if loop
-                  END IF
+                  ! ! Extrapolate from first cero partial cell through bathymetry
+                  ! IF ( hFacC(i,j,iz-1,bi,bj).eq.0 .or. iz.eq.SSP%Nz-1 ) THEN ! underground or last gcm vlevel
+                  !   ! calc gradient at first underground depth point
+                  !   dcdz(jj) =  ( tmpSSP(iz-1,ii,bi,bj) - tmpSSP(iz-2,ii,bi,bj) ) / &
+                  !               ( SSP%z(iz-1) - SSP%z(iz-2) )
+                  !   ! Mean depth gradient of SSP ! ADATIVE IDW needs a new size defined
+                  !   IF (njj(ii).eq.sdcdz(ii)) dcdzAvg(ii) = SUM(dcdz) / sdcdz(ii)
+
+                  !   ! Extend through SSP deepest depth level
+                  !   tmpSSP(iz+1:SSP%Nz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + dcdzAvg(ii)*SSP%z(iz+1:SSP%Nz)
+                  !   EXIT interp
+                  ! END IF
+
                 END IF
               END DO vlevel
             
@@ -1001,7 +1015,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
   CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   DO iz = 1, SSP%Nz
-    WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
+    WRITE(msgBuf,'(12F10.4)'  ) SSP%z( iz ), SSP%cMat( iz, : )
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   END DO
 #endif /* IHOP_WRITE_OUT */
