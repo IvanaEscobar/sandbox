@@ -822,7 +822,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   CHARACTER*(80)          :: fmtstr
 
   ! == Local Variables ==
-  INTEGER                       :: ii, jj, njj(IHOP_NPTS_RANGE)
+  INTEGER                       :: ii, jj, njj(IHOP_NPTS_RANGE), k
   REAL (KIND=_RL90), INTENT(IN) :: Depth, freq
   REAL (KIND=_RL90)             :: sumweights(IHOP_NPTS_RANGE, Nr), &
                                    dcdz
@@ -871,15 +871,17 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
       DO j=1,sNy
         DO i=1,sNx
           DO ii=1,IHOP_npts_range
-            ! IDW Interpolation weights
+            ! IDW Interpolation weight sum
             DO jj=1,IHOP_npts_idw
               IF (xC(i,j,bi,bj) .eq. ihop_xc(ii,jj) .and. &
                   yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN 
-                  DO iz=1,Nr
-                    IF ( hFacC(i,j,iz,bi,bj).eq.0.0 ) THEN
-                      sumweights(ii,iz) = sumweights(ii,iz) - ihop_idw_weights(ii,jj)
-                    ENDIF
-                  ENDDO
+                DO k=1,Nr
+                  IF ( hFacC(i,j,k,bi,bj).eq.0.0 ) THEN
+                    sumweights(ii,k) = sumweights(ii,k) - ihop_idw_weights(ii,jj)
+                  ENDIF
+                  ! Set TINY values to 0.0
+                  IF ( ABS(sumweights(ii,k)).LT.1D-24 ) sumweights(ii,k) = 0.0
+                ENDDO
               END IF
             ENDDO
           ENDDO
@@ -900,7 +902,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
                 yC(i,j,bi,bj) .eq. ihop_yc(ii,jj)) THEN
               njj(ii) = njj(ii) + 1
 
-              vlevel: DO iz=1,SSP%Nz-1
+              DO iz=1,SSP%Nz-1
                 IF (iz.eq.1) THEN
                   ! Top vlevel zero depth
                   tmpSSP(1,ii,bi,bj) = tmpSSP(1,ii,bi,bj) + &
@@ -914,25 +916,31 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
                       ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
                   END IF 
                   
-                  IF (iz.eq.SSP%Nz-1) THEN ! sumweights(ii,iz-1).eq.0.0 .or. 
-                  ! Extrapolate from first cero partial cell through bathymetry
+                  IF ( iz.eq.SSP%Nz-1 .or. sumweights(ii,iz-1).eq.0.0 ) THEN 
+                    ! Extrapolate through bathymetry
+                    k=iz
+                    
                     IF ( njj(ii).eq.IHOP_npts_idw ) THEN 
-                      ! calc gradient at first underground depth point
-                      dcdz =  ( tmpSSP(iz,ii,bi,bj) - tmpSSP(iz-1,ii,bi,bj) ) / &
-                              ( SSP%z(iz) - SSP%z(iz-1) )
-                      print *, 'Esco, ii,dcdz', ii, dcdz
-                      ! Extend through SSP deepest depth level
-                      tmpSSP(iz+1:SSP%Nz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + dcdz*SSP%z(iz+1:SSP%Nz)
+                      ! Last gcm vlevel extrapolation
+                      IF ( iz.eq.SSP%Nz-1 .and. sumweights(ii,iz-1).ne.0.0 ) k = k+1
+                       
+                      ! Calc depth gradient
+                      dcdz =  ( tmpSSP(k-1,ii,bi,bj)-tmpSSP(k-2,ii,bi,bj) ) / &
+                              ( SSP%z(k-1)-SSP%z(k-2) )
+                      ! Extrapolate
+                      tmpSSP(k:SSP%Nz,ii,bi,bj) = &
+                          tmpSSP(k-1,ii,bi,bj) + dcdz*SSP%z(k:SSP%Nz)
+                      ! Move to the next range point, ii
                       EXIT interp
-                    ENDIF 
+                    END IF 
                   END IF
 
                 END IF
-              END DO vlevel
+              END DO  
             
-            ENDIF
+            END IF
             END DO interp
-          ENDDO 
+          END DO 
         ENDDO
       ENDDO
     ENDDO
@@ -949,7 +957,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   ! set vector structured c, rho, and cz for first range point
   DO iz = 1,SSP%Nz
     alphaR = SSP%cMat( iz, 1 )
-  
+
     SSP%c(   iz ) = CRCI( SSP%z( iz ), alphaR, alphaI, freq, freq, &
                           SSP%AttenUnit, betaPowerLaw, fT, myThid )
     SSP%rho( iz ) = rhoR
@@ -1012,7 +1020,7 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
   WRITE(msgBuf,'(A)') ' Depth (m)     Soundspeed (m/s)'
   CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   DO iz = 1, SSP%Nz
-    WRITE(msgBuf,'(12F10.4)'  ) SSP%z( iz ), SSP%cMat( iz, : )
+    WRITE(msgBuf,'(12F10.2)'  ) SSP%z( iz ), SSP%cMat( iz, : )
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
   END DO
 #endif /* IHOP_WRITE_OUT */
