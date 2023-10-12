@@ -13,9 +13,17 @@ def meter2deg (m):
     return m / 6371009. * 180 / pi
 
 def lon180to360 (lon):
+    # Input: longitude that spans [-180 180] degE or [180 degW 180degE]
+    # Output: longitude that spans [0 360] deg'E'
+    #
+    # Note: 0 deg lies at Greenwich, England aka the international date line 
     return lon % 360.
 
 def lon360to180 (lon):
+    # Input: longitude that spans [0 360] deg'E'
+    # Output: longitude that spans [-180 180] degE or [180 degW 180degE]
+    #
+    # Note: 0 deg lies at Greenwich, England aka the international date line 
     return (lon+180.) % 360. - 180.
 
 def gcDistance( lonA, latA, lonB, latB ):
