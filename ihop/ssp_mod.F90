@@ -911,9 +911,15 @@ SUBROUTINE ExtractSSP( Depth, freq, myThid )
                 ELSE ! 2:(SSP%Nz-1)
                   ! Middle depth layers
                   IF (sumweights(ii,iz-1).gt.0.0) THEN
-                    tmpSSP(iz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + &
-                      ihop_ssp(i,j,iz-1,bi,bj)* &
-                      ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
+                    IF (ihop_idw_weights(ii,jj).eq.0.0) THEN
+                      ! Exactly on a cell center, ignore interpolation
+                      tmpSSP(iz,ii,bi,bj) = ihop_ssp(i,j,iz-1,bi,bj)
+                      EXIT interp
+                    ELSE
+                      tmpSSP(iz,ii,bi,bj) = tmpSSP(iz,ii,bi,bj) + &
+                        ihop_ssp(i,j,iz-1,bi,bj)* &
+                        ihop_idw_weights(ii,jj)/sumweights(ii,iz-1)
+                    END IF
                   END IF 
                   
                   IF ( iz.eq.SSP%Nz-1 .or. sumweights(ii,iz-1).eq.0.0 ) THEN 
