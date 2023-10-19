@@ -28,7 +28,10 @@ from .caatex import (
         caatex_coords,
         )
 
+from . import gebco
+
 __all__ = [ 'utils',
             'unesco',
             'nesbaDist',
+            'gebco',
           ]
