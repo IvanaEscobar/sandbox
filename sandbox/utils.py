@@ -1,6 +1,6 @@
 from scipy.io import loadmat
 from numpy import abs, cos, sqrt, arctan, sin, arccos, pi, tan,\
-                  vectorize, exp, zeros, array, reshape
+                  vectorize, exp, zeros, array, reshape, fromfile
 from pyproj import Geod
 
 def loadMatFile ( file ):
@@ -182,3 +182,7 @@ def utm2wgs(x, y, utmzone):
     lons = reshape(lons, arrShape)
     lats = reshape(lats, arrShape)
     return lons, lats
+
+def loadmitgcmbinary(ff, dims):
+    data = fromfile(ff, dtype='>f4').reshape(dims)
+    return data

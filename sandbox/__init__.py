@@ -3,6 +3,7 @@
 
 from .utils import (
         loadMatFile,
+        loadmitgcmbinary,
         degMinSec2decimal,
         lon180to360,
         lon360to180,
