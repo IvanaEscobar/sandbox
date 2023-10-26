@@ -105,7 +105,8 @@ CONTAINS
     IF ( IHOP_depth.NE.0 ) THEN
         Bdry%Bot%HS%Depth = IHOP_depth
     ELSE
-        Bdry%Bot%HS%Depth = rkSign*rF( Nr+1 ) + 5*1500.0/IHOP_freq ! add 5 wavelengths
+        ! Extend by 5 wavelengths
+        Bdry%Bot%HS%Depth = rkSign*rF( Nr+1 ) + 5*1500.0/IHOP_freq 
     END IF
     x = [ 0.0 _d 0, Bdry%Bot%HS%Depth ]   ! tells SSP Depth to read to
 
@@ -256,7 +257,7 @@ CONTAINS
     IF ( IHOP_rbox.NE.0 ) THEN
         Beam%Box%r = IHOP_rbox
     ELSE
-        !Beam%Box%r = ( SSP%Seg%r( SSP%Nr ) - 0.05) / 1000.0 ! in km
+        ! Extend beam box by a single step size forward
         Beam%Box%r = ihop_rr(nrd) + Beam%deltas/1000. ! in [km]
     END IF
 #ifdef IHOP_WRITE_OUT
@@ -270,7 +271,7 @@ CONTAINS
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 
-    Beam%Box%r = 1000.0*Beam%Box%r   ! convert km to m
+    Beam%Box%r = Beam%Box%r*1000.   ! convert km to m
 #endif /* IHOP_THREED */
 
     ! *** Beam characteristics ***
