@@ -343,7 +343,7 @@ SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
          STOP 'ABNORMAL END: S/R ReadBTY'
       END SELECT BathyTypeB
 
-       ! R_low check of gcm depths, change to positive values
+      ! R_low check of gcm depths, change to positive values
       firstnonzero=.true.
       DO bj=myByLo(myThid),myByHi(myThid)
          DO bi=myBxLo(myThid),myBxHi(myThid)
@@ -373,8 +373,10 @@ SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, myThid )
             READ(  BTYFile, * ) Bot( ii )%x
 # ifdef IHOP_WRITE_OUT
             IF (Bot(ii)%x(2) .lt. gcmmin .or. Bot(ii)%x(2) .gt. gcmmax) THEN
-               WRITE(msgBuf,'(2A,F10.2)') '** Warning ** BDRYMOD ReadBTY: ', &
-                  'ihop bathymetry out of gcm bathymetry limits: ', Bot(ii)%x(2)
+               WRITE(msgBuf,'(2A,F10.2,A,F10.2)') &
+                '** Warning ** BDRYMOD ReadBTY: ', &
+                'ihop and gcm bathymetry vary, ihop:', Bot(ii)%x(2), 'gcm:', &
+                gcmmax
                CALL PRINT_MESSAGE( msgBuf, errorMessageUnit, SQUEEZE_RIGHT, myThid )
             END IF
             IF ( ii < Number_to_Echo .OR. ii == NbtyPts ) THEN  

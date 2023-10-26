@@ -481,7 +481,7 @@ SUBROUTINE Quad( x, c, cimag, gradc, crr, crz, czz, rho, freq, Task, myThid )
       WRITE(msgBuf,'(2A)') 'ray is outside the box where ocean ',&
         'soundspeed is defined'
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
-      WRITE(msgBuf,'(A,2F10.4)') ' x = ( r, z ) = ', x
+      WRITE(msgBuf,'(A,2F13.4)') ' x = ( r, z ) = ', x
       CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
       WRITE(msgBuf,'(2A)') 'SSPMOD Quad: ', &
         'ray is outside the box where the soundspeed is defined'

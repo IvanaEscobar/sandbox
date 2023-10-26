@@ -559,7 +559,7 @@ CONTAINS
   
   !     == Local Variables ==
     REAL (KIND=_RL90), INTENT( IN ) :: xs( 2 )     ! coordinate of source
-    REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! init angle, beam amplitude
+    REAL (KIND=_RL90), INTENT( IN ) :: alpha, Amp0 ! angle in rad, beam amp
     INTEGER           :: is, is1                   ! indices for ray step
     REAL (KIND=_RL90) :: c, cimag, gradc( 2 ), crr, crz, czz, rho
     REAL (KIND=_RL90) :: dEndTop( 2 ), dEndBot( 2 ), TopnInt( 2 ), BotnInt( 2 ), &
