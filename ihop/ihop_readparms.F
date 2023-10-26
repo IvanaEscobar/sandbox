@@ -150,10 +150,10 @@ C--   Default values for IHOP_PARM02
       DO i=1,nsd
         IHOP_sd(i)  = 0. _d 0
       ENDDO
-      DO i=1,nsd
+      DO i=1,nrd
         IHOP_rd(i)  = 0. _d 0
       ENDDO
-      DO i=1,nsd
+      DO i=1,nrr
         IHOP_rr(i)  = 0. _d 0
       ENDDO
       IHOP_alpha    = 0. _d 0
