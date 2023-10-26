@@ -230,16 +230,7 @@ CONTAINS
     CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
 #else /* not IHOP_THREED */
-    IF ( IHOP_zbox.NE.0 ) THEN
-        Beam%Box%z = IHOP_zbox
-    ELSE
-        Beam%Box%z = Bdry%Bot%HS%Depth ! in m
-    END IF
-    IF ( IHOP_rbox.NE.0 ) THEN
-        Beam%Box%r = IHOP_rbox
-    ELSE
-        Beam%Box%r = ( SSP%Seg%r( SSP%Nr ) - 0.05) / 1000.0 ! in km
-    END IF
+    ! Step size in meters [m]
     Beam%deltas = IHOP_step
     IF ( Beam%deltas == 0.0 ) THEN ! Automatic step size option
         Beam%deltas = ( Bdry%Bot%HS%Depth - Bdry%Top%HS%Depth ) / 10.0   
@@ -254,6 +245,19 @@ CONTAINS
             ' Step length,', ' deltas = ', Beam%deltas, ' m'
         CALL PRINT_MESSAGE( msgbuf, PRTFile, SQUEEZE_RIGHT, myThid )
 #endif /* IHOP_WRITE_OUT */
+    END IF
+
+    ! Domain size
+    IF ( IHOP_zbox.NE.0 ) THEN
+        Beam%Box%z = IHOP_zbox
+    ELSE
+        Beam%Box%z = Bdry%Bot%HS%Depth ! in m
+    END IF
+    IF ( IHOP_rbox.NE.0 ) THEN
+        Beam%Box%r = IHOP_rbox
+    ELSE
+        !Beam%Box%r = ( SSP%Seg%r( SSP%Nr ) - 0.05) / 1000.0 ! in km
+        Beam%Box%r = ihop_rr(nrd) + Beam%deltas/1000. ! in [km]
     END IF
 #ifdef IHOP_WRITE_OUT
     WRITE(msgBuf,'(A)') 
