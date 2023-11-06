@@ -20,7 +20,7 @@ def get_prt_data (file_path, keyword, nranges=0):
                 case 'depths':
                     return arr[:,0]
                 case 'ssp' | 'SSP':
-                    return arr[:,1]
+                    return arr[:,1:]
                 case _:
                     return arr
         else:   # ranges
