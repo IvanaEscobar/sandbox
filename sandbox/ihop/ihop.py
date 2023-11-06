@@ -3,7 +3,6 @@ from numpy import array
 def get_prt_data (file_path, keyword, nranges=0):
     tmp = file_path + '.tmp'
     _remove_PIDTID(file_path, tmp)
-    print(keyword)
 
     try:
         match keyword:
