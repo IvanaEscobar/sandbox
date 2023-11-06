@@ -1,5 +1,6 @@
 #from . import ooi-pioneer
 #from . import mitprof
+from . import ihop
 
 from .utils import (
         loadMatFile,
