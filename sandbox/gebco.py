@@ -31,8 +31,8 @@ def generateBathyBinary (gridDir,nj,ni, regional=True):
         latMax=yc.max()
         lonMin=xc.min()
         lonMax=xc.max()
-        gebco = gebco.elevation.sel( lat=slice(latMin,latMax),
-                                     lon=slice(lonMin,lonMax) )
+        gebco = gebco.sel(  lat=slice(latMin,latMax),
+                            lon=slice(lonMin,lonMax) )
     else:
         return None
         # GLOBAL
