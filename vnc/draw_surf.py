@@ -11,7 +11,6 @@ import matplotlib.patches as patches
 import cartopy.crs as ccrs
 
 
-
 def get_da_indices(da, myticks):
     # da is the i or j dimension as a 1d value
     # ds.YC.isel(j=30).compute().i for curvilinear grids
@@ -29,11 +28,24 @@ def saveFrame(tt, ds, cmap, fname=''):
         vmin=1403; vmax=1548
     elif ds.attrs['standard_name']=='THETA':
         vmin=0;vmax=30
+    elif ds.attrs['standard_name']=='SALT':
+        vmin=18;vmax=35.6
 
     # plot on a rotated llc face/tile/facet
-    p = ds.isel(k=0,time=tt).plot(x='j',y='i', cmap=cmap, vmin=vmin, vmax=vmax)
+    p = ds.isel(k=0,time=tt).plot(x='j',y='i', cmap=cmap, 
+            vmin=vmin, vmax=vmax, extend='neither')
     # flip y-axis
     plt.gca().invert_yaxis()
+
+    plt.grid(alpha=0.3)
+        
+    ## points of the ihop domain
+    lineID = [[128, 139],[148,138]] # in [J],[I] for ds.sel
+    plt.plot(lineID[0], lineID[1], color='blue', zorder=3)
+    plt.scatter(lineID[0][ 0], lineID[1][ 0], s=20, color='C0', 
+                zorder=4, label='source')
+    plt.scatter(lineID[0][-1], lineID[1][-1], s=20, color='C1', 
+                zorder=4, label='receiver')
 
     # set tick marks on rotated curvilinear facet *ugly cry*
     ax = p.axes
@@ -55,9 +67,10 @@ def saveFrame(tt, ds, cmap, fname=''):
     ax.set_xlabel("longitude [$^\circ$E]")
     ax.set_ylabel("latitude [$^\circ$N]")
     ax.set_title("Surface "+ ds.attrs['long_name'] + " at "+ str(ds.dates.isel(time=tt).data) + " UTC")
+    plt.legend(loc='lower left')
 
     if fname:
-        plt.savefig(fname, bbox_inches="tight", transparent=True)
+        plt.savefig(fname, bbox_inches="tight", transparent=True, dpi=300)
     else:
         plt.show()
     plt.close()
@@ -74,8 +87,8 @@ imgPath='/home/ivana/regionalgcm/img/'
 
 # save vnc DataSet
 # remove pad
-vnc=ds.isel(i=slice(9,238), i_g=slice(9,239),
-            j=slice(11,199), j_g=slice(11,200),
+vnc=ds.isel(i=slice(10,237), i_g=slice(10,238),
+            j=slice(12,198), j_g=slice(12,199),
             time=slice(1,-1) )
 
 # nan on maskC
@@ -96,10 +109,14 @@ print('Start plotting')
 
 # Make plots
 for number in range(len(vnc.iter)):
-    fileName = imgPath+'vnc_1yr_surface-cSound_%10.10i.png'%vnc.iter[number]
-    cmap=cm.speed
-    saveFrame(number, vnc.ihop_ssp, cmap, fileName)
+#   fileName = imgPath+'vnc_1yr_surface-cSound_%10.10i.png'%vnc.iter[number]
+#   cmap=cm.speed
+#   saveFrame(number, vnc.ihop_ssp, cmap, fileName)
 
-    fileName = imgPath+'vnc_1yr_surface-THETA_%10.10i.png'%vnc.iter[number]
-    cmap=cm.thermal
-    saveFrame(number, vnc.THETA, cmap, fileName)
+#   fileName = imgPath+'vnc_1yr_surface-THETA_%10.10i.png'%vnc.iter[number]
+#   cmap=cm.thermal
+#   saveFrame(number, vnc.THETA, cmap, fileName)
+
+    fileName = imgPath+'vnc_1yr_surface-SALT_%10.10i.png'%vnc.iter[number]
+    cmap=cm.haline
+    saveFrame(number, vnc.SALT, cmap, fileName)
