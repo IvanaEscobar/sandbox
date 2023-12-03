@@ -37,7 +37,7 @@ def generateBathyBinary (gridDir,nj,ni, regional=True):
         return None
         # GLOBAL
 
-    # downscaling means we can use a cheap interpolation: longest computation
+    # downscaling means we can use a cheap interpolation: longest wall time 
     regridder = Regridder(gebco.elevation, grid, 'nearest_s2d')
     Depth = regridder(gebco.elevation)
      

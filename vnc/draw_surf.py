@@ -33,7 +33,8 @@ def saveFrame(tt, ds, cmap, fname=''):
 
     # plot on a rotated llc face/tile/facet
     p = ds.isel(k=0,time=tt).plot(x='j',y='i', cmap=cmap, 
-            vmin=vmin, vmax=vmax, extend='neither')
+            vmin=vmin, vmax=vmax, extend='neither', 
+            cbar_kwargs={'orientation':'horizontal'})
     # flip y-axis
     plt.gca().invert_yaxis()
 
@@ -113,10 +114,10 @@ for number in range(len(vnc.iter)):
 #   cmap=cm.speed
 #   saveFrame(number, vnc.ihop_ssp, cmap, fileName)
 
-#   fileName = imgPath+'vnc_1yr_surface-THETA_%10.10i.png'%vnc.iter[number]
-#   cmap=cm.thermal
-#   saveFrame(number, vnc.THETA, cmap, fileName)
+    fileName = imgPath+'vnc_1yr_surface-THETA_%10.10i.png'%vnc.iter[number]
+    cmap=cm.thermal
+    saveFrame(number, vnc.THETA, cmap, fileName)
 
-    fileName = imgPath+'vnc_1yr_surface-SALT_%10.10i.png'%vnc.iter[number]
-    cmap=cm.haline
-    saveFrame(number, vnc.SALT, cmap, fileName)
+#   fileName = imgPath+'vnc_1yr_surface-SALT_%10.10i.png'%vnc.iter[number]
+#   cmap=cm.haline
+#   saveFrame(number, vnc.SALT, cmap, fileName)
