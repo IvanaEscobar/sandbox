@@ -183,6 +183,6 @@ def utm2wgs(x, y, utmzone):
     lats = reshape(lats, arrShape)
     return lons, lats
 
-def loadmitgcmbinary(ff, dims):
-    data = fromfile(ff, dtype='>f4').reshape(dims)
+def loadmitgcmbinary(ff, dims, dtype='>f4'):
+    data = fromfile(ff, dtype=dtype).reshape(dims)
     return data
