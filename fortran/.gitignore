@@ -1,5 +1,6 @@
 testme
 make_readnetcdf
 
-
+readnetcdf.F
+vectorPass.F90
 *.o
