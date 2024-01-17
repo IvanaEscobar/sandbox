@@ -28,5 +28,6 @@ program drive_f_ad
 
     ! evaluation of function and derivative
     call f_ad(a,x,x_ad,y,y_ad,i) ! postprocessing
-    print *, ' values of f and df (reverse): ',y, x_ad
+    print *, ' values of f: ',y
+    print *, ' and df (reverse): ',x_ad
 end
