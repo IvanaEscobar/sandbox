@@ -1,0 +1,32 @@
+#include "CPP_OPTIONS.h"
+
+MODULE pkg_mod
+
+contains
+    subroutine f( a, x, y )
+        implicit none
+! == Global Variables ==
+#ifdef ALLOW_PKG
+# include "PKG.h"
+#endif
+
+! == Local Variables ==
+        real, intent(in ) :: a, x
+        real, intent(out) :: y
+    
+! == Subroutine Code ==
+        if (a.GT.1) then
+            ! Do something with the header common blocks
+            PKG_RUN_THIS=.true.
+            PKG_iter = 10
+            PKG_iter2 = PKG_iter + 10
+        end if
+
+        if (PKG_RUN_THIS) then
+            ! common block parameters won't show up in AD
+            y=a*x**4 + PKG_iter + PKG_iter2
+        end if
+
+    return
+    end
+END MODULE pkg_mod

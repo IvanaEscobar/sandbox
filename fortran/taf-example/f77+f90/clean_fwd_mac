@@ -1,0 +1,2 @@
+echo "Reset build, removing: "
+rm -v *.f *.o *.mod *.f90 f_exec

@@ -1,0 +1,12 @@
+# == MacOS M2 Compile with GNU ==
+
+# CPP for header files
+cat pkg_mod.FOR90 | cpp -traditional -P > pkg_mod.f90
+cat main.FOR | cpp -traditional -P > main.f
+
+# Create FORTRAN object files
+gfortran -fPIC -ffixed-line-length-132 -ffree-line-length-0 -O3 -ftree-vectorize -funroll-loops -c pkg_mod.f90
+gfortran -fPIC -ffixed-line-length-132 -ffree-line-length-0 -O3 -ftree-vectorize -funroll-loops -c main.f
+
+# Create executable called f_exec
+gfortran -fPIC -ffixed-line-length-132 -ffree-line-length-0 -O3 -ftree-vectorize -funroll-loops -o f_exec main.o pkg_mod.o
