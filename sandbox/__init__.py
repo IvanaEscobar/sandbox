@@ -11,6 +11,7 @@ from .utils import (
         gcDistance,
         wgs84Distance,
         wgs84space,
+        wgs84pointBtwnAB,
         utm2wgs,
         )
 from .unesco import (

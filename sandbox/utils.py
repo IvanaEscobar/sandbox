@@ -80,6 +80,27 @@ def wgs84space(start, end, npts=3):
 
     return r 
 
+def wgs84pointBtwnAB(start, end, r_btwn):
+    # start = [startlon, startlat]
+    # end   = [endlon,   endlat]
+    # r_btwn = distance to a midpoint along A to B geodesic in METERS
+    # Return: 
+    # btwn  = [btwnlon,  btwnlat]
+    g = Geod(ellps='WGS84')
+
+    startlon = start[0]
+    startlat = start[1]
+    endlon   = end[0]
+    endlat   = end[1]
+
+    # calculate azimuth of geodesic
+    azi,b,d = g.inv(startlon, startlat, endlon, endlat)
+
+    # use range to find lat, lon of point in between A and B
+    btwnlon, btwnlat, b = g.fwd(startlon, startlat, azi, r_btwn)
+
+    return [btwnlon,btwnlat]
+
 def utm2wgs(x, y, utmzone):    
     # Converts arrays of UTM coordinates into Lon/Lat arrays.
     # Inputs:
