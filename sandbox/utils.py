@@ -204,6 +204,12 @@ def utm2wgs(x, y, utmzone):
     lats = reshape(lats, arrShape)
     return lons, lats
 
-def loadmitgcmbinary(ff, dims, dtype='>f4'):
-    data = fromfile(ff, dtype=dtype).reshape(dims)
+def loadmitgcmbinary(ff, shape, dtype='>f4'):
+    # binary shape from MITgcm will ALWAYS be in order of
+    # 3D: nz,ny,nx 
+    # 2D: ny,nx
+    # This fxn will return the binary in it's native ordering
+    # Return: data
+
+    data = fromfile(ff, dtype=dtype).reshape(shape)
     return data
