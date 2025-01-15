@@ -3,45 +3,35 @@
 from re import findall
 
 '''
-Class for extracing monitor information from STDOUT.#### files in the debugging
-stage
+Class for extracting monitor information from standard output files 
+e.g. STDOUT.####
 
-Need to import the filename:
+Import based on the filename:
     - d = getData('STDOUT.0000')
 
 The following objects are in the class:
-    - data: tuples including the variable name and value
-    - varNames: a list of unique variable names in STDOUT
-    - tups: a list of tuples of unique variable names in STDOUT
+    - data : dictionary including the variable name and value
 
 The following methods are in the class:
-    - getVals: stores a list of floats for a given variable name
+    - getNames : list of variable names. Dictionary keys 
+    - getVals  : list of floats for a given variable name. Dictionary values 
 '''
 
-class getData():
+class getData:
     def __init__( self, filename ):
-        rx = r'\s\%MON\s([^_]+)_(\S+)_(\S+)\s+=\s+(\S+)'
+        rx = r'%MON\s+(\S+)\s+=\s+(\S+)'
         with open( filename, 'r' ) as fileIn:
-            data = []
+            self.data = {}
             for line in fileIn:
-                if findall( rx, line ) != []:
-                    data.append( findall( rx, line )[0] )
+                match = findall( rx, line )
+                if match: 
+                    varName, varVal = match[0]
+                    if varName not in self.data:
+                        self.data[varName] = []
+                    self.data[varName].append(float(varVal))
 
-        self.data = data
-        self.varNames = []
-        self.tups = []
-
-        for it in self.data:
-            var = ( it[0] + ' ' + it[1] + ' ' + it[2] ) 
-            if self.varNames.count( var ) == 0:
-                self.varNames.append( var )
-                self.tups.append( it[:3] )
+    def getNames( self ):
+        return list(self.data.keys())
 
     def getVals( self, varName ):
-        vals = []
-        varId = self.varNames.index( varName )
-
-        for it in self.data:
-            if self.tups[ varId ] == it[:3]:
-                vals.append( float( it[-1] ) )
-        return vals
+        return self.data.get( varName, [] )
