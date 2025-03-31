@@ -70,7 +70,7 @@ def wgs84space(start, end, npts=3):
         raise ValueError('Not enough points in the line')
 
     # calculate distance between points
-    r = g.inv_intermediate(startlon, startlat, endlon, endlat, inpts)
+    r = g.inv_intermediate(startlon, startlat, endlon, endlat, inpts, , return_back_azimuth=True)
 
     # npts doesn't include start/end points, so prepend/append them
     r.lons.insert(0, startlon)
