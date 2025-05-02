@@ -17,7 +17,7 @@ The following methods are in the class:
     - getVals  : list of floats for a given variable name. Dictionary values 
 '''
 
-class getData:
+class getMonData:
     def __init__( self, filename ):
         rx = r'%MON\s+(\S+)\s+=\s+(\S+)'
         with open( filename, 'r' ) as fileIn:
@@ -30,8 +30,30 @@ class getData:
                         self.data[varName] = []
                     self.data[varName].append(float(varVal))
 
+        # add hours and days 
+        self.addHours()
+        self.addDays()
+
     def getNames( self ):
         return list(self.data.keys())
 
     def getVals( self, varName ):
         return self.data.get( varName, [] )
+
+    def addHours( self ):
+        if 'hours' in self.data:
+            # don't repeat addHours if it's already been called before
+            return self
+        else:
+            assert 'time_secondsf' in self.data, "No `time_secondsf` in monitor output"
+            self.data['hours'] = [t/3600 for t in self.data['time_secondsf']]
+            return self
+
+    def addDays( self ):
+        if 'days' in self.data:
+            # don't repeat addDays if it's already been called before
+            return self
+        else:
+            assert 'time_secondsf' in self.data, "No `time_secondsf` in monitor output"
+            self.data['days'] = [t/3600/24 for t in self.data['time_secondsf']]
+            return self

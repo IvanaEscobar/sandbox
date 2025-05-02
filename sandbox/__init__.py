@@ -1,6 +1,5 @@
 #from . import ooi-pioneer
 #from . import mitprof
-from . import ihop
 
 from .utils import (
         loadMatFile,
@@ -14,9 +13,11 @@ from .utils import (
         wgs84pointBtwnAB,
         utm2wgs,
         )
+
 from .unesco import (
         ssp,
         )
+
 from .nesb import (
         nesbaDist,
         CTD_coords,
@@ -27,14 +28,21 @@ from .nesb import (
         globalGRID,
         dsBathy,
         )
+
 from .caatex import (
         caatex_coords,
         )
 
-from . import gebco
+from .getSTDOUT import (
+        getMonData,
+        )
+
+from . import (
+        ihop,
+        gebco,
+        )
 
 __all__ = [ 'utils',
             'unesco',
-            'nesbaDist',
             'gebco',
           ]
