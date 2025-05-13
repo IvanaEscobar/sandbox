@@ -10,8 +10,9 @@ from .utils import (
         gcDistance,
         wgs84Distance,
         wgs84space,
-        wgs84pointBtwnAB,
         utm2wgs,
+        concatDs, 
+        renameDs,
         )
 
 from .unesco import (

@@ -1,7 +1,9 @@
 from scipy.io import loadmat
 from numpy import abs, cos, sqrt, arctan, sin, arccos, pi, tan,\
-                  vectorize, exp, zeros, array, reshape, fromfile
+                  vectorize, exp, zeros, array, reshape, fromfile,\
+                  unique
 from pyproj import Geod
+from xarray import concat as _concat
 
 def loadMatFile ( file ):
     return loadmat(file)
@@ -213,3 +215,60 @@ def loadmitgcmbinary(ff, shape, dtype='>f4'):
 
     data = fromfile(ff, dtype=dtype).reshape(shape)
     return data
+
+def concatDs(manyDs, grid, merge=True):
+    '''
+    Assuming a repeated T is identical between datasets, 
+    we concatenate only the first instance of a unique T coordinate
+    '''
+    uniqueT = []
+    uniqueDs = []
+
+    for ds in manyDs:
+        for T in ds.T.data:
+            oneT = ds.sel(T=T)
+            if T not in uniqueT:
+                uniqueT.append(T)
+                uniqueDs.append(oneT)
+
+    ds = _concat( uniqueDs, dim='T' )
+    ds = renameDs( ds )
+    ds.coords['years'] = ds.T/3600/24/360.
+    
+    if merge:
+        if len(ds.Z.data) == 1:
+            ds = ds.squeeze(dim='Z')
+        ds = ds.merge( grid )
+    
+    return ds
+
+def check_uniqueT( T ):
+    print( len(T) - len(unique(T)) )
+    return None
+
+def renameDs( ds ):
+    '''
+    Hardcoding renaming dimensions generated using gluemnc bash script
+    '''
+    
+    myDims = {}
+    for dim in ds.dims:
+        dimName = dim[0:3]
+        
+        if dimName == 'Zd0' or dimName == 'Zmd':
+            myDims[dim] = 'Z'
+        elif dimName == 'Zld':
+            myDims[dim] = 'Zl'
+        elif dimName == 'Y':
+            myDims[dim] = 'YC'
+        elif dimName == 'X':
+            myDims[dim] = 'XC'
+        elif dimName == 'Yp1':
+            myDims[dim] = 'YG'
+        elif dimName == 'Xp1':
+            myDims[dim] = 'XG'    
+
+    if 'iter' not in ds.coords:
+        ds=ds.set_coords('iter')
+
+    return ds.rename(myDims)
