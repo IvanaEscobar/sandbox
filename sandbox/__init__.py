@@ -13,6 +13,7 @@ from .utils import (
         utm2wgs,
         concatDs, 
         renameDs,
+        add_SRpoints,
         )
 
 from .unesco import (
