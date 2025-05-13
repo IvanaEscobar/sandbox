@@ -272,3 +272,21 @@ def renameDs( ds ):
         ds=ds.set_coords('iter')
 
     return ds.rename(myDims)
+
+def add_SRpoints(ax, line, **plot_kwargs):
+    '''
+    Add scatter points to an Axes object, such as one from a subplot or xarray plot.
+
+    Parameters:
+        ax : matplotlib.axes.Axes
+            The axes to draw on. Can be directly from subplots or from .plot().axes
+        line : Geod object
+            Must have attributes `lons` and `lats` as arrays.
+        **plot_kwargs : optional
+            Additional arguments passed to `ax.scatter`.
+    '''
+
+    ax.scatter(line.lons[0], line.lats[0], c='C1', **plot_kwargs)
+    ax.scatter(line.lons[-1], line.lats[-1], c='C1')
+
+    return None
