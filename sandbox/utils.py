@@ -287,6 +287,6 @@ def add_SRpoints(ax, line, **plot_kwargs):
     '''
 
     ax.scatter(line.lons[0],  line.lats[0],  c='C0', **plot_kwargs)
-    ax.scatter(line.lons[-1], line.lats[-1], c='C1')
+    ax.scatter(line.lons[-1], line.lats[-1], c='C1', **plot_kwargs)
 
     return None
