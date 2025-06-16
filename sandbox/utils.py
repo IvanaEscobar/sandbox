@@ -217,7 +217,7 @@ def loadmitgcmbinary(ff, shape, dtype='>f4'):
     data = fromfile(ff, dtype=dtype).reshape(shape)
     return data
 
-def concatDs(manyDs, grid=None, merge=True):
+def concatDs(manyDs, grid=None):
     '''
     Assuming a repeated T is identical between datasets, 
     we concatenate only the first instance of a unique T coordinate
@@ -239,7 +239,12 @@ def concatDs(manyDs, grid=None, merge=True):
     else: 
         ds.coords['years'] = ds.iter*120/3600/24/360.
     
-    if merge and (grid is not None):
+    if grid is not None:
+        merge=True
+    else:
+        merge=False
+
+    if merge:
         if len(ds.Z.data) == 1:
             ds = ds.squeeze(dim='Z')
         ds = ds.merge( grid )
