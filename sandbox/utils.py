@@ -1,7 +1,8 @@
 from scipy.io import loadmat
 from numpy import abs, cos, sqrt, arctan, sin, arccos, pi, tan,\
                   vectorize, exp, zeros, array, reshape, fromfile,\
-                  unique
+                  unique, datetime64
+from numpy import issubdtype as _issubdtype
 from pyproj import Geod
 from xarray import concat as _concat
 
@@ -233,7 +234,10 @@ def concatDs(manyDs, grid, merge=True):
 
     ds = _concat( uniqueDs, dim='T' )
     ds = renameDs( ds )
-    ds.coords['years'] = ds.T/3600/24/360.
+    if not _issubdtype(ds.T.dtype, datetime64):
+        ds.coords['years'] = ds.T/3600/24/360.
+    else: 
+        ds.coords['years'] = ds.iter*120/3600/24/360.
     
     if merge:
         if len(ds.Z.data) == 1:
