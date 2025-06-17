@@ -235,9 +235,10 @@ def concatDs(manyDs, grid=None):
     ds = _concat( uniqueDs, dim='T' )
     ds = renameDs( ds )
     if not _issubdtype(ds.T.dtype, datetime64):
-        ds.coords['years'] = ds.T/3600/24/360.
+        ds.coords['years'] = ds.T/3600./24./360.
     else: 
-        ds.coords['years'] = ds.iter*120/3600/24/360.
+        ds.coords['years'] = ds.iter*120./3600./24./360.
+    ds['years'] = ds.years.assign_attrs(units='seconds')
     
     if grid is not None:
         merge=True
