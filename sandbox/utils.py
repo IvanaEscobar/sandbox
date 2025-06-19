@@ -104,6 +104,23 @@ def wgs84pointBtwnAB(start, end, r_btwn):
 
     return [btwnlon,btwnlat]
 
+def wgs84fromBearing(start, bearing, distance, npts=3):
+    '''
+    Inputs: 
+        start = [startlon, startlat], degE degN
+        bearing = degrees; Example: 45 is northwest
+        distance = in meters; Example: 5 km is 5000
+    '''
+    g = Geod(ellps='WGS84')
+
+    startlon = start[0]
+    startlat = start[1]
+    
+    endlon, endlat, _ = g.fwd(startlon, startlat, bearing, distance)
+    print(f'end coordinates: [{endlat:0.3f} dN, {endlon:0.3f} dE]')
+    
+    return wgs84space([endlon,endlat], start, npts)
+
 def utm2wgs(x, y, utmzone):    
     # Converts arrays of UTM coordinates into Lon/Lat arrays.
     # Inputs:
