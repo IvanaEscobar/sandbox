@@ -10,6 +10,7 @@ from .utils import (
         gcDistance,
         wgs84Distance,
         wgs84space,
+        wgs84fromBearing,
         utm2wgs,
         concatDs, 
         renameDs,
