@@ -41,7 +41,6 @@ def open_prt(fname):
     sound_table_re = re.compile(r"Depth\s*\[\s*m\s*\]\s+Soundspeed\s*\[\s*m/s\s*\]", re.IGNORECASE)
 
     # Pattern to extract a single float after the PID prefix
-    #float_after_pid = re.compile(r"\)\s*([+-]?\d+(?:\.\d*)?)")
     pid_tid_re=re.compile(r"\(PID\.TID\s+\d{4}\.\d{4}\)\s+(.*)")
     array_pattern=re.compile(r"[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?")
 
@@ -49,7 +48,9 @@ def open_prt(fname):
     source_depth = None
     receiver_depth = None
     receiver_range = None
+    sound_ranges = None
     ss_data = []
+    ss_depths = []
     in_ss_block = False
 
     with open(fname, "r") as f:
@@ -73,7 +74,7 @@ def open_prt(fname):
                     receiver_range = float(m.group(1))
                 continue
 
-            # array values
+            # 1d array values
             if sound_ranges_re.search(line):
                 next_line = next(f).strip()
                 m = pid_tid_re.match(next_line)
@@ -82,29 +83,33 @@ def open_prt(fname):
                     sound_ranges = np.array([float(v) for v in vals])
                 continue
 
-            # Sound speed table
-            if soundTable_re.search(line):
+            # 2d array values
+            if sound_table_re.search(line):
                 in_ss_block = True
                 continue
 
             if in_ss_block:
-                if line.strip() == "" or not re.search(r"\d", line):
+                if re.search(r"_+", line):  # end of table
                     in_ss_block = False  # end of table
                     continue
                 try:
-                    values = list(map(float, line.strip().split()))
-                    if len(values) >= 2:
-                        ss_data.append(values[:2])
+                    m = pid_tid_re.match(line.strip())
+                    if m:
+                        fields = array_pattern.findall(m.group(1))
+                        if len(fields) >= 2:
+                            ss_depths.append(float(fields[0]))
+                            ss_data.append(fields[1:])
                 except ValueError:
                     continue
 
     # Convert sound speed table to xarray Dataset
     soundspeed_table = None
     if ss_data:
-        ss_array = np.array(ss_data)
+        ss_array = np.array(ss_data, dtype=float)
+        ss_depths = np.array(ss_depths)
         soundspeed_table = xr.Dataset(
-            {"sound_speed": (["depth"], ss_array[:, 1])},
-            coords={"depth": ss_array[:, 0]}
+            {"sound_speed": (["depth","range"], ss_array)},
+            coords={"depth": ss_depths, "range":sound_ranges}
         )
 
     return _PRTDataStore(
