@@ -1,7 +1,7 @@
 import re
-import numpy as np
-import xarray as xr
-from pathlib import Path
+from numpy import array as _array
+from xarray import Dataset as _Dataset
+from pathlib import Path as _Path
 
 
 class _PRTDataStore:
@@ -19,7 +19,7 @@ class _PRTDataStore:
 
     def __repr__(self):
         return (
-            f"_PRTDataStore(\n"
+            f" Class: PRTDataStore(\n"
             f"  source_depth={self.source_depth},\n"
             f"  receiver_depth={self.receiver_depth},\n"
             f"  receiver_range={self.receiver_range},\n"
@@ -29,7 +29,7 @@ class _PRTDataStore:
 
 
 def open_prt(fname):
-    fname = Path(fname)
+    fname = _Path(fname)
     if not fname.exists():
         raise FileNotFoundError(f"File not found: {fname}")
 
@@ -80,7 +80,7 @@ def open_prt(fname):
                 m = pid_tid_re.match(next_line)
                 if m:
                     vals = array_pattern.findall(m.group(1))
-                    sound_ranges = np.array([float(v) for v in vals])
+                    sound_ranges = _array([float(v) for v in vals])
                 continue
 
             # 2d array values
@@ -90,7 +90,7 @@ def open_prt(fname):
 
             if in_ss_block:
                 if re.search(r"_+", line):  # end of table
-                    in_ss_block = False  # end of table
+                    in_ss_block = False
                     continue
                 try:
                     m = pid_tid_re.match(line.strip())
@@ -105,9 +105,9 @@ def open_prt(fname):
     # Convert sound speed table to xarray Dataset
     soundspeed_table = None
     if ss_data:
-        ss_array = np.array(ss_data, dtype=float)
-        ss_depths = np.array(ss_depths)
-        soundspeed_table = xr.Dataset(
+        ss_array = _array(ss_data, dtype=float)
+        ss_depths = _array(ss_depths)
+        soundspeed_table = _Dataset(
             {"sound_speed": (["depth","range"], ss_array)},
             coords={"depth": ss_depths, "range":sound_ranges}
         )
