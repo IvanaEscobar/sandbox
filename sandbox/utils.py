@@ -117,7 +117,7 @@ def wgs84fromBearing(start, bearing, distance, npts=3):
     startlat = start[1]
     
     endlon, endlat, _ = g.fwd(startlon, startlat, bearing, distance)
-    print(f'end coordinates: [{endlat:0.3f} dN, {endlon:0.3f} dE]')
+    #print(f'end coordinates: [{endlat:0.3f} dN, {endlon:0.3f} dE]')
     
     return wgs84space([endlon,endlat], start, npts)
 
