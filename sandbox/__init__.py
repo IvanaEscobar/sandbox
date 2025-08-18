@@ -22,6 +22,10 @@ from .unesco import (
         )
 
 from .ihop.prt_store import open_prt
+
+from .ihop import (
+        makeIHOPobs,
+        )
 #from .nesb import (
 #        nesbaDist,
 #        CTD_coords,
@@ -50,5 +54,6 @@ from . import (
 __all__ = [ 'utils',
             'unesco',
             'gebco',
+            'ihop',
             'open_prt',
           ]
