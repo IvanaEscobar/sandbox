@@ -1,11 +1,16 @@
 #!/bin/bash python
 # External imports
 import arlpy.uwapm as _pm
+from numpy import datetime64 as _datetime64
 # Internal imports
 from ..utils import wgs84fromBearing, wgs84space
 
+# Basic utils for bcg.hd
+lineSource = lambda ds, line: ds.sel(YC=line.lats[0],  XC=line.lons[0],  method='nearest')
+lineReceiv = lambda ds, line: ds.sel(YC=line.lats[-1], XC=line.lons[-1], method='nearest')
 ihop = _pm._Bellhop()
 
+# set-up diagnostics
 ts080 = list(range(21168000, 21189601, 30))
 ts100 = list(range(26337600, 26359201, 30))
 
@@ -22,6 +27,12 @@ for at in range(len(line_Z080.lats)):
     line_Z080.lats[at]=56
     line_Z100.lats[at]=59
 
-# Basic utils for bcg.hd
-lineSource = lambda ds, line: ds.sel(YC=line.lats[0],  XC=line.lons[0],  method='nearest')
-lineReceiv = lambda ds, line: ds.sel(YC=line.lats[-1], XC=line.lons[-1], method='nearest')
+### MITgcm variables ###
+# data timestep size
+dt = 120.
+# data.cal startdate
+startdate = _datetime64('1941-01-01 00:00:00')
+
+# data.ihop::ihop_r[dr]
+#           lon,       lat,       depth
+m080_rvr = [14.000000, 47.001796, 160]
