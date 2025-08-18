@@ -1,5 +1,10 @@
 #!/bin/bash python
+# External imports
+import arlpy.uwapm as _pm
+# Internal imports
 from ..utils import wgs84fromBearing, wgs84space
+
+ihop = _pm._Bellhop()
 
 ts080 = list(range(21168000, 21189601, 30))
 ts100 = list(range(26337600, 26359201, 30))
@@ -17,5 +22,6 @@ for at in range(len(line_Z080.lats)):
     line_Z080.lats[at]=56
     line_Z100.lats[at]=59
 
+# Basic utils for bcg.hd
 lineSource = lambda ds, line: ds.sel(YC=line.lats[0],  XC=line.lons[0],  method='nearest')
 lineReceiv = lambda ds, line: ds.sel(YC=line.lats[-1], XC=line.lons[-1], method='nearest')
