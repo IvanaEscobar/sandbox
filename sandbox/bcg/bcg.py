@@ -33,6 +33,9 @@ dt = 120.
 # data.cal startdate
 startdate = _datetime64('1941-01-01 00:00:00')
 
-# data.ihop::ihop_r[dr]
+# data.ihop::ihop_r[dr], e.g. sb.wgs84fromBearing([14,47],0,ihop_rr*1000)
 #           lon,       lat,       depth
-m080_rvr = [14.000000, 47.001796, 160]
+m080_rvr = [14.000000, 50.590975, 160.]
+z080_rvr = [21.572744, 56.000000,  80.]
+m100_rvr = [18.000000, 50.590975, 115.]
+z100_rvr = [22.042879, 59.000000, 160.]
