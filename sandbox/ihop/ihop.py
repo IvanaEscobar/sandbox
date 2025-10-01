@@ -58,6 +58,7 @@ def makeIHOPobs(tau, ang, rcvr, ts, date_times):
             ihop_ang=(['iOBS'],ihop_ang),
             ihop_uncert=(['iOBS'],ihop_uncert),
             ihop_iter=(['iOBS'],_array(ts, dtype=_float64)),
+            ihop_val=(['iOBS'],ihop_tau),
     ))
 
     ## Add attributes
