@@ -8,7 +8,7 @@ from ..utils import wgs84fromBearing, wgs84space
 # Basic utils for bcg.hd
 lineSource = lambda ds, line: ds.sel(YC=line.lats[0],  XC=line.lons[0],  method='nearest')
 lineReceiv = lambda ds, line: ds.sel(YC=line.lats[-1], XC=line.lons[-1], method='nearest')
-ihop = _pm._Bellhop()
+#ihop = _pm._Bellhop()
 
 # set-up diagnostics
 ts080 = list(range(21168000, 21189601, 30))
