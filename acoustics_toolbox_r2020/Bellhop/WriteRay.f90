@@ -53,7 +53,7 @@ CONTAINS
        WRITE( QFile,   * ) ray2D( is )%x(1), ray2D( is )%q(1)
        WRITE( QQFile,  * ) ray2D( is )%x(1), ray2D( is )%q(2)
        WRITE( PFile,   * ) ray2D( is )%x(1), ray2D( is )%p(1)
-       WRITE( STPFile, * ) ray2D( is )%x(1), ray2D( is )%step
+       WRITE( STPFile, * ) ray2D( is )%x(1), ray2D( is )%Amp
        WRITE( TAUFile, * ) ray2D( is )%x(1), real(ray2D( is )%tau)
     END DO
 
