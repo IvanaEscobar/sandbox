@@ -30,6 +30,7 @@ hello
 acoustics_toolbox_r2020/Bellhop/Makefile
 .bell_july22
 bell
+bell.bak
 # BELLHOP output files
 *.arr
 *.prt
