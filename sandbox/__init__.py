@@ -1,6 +1,5 @@
 # sandbox/__init__.py
 
-#from . import ooi-pioneer
 #from . import mitprof
 
 from .utils import (
@@ -49,6 +48,9 @@ from . import (
         ihop,
         gebco,
         )
+
+from .colors import *
+from .bcg import *
 
 # For wildcard imports: from sandbox import *
 __all__ = [ 'utils',
