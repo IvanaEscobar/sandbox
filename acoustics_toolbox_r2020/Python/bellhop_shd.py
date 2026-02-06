@@ -405,7 +405,7 @@ def plotshd(
     title, PlotType, freqVec, freq0, atten, Pos, pressure = read_shd(filename, freq=freq)
 
     if ax is None:
-        _, ax = plt.subplots(figsize=(10, 4))
+        _, ax = plt.subplots(figsize=(10, 5))
 
     field = pressure[itheta, isz, :, :]  # (Nrz or 1, Nrr)
     amp = np.abs(field).astype(np.float64)
@@ -454,7 +454,7 @@ def plotshd(
     if add_title:
         ax.set_title(f"{title}\nPlotType={PlotType.strip()}  freq0={freq0:g} Hz  z_src={Pos.s.z[isz]:g} m")
 
-    cb = plt.colorbar(pcm, ax=ax)
+    cb = plt.colorbar(pcm, ax=ax, orientation='horizontal', location='top')
     cb.ax.tick_params(labelsize=12)
     cb.set_label("TL [dB]")
     return ax
