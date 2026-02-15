@@ -121,6 +121,13 @@ def _plausible_depth(z: np.ndarray) -> bool:
         return False
     return True
 
+def _plausible_range(x: np.ndarray) -> bool:
+    x = np.asarray(x, dtype=float)
+    if x.size < 2:
+        return True
+    # allow 0 at start; should be nondecreasing and within sane bounds
+    return np.all(np.isfinite(x)) and np.min(x) >= 0.0 and np.max(x) < 1e9 and np.all(np.diff(x) >= 0.0)
+
 
 def _plausible_theta(th: np.ndarray) -> bool:
     if th.size == 0 or not np.all(np.isfinite(th)):
@@ -282,9 +289,14 @@ def read_shd(
         Sz, real_dt_z = _read_real_vector_from_record(rec8, Nsz, endian, prefer="f8", plausibility_fn=_plausible_depth)
         Rz, _ = _read_real_vector_from_record(rec9, Nrz, endian, prefer="f8", plausibility_fn=_plausible_depth)
 
-        # Record 10: Rr (effectively REAL*8 by design)
+        # Record 10: Rr (receiver ranges). Many SHD writers store this as REAL*4.
         rec10 = _read_record_raw(f, 10, rec_bytes)
-        Rr = np.frombuffer(rec10, dtype=f8, count=Nrr).astype(float)
+        Rr, _ = _read_real_vector_from_record(
+            rec10, Nrr, endian, prefer="f4", plausibility_fn=_plausible_range
+        )
+        # # Record 10: Rr (effectively REAL*8 by design)
+        # rec10 = _read_record_raw(f, 10, rec_bytes)
+        # Rr = np.frombuffer(rec10, dtype=f8, count=Nrr).astype(float)
 
         # Pressure allocation
         if PlotType.strip() == "irregular":
@@ -416,6 +428,20 @@ def plotshd(
     r = Pos.r.r.copy()
     z = Pos.r.z.copy()
 
+    rb = np.asarray(Pos.r.r)
+    zb = np.asarray(Pos.r.z)[:TL.shape[0]]
+    print("r monotonic increasing?", np.all(np.diff(rb) > 0))
+    print("r monotonic decreasing?", np.all(np.diff(rb) < 0))
+    print("r unique?", np.unique(rb).size == rb.size)
+    
+    print("z monotonic increasing?", np.all(np.diff(zb) > 0))
+    print("z monotonic decreasing?", np.all(np.diff(zb) < 0))
+    print("z unique?", np.unique(zb).size == zb.size)
+    
+    # show first few "bad" diffs if needed
+    bad = np.where(np.diff(rb) <= 0)[0]
+    print("first bad r indices:", bad[:10])
+
     xlab = "range [m]"
     if units == "km":
         r = r / 1000.0
@@ -434,13 +460,13 @@ def plotshd(
         )
 
         # --- sourcec and receiver dots
-        ax.scatter(0, 60, label='source = 60 m',
+        ax.scatter(0,73, label='source = 73 m',
             s=100,
             color=utyellow,
             edgecolor='k',
             zorder=1000,
            )
-        ax.scatter(bty.r[-3], 1020, label='receiver = 1020 m',
+        ax.scatter(2442, 300, label='receiver = 300 m',
             s=100,
             color=utorange,
             edgecolor='k',
@@ -456,5 +482,5 @@ def plotshd(
 
     cb = plt.colorbar(pcm, ax=ax, orientation='horizontal', location='top')
     cb.ax.tick_params(labelsize=12)
-    cb.set_label("TL [dB]")
+    cb.set_label("Transmission Loss [dB]")
     return ax
