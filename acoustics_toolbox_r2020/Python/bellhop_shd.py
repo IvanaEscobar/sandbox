@@ -459,19 +459,19 @@ def plotshd(
                 color=utearth,
         )
 
-        # --- sourcec and receiver dots
-        ax.scatter(0,73, label='source = 73 m',
-            s=100,
-            color=utyellow,
-            edgecolor='k',
-            zorder=1000,
-           )
-        ax.scatter(2442, 300, label='receiver = 300 m',
-            s=100,
-            color=utorange,
-            edgecolor='k',
-            zorder=1000
-           )
+#        # --- sourcec and receiver dots
+#        ax.scatter(0,73, label='source = 73 m',
+#            s=100,
+#            color=utyellow,
+#            edgecolor='k',
+#            zorder=1000,
+#           )
+#        ax.scatter(2442, 300, label='receiver = 300 m',
+#            s=100,
+#            color=utorange,
+#            edgecolor='k',
+#            zorder=1000
+#           )
 
     ax.set_xlim(np.nanmin(R), np.nanmax(R))
     ax.set_ylim(np.nanmax(Z), np.nanmin(Z))
