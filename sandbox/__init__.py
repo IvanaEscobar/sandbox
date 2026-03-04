@@ -25,16 +25,16 @@ from .ihop.prt_store import open_prt
 from .ihop import (
         makeIHOPobs,
         )
-#from .nesb import (
-#        nesbaDist,
-#        CTD_coords,
-#        nesba_coords,
-#        gcm_coords,
-#        dataDir,
-#        regionGRID,
-#        globalGRID,
-#        dsBathy,
-#        )
+from .nesb import (
+        nesbaDist,
+        CTD_coords,
+        nesba_coords,
+        gcm_coords,
+        dataDir,
+        regionGRID,
+        globalGRID,
+        dsBathy,
+        )
 
 from .caatex import (
         caatex_coords,
