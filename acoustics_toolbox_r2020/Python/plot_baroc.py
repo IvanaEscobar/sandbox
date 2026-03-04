@@ -1,8 +1,16 @@
-from matplotlib.collections import LineCollection
+
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+from matplotlib.colors import LinearSegmentedColormap, to_rgb
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+
 import sandbox as sb
 import cmocean.cm as cm
+
+
 
 def plot_eigenrays(
     erays,
@@ -84,8 +92,8 @@ def plot_eigenrays(
     # --- bathymetry fill (solid)
     ax.fill_between(
         ranges_km,
-        ylim[0] * np.ones_like(ranges_km),
-        y2=ylim[0],
+        float(ylim[0]) * np.ones_like(ranges_km),
+        y2=float(ylim[0]),
         color=sb.utearth,
         zorder=0,
     )
@@ -108,6 +116,7 @@ def plot_eigenrays(
 
     return ax
 
+
 def overlay_eigenrays(erays_subset, ax, *, color="white", lw=0.35, alpha=None, zorder=20):
     """Overlay a subset of rays on an existing axes."""
     if erays_subset is None or len(erays_subset) == 0:
@@ -121,6 +130,8 @@ def overlay_eigenrays(erays_subset, ax, *, color="white", lw=0.35, alpha=None, z
     if alpha is not None:
         lc.set_alpha(alpha)
     ax.add_collection(lc)
+
+
 
 def plot_traveltime_vs_arrivalangle(
     arr,
@@ -221,5 +232,253 @@ def plot_traveltime_vs_arrivalangle(
     # --- optional save (does NOT force show/close)
     if savepath is not None:
         fig.savefig(savepath, bbox_inches="tight", dpi=dpi, transparent=transparent)
+
+    return ax
+
+
+
+def lighten_color(color, amount=0.5):
+    c = np.array(to_rgb(color))
+    return tuple(1 - (1 - c) * amount)
+
+
+def darken_color(color, amount=0.7):
+    c = np.array(to_rgb(color))
+    return tuple(c * amount)
+
+
+def stacked_amp_turquoise_cmap_frac(base_cmap, frac, n=256):
+    """
+    Build a colormap whose split occurs at `frac` (0..1) of the colormap.
+    Below split: base_cmap. Above split: turquoise gradient.
+    """
+    if isinstance(base_cmap, str):
+        base = mpl.colormaps[base_cmap]
+    else:
+        base = base_cmap
+
+    frac = float(np.clip(frac, 0.0, 1.0))
+
+    # build UT blue gradient
+    utblue_color = sb.utblue
+    utblue_dark  = darken_color(utblue_color, 0.6)
+    utblue_light = lighten_color(utblue_color, 0.6)
+
+    utblue_grad = LinearSegmentedColormap.from_list(
+        "utblue_grad",
+        [utblue_dark, utblue_color, utblue_light]
+    )
+
+    # allocate samples proportional to frac
+    n0 = max(2, int(round(n * frac)))
+    n1 = max(2, n - n0)
+
+    colors = np.vstack([
+        base(np.linspace(0, 1, n0)),
+        utblue_grad(np.linspace(0, 1, n1)),
+    ])
+
+    return LinearSegmentedColormap.from_list("amp_plus_utblue_frac", colors)
+
+
+def plot_arrivals_timeseries(
+    arrs,
+    deltaT,
+    ax=None,
+    cmap="viridis",
+    vmin=None,
+    vmax=None,
+    # overlay options (choose ONE style)
+    top_n=None,              # e.g., 10  -> overlay top 10 loudest each timestep
+    top_db=None,             # e.g., -121 -> overlay all with amp_dB >= -121 each timestep
+    # styling
+    s_base=4,
+    s_top=10,
+    alpha_base=0.6,
+    edgecolor_top="k",
+    linewidth_top=0.4,
+    rasterized=True,
+    add_colorbar=True,
+    hex_gridsize=220,
+    swap_axes=False,
+    yearly=True,
+    tick_vals=None,
+):
+    """
+    Scatter time series of arrivals: x=years, y=time_of_arrival, colored by amp_dB.
+    Overlays top arrivals each timestep (either top_n OR top_db).
+
+    Parameters
+    ----------
+    arrs : dict[int, pandas.DataFrame]
+        Keys are iteration numbers. DataFrames have 'time_of_arrival' and 'amp_dB'.
+    deltaT : float
+        Timestep size in seconds.
+    top_n : int, optional
+        Overlay the top N arrivals per timestep (largest amp_dB).
+    top_db : float, optional
+        Overlay arrivals with amp_dB >= top_db per timestep.
+    """
+
+    if (top_n is not None) and (top_db is not None):
+        raise ValueError("Choose only one overlay method: top_n OR top_db (not both).")
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(11, 5))
+    else:
+        fig = ax.figure
+
+    ax.set_facecolor(sb.utgray)          # plotting area background
+
+    # --- collect into arrays for fast plotting
+    xs, ys, cs = [], [], []
+    xs_top, ys_top = [], []
+
+    # build iteration list first
+    its_all = sorted(arrs.keys())
+    
+    if yearly:
+        sec_per_year = 24 * 3600 * 360  # 360-day model year
+        its = [it for it in its_all if (it * deltaT) % sec_per_year == 0]
+    else:
+        its = its_all
+    
+    for it in its:
+        years = (it * deltaT) / sec_per_year if yearly else (it * deltaT) / (24 * 3600)  # pick what you want
+    
+        df = arrs.get(it)
+        if df is None or df.empty:
+            continue
+
+
+        # base points
+        ttoa = df["time_of_arrival"].to_numpy()
+        ampdb = df["amp_dB"].to_numpy()
+
+        xs.append(np.full_like(ttoa, years, dtype=float))
+        ys.append(ttoa.astype(float))
+        cs.append(ampdb.astype(float))
+
+        # overlay selection
+        if top_n is not None:
+            # top N by amp_dB (largest / least negative)
+            idx = np.argsort(ampdb)[-top_n:]
+            xs_top.append(np.full(idx.shape, years, dtype=float))
+            ys_top.append(ttoa[idx].astype(float))
+
+        elif top_db is not None:
+            mask = ampdb >= top_db
+            if np.any(mask):
+                xs_top.append(np.full(mask.sum(), years, dtype=float))
+                ys_top.append(ttoa[mask].astype(float))
+
+    if not xs:
+        raise ValueError("No data found in arrs to plot.")
+
+    x = np.concatenate(xs)
+    y = np.concatenate(ys)
+    c = np.concatenate(cs)
+
+    # --- ensure vmin/vmax are defined and are the colorbar bounds
+    if vmin is None:
+        vmin = float(np.nanmin(c))
+    if vmax is None:
+        vmax = float(np.nanmax(c))
+
+    # --- standard normalization (keeps colorbar linear in dB)
+    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+
+    if top_db is not None:
+        # split location in *data fraction*, not forced to 0.5
+        frac = (float(top_db) - vmin) / (vmax - vmin)
+        cmap2 = stacked_amp_turquoise_cmap_frac(base_cmap=cmap, frac=frac, n=256)
+    else:
+        cmap2 = mpl.colormaps[cmap] if isinstance(cmap, str) else cmap
+
+
+    # --- background: hexbin colored by amp_dB (not counts)
+    if swap_axes:
+        hx = y; hy = x
+    else:
+        hx = x; hy = y
+
+    # Keep the same extent so both hexbin layers align exactly
+    extent = (np.nanmin(hx), np.nanmax(hx), np.nanmin(hy), np.nanmax(hy))
+
+    hb = ax.hexbin(
+        hx, hy,
+        C=c,
+        reduce_C_function=np.max,
+        gridsize=hex_gridsize,
+        mincnt=1,
+        cmap=cmap2,
+        norm=norm,
+        # extent=extent,
+        # linewidths=0.0,
+        zorder=1,
+    )
+    if top_db is not None:
+        mask_hi = c >= float(top_db)
+
+        # --- bottom layer: below-threshold hexes
+        hb_hi = ax.hexbin(
+            hx[mask_hi], hy[mask_hi],
+            C=c[mask_hi],
+            reduce_C_function=np.max,
+            gridsize=hex_gridsize,
+            mincnt=1,
+            cmap=cmap2,
+            norm=norm,
+            # extent=extent,
+            # linewidths=0.0,
+            zorder=3000,
+        )
+
+    # Force the mappable limits (this guarantees colorbar bounds)
+    hb.set_clim(vmin, vmax)
+
+
+    # --- labels
+    if not swap_axes:
+        ax.set_xlabel("years")
+        ax.set_ylabel("travel time [sec]")
+    else:
+        ax.set_xlabel("travel time [sec]")
+        ax.set_ylabel("time [year]")
+
+    ax.grid(True, alpha=0.25)
+    ax.set_axisbelow(True)
+
+    if add_colorbar:
+        # --- horizontal colorbar ABOVE the plot (inside the axes, so layout is stable)
+        cax = inset_axes(
+            ax,
+            width="95%",     # length of the bar
+            height="6%",     # thickness
+            loc="upper center",
+            borderpad=-2.8
+        )
+
+        cbar = fig.colorbar(hb, cax=cax, orientation="horizontal")
+        cbar.set_label("amplitude [dB]")
+        cbar.ax.xaxis.set_label_position("top")
+        cbar.ax.xaxis.set_ticks_position("top")
+
+        if top_db is not None:
+            ticks = np.array(cbar.get_ticks(), dtype=float)
+            ticks = np.unique(np.concatenate([ticks, [vmin, float(top_db), vmax]]))
+            ticks = ticks[(ticks >= vmin) & (ticks <= vmax)]
+            ticks = np.sort(ticks)
+            # ---- REMOVE specific unwanted ticks
+            if tick_vals is not None:
+                # remove_vals = np.array([-110, -120, -160], dtype=float)
+                remove_vals = tick_vals
+                ticks = ticks[~np.isclose(ticks[:, None], remove_vals).any(axis=1)]
+
+
+            cbar.set_ticks(ticks)
+
+            # marker line at top_db (horizontal cbar => vertical line)
+            cbar.ax.axvline(float(top_db), color="k", linewidth=1)
 
     return ax

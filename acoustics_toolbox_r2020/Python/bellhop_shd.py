@@ -458,7 +458,6 @@ def plotshd(
                 y2=np.nanmax(Z),
                 color=utearth,
         )
-
 #        # --- sourcec and receiver dots
 #        ax.scatter(0,73, label='source = 73 m',
 #            s=100,
@@ -481,6 +480,6 @@ def plotshd(
         ax.set_title(f"{title}\nPlotType={PlotType.strip()}  freq0={freq0:g} Hz  z_src={Pos.s.z[isz]:g} m")
 
     cb = plt.colorbar(pcm, ax=ax, orientation='horizontal', location='top')
-    cb.ax.tick_params(labelsize=12)
+    cb.ax.tick_params()
     cb.set_label("Transmission Loss [dB]")
     return ax
